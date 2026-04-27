@@ -1,0 +1,145 @@
+---
+title: "GAM"
+author: "Maria Carolina Pacheco"
+#date: "`r format (Sys.time(), '%d %B, %Y')`"
+output:
+   html_document: #Salvar como html
+      theme: journal #cerulean,flatly,united,cosmo,simplex
+      number_sections: yes
+      toc: true               # Gera sumário (Table of Contents)
+      toc_float:              # Faz o sumário “flutuar” ao lado
+        collapsed: false      # Não inicia “fechado”
+        smooth_scroll: false  # Desativa rolagem suave (opcional)
+        position: left        # Posiciona o sumário à esquerda
+        width: 250px          # Define a largura do sumário
+---
+
+```{r include=FALSE}
+
+library(mgcv) #rodar gam
+library(mgcViz) #visualizar resultados do gam
+library(gratia) #visualizar resultados do gam
+library(ggplot2) #plotar
+library(dplyr) #manipular dados
+library(DHARMa) #avaliação dos residuos
+library(performance) #avaliação dos residuos
+library(ggeffects) #para plotar os resultados
+library(glmmTMB)
+
+```
+
+## Introdução
+Os dados que vou usar para esta análise seguem a mesma estrutura dos dados que utilizei no script anterior, no qual fiz um glm utilizando distribuição Beta. A diferença é que estes dados são de outro experimento realizado com corais da espécie ***Porites Astreoides***.
+
+Assim, temos:
+
+- Variável resposta: YII 
+- Variáveis preditoras: tratamento (aquecido x controle); habitat (topo x base); dias de experimento
+
+Abrindo os dados e já convertendo em fator o que vou utilizar:
+```{r echo=TRUE}
+micro_porites <- read.csv("dados_scriptsR/PAM_porites.csv", sep=";", dec=".")
+View(micro_porites)
+str(micro_porites)
+
+cols_p <- c("habitat", "treatment", "colony", "ID")
+micro_porites[, cols_p] <- lapply(micro_porites[, cols_p], factor) #Transformando para fator
+```
+
+## Explorando os dados visualmente
+
+```{r echo=TRUE}
+# Distribuição da variável resposta
+ggplot(micro_porites, aes(x = YII)) +
+  geom_histogram(bins = 35, fill = 'coral', col = 'white', alpha = 0.6)
+```
+
+O dados parecem ter forte assimetria a direita e tem muitos zeros.
+
+```{r echo=TRUE}
+#Plotando os dados ao longo do tempo
+ggplot(micro_porites, aes(x = factor(exp_day) , y=YII)) +
+  geom_boxplot(fill = 'coral', col = 'white', alpha = 0.6)
+```
+
+A eficiência fotossintética parece diminuir ao longo do tempo
+
+```{r echo=TRUE}
+
+#Separando por tratamento
+ggplot(micro_porites, aes(x = factor(exp_day) , y=YII, fill=treatment)) +
+  geom_boxplot(alpha = 0.8)+
+  scale_fill_manual(values=c("coral","cyan4"))+
+  theme(legend.position = "bottom")
+```
+
+O experimento parece ter funcionado bem, considerando que estamos vendo uma diferença entre os tratamentos conforme o esperado.
+
+```{r echo=TRUE}
+#Separando agora por habitat também
+ggplot(micro_porites, aes(x = factor(exp_day) , y=YII, fill=interaction (treatment, habitat)))+
+  geom_boxplot(alpha = 0.8)+
+  scale_fill_manual(values=c("coral","cyan4", "orange", "cyan"))+
+  theme(legend.position = "bottom")
+```
+
+Essa espécie parece ter uma diferenciação maior entre topo e base.
+
+## Modelos
+
+Vou começar rodando um GLMM como fiz com Siderastrea stellata no script anterior.
+
+### Modelo 1: GLMM
+```{r echo=TRUE}
+
+summary(micro_porites$YII) 
+
+micro_porites$YII <- (micro_porites$YII + (median(micro_porites$YII, na.rm = TRUE)*0.1)) #ajustando os dados para eliminar zeros
+
+# Fazendo um modelo já com todos os preditores e incluindo interação
+glmm_porites <- glmmTMB (YII ~ treatment*exp_day*habitat +
+                        (1|ID),
+                      family = beta_family(link="logit"),
+                      data = micro_porites)
+
+# Avaliando o ajuste do modelo visualmente
+simres_glmm_por <- simulateResiduals(glmm_porites, n=1000)
+plot(simres_glmm_por) #bem ruim, não parece linear
+check_model(simres_glmm_por) #o modelo não tá prevendo bem a distribuição dos residuos
+```
+
+Avaliando os resíduos do modelo, é possível concluir que ele não está bem ajustado aos dados. O QQ plot mostrou desvio significativo do resíduos e, utilizando a função check_model, vemos que os dados observados não estão seguindo a linha dos dados previstos. 
+
+Vamos testar usando GAMM.
+
+### Modelo 2: GAMM 
+```{r echo=TRUE}
+gamm_porites <- gam(YII ~ s(exp_day, bs = "tp") + treatment + habitat +
+                     s(ID, bs="re"), #colocando o id dos corais como efeito aleatório
+                   data = micro_porites,
+                   family = betar(link="logit"))
+```
+
+### Comparando e visualizando
+```{r echo=TRUE}
+AIC (glmm_porites, gamm_porites )
+```
+
+Utilizando GAMM o AIC ficou menor, então vamos adotar esse modelo.
+
+Visualizando os resultados agora:
+```{r echo=TRUE}
+summary(gamm_porites)
+```
+
+O modelo mostra efeito significativo tanto do tratamento quanto do habitat de origem dos corais. Os efeitos do tempo e do coral também foram significativos.
+
+Checando o ajuste:
+```{r echo=TRUE}
+par(mfrow = c(2,2))
+gam.check(gamm_porites) # Aqui parece bom
+
+check_model(gamm_porites) #Aqui parece péssimo
+```
+
+Ainda preciso fazer ajustes no modelo para poder fazer ele prever melhor os meus dados. 

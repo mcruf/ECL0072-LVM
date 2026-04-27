@@ -1,0 +1,66 @@
+name: "disciplinas-template"
+output_dir: "."
+exclude: ["README.md"]
+output:
+  html_document:
+    theme: journal #flatly
+   # css: styles.css
+    highlight: default
+    code_folding: hide
+    number_sections: false
+    toc: true
+    toc_depth: 4
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    includes:
+      after_body: footer.html
+navbar:
+  title: "ECL0072"
+  type: inverse
+  left:
+    - text: "Home"
+      href: index.html
+    # - text: "Aulas"
+    #   href: aulas.html
+    - text: "Referências"
+      href: referencias.html
+    # - text: "Programas"
+    #   href: recursos.html
+    - text: "Aulas"
+      menu:
+      - text: "Dia 1"
+      - text: "LM"
+        href: Aulas/Aula_01.html
+      - text: "----------"
+      - text: "Dia 2"
+      - text: "Métodos de inferência & Validação"
+        href: Aulas/Aula_02.html
+      - text: "----------"
+      - text: "Dia 3"
+      - text: "GLM para dados binários"
+        href: Aulas/Aula_03.html
+      - text: "----------"
+      - text: "Dia 4"
+      - text: "GLM para dados discretos"
+        href: Aulas/Aula_04.html
+      - text: "----------"
+      - text: "Dia 5"
+      - text: "GLM para dados contínuos"
+        href: Aulas/Aula_05.html
+      - text: "----------"
+      - text: "Dia 6"
+      - text: "GLM para dados categóricos"
+        href: Aulas/Aula_06.html
+      - text: "----------"
+      - text: "Dia 7"
+      - text: "Dist. prob complementares"
+        href: Aulas/Aula_07.html
+      - text: "----------"
+      - text: "Dia 8"
+      - text: "GAM"
+        href: Aulas/Aula_08.html
+  right:
+    - text: GitHub
+      icon: fa-github fa-lg
+      href: https://github.com/mcruf

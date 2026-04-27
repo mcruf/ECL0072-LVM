@@ -1,0 +1,1072 @@
+---
+title: "Modelos Lineares Generalizados e Aditivos para Dados Ecológicos (ECL0072)"
+subtitle: "Aula 01: LM & RMarkdown"
+author: "Marie-Christine Rufener"
+#institute: "macrufener@gmail.com"
+#date: "2016/12/12 (updated: `r Sys.Date()`)"
+output:
+  xaringan::moon_reader:
+    css: [default, metropolis, metropolis-fonts, my-theme.css]
+    lib_dir: libs
+    nature:
+      #seal: false #disable title slide
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+<!--- CSS box customization -->
+<style>
+p.comment {
+background-color: #F9DCC4;
+padding: 10px;
+border: 1px solid black;
+margin: 50px;
+border-radius: 5px;
+text-align: center
+}
+</style>
+
+
+```{r setup, include=FALSE}
+
+library(kableExtra)
+library(dplyr)
+
+```
+
+
+.pull-left[
+
+
+### <span style="color: #ee6c4d;">Ementa</span>
+- **29/09 -** LM & RMarkdown
+- **30/09 -** Métodos de inferência, seleção & diagnóstico de modelos
+- **01/10 -** GLM para dados binários
+- **02/10 -** GLM para dados discretos
+- <span style="color: #ee9b00;">**03/10 -** Feriado<span style="color: #ee6c4d;">
+- **06/10 -** GLM para dados contínuos
+- **07/10 -** GLM para dados categóricos
+- **08/10 -** Distribuições de probabilidade complementares
+- **09/10 -** GAM
+- **10/10 -** Aula prática: projetos
+
+]
+
+.pull-right[
+
+### <span style="color: #ee6c4d;">Horário</span>
+**8h00 - 12h00** (15 min de intervalo)
+
+- 1h30 - aula teórica
+- 1h - prática guiada
+- 1h30 - prática individual/em grupo
+]
+
+
+
+---
+### <span style="color: #ee6c4d;">Avaliação </span>
+Guia prático sobre os tópicos da disciplina (grupo de **02-03 pessoas**)
+
+- Abordar todos os tópicos cobertos entre os dias 01/10-09/10 (GLM para dados binários até GAM)
+
+
+- Relatório em formato `RMarkdown (Bookdown)`
+
+
+>  <span style="color: #ee6c4d;"><u>**Entrega: 12/10**</u></span> 
+
+----
+
+### <span style="color: #ee6c4d;">Dúvidas</span>
+
+- Durante as práticas
+
+- https://github.com/mcruf/ECL0072-GLM_GAM/issues (programação)
+
+- email: [macrufener@gmail.com]()
+
+
+---
+
+## <span style="color: #ee6c4d;">Conteúdo programático </span> 
+
+<br>
+
+
+**1. Modelos lineares (LM)** 
+
+  > Prática 
+
+**2. RMarkdown (relatório)**  
+  > Prática 
+
+
+---
+
+## <span style="color: #ee6c4d;">Leitura sugerida </span> 
+
+
+**Livros**
+- **Caps. 2 & 3:** Clark & Berry (2025)
+- **Cap. 1:** Faraway (2014)
+- **Caps. 6, 7 & 10:** Gelman et al. (2020)
+
+-----
+
+**Artigos**
+
+- Hampton, S.E., et al. (2013). Big data and the future of ecology. Frontiers in Ecology and the Environment.  https://doi.org/10.1890/120103 
+
+- Zuur, A.F. et al. (2010). A protocol for data exploration to avoid common statistical problems. Methods in ecology and evolution. https://doi.org/10.1111/j.2041-210X.2009.00001.x 
+
+
+---
+
+### <span style="color: #ee6c4d;">Material do curso</span>
+
+O curso foi todo construído usando apenas o R Markdown e, por isso, todo o código fonte e o material pode ser acessado via
+
+https://github.com/mcruf/ECL0072-GLM_GAM
+
+
+
+
+---
+
+### <span style="color: #ee6c4d;">Estatística: entre o inferno, o céu e a liberdade </span>
+
+<br>
+
+```{r echo=FALSE, fig.align ='center', out.width = "100%"}
+knitr::include_graphics("../Figuras/bandas.png")
+```
+
+
+
+---
+
+### <span style="color: #ee6c4d;">O detetive ecológico </span>
+
+
+```{r echo=FALSE, fig.align ='left', out.width = "90%"}
+knitr::include_graphics("../Figuras/ecology_and_big_data.png")
+```
+
+
+---
+
+
+.pull-left[
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+> <font size="6"><center> <span style="color: #ee6c4d;"> <b>Without data</b>, you're just another <b>person with an opinion</b></center></font></span> 
+
+
+]
+
+
+.pull-right[
+
+<br>
+<br>
+
+
+```{r echo=FALSE, out.width ="75%", fig.align ='left', fig.cap="Edwards Demming (1900-1993)", fig.topcaption=F}
+knitr::include_graphics("../Figuras/Edwards_Demming.png")
+```
+
+]
+
+
+---
+
+class: inverse, center, middle
+
+# Modelos Lineares
+
+---
+
+### <span style="color: #ee6c4d;">**O que é um modelo?** </span> 
+
+
+#### O que determina o tamanho de uma população?
+
+--
+
+.pull-left[
+
+<br>
+
+```{r echo=FALSE, fig.asp = 4, fig.align ='center'}
+knitr::include_graphics("../Figuras/dinamica_pop.png")
+```
+
+]
+
+--
+
+.pull-right[
+
+<br>
+
+$$\large P_{t+1} = P_t + {\color{#4C7B31} N} - {\color{Tomato} M} + {\color{#4C7B31} I} - {\color{Tomato} E} $$
+<br>
+
+$$\large \Delta P = N-M$$ 
+<br>
+
+$$\large \frac{dP}{dt} = rN$$ 
+<br>
+
+$$\large P_t = P_0 e^{rt}$$ 
+
+]
+
+---
+
+### <span style="color: #ee6c4d;">**O que é um modelo?** </span> 
+
+<br>
+
+> <span style="color: #ee6c4d;">Expressão matemática de uma ideia</span>
+
+
+
+> - <span style="color: #b1a7a6;">Exprime as mais diversas relações da natureza</span> 
+
+<br>
+
+$$\Large Y = f(X)$$
+
+---
+
+### <span style="color: #ee6c4d;">**O que é um modelo?** </span> 
+
+
+#### Pinguins do Arquipélago Palmer
+
+```{r echo=FALSE, out.width ="90%", fig.align ='center'}
+knitr::include_graphics("../Figuras/relacao_y_x.png")
+```
+
+---
+
+### <span style="color: #ee6c4d;">**O que é um modelo *estatístico*?** </span> 
+
+<br>
+
+
+$$\Large Y = f(X) + \color{Tomato}\varepsilon$$
+
+```{r echo=FALSE, out.width ="100%", fig.align ='center'}
+knitr::include_graphics("../Figuras/relacao_y_x_variabilidade.png")
+```
+
+
+
+---
+
+### <span style="color: #ee6c4d;">**Tipos de relações** </span> 
+
+<br>
+
+```{r echo=FALSE, out.width ="100%", fig.align ='center'}
+knitr::include_graphics("../Figuras/tipos_de_correlacoes.png")
+```
+
+---
+
+### <span style="color: #ee6c4d;">**Para que são usados?** </span> 
+
+--
+
+**Descritivo**
+  - Avaliar as relações entre as variáveis 
+      - Eg.: Quais variáveis são as melhores preditoras? 
+
+--
+
+----
+**Inferência**
+  - Validar/Invalidar hipóteses 
+      - Eg.: Há efeito do tratamento sobre a recuperação florestal? 
+
+--
+
+----
+**Predições**
+  - Realizar projeções 
+      - Eg.: Predizer a distribuição de espécies
+
+
+---
+<br>
+
+```{r echo=FALSE, out.width ="60%", fig.align ='center', fig.topcaption=F}
+knitr::include_graphics("../Figuras/horse_meme.jpg")
+```
+
+---
+
+
+
+
+
+.pull-left[
+
+<br>
+
+```{r echo=FALSE, out.width ="60%", fig.align ='center', fig.cap="George P. Box (1919-2013)", fig.topcaption=F}
+knitr::include_graphics("../Figuras/GeorgeEPBox.jpg")
+```
+
+
+]
+
+.pull-right[
+
+<br>
+<br>
+<br>
+<br>
+
+> <font size="6"><center> <span style="color: #ee6c4d;">Essentially, <b>all models are wrong</b>, but <b>some are useful</b></center></font></span> 
+
+]
+
+
+
+
+---
+
+
+
+### <span style="color: #ee6c4d;">**Modelo linear** </span> 
+
+Base para a maioria dos modelos mais complexos
+
+
+```{r echo=FALSE, out.width ="70%", fig.align ='center'}
+knitr::include_graphics("../Figuras/visao_geral_lm.png")
+```
+
+
+---
+
+### <span style="color: #ee6c4d;">**Modelo linear** </span><span style="color: #3e5c76;">| Visão geral  </span> 
+
+<br>
+
+
+$$\Large Y = f(X) + \varepsilon$$
+--
+
+$$(\Large  y_i = f(x_i|\theta) + \varepsilon_i)$$
+--
+
+<br>
+
+$$\Large f(X) = \beta_0 + \beta_1X_1 + \varepsilon$$
+
+
+- $\large \beta_0$ - intercepto
+- $\large \beta_1$ - parâmetro (coeficiente, peso, ...)
+- $\large X_1$ - covariável (variável independente, preditora, input, ... )
+- $\large Y$ - variável resposta (variável dependente, output, ...)
+- $\large \varepsilon$ - resíduo (erro)
+
+
+---
+
+### <span style="color: #ee6c4d;">**Modelo linear** </span> <span style="color: #3e5c76;">| Visão geral  </span> 
+
+
+**ATENÇÃO:** O termo <i>linear </i> está relacionado na <b>linearidade entre os parâmetros</b> ($\beta$) do modelo, e não em relação às variáveis preditoras (jeitão do gráfico)
+
+<br>
+
+```{r echo=FALSE, out.width ="80%", fig.align ='center'}
+knitr::include_graphics("../Figuras/exemplo_regressoes.png")
+```
+
+
+
+---
+
+### <span style="color: #ee6c4d;">**Modelo linear** </span><span style="color: #3e5c76;">| Visão geral  </span> 
+
+#### Quais equações são lineares?
+
+<br>
+
+.pull-left[
+- $\large y = \beta_0 + \beta_1 x + \beta_2 x^2 + \varepsilon$
+
+<br>
+
+- $\large y = \beta_0 + \beta_1 \beta_2 x + \varepsilon$
+
+<br>
+
+- $\large y = \beta_0 + \beta_1log(x_1) + \varepsilon$
+]
+
+--
+
+.pull-right[
+
+- $y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_1 x_2 + \epsilon$
+
+<br>
+
+- $\large y = \beta_0 + e^{\beta_1x_1} + \varepsilon$
+
+<br>
+
+- $\large y = \frac{1}{1 + e^{-(\beta_0 + \beta_1 x)}} + \varepsilon$
+
+]
+
+
+---
+
+### <span style="color: #ee6c4d;">**Modelo linear** </span> <span style="color: #3e5c76;">| Componentes  </span> 
+
+
+.pull-left[
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+
+$$\Large Y = \beta_0 + \beta_1{\color{Tomato}{X_1}} + \varepsilon$$
+]
+
+
+.pull-right[
+
+```{r echo=FALSE, out.width ="75%", fig.align ='left'}
+knitr::include_graphics("../Figuras/tipos_de_variaveis.png")
+```
+
+
+]
+
+---
+
+### <span style="color: #ee6c4d;">**Modelo linear** </span> <span style="color: #3e5c76;">| Componentes  </span> 
+
+
+.pull-left[
+
+<br>
+
+
+```{r echo=FALSE, out.width ="70%", fig.align ='center'}
+knitr::include_graphics("../Figuras/tipos_de_variaveis.png")
+```
+
+]
+
+
+.pull-right[
+
+<br>
+<br>
+
+#### <span style="color: #ee6c4d;">ANOVA </span>
+
+- Quando $X$ reúne apenas variáveis *qualitativas*
+
+-------
+
+
+#### <span style="color: #ee6c4d;">ANCOVA </span>
+
+- Quando $X$ reúne variáveis *quantitativas* E *qualitativas*
+
+
+]
+
+---
+
+### <span style="color: #ee6c4d;">**Modelo linear** </span><span style="color: #3e5c76;">| Componentes  </span>  
+
+<br>
+<br>
+
+$$\Large Y = \beta_0 + \beta_1{X_1} + \color{Tomato}\varepsilon$$
+
+
+
+$$\Large \varepsilon \sim N(0, \sigma^2) $$
+
+--
+
+-------
+
+Mesma equação, representação diferente
+<br>
+
+
+$$\Large y|\mathbf{X},\beta,\sigma =  N(\mu, \sigma^2)$$
+
+
+---
+
+### <span style="color: #ee6c4d;">**Modelo linear** </span><span style="color: #3e5c76;">| Componentes  </span>  
+
+
+
+```{r echo=FALSE, out.width ="70%", fig.align ='center'}
+knitr::include_graphics("../Figuras/Exemplo_residuo.jpeg")
+```
+
+
+---
+
+### <span style="color: #ee6c4d;">**Modelo linear** </span><span style="color: #3e5c76;">| Por trás dos bastidores </span>
+
+<br>
+
+Todo modelo estatístico pode ser formulado por matrizes
+
+- Permite usar álgebra linear para resolver os modelos
+- Facilita a implementação computacional e otimizações
+
+<br>
+
+$$\Large \mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\varepsilon}$$
+
+<br>
+
+--
+
+- **y** - vetor da variável resposta ($n \times 1$)
+- **X** - matriz de design; inclui os preditores e intercepto ($n \times p$)
+- $\mathbf{\beta}$ - vetor dos parâmetros ($p \times 1$)
+- $\varepsilon$ - vetor dos resíduos 
+
+---
+
+### <span style="color: #ee6c4d;">**Modelo linear** </span><span style="color: #3e5c76;">| Por trás dos bastidores </span>
+
+<br>
+
+.pull-left[
+
+```{r echo=F, message=F, warning=F}
+
+library(kableExtra)
+
+
+dados <- readRDS("~/Library/CloudStorage/OneDrive-Personal/Arbeit/Lectures_and_talks/UFRN/Lectures/ECL0072-GLM_GAM/Dados/palmerpenguins_extended.rds")
+
+set.seed(123)
+dados %>%
+  group_by(species) %>%
+  sample_n(size =2) %>%
+  select(c("bill_length_mm","body_mass_g")) %>%
+  kable(align = "ccc")
+
+```
+
+]
+
+.pull-right[
+
+<br>
+
+```{r echo=FALSE, out.width ="80%", fig.align ='center'}
+knitr::include_graphics("../Figuras/palmerpenguins.png")
+```
+]
+
+---
+
+### <span style="color: #ee6c4d;">**Modelo linear** </span><span style="color: #3e5c76;">| Por trás dos bastidores </span>
+
+<br>
+
+.pull-left[
+
+```{r echo=F, message=F, warning=F}
+
+set.seed(123)
+dados %>%
+  group_by(species) %>%
+  sample_n(size =2) %>%
+  select(c("bill_length_mm","body_mass_g")) %>%
+  kable(align = "ccc")
+
+```
+
+]
+
+
+.pull-right[
+
+$Peso_i = \beta_0 + \beta_1CompBico_i + \varepsilon_i$
+
+
+]
+
+
+
+---
+
+### <span style="color: #ee6c4d;">**Modelo linear** </span><span style="color: #3e5c76;">| Por trás dos bastidores </span>
+
+<br>
+
+.pull-left[
+
+```{r echo=F, message=F, warning=F}
+
+set.seed(123)
+dados %>%
+  group_by(species) %>%
+  sample_n(size =2) %>%
+  select(c("bill_length_mm","body_mass_g")) %>%
+  kable(align = "ccc")
+
+```
+
+]
+
+.pull-right[
+
+$Peso_i = \beta_0 + \beta_1CompBico_i + \varepsilon_i$
+
+<br>
+
+$$\color{#8b8c89}{5330 = \beta_0 + \beta_130.5 + \varepsilon_1}$$
+  
+$$\color{#8b8c89}{5126 = \beta_0 + \beta_158.3 + \varepsilon_2}$$
+    
+$$\color{#8b8c89}{3392 = \beta_0 + \beta_133.6 + \varepsilon_3}$$
+]
+
+---
+
+### <span style="color: #ee6c4d;">**Modelo linear** </span><span style="color: #3e5c76;">| Por trás dos bastidores </span>
+
+
+<br>
+
+.pull-left[
+
+
+```{r echo=F, message=F, warning=F}
+
+set.seed(123)
+dados %>%
+  group_by(species) %>%
+  sample_n(size =2) %>%
+  select(c("bill_length_mm","body_mass_g")) %>%
+  kable(align = "ccc")
+
+```
+
+
+]
+.pull-right[
+$Peso_i = \beta_0 + \beta_1CompBico_i + \varepsilon_i$
+
+<br>
+
+$$
+\begin{bmatrix}
+5330 \\
+5126 \\
+3392 \\
+4194 \\
+7482 \\
+7306
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 & 30.5 \\
+1 & 58.3 \\
+1 & 33.6 \\
+1 & 27.6 \\
+1 & 57.2 \\
+1 & 75.0
+\end{bmatrix}
+\begin{bmatrix}
+\beta_0 \\
+\beta_1
+\end{bmatrix}
++
+\begin{bmatrix}
+\varepsilon_1 \\
+\varepsilon_2 \\
+\varepsilon_3 \\
+\varepsilon_4 \\
+\varepsilon_5 \\
+\varepsilon_6
+\end{bmatrix}
+$$
+]
+
+---
+
+### <span style="color: #ee6c4d;">**Modelo linear** </span><span style="color: #3e5c76;">| Por trás dos bastidores </span>
+
+#### ANOVA (um fator)
+
+<br>
+
+.pull-left[
+```{r echo=F, message=F, warning=F}
+
+set.seed(123)
+dados %>%
+  group_by(species) %>%
+  sample_n(size =2) %>%
+  select(c("bill_length_mm","body_mass_g")) %>%
+  kable(align = "ccc")
+
+```
+]
+
+.pull-right[
+
+$Peso_i = \beta_0 + \sum_{j=1}^{J-1} \beta_j \cdot Especie_{i,j} + \varepsilon_i$
+]
+
+---
+### <span style="color: #ee6c4d;">**Modelo linear** </span><span style="color: #3e5c76;">| Por trás dos bastidores </span>
+
+#### ANOVA (um fator)
+
+<br>
+
+.pull-left[
+```{r echo=F, message=F, warning=F}
+
+set.seed(123)
+dados %>%
+  group_by(species) %>%
+  sample_n(size =2) %>%
+  select(c("bill_length_mm","body_mass_g")) %>%
+  kable(align = "ccc")
+
+```
+]
+
+.pull-right[
+
+$Peso_i = \beta_0 + \sum_{j=1}^{J-1} \beta_j \cdot Especie_{i,j} + \varepsilon_i$
+
+<p class="comment">
+<b> ATENÇÃO </b>
+
+<br>
+
+O primeiro nível do fator é sempre absorvido pelo intercepto $\beta_0$ - i.e., nível de referência (tudo será comparado relativo ao intercepto).
+
+<br>
+
+</p>
+
+]
+
+---
+### <span style="color: #ee6c4d;">**Modelo linear** </span><span style="color: #3e5c76;">| Por trás dos bastidores </span>
+
+#### ANOVA (um fator)
+
+<br>
+
+.pull-left[
+```{r echo=F, message=F, warning=F}
+
+set.seed(123)
+dados %>%
+  group_by(species) %>%
+  sample_n(size =2) %>%
+  select(c("bill_length_mm","body_mass_g")) %>%
+  kable(align = "ccc")
+
+```
+]
+
+.pull-right[
+
+
+$$Peso_i = \beta_0 + \beta_1\text{Chinstrap}_i + \\ \beta_2\text{Gentoo}_i + \varepsilon_i$$
+
+<br>
+
+$Adelie$ como nível de referência
+
+$Especie_{i,1}$ = 1 se *Chinstrap*, 0 contrário
+
+$Especie_{i,2}$ = 1 se *Gentoo*, 0 contrário
+
+]
+
+---
+### <span style="color: #ee6c4d;">**Modelo linear** </span><span style="color: #3e5c76;">| Por trás dos bastidores </span>
+
+#### ANOVA (um fator)
+
+<br>
+
+.pull-left[
+```{r echo=F, message=F, warning=F}
+
+set.seed(123)
+dados %>%
+  group_by(species) %>%
+  sample_n(size =2) %>%
+  select(c("bill_length_mm","body_mass_g")) %>%
+  kable(align = "ccc")
+
+```
+]
+
+.pull-right[
+
+$$Peso_i = \beta_0 + \beta_1 \text{Chinstrap}_i + \\ \beta_2 \text{Gentoo}_i + \varepsilon_i$$
+
+<br>
+
+$$\color{#8b8c89}{5330 = \beta_0 + \beta_1 \cdot 0 + \beta_2 \cdot 0 + \varepsilon_1}$$
+  
+$$\color{#8b8c89}{3392 = \beta_0 + \beta_1 \cdot 1 + \beta_2 \cdot 0 + \varepsilon_3}$$
+
+
+$$\color{#8b8c89}{7482 = \beta_0 + \beta_1 \cdot 0 + \beta_2 \cdot 1 + \varepsilon_5}$$
+
+
+]
+
+
+---
+### <span style="color: #ee6c4d;">**Modelo linear** </span><span style="color: #3e5c76;">| Por trás dos bastidores </span>
+
+#### ANOVA (um fator)
+
+<br>
+
+.pull-left[
+```{r echo=F, message=F, warning=F}
+
+set.seed(123)
+dados %>%
+  group_by(species) %>%
+  sample_n(size =2) %>%
+  select(c("bill_length_mm","body_mass_g")) %>%
+  kable(align = "ccc")
+
+```
+]
+
+.pull-right[
+
+$$Peso_i = \beta_0 + \beta_1\text{Chinstrap}_i + \\ \beta_2\text{Gentoo}_i + \varepsilon_i$$
+
+<br>
+
+$$
+\begin{bmatrix}
+5330 \\
+5126 \\
+3392 \\
+4194 \\
+7482 \\
+7306
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 & 0 & 0\\
+1 & 0 & 0\\
+1 & 1 & 0\\
+1 & 1 & 0\\
+1 & 0 & 1\\
+1 & 0 & 1
+\end{bmatrix}
+\cdot
+\begin{bmatrix}
+\beta_0 \\
+\beta_1 \\
+\beta_2
+\end{bmatrix}
++
+\begin{bmatrix}
+\varepsilon_1 \\
+\varepsilon_2 \\
+\varepsilon_3 \\
+\varepsilon_4 \\
+\varepsilon_5 \\
+\varepsilon_6
+\end{bmatrix}
+$$
+
+
+]
+
+---
+### <span style="color: #ee6c4d;">**Desafio do dia** </span>
+
+
+Como seria a equação e representação matricial para os seguintes casos:
+
+
+- <h4> ANOVA bifatorial </h4>
+
+- <h4> ANCOVA </h4>
+
+
+```{r echo=F, message=F, warning=F}
+
+set.seed(123)
+dados %>%
+  group_by(species) %>%
+  sample_n(size =2) %>%
+  select(c("bill_length_mm","body_mass_g", "sex")) %>%
+  kable(align = "ccc")
+
+```
+
+---
+### <span style="color: #ee6c4d;">**Modelo linear** </span><span style="color: #3e5c76;">| Pressupostos </span>
+
+
+Todo modelo estatístico é baseado em um conjunto de pressupostos
+
+--
+
+<br>
+- **Representatividade**
+  - As amostras são representativas da população
+  - "*Garbage in, garbage out*"
+
+--
+
+<br>
+- **Aditividade & Linearidade**
+  - O modelo é aditivo e linear na relação de seus parâmetros
+
+---
+### <span style="color: #ee6c4d;">**Modelo linear** </span><span style="color: #3e5c76;">| Pressupostos </span>
+
+
+Todo modelo estatístico é baseado em um conjunto de pressupostos
+
+<br>
+- **Resíduos**
+  - Independentes 
+  - Homocedásticos (variância constante)*
+  - Normalidade*
+
+
+.footnote[*Apenas válido para modelos lineares!]
+
+
+---
+## <span style="color: #ee6c4d;">Prática no R </span>
+
+
+<br>
+<br>
+
+```{r echo=FALSE, out.width ="25%", fig.align ='center', fig.cap="Pratica_aula_01.R", fig.topcaption=F}
+knitr::include_graphics("../Figuras/Rlogo.png")
+```
+
+
+
+
+---
+class: inverse, center, middle
+
+# RMarkdown
+
+```{r echo=FALSE, fig.align ='center', out.width = "40%"}
+knitr::include_graphics("../Figuras/Rmarkdown.png")
+```
+
+
+---
+
+### <span style="color: #ee6c4d;">**O que é?** </span> 
+
+
+Ecosistema que permite criar documentos *dinâmicos*, misturando códigos de programação (e.g., R) com texto em `Markdown`.
+
+--
+
+- **Markdown:** é uma linguagem de marcação 
+
+    - Apenas dizem como algo deve ser entendido
+      - Não é uma linguagem de *programação* porque não têm capacidade de processamento e execução de funções
+--
+      > Por exemplo: as linguagens HTML e YAML não são linguagens de programação, uma vez que apenas dizem como uma página web está estruturada e "maquiada", mas não executa nenhum processamento
+
+
+---
+### <span style="color: #ee6c4d;">**Para que serve?** </span> 
+
+- Relatórios em diversos formatos (e.g., PDF, Word, HTML)
+- Artigos científicos
+- Livros e blogs (Bookdown e Blogdown)
+- Apresentações em slides (e.g., PowerPoint, HTML, LaTeX)
+- Aplicativos via Shiny (Rshiny)
+- Dashboards 
+- Websites 
+
+Veja [aqui](https://rmarkdown.rstudio.com/formats.html) os demais formatos disponíveis no RMarkdown
+
+---
+### <span style="color: #ee6c4d;">**Como funciona?** </span> 
+
+<br>
+<br>
+
+```{r echo=FALSE, fig.align ='center', out.width = "90%"}
+knitr::include_graphics("../Figuras/Rmarkdown_workflow.png")
+```
+
+---
+
+### <span style="color: #ee6c4d;">**Qual a importância?** </span> 
+
+<br>
+
+**Reprodutibilidade:** 
+- Importante em estudos acadêmicos, uma vez que outros pesquisadores podem querer replicar a metodologia do estudo em questão.
+    - Um documento que une o código às explicações pode ser útil
+
+--
+
+--------
+
+**Relatórios/manuscritos parametrizados:** 
+
+- O RMarkdown permite a criação de relatórios/manuscritos padronizados, tal que as informações apresentadas são atualizadas automaticamente sempre que os dados forem atualizados.
+
+
+---
+
+## <span style="color: #ee6c4d;">Prática no R </span>
+
+
+<br>
+<br>
+
+```{r echo=FALSE, out.width ="25%", fig.align ='center', fig.topcaption=F}
+knitr::include_graphics("../Figuras/Rlogo.png")
+```

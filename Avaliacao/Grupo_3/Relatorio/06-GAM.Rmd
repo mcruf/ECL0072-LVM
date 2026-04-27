@@ -1,0 +1,382 @@
+---
+title: "Modelos Aditivos Generalizados (GAMs)"
+author: "Samuel Lima & Niege Félix"
+#date: "`r format (Sys.time(), '%d %B, %Y')`"
+output:
+   html_document: #Salvar como html
+      theme: cosmo #cerulean,flatly,united,cosmo,simplex
+      number_sections: yes
+      toc: true               # Gera sumário (Table of Contents)
+      toc_float:              # Faz o sumário “flutuar” ao lado
+        collapsed: false      # Não inicia “fechado”
+        smooth_scroll: false  # Desativa rolagem suave (opcional)
+        position: left        # Posiciona o sumário à esquerda
+        width: 200px          # Define a largura do sumário
+---
+
+
+Os Modelos Aditivos Generalizados são uma extensão dos Modelos Lineares Generalizados (GLMs), permitindo que as relações entre as variáveis independentes e a variável resposta sejam modeladas de forma mais flexível, por meio de funções suavizadas.  Mesmo com essa flexibilidade, os GAMs mantêm pressupostos importantes que precisam ser atendidos para garantir a validade dos resultados.
+
+---
+
+# Pressupostos de um Modelo GAM
+
+## Estrutura aditiva
+
+O modelo assume que os efeitos das variáveis explicativas são **aditivos** na escala do preditor linear.  Isto é, a relação entre a média da resposta e as covariáveis pode ser expressa como:
+
+\[
+g(E[Y]) = \beta_0 + s_1(X_1) + s_2(X_2) + \cdots + s_p(X_p)
+\]
+
+onde \(g(\cdot)\) é a função de ligação e \(s_j(X_j)\) são funções suavizadas das covariáveis.
+
+---
+
+## Função de ligação e família de distribuição adequadas
+
+Assim como nos GLMs, o GAM assume que os dados seguem uma **família de distribuição da Exponencial** (como normal, Poisson, binomial, gama ou Tweedie) e que há uma **função de ligação** adequada que relaciona a média da resposta com o preditor linear.  
+A escolha incorreta da família ou do link pode comprometer o ajuste e a interpretação.
+
+---
+
+## Independência das observações
+
+As observações devem ser **independentes entre si**.  
+Quando há dependência temporal, espacial ou hierárquica, o modelo precisa ser ajustado para incluir estruturas de correlação (por exemplo, usando `gamm()` ou `bam()` no pacote `mgcv`).
+
+---
+
+## Relação adequada entre média e variância
+
+A variância da variável resposta deve estar relacionada à sua média conforme a família escolhida.  
+Por exemplo:
+- Poisson: \(Var(Y) = E[Y]\)
+- Binomial: \(Var(Y) = E[Y](1 - E[Y])\)
+- Gama: \(Var(Y) = \phi (E[Y])^2\)
+
+Se essa relação for incorreta, pode haver **sobredispersão** ou **subdispersão**.
+
+---
+
+## Escolha adequada da suavidade (parâmetro λ)
+
+Os termos suavizados \(s_j(X_j)\) possuem um parâmetro de suavização (λ) que controla o grau de flexibilidade da curva:
+- λ muito alto → curva muito rígida (underfitting);
+- λ muito baixo → curva muito ondulada (overfitting).
+
+O ajuste ideal é obtido automaticamente pelo método de estimação (ex.: REML, GCV), mas deve ser verificado com diagnósticos (`gam.check()`).
+
+---
+
+## Ausência de concurvity
+
+A **concurvity** é o análogo da **multicolinearidade** nos GAMs.  
+Ela ocorre quando um termo suavizado pode ser aproximado por uma combinação de outros termos, prejudicando a estimativa dos efeitos.  
+O ideal é que a concurvity seja baixa (valores próximos de 0).
+
+---
+
+## Cobertura adequada dos dados
+
+As funções suavizadas dependem da densidade de dados ao longo do domínio da variável.  
+Se houver regiões com poucos dados (especialmente nas bordas), o ajuste pode se tornar instável ou impreciso.
+
+---
+
+## Homoscedasticidade condicional (quando aplicável)
+
+Para famílias contínuas como a **normal**, assume-se variância constante dos erros.  
+Para famílias não normais (como Poisson ou gama), essa relação já é modelada internamente, mas deve ser checada com diagnósticos de resíduos.
+
+---
+
+## Comportamento dos resíduos
+
+Os resíduos devem ser **aproximadamente aleatórios**, sem padrões sistemáticos.  
+É possível verificar isso com funções como:
+
+```{r eval=FALSE}
+library(mgcv)
+gam.check(modelo)
+
+library(DHARMa)
+res <- simulateResiduals(modelo)
+plot(res)
+
+```
+
+
+# Prática
+
+
+Carregando pacotes a serem utilizados e importando o banco de dados
+
+```{r echo=T, message=FALSE, warning=FALSE}
+library(mgcv) #rodar gam
+library(mgcViz)
+library(gratia) #visualizar resultados do gam
+library(marginaleffects)
+library(ggplot2) #plotar
+library(dplyr) #manipular dados
+library(DHARMa) #avaliação dos residuos
+library(performance) #avaliação dos residuos
+library(ggeffects)
+library(glmmTMB)
+
+dados_gam <- readRDS("../Dados/fisheries.rds")
+```
+
+
+Para exemplificar os Modelos Aditivos Generalizados, vamos utilizar o bando de dados, armazenados no diretório `/Dados` da disciplina. Consiste em um banco de dados simulado que descreve uma típica pescaria de atum no Oceano Atlântico Sul.
+
+
+
+Nosso **objetivo** será testar se a pescaria de atum no oceano atlântico é espacialmente concentrada. Nossa **hipótese** é que há um maior concentração nos trópicos devido a maior produtividade e, consequentemente, maior concentração de recursos para os atuns.
+
+
+## Análise exploratória
+
+
+```{r echo=TRUE}
+head(dados_gam)
+
+str(dados_gam)
+
+#Abundância total das espécies alvo (atum)
+dados_gam %>% 
+  dplyr::select(Thunnus_albacares,Thunnus_atlanticus,
+                Katsuwonus_pelamis,Prionace_glauca) %>% 
+  colSums(.)
+
+```
+
+
+
+A partir de agora vamos trabalhar apenas com a espécie de atum com maior
+abundância (`Thunnus_albacares`)
+
+
+
+```{r echo=TRUE}
+hist(dados_gam$Thunnus_albacares)
+
+dotchart(dados_gam$Thunnus_albacares)
+
+ifelse(is.na(dados_gam$Thunnus_albacares) == TRUE,1, 0) %>% sum()
+```
+
+
+Distribuição típica de uma variável de contagem, não há outliers aparentes, nem NAs.
+
+
+
+Como vamos trabalhar apenas com latitude e longitude, não precisamos ajustar o tipo das variáveis.
+
+
+
+### Observando correlações
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+tmp <- dados_gam[, c("Thunnus_albacares", "Lat", "Long")]
+cor(tmp,method = "pearson")
+cor(tmp,method = "spearman") #para dados com distribuição não normal
+
+```
+
+
+Sem correlação expressiva.
+
+
+
+### Observando tendências 
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+ggplot(dados_gam,aes(x=Lat,y=Thunnus_albacares))+
+  geom_point(size = 3, col = 'gray50',alpha = 0.7)
+
+
+ggplot(dados_gam,aes(x=Long,y=Thunnus_albacares))+
+  geom_point(size = 3, col = 'gray50',alpha = 0.7)
+
+```
+
+
+Claras relações não lineares. Com picos de abundância na latitude 0 e na 
+longitude -35
+
+
+
+## Modelando os dados
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+## Vamos iniciar com modelos lineares polinomiais e ir até ao GAM
+
+## Modelo com termo quadrático
+mod_glm2 <- glmmTMB(Thunnus_albacares ~ poly(Lat, 2)+poly(Long, 2),
+              data = dados_gam,
+              family = poisson)
+
+
+## Modelo com termo cúbico
+mod_glm3 <- glmmTMB(Thunnus_albacares ~ poly(Lat, 3)+poly(Long, 3),
+              data = dados_gam,
+              family = poisson)
+
+
+## Modelo com termo à quarta
+mod_glm4 <- glmmTMB(Thunnus_albacares ~ poly(Lat, 4)+poly(Long, 4),
+              data = dados_gam,
+              family = poisson)
+
+AIC(mod_glm2, mod_glm3,mod_glm4)
+```
+
+Quanto maior o termo, melhor foi o ajuste do modelo. 
+
+Vamos verificar como está o ajuste dos resíduos do melhor modelo até o momento
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+simres<-simulateResiduals(mod_glm4, n=1000, plot=T)
+check_overdispersion(simres)
+check_zeroinflation(simres)
+```
+
+
+Péssimo ajuste dos resíduos, sobredispersão e subajuste os zeros. Observando graficamente:
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+ggplot(dados_gam, aes(x=Lat, y=Thunnus_albacares)) +
+  geom_point(alpha = 0.5, col="gray40") +
+  geom_smooth(method = "glm", formula = y~poly(x,4), 
+              col = "darkorange", se = T) +
+  labs(y = "Abundância de Thunnus albacares", x = "Latitude") +
+  theme_minimal()
+
+ggplot(dados_gam, aes(x=Long, y=Thunnus_albacares)) +
+  geom_point(alpha = 0.5, col="gray40") +
+  geom_smooth(method = "glm", formula = y~poly(x,4), 
+              col = "darkorange", se = T) +
+  labs(y = "Abundância de Thunnus albacares", x = "Longitude") +
+  theme_minimal()
+
+```
+
+
+> Vamos testar com outras distribuições e o GAM
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+#Binomial negativa
+mod_glm5 <- glmmTMB(Thunnus_albacares ~ poly(Lat, 4)+poly(Long, 4),
+                data = dados_gam,
+                family = nbinom2(link = "log"))
+
+#Binomial negativa truncada
+mod_glm5b <- glmmTMB(Thunnus_albacares ~ poly(Lat, 4)+poly(Long, 4),
+                     ziformula = ~Lat+Long,
+                     data = dados_gam,
+                     family = truncated_nbinom2(link = "log"))
+
+#GAM com distriubuição inflada por zero
+#aditivo
+mod_gam1 <- gam(Thunnus_albacares ~ s(Long)+s(Lat),
+                data = dados_gam,
+                family = "ziP")
+
+#interativo
+mod_gam2 <- gam(Thunnus_albacares ~ s(Long,Lat),
+                data = dados_gam,
+                family = "ziP")
+
+AIC(mod_glm5, mod_glm5b, mod_gam1, mod_gam2)
+```
+
+
+O GAM interativo apresentou o menor AIC
+
+
+
+## Verificando resíduos do melhor modelo
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+simres2<-simulateResiduals(mod_gam2, n=1000,plot = T)
+check_overdispersion(simres2)
+check_zeroinflation(simres2)
+#Bom ajuste, sem sobredispersão e inflação de zeros.
+
+
+gratia::appraise(mod_gam2,
+                 method = 'simulate',
+                 seed = 123) 
+
+```
+
+> Agora sim, tudo certo!
+
+
+## Resultados
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+summary(mod_gam2) 
+```
+
+
+Diferentemente dos GLMs, nossos coeficientes não estão junto do intercepto. 
+Isso porque aqui temos diversos coeficientes para uma única função suave. 
+Eles são determinados pelo número de nós determinado pela função suave. Podemos extrai-los com a seguinte função:
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+coef(mod_gam2)
+```
+
+O modelo utilizou 29 funções básicas.
+
+
+
+Visualizando os resultados:
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+plot(mod_gam2) 
+```
+
+
+Esse gráfico mostra a relação das variáveis preditoras com o efeito de suavização. O eixo da suavização é centrado em 0 (média dos dados da variável y). Valores acima representam efeito positivo e abaixo, negativo. Porém, como se trata aqui de um efeito interativo, vamos observar de outra maneira para facilitar a interpretação...
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+gratia::draw(mod_gam2)
+
+#Ou ainda:
+sm <- smooth_estimates(mod_gam2, select = c("s(Long,Lat)")) 
+draw(sm) +
+  scale_fill_viridis_c(option = "D") +
+  labs(x = "Longitude", 
+       y = "Latitude")
+
+```
+
+
+
+Efeito parcial de cada variável com a unidade original da variável resposta:
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+plot_predictions(mod_gam2, condition = "Lat",points = 0.3)+
+  labs(y = "Abundância de Thunnus albacares", x = "Latitude") +
+  theme_minimal()
+
+plot_predictions(mod_gam2, condition = "Long",points = 0.3)+
+  labs(y = "Abundância de Thunnus albacares", x = "Longitude") +
+  theme_minimal()
+```
+
+
+
+Olhando o efeito unico da longitude, podemos ver que ainda não há um bom ajuste. Provavelmente porque nosso modelo não contém as variáveis ambientais, que devem explicar boa parte da variação restante.
+
+
+
+Entretanto, nossa hipótese inicial foi corroborada. Há uma maior abundância de
+atum nas menores latitudes, especialmente nos trópicos. Ainda pudemos ver que isso acontece principalmente na região mais central longitudinalmente da área de estudo.

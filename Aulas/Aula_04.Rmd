@@ -1,0 +1,501 @@
+---
+title: "Modelos Lineares Generalizados e Aditivos para Dados Ecológicos (ECL0072)"
+subtitle: "Aula 04: GLM para dados discretos"
+author: "Marie-Christine Rufener"
+#institute: "macrufener@gmail.com"
+#date: "2016/12/12 (updated: `r Sys.Date()`)"
+output:
+  xaringan::moon_reader:
+    css: [default, metropolis, metropolis-fonts, my-theme.css]
+    lib_dir: libs
+    nature:
+      #seal: false #disable title slide
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+## <span style="color: #ee6c4d;">Conteúdo programático </span> 
+
+<br>
+
+
+**1. O que é um dado discreto?**  
+
+
+**2. Distribuição Poisson**  
+
+
+**3. Distribuição Binomial Negativa**  
+
+  > Prática 
+
+
+---
+
+## <span style="color: #ee6c4d;">Leitura sugerida </span> 
+
+
+
+**Livros**
+- **Cap. 9:** Zuur et al. (2009)
+- **Cap. 5 :** Faraway (2016)
+- **Cap. 4 (seção 4.6):** Bolker (2008)
+- **Cap. 7:** Agresti (2015)*
+
+
+.footnote[*Leitura mais técnica]
+
+---
+class: inverse, center, middle
+
+# O que é um dado discreto?
+
+---
+## <span style="color: #ee6c4d;">Dados discretos </span>
+
+
+Tipo de informação que assume apenas valores inteiros e contáveis (e.g., 12, 35, 283, ....)
+  - Número de ocorrência que um determinado evento ocorre no tempo  
+
+<br>
+
+
+```{r echo=FALSE, out.width ="100%", fig.align ='center'}
+knitr::include_graphics("../Figuras/Exemplo_dado_contagem.png")
+```
+
+---
+## <span style="color: #ee6c4d;">Dados discretos </span>
+
+Distribuições de probabilidade discretas:
+
+- Bernoulli/Binomial
+- Multinomial
+- Poisson 
+- Binomial Negativa 
+- Poisson/ Binomial Negativa zero-inflacionado
+- Geométrica
+- Hipergeométrica*
+
+
+.footnote[*Não pertence à família exponencial de distribuições]
+
+
+
+---
+## <span style="color: #ee6c4d;">Exemplo prático </span>
+
+A pesca de espinhel costuma ser utilizada para capturar grandes espécies pelágicas, com destaque para os atuns.
+  - Em cada evento de pesca (pescaria) são registradas as espécies que foram capturadas, sejam estas alvo ou não-alvo, além de muitas outras informações auxiliares.  
+  
+    > **Pergunta:** há uma época do ano em que se captura mais atuns?
+
+
+```{r echo=FALSE, out.width ="90%", fig.align ='center'}
+knitr::include_graphics("../Figuras/Longline_fisheries.png")
+```
+
+---
+class: inverse, center, middle
+
+# Distribuição Poisson
+
+---
+## <span style="color: #ee6c4d;">Distribuição Poisson </span>
+
+
+Definida sob variáveis discretas positivas 
+  - $Y \in \text{{0, 1, 2, 3, ...}}$
+
+
+$$\large f(y; \lambda) = \frac{\lambda^y e^{-\lambda}}{y!}$$
+
+```{r echo=FALSE, out.width ="100%", fig.align ='center'}
+knitr::include_graphics("../Figuras/Distribuicao_Poisson.png")
+```
+
+
+
+---
+## <span style="color: #ee6c4d;">Distribuição Poisson </span>
+
+<br>
+
+$$\large y_i \sim Poisson(\lambda_i) ~~~ (\lambda_i  \geq 0)$$
+
+<br>
+
+$$\large E(Y) = \lambda, ~~~~~Var(Y) = \lambda$$
+
+<br>
+
+$\large \lambda_i$: número médio de eventos (e.g., abundância média de uma espécie ou número médio de espécies não-alvo por pescaria)
+
+
+
+--
+
+<p class="comment">
+<b>ATENÇÃO</b>
+<br>
+
+Assume que a média = variância! 
+</p>
+
+
+---
+
+## <span style="color: #ee6c4d;">Distribuição Poisson </span>
+
+Podemos relacionar a média de eventos $\lambda_i$ a um conjunto de covariáveis conforme a relação:
+
+
+.pull-left[
+<br>
+
+$$\large y_i \sim Poisson(\lambda_i)$$
+
+$$\large log(\lambda_i) = \eta_i$$
+$$\large \eta_i = \beta_0 + \beta_1x_{i_1} + \beta_2x_{i_2} + \dots + \beta_px_{i_p}$$
+]
+.pull-right[
+
+
+<p class="comment">
+<b>ATENÇÃO</b>
+<br>
+
+Usamos a <i>função logarítmica</i> como função de ligação de forma que $\lambda \geq 0$
+
+</p>
+
+]
+
+
+---
+
+## <span style="color: #ee6c4d;">Distribuição Poisson </span><span style="color: #3e5c76;">| Offset </span> 
+
+Dados de contagem muitas vezes são medidos em relação a uma referência, como uma área ou um período de tempo
+
+
+```{r echo=FALSE, out.width ="100%", fig.align ='center'}
+knitr::include_graphics("../Figuras/Offset.png")
+```
+
+---
+## <span style="color: #ee6c4d;">Distribuição Poisson </span><span style="color: #3e5c76;">| Offset </span> 
+
+Se a referência não for padronizada ao longo do estudo, teremos conclusões equivocadas 
+
+
+```{r echo=FALSE, out.width ="80%", fig.align ='center'}
+knitr::include_graphics("../Figuras/Offset_2.png")
+```
+
+
+
+---
+
+## <span style="color: #ee6c4d;">Distribuição Poisson </span><span style="color: #3e5c76;">| Offset </span> 
+
+
+
+É necessário padronizar a variável resposta
+
+--
+
+- Dividindo Y pelo *esforço amostral* (densidade)
+  - E.g.: $\text{No. de plântulas}/m^2$
+      - Variável contínua -> distribuição Normal, Gama, ....
+
+
+--
+
+<br>
+
+- Contabilizando diretamente no modelo
+  - **Offset**
+
+---
+## <span style="color: #ee6c4d;">Distribuição Poisson </span><span style="color: #3e5c76;">| Offset </span> 
+
+
+O offset é uma variável preditora especial que entra no componente sistemático do modelo, porém não tem parâmetro para ser estimado
+
+<br>
+
+$$\large y_i \sim Poisson(\lambda_i\color{Tomato}{E_i})$$
+
+--
+
+
+$$\large log(\lambda_i\color{Tomato}{E_i}) = log(\lambda_i) + log(\color{Tomato}{E_i})$$
+
+--
+
+$$\large \beta_0 + \beta_1x_{i_1} + \beta_2x_{i_2} + \dots + \beta_px_{i_p}+ log(\color{Tomato}{E})$$
+<br>
+
+- Lembrando que $log(\lambda) = \eta$
+- $E_i$ é a exposição (esforço amostral)
+
+
+---
+
+## <span style="color: #ee6c4d;">Distribuição Poisson </span><span style="color: #3e5c76;">| Sobredispersão </span> 
+
+Dados discretos frequentemente apresentam sobredispersão
+- $\text{Var(dados)} > \text{Var(modelo)}$
+
+
+```{r echo=FALSE, out.width ="70%", fig.align ='center'}
+knitr::include_graphics("../Figuras/Overdispersion.png")
+```
+
+---
+
+
+## <span style="color: #ee6c4d;">Distribuição Poisson </span><span style="color: #3e5c76;">| Sobredispersão </span> 
+
+
+.pull-left[
+**Causa:**
+  - Omissão de variáveis preditoras importantes
+  
+  - Dados zero-inflacionados
+  
+  - Dependência entre as observações
+
+]
+
+
+
+
+---
+## <span style="color: #ee6c4d;">Distribuição Poisson </span><span style="color: #3e5c76;">| Sobredispersão </span> 
+
+
+.pull-left[
+**Causa:**
+  - Omissão de variáveis preditoras importantes
+  
+  - Dados zero-inflacionados
+  
+  - Dependência entre as observações
+
+
+-------
+
+**Consequência:**
+  - Erros padrão inflacionados (subestimação da variabilidade)
+  
+  - Significância estatística equivocada
+
+]
+
+
+---
+## <span style="color: #ee6c4d;">Distribuição Poisson </span><span style="color: #3e5c76;">| Sobredispersão </span> 
+
+
+.pull-left[
+**Causa:**
+  - Omissão de variáveis preditoras importantes
+  
+  - Dados zero-inflacionados
+  
+  - Dependência entre as observações
+
+
+-------
+
+**Consequência:**
+  - Erros padrões inflacionados (subestimação da variabilidade)
+  
+  - Significância estatística equivocada
+
+]
+
+
+.pull-right[
+<br>
+
+**Solução:**
+  - Incluir novas variáveis preditoras
+  
+  - Modelo quasi-Poisson (desuso)
+  
+  - Modelo Poisson com efeito(s) aleatório(s)
+  
+  - Modelo Binomial Negativo
+  
+  - Modelo Poisson/BN zero-inflacionado
+]
+
+
+---
+## <span style="color: #ee6c4d;">Distribuição Poisson </span><span style="color: #3e5c76;">| Sobredispersão </span> 
+
+**Detectando sobredispersão**
+
+
+- Análise gráfica dos resíduos:
+
+.pull-left[
+```{r echo=FALSE, out.width ="100%", fig.align ='center'}
+knitr::include_graphics("../Figuras/Overdispersion_residuals.png")
+```
+
+]
+
+
+.pull-right[
+
+Em GLMs, passamos a analisar os resíduos padronizados
+
+- E.g.: **Resíduos de Pearson**
+
+    $r_i = \frac{y_i-\hat{\lambda_i}}{\sqrt{\hat{\lambda_i}}}$
+
+
+Espera-se que a média dos resíduos seja próxima de 0 e a variância próxima de 1!
+
+]
+
+---
+
+## <span style="color: #ee6c4d;">Distribuição Poisson </span><span style="color: #3e5c76;">| Sobredispersão </span> 
+
+**Detectando sobredispersão**
+
+
+- Teste de razão de dispersão:
+  - Calcula o fator de dispersão ($\phi$) - o quanto a variância residual desvia do modelo Poisson 
+
+
+$$\large \phi = \frac{\chi^2}{df}= \frac{\sum_{i=1}^{n} \frac{(y_i-\hat{\lambda_i)^2}}{\hat{\lambda_i}}}{n-p} $$
+- onde:
+  - $y_i$ = valores observados
+  - $\hat{\lambda_i}$ = valores preditos
+  - $n$ = número de observações
+  - $p$ = número de parâmetros no modelo
+  - $\chi^2$ = qui-quadrado (soma dos resíduos de Pearson ao quadrado)
+  
+---
+## <span style="color: #ee6c4d;">Distribuição Poisson </span><span style="color: #3e5c76;">| Sobredispersão </span> 
+
+**Detectando sobredispersão**
+
+
+- Teste de razão de dispersão:
+  - Calcula o fator de dispersão ($\phi$) - o quanto a variância residual desvia do modelo Poisson 
+  <br>
+  
+      - $\mathbf{\phi \approx 1}$: não há evidência de sobredispersão
+      - $\mathbf{\phi > 1}$: sobredispersão (o modelo subestima a variância)
+      - $\mathbf{\phi < 1}$: subdispersão (raro!)
+
+
+---
+class: inverse, center, middle
+
+# Distribuição Binomial Negativa
+
+---
+
+## <span style="color: #ee6c4d;">Distribuição Binomial Negativa </span>
+
+Alternativa quando os dados apresentam sobredispersão
+- É uma extensão da distribuição Poisson
+
+
+$$\large Y \sim Poisson(\color{Tomato}\lambda)$$
+
+$$\large \color{Tomato}\lambda \sim Gama(k, \beta)$$
+
+
+
+A média da distribuição Poisson ($\lambda$) não é mais assumida como fixa
+  - variável aleatória que segue uma distribuição Gama
+
+--
+
+<br>
+
+
+> <span style="color: #ee6c4d;">A distribuição Binomial Negativa é uma distribuição composta (Poisson + Gama). </span>
+
+
+---
+## <span style="color: #ee6c4d;">Distribuição Binomial Negativa </span>
+
+Assim como a distribuição Poisson, a distribuição BN apresenta forte assimetria à direita
+
+
+$$\large f(y; \mu, k) = \frac{\Gamma(y+k)}{\Gamma(k)\times\Gamma(y+1)} \times \left (\frac{k}{\mu + k}\right)^k \times \left(1 - \frac{k}{\mu + k}\right)^y$$
+
+
+
+```{r echo=FALSE, out.width ="100%", fig.align ='center'}
+knitr::include_graphics("../Figuras/Distribuicao_BN.png")
+```
+
+
+
+
+---
+## <span style="color: #ee6c4d;">Distribuição Binomial Negativa </span>
+
+Podemos resumir o modelo conforme
+
+
+$$\large Y \sim BN(\mu, k)$$
+
+$$E(Y) = \mu, ~~~~~Var(Y) = \mu + \frac{\mu^2}{k}$$
+
+onde:
+- $\mu$: média da distribuição BN
+- $k$: parâmetro de dispersão (forma/*shape*)
+
+--
+
+
+<p class="comment">
+<b>ATENÇÃO</b>
+<br>
+
+O que significa quando $k \rightarrow \infty$?
+
+</p>
+
+---
+
+## <span style="color: #ee6c4d;">Prática no R </span>
+
+
+<br>
+<br>
+
+```{r echo=FALSE, out.width ="25%", fig.align ='center', fig.cap="Pratica_aula_04.R <br>", fig.topcaption=F}
+knitr::include_graphics("../Figuras/Rlogo.png")
+```
+
+---
+## <span style="color: #ee6c4d;">Prática no R </span><span style="color: #3e5c76;">| Relatório:  </span>  
+
+
+**fisheries.rds**
+
+- Abundância de diversas espécies alvos e não-alvos da pesca
+  - Associar a abundância de uma espécie a fatores oceanográficos, espaciais, sazonais e pesqueiros
+    - Alternativamente, pode-se calcular a riqueza de espécies avaliar sua relação com os demais fatores 
+
+
+----
+
+**benthos_exposure.rds**
+
+- Riqueza de macrofauna bentônica registrada em diferentes praias
+  - Associar a riqueza à fatores de exposição a estresse ambiental e altura em relação a maré

@@ -1,0 +1,271 @@
+---
+title: "GLM Para dados discretos"
+author: "Maiara Menezes"
+date: "`r format (Sys.time(), '%d %B, %Y')`"
+output:
+   html_document: #Salvar como html
+      theme: journal #cerulean,flatly,united,cosmo,simplex
+      number_sections: yes
+      toc: true               # Gera sumario (Table of Contents)
+      toc_float:              # Faz o sumario 
+        collapsed: false      # Nao inicia 
+        smooth_scroll: false  # Desativa rolagem suave (opcional)
+        position: left        # Posiciona o sumario 
+        width: 250px          # Define a largura do sumario
+---
+
+## Introdução
+
+Neste relatório vamos avaliar um banco de dados que explora a variação na quantidade de espécies (riqueza) da macrofauna bentônica identificadas em amostras coletadas 9 praias distintas.
+
+As variáveis incluídas no banco de dados que foram coletadas em campo são:
+
+(1) Sample: Número da amostra
+(2) Richness: Riqueza de macrofauna bentônica (variável numérica)
+(3) Exposure: Índice de exposição (que varia entre 8, 10 e 11 - categórica)
+(4) NAP: altura da estação de amostragem em relação à maré (variável numérica)
+(5) Beach: Praia em que foi feito a amostragem (variável categórica)
+
+Mais detalhadamente, exposure é um índice composto pela ação das ondas, comprimento da zona de arrebentação, declive, tamanho dos grãos e profundidade da camada anaeróbica. 
+
+Este banco de dados é explorado no livro do Zuur (2009):
+https://www.highstat.com/index.php?view=article&id=17&catid=18.
+(Nome original do banco de dados: RIKZ)
+
+### Objetivo
+
+Vamos analisar este banco de dados buscando responder a seguinte pergunta:
+
+**Existe uma relação entre riqueza de espécies, a altura da estação de amostragem (NAP) e o índice de exposição à maré?**
+
+Em outras palavras, queremos compreender se as áreas mais expostas à ação do hidrodinamismo são áreas em que menos espécies ocorrem, diante os desafios de permanecer exposto ao ar, ao vento e a força das ondas. Em contraste, as áreas que permanecem submersas por mais tempo e que estão menos expostas a estas intempéries seriam aquelas que contarão com um maior número de espécies (maior riqueza).
+
+Vamos iniciar importando os dados e fazendo uma breve análise exploratória.
+
+```{r echo=T}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 1. Importando o banco de dados
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+dados <- readRDS("../Dados/benthos_exposure.rds")
+
+```
+
+Vejamos brevemente algumas características gerais do banco de dados:
+
+
+```{r, echo=T}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 2. Análise exploratória 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+str(dados)
+
+```
+
+Observe que exposure e beach são variáveis categóricas. Então, precisamos indica-las como fatores. Para isso vamos usar o pacote `dplyr`
+
+```{r, echo=T, message=FALSE}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 3. Ajustando o formato da variável resposta 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+library(dplyr)
+
+cols <- c("Exposure", "Beach")
+dados[, cols] <- lapply(dados[, cols], factor)
+
+```
+
+É fundamental explorar um pouco nossa variável de interesse para entender sua distribuição.
+
+```{r, echo=T}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 4. Explorando a variável resposta 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+hist(dados$Richness)
+summary(dados$Richness)
+dotchart(dados$Richness)
+
+```
+
+Como podemos ver, nossa variável preditora é discreta e tem uma distribuição assimétrica, típica de dados de contagem, com uma maior ocorrência de dados próximos ao zero e alguns dados pontuais >10. Para lidar com esse tipo de dado, temos que utilizar modelos lineares que tenham uma distribuição diferente da normal (gaussiana) e que considere esta particularidade de assimetria, como no caso da distribuição de poisson ou a binomial negativa.
+
+Antes de seguir com a construção do modelo, podemos explorar a relação entre a nossa variável preditora (riqueza) e as nossas covariáveis ambientais (Exposure e NAP).
+
+```{r, echo=T}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 5. Relação Riqueza vs. Exposição
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+library(ggplot2)
+ggplot(dados, aes(x = Exposure, y = Richness)) +
+  geom_point(fill = 'cyan4') +
+  theme_minimal()
+
+```
+
+Podemos observar que possivelmente existe uma diferença na riqueza das espécies a depender do nível de exposição, sendo os pontos de  amostragem com menor nível de exposição (8) aqueles que em que foram registradas mais espécies, e os com maior grau de exposição, os que obtiveram menos espécies registradas.  
+
+```{r, echo=T}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 5. Relação Riqueza vs. Altura da estação de coleta (NAP)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ggplot(dados, aes(x = NAP, y = Richness)) +
+  geom_point(fill = 'cyan4') +
+  theme_minimal()
+
+```
+
+Já em relação ao NAP, existe uma relação negativa entre a a riqueza e a altura da estação de amostragem, indicando que quanto maior a altura do ponto de amostragem, menor a quantidade de espécies. 
+
+Identificadas essas tendências podemos partir para o nosso teste de hipóteses. 
+
+<br>
+
+## Hipóteses
+Com base na breve análise exploratória realizada anteriormente, podemos começar a formular algumas hipóteses:
+
+- $H_1:$ A riqueza de espécies da macrofauna betônica diminui quanto mais altas as áreas intermarés e maior o índice de exposição as intempéries da ação das ondas, característica da zona de arrebentação.
+
+<br>
+
+## Metodologia
+
+Para testar esta hipótese, vamos estruturar um modelo que considere as duas covariáveis ambientais e que apresente uma distribuição assimétrica dos resíduos, própria para dados de contagem.
+
+Lembrando que a distribuição de poisson é estruturada a partir de uma função logarítmica, para que a média dos valores de y ($(\lambda_i)$) assumam sempre valores positivos (>0), já que não existe contagem negativa para o número de espécies. Temos enquanto a seguinte relação:
+ $$\large y_i \sim Poisson(\lambda_i)$$
+Onde $y_i$ é a riqueza da i*esma* amostra e $\lambda_i$ é a média do número de espécies (riqueza).
+Adicionalmente, como estamos trabalhando com um modelo aditivo generalizado, devemos assumir que:
+ $$ \large log(\lambda_i) = \eta_i = \beta_0 +\sum_{j=1}^{J} \beta_j x_{ij}$$
+
+Onde $log(\lambda_i)$ é o componente randômico, que sempre deverá assumir um valor positivo; $\beta_0$ o intercepto, $j$ número de covariáveis, $\beta_j$ os coeficientes que quantificam o efeito das covariáveis $x_j$; e $\eta_i$ a função de ligação entre esses dois componentes.
+
+Podemos escrever o modelo completo, conforme
+
+$$log(\lambda_i) = \beta_0 + \beta_1 Exposição_{i} + \beta_2 NAP_{i}$$
+
+Adicionalmente, essa distribuição assume que a média e a variância são equivalentes.
+
+Este modelo é suficiente para responder aos dois objetivos específicos. No entanto, testaremos diversos modelos para achar o modelo que melhor se ajuste aos dados. Para tanto, usaremos o método "forward-stepwise", em que partimos do modelo nulo e inserimos uma covariável por vez. 
+
+Os modelos serão comparados pelos valores de AIC e, quando necessário, contrastados (testados) via o *teste de razão de verossimilhança*. Além disso, o ajuste dos modelos será analisado via análises gráficas dos resíduos.
+
+## Análise e Resultados
+
+Iniciaremos as análises montando os modelos, partindo do modelo mais simples (modelo nulo) para o modelo mais complexo (contém todas as covariáveis).
+
+```{r echo=T}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 6. Testando modelos
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Modelo Nulo
+mod0 <- glm(Richness ~ 1,
+            family = poisson (link = "log"),
+            data = dados)
+
+## Modelo 1
+mod1 <- glm(Richness ~ NAP,
+            family = poisson (link = "log"),
+            data = dados)
+
+## Modelo 2
+mod2 <- glm(Richness ~ Exposure,
+            family = poisson (link = "log"),
+            data = dados)
+
+## Modelo 3
+mod3 <- glm(Richness ~ NAP + Exposure,
+            family = poisson (link = "log"),
+            data = dados)
+
+```
+
+Agora que temos alguns modelos, podemos compará-los via valores de AIC
+
+
+```{r echo=T}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 7. Comparando os modelos
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Calcular os valores de AIC ##
+aic <- AIC(mod0, mod1, mod2, mod3)
+
+
+## Ordenar dos menores aos maiores valores ##
+aic %>% arrange(-AIC)
+```
+
+Como podemos observar, o modelo 3 foi aquele com o menor valor de AIC. Podemos averiguar de ele difere significativamente o segundo melhor modelo (mod 1) antes de avalia-lo graficamente.
+
+```{r echo = T}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 8. Teste de razão de verossimilhança
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#lmtest::lrtest(mod3, mod2) # mesma coisa
+anova(mod3, mod1, test = "Chisq")
+```
+Constatada a diferença entre os modelos podemos partir para análise gráfica dos resíduos para validá-lo.
+
+```{r echo=T, message=F}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 9.Validação do modelo
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+library(performance)
+check_model(mod3)
+check_overdispersion(mod3)
+
+```
+Observando os gráficos podemos constatar que apesar de os valores preditos estarem bem próximos dos valores estimados (plot 1) a variância residual não está como esperado (plot 3 e 6). Além disso, é possível identificar que algumas poucas observações influenciam a distribuição dos dados (plot 4). Além disso, o teste que verifica a sobredispersão dos dados foi significativo, o que demosntra outra fragilidade do modelo. 
+
+Desta forma, como o nosso melhor modelo não apresenta um ajuste ideal, podemos seguir explorando outros tipos de distribuição que possam nos ajudar a lidar com essas limitações. Uma possibilidade para o tipo de dado que estamos trabalhando é a binomial negativa.
+
+```{r echo=T, message=F}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 10.Testando o modelo com distribuição binomial negativa
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+library(MASS)
+mod4<- glm.nb(Richness ~ NAP + Exposure,
+            data = dados)
+
+aic <- AIC(mod0, mod1, mod2, mod3, mod4)
+aic %>% arrange(-AIC)
+anova(mod3, mod4, test = "Chisq")
+
+```
+
+Quando comparado aos modelos com a distribuição de Poisson, o modelo da binomial negativa apresentou de fato um AIC menor. Todavia, não existe diferença significativa entre os AICs do modelo cheio com distribuição de poisson e da binomial negativa. Neste caso, podemos partir para análise gráfica dos resíduos para tomar a decisão de qual modelo será considerado para intrepetar os resultados.
+
+```{r echo=T, message=F}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 11.Validação do modelo com distribuição binomial negativa
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+check_model(mod4)
+check_overdispersion(mod4)
+
+```
+
+Verificamos com essa análise gráfica que o modelo com distribuição binomial negativa apesar de contornar o problema da sobredispersão dos dados, acarretou num leve prejuízo quanto a normalidade dos resíduos. Considerando que não houve diferença significativa quanto ao critério de aic entre estes dois modelos, podemos eleger, pelo critério da parcimonia, o modelo mais simples apara analisar os resultados.
+
+```{r echo=T, message=F}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 12. Resultados do modelo com distribuição de poisson
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+summary(mod3)
+
+```
+A partir desses resultados temos que ambas as variáveis mensuradas influenciam negativamente a riqueza de espécies da macrofauna bentônica. Espera-se uma redução na riqueza para cada incremento no valor de NAP na ordem logritma de 1.12 espécies (log(5.92 = intercepto)-log(-0.65 = coef. angular 1)), e para cada incremento no valor de Exposure de  1.36 espécies (log(5.92 = intercepto)-log(-0.41 = coef. angular 1)).

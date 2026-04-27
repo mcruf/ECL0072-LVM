@@ -1,0 +1,239 @@
+---
+title: "GLM para dados binários"
+author: "Maiara Menezes"
+date: "`r format (Sys.time(), '%d %B, %Y')`"
+output:
+   html_document: #Salvar como html
+      theme: journal #cerulean,flatly,united,cosmo,simplex
+      number_sections: yes
+      toc: true               # Gera sumario (Table of Contents)
+      toc_float:              # Faz o sumario 
+        collapsed: false      # Nao inicia 
+        smooth_scroll: false  # Desativa rolagem suave (opcional)
+        position: left        # Posiciona o sumario 
+        width: 250px          # Define a largura do sumario
+---
+
+## Introdução
+
+Dados binários são caracterizados por variáveis que podem assumir apenas dois estados possíveis (0-1). Neste exercício, vamos utilizar dados que foram coletados a partir da pesca industrial de espinhel entre os anos `r min(dados$Ano)` e `r max(dados$Ano)`. O objetivo da análise é associar a presença da espécie `Acanthocybium solandria` conhecida como cavala, uma espécie de relevância comercial, à algumas característica oceanográficas a fim contribuir para o sucesso de captura na pescaria, identificando a temperatura e profundidade ideais em que o espinhel podera ser colocado para aumentar a chances de captura desta espécie.
+
+  
+```{r echo=T}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 1. Importando o banco de dados
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+dados <- readRDS("../Dados/fisheries.rds")
+
+```
+
+
+Vejamos brevemente algumas características gerais do banco de dados:
+
+
+```{r, echo=T}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 2. Análise exploratória 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+str(dados)
+
+```
+
+<br>
+
+## Análise exploratória
+
+A coluna `Acanthocybium_solandri` armazena informação sobre a quantidade de indivíduos da espécie cavala capturados.
+
+Para fazer uma análise com dados binários utilizando este banco de dados, a nossa variável Y (número de cavalas capturadas) que é uma variável numérica discreta, deverá ser transformada em uma variável binária de presença e ausência, assumindo valores de 0 e 1. Para isto, temos que utilizar a função ´ifelse´ do pacote ´dplyr´ atribuindo valor = 1 nas observações onde houve a captura de pelo menos 1 indíviduo e valor = 0 para quando nenhum indivíduo foi capturado.  
+
+
+```{r echo=T, message=FALSE}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 3. Ajustando o formato da variável resposta 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+library(dplyr)
+
+dados$Acanthocybium_solandri <- ifelse(dados$Acanthocybium_solandri >= 1 ,1, 0) %>%                       as.factor()
+
+```
+
+Podemos investigar visualmente se existe alguma relação da ocorrência da cavala com as nossas variáveis ambientais de interesse: temperatura e profundida.
+
+
+```{r echo=F}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 4. Ocorrência de A.solandri vs. temperatura
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+library(ggplot2)
+ggplot(dados, aes(x = Acanthocybium_solandri, y = sst , 
+                  fill = Acanthocybium_solandri)) +
+  geom_boxplot(show.legend = F ) +
+  theme_minimal()
+
+```
+Observamos que a temperatura em torno de 26/27 graus possivelmente é aquele aonde as capturas da cavala são mais efetivas. Porém, há muitas ausências de captura também nas águas em torno desta temperatura. Então, vamos observar a relação com a profundidade.
+
+
+```{r echo=F}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 5. Ocorrência de A.solandri vs. profundidade
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ggplot(dados, aes(x = Acanthocybium_solandri, y = depth,
+                  fill = Acanthocybium_solandri)) +
+  geom_boxplot(show.legend = F)
+
+```
+
+Podemos observar também a partir desse gráfico, que  a média das capturas se concentrou em torno de 4500m de profundidade.
+
+Ao analisar esses gráficos podemos sugerir que o sucesso de captura da cavala possivelmente está associado a regiões tropicais, com águas mais quentes (em torno de 26 graus C) e em profundidades em torno de 4500m. Mas as ausências de captura também foram bastante comum nessas condições, como observado nos gráficos acima. Será então que apenas a tempetura e a profundidade são informações suficientes para o pescadores definirem suas estratégias de pescaria para aumentar a chance de capturar essa espécie? 
+
+
+## Hipóteses
+Com base nessas breves observações, podemos começar a formular algumas hipóteses:
+
+- $H_1:$ O sucesso de captura da cavala é maior em regiões tropicais com águas mais quentes
+
+- $H_2:$ O sucesso de captura da cavala é maior em águas mais profundas (em torno de 4000 e 5000m)
+
+## Objetivos
+
+Avaliar como condições oceanográficas (temperatura da superfcíe da água e profundidade) influenciam no sucesso de captura da cavala (Acanthocybium_solandri)
+
+
+### Objetivos específicos
+
+(i) **Estimar a influência da temperatura da água no sucesso de captura da cavala**
+     
+(ii) **Estimar a influência da profundidade no sucesso de captura da cavala**
+     
+
+## Metodologia
+
+Para avaliar se essas condições ocenográficas influenciam o sucesso de captura da cavala, será utilizado um modelo de regressão logística (i.e., modelo binomial), visto que a variável resposta (*Acanthocybium_solandri*) é binária (houve captura (1) vs. não houve captura (0)).
+
+Podemos resumir o modelo conforme:
+
+$$y_i \sim Binomial(n_i, p_i)$$
+
+$$logit(p_i) = \eta_i 
+= \beta_0 +\sum_{j=1}^{J} \beta_j x_{ij}$$
+
+
+onde $y_i$ é a i*esmo* pescaria, $n_i$ o número total de pescarias, $p_i$ a probabilidade da i*esmo* pescaria de capturar ao menos um indivíduo de cavala, $\beta_0$ o intercepto, $j$ número de covariáveis, $\beta_j$ os coeficientes que quantificam o efeito das covariáveis $x_j$.
+
+Podemos escrever o modelo completo, conforme
+
+$$logit(p_i) = \beta_0 + \sum_{j=1}^{J-1} \beta_j Temperatura_{i,j} + \sum_{k=1}^{K-1} \gamma_k Profundidade_{i,k}$$
+
+
+> **Atenção:** Repare que o modelo contém 2 covariáveis numéricas - estamos, portanto, montando uma regressão logística com duas variáveis usando uma distribuição binomial!
+
+Este único modelo é suficiente para responder aos dois objetivos específicos. No entanto, para vias de exercício, iremos testar diversos modelos para achar o modelo que melhor se ajuste aos dados. Para tanto, usaremos o método "forward-stepwise", em que partimos do modelo nulo e inserimos uma covariável por vez. 
+
+Os modelos serão comparados pelos valores de AIC e, quando necessário, contrastados (testados) via o *teste de razão de verossimilhança*. Além disso, o ajuste dos modelos será analisado via análises gráficas dos resíduos.
+
+
+## Análises e Resultados
+
+Iniciaremos as análises montando os modelos, partindo do modelo mais simples (modelo nulo) para o modelo mais complexo (contém todas as covariáveis).
+
+
+```{r echo=T}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 6. Testando modelos
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Modelo Nulo
+mod0 <- glm(Acanthocybium_solandri ~ 1,
+            family = binomial(link = "logit"),
+            data = dados)
+
+## Modelo 1
+mod1 <- glm(Acanthocybium_solandri ~ sst,
+            family = binomial(link = "logit"),
+            data = dados)
+
+## Modelo 2
+mod2 <- glm(Acanthocybium_solandri ~ depth,
+            family = binomial(link = "logit"),
+            data = dados)
+
+## Modelo 3
+mod3 <- glm(Acanthocybium_solandri ~ sst + depth,
+            family = binomial(link = "logit"),
+            data = dados)
+
+```
+Agora que temos alguns modelos, podemos compará-los via valores de AIC
+
+
+```{r echo=T}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 7. Comparando os modelos
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Calcular os valores de AIC ##
+aic <- AIC(mod0, mod1, mod2, mod3)
+
+
+## Ordenar dos menores aos maiores valores ##
+aic %>% arrange(-AIC)
+```
+
+
+De acordo com a tabela, constata-se que o modelo nulo (mod0) foi o que apresentou o melhor ajuste uma vez que apresentou o menor valor de AIC quando comparado aos demais modelos.
+
+É importante frisar que estamos trabalhando com uma variável categórica, isso implica que o primeiro nível de cada variável estará absorvido no intercepto. Dessa forma, a interpretação dos resultados é feita de forma relativa.
+
+Antes de prosseguirmos com a validação visual do modelo escolhido, vamos comparar se esse modelo difere significativamente do segundo melhor modelo (mod1).
+
+
+```{r echo = T}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 8. Teste de razão de verossimilhança
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#lmtest::lrtest(mod3, mod2) # mesma coisa
+anova(mod0, mod1, test = "Chisq")
+```
+
+Como o p-valor > 0.05, conclui-se que não existe diferença significativa entre o modelo nulo e o modelo que incorpora a temperatura como covariável. Logo, podemos assumir que **as covariáveis escolhidas não foram suficientes para explicar para estimar o sucesso de captura da cavala.** 
+
+
+Á título de exemplo, vamos analisar graficamente o ajuste do modelo:
+
+```{r echo=T, message=F}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 9.Validação do modelo
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+library(DHARMa)
+
+## Simulando os resíduos a partir do modelo escolhido ##
+resid_sim <- simulateResiduals(mod1, n=1000)
+
+plot(resid_sim)
+
+```
+
+Podemos fazer uma análise mais minuciosa dos resíduos do modelo 1 usando a função `check_model()` do pacote *performance*, só a título de exemplo:
+
+
+```{r echo=T, message=F}
+library(performance)
+check_model(mod1)
+
+```
+
+De maneira geral, têm-se um bom ajuste na normalidade dos resíduos, e os dados preditos pelo modelo estão alinhados com os dados observados. Entretanto, como já identificamos que o modelo nulo foi o melhor modelo, segundo o critério de AIC, não é viável considerar este modelo para determinar o sucesso de captura das cavalas.

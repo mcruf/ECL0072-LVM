@@ -1,0 +1,151 @@
+---
+title: "GLM para dados contínuos"
+author: "Clara Buck"
+#date: "`r format (Sys.time(), '%d %B, %Y')`"
+output:
+   html_document: #Salvar como html
+      theme: journal #cerulean,flatly,united,cosmo,simplex
+      number_sections: yes
+      toc: true               # Gera sumário (Table of Contents)
+      toc_float:              # Faz o sumário “flutuar” ao lado
+        collapsed: false      # Não inicia “fechado”
+        smooth_scroll: false  # Desativa rolagem suave (opcional)
+        position: left        # Posiciona o sumário à esquerda
+        width: 250px          # Define a largura do sumário
+---
+
+# Introdução
+
+
+Este relatório apresenta uma análise de **GLMs para dados contínuos** utilizando o banco de dados `fisheries.rds`. O objetivo foi modelar a **abundância de espécies não-alvo (Bycatch)** padronizada pelo esforço amostral (BPUE) em função de variáveis espaciais e sazonais.
+
+---
+
+# Preparação dos Dados
+
+
+```{r echo=T, message=F, warning=F}
+library(ggplot2)
+library(MASS)
+library(dplyr)
+library(DHARMa)
+library(ggeffects)
+library(performance)
+
+
+# setwd("C:/Users/Dell/")
+# dados <- readRDS("Documents/fisheries.rds")
+
+setwd("/Users/mcruf/Library/CloudStorage/OneDrive-Personal/Arbeit/Lectures_and_Talks/UFRN/Lectures/ECL0072-GLM_GAM/")
+dados <- readRDS("Dados/fisheries.rds")
+
+dados[, c("Ano", "Mes", "Barco")] <- lapply(dados[, c("Ano", "Mes", "Barco")], factor)
+
+
+especies_alvo <- c("Thunnus_albacares", "Thunnus_atlanticus", "Katsuwonus_pelamis", "Prionace_glauca")
+especies_nalvo <- setdiff(colnames(dados)[8:27], especies_alvo)
+
+
+dados <- dados %>%
+rowwise() %>%
+mutate(Bycatch = sum(c_across(all_of(especies_nalvo))),
+BPUE = Bycatch / N_anzol) %>%
+data.frame()
+```
+
+
+A variável **BPUE** foi transformada para garantir positividade e evitar valores nulos:
+
+
+```{r echo=T, message=F, warning=F}
+dados$BPUE2 <- dados$BPUE + (0.1 * median(dados$BPUE))
+dados$BPUE2_log <- log(dados$BPUE2)
+```
+
+---
+
+# Modelagem
+
+
+Foram ajustados dois modelos GLM para comparar o desempenho das distribuições **Gama** e **log-Normal**.
+
+
+```{r echo=T, message=F, warning=F}
+modelo_G <- glm(BPUE2 ~ Mes + Lat*Long, family = Gamma(link = "log"), data = dados)
+modelo_LN <- glm(BPUE2_log ~ Mes + Lat*Long, family = gaussian, data = dados)
+```
+
+---
+
+# Comparação dos Modelos
+
+Os modelos foram avaliados pelo **AIC** e pelo **teste de razão de verossimilhança**:
+
+
+```{r echo=T, message=F, warning=F}
+AIC(modelo_G, modelo_LN)
+lmtest::lrtest(modelo_LN, modelo_G)
+```
+
+
+Ambos apresentaram bom ajuste, mas o modelo **Gama** apresentou melhor desempenho geral (menor AIC e maior logLik).
+
+
+---
+
+
+# Diagnóstico dos Resíduos
+
+
+```{r echo=T, message=F, warning=F}
+resG <- simulateResiduals(modelo_G, n = 1000)
+resLN <- simulateResiduals(modelo_LN, n = 1000)
+
+
+plot(resG)
+plot(resLN)
+```
+
+
+O modelo Gama apresentou resíduos mais homogêneos e distribuição mais próxima da normalidade.
+
+
+---
+
+
+# Resultados do Modelo Gama
+
+
+```{r echo=T, message=F, warning=F}
+summary(modelo_G)
+```
+
+
+O efeito da interação **Latitude × Longitude** foi significativo, indicando padrões espaciais na abundância do bycatch. Também observou-se variação sazonal entre os meses.
+
+
+---
+
+
+# Predições e Visualização
+
+
+```{r echo=T, message=F, warning=F}
+library(ggeffects)
+ggpredict(modelo_G) %>% plot()
+```
+
+
+O gráfico mostra o padrão esperado de BPUE ao longo das covariáveis explicativas.
+
+
+---
+
+
+# Conclusões
+
+
+- O modelo com distribuição **Gama** apresentou melhor ajuste aos dados contínuos de BPUE.
+- Foram observados padrões **sazonais e espaciais** relevantes.
+- A modelagem reforça a importância de considerar a interação espacial na avaliação da fauna acompanhante.
+

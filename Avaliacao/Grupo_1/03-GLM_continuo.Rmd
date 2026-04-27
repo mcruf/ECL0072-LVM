@@ -1,0 +1,206 @@
+---
+title: "GLM para dados contínuos"
+author: "Gabriela Neres, Mariane Melo, Pedro Lopes"
+#date: "`r format (Sys.time(), '%d %B, %Y')`"
+output:
+   html_document: #Salvar como html
+      theme: journal #cerulean,flatly,united,cosmo,simplex
+      number_sections: yes
+      toc: true               # Gera sumário (Table of Contents)
+      toc_float:              # Faz o sumário “flutuar” ao lado
+        collapsed: false      # Não inicia “fechado”
+        smooth_scroll: false  # Desativa rolagem suave (opcional)
+        position: left        # Posiciona o sumário à esquerda
+        width: 250px          # Define a largura do sumário
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+## Introdução
+
+A diversidade beta representa a variação na composição de espécies entre diferentes locais, refletindo como as comunidades mudam ao longo de gradientes ambientais, espaciais ou temporais. Com base nesse conceito, Legendre & Cáceres (2013) propuseram o LCBD (Local Contribution to Beta Diversity), que mede a singularidade ecológica de uma comunidade dentro de uma metacomunidade, o quanto aquela comunidade "contribui" para a diversidade beta. Valores altos de LCBD indicam locais com espécies raras, composições únicas ou baixa riqueza, destacando comunidades importantes para a manutenção da diversidade regional e úteis para definir áreas prioritárias de conservação e restauração.
+
+Os dados utilizados nesta análise são valores de LCBD de comunidades em algumas metacomunidades de rios. As comunidades podem ser de trechos intermitentes (que podem secar) ou perenes (que não secam) destes rios.
+
+Este script tem como objetivo ajustar modelos lineares generalizados (GLM) para o índice **LCBD total** (Local Contribution to Beta Diversity) para testar se fatores como **tipo de rio (perene ou intermitente)**, **ordem do rio** e **metacomunidade** são variáveis que descrevem os valores de LCBD.  
+O objetivo é comparar modelos para dados contínuos (Gamma e Log-normal), verificar a adequação dos modelos e visualizar os resultados.
+
+---
+
+## Carregando pacotes utilizados
+
+```{r packages}
+library(dplyr)       # Manipulação de dados
+library(ggplot2)     # Visualização de dados
+library(glmmTMB)     # Modelos GLM
+library(performance) # Diagnóstico de modelos
+library(DHARMa)      # Resíduos simulados para GLM
+library(ggeffects)   # Predições e gráficos de efeitos
+```
+
+---
+
+## Carregando os dados
+
+```{r echo = FALSE}
+path = "C:/Users/Usuario/Documents/RProjects/lcbd_france"
+```
+
+Leitura do arquivo CSV para obtenção do dataset.
+
+```{r read-data}
+
+dados <- read.csv(paste0(path, "/output/processed_data/dados_modelos.csv"))
+
+# Estrutura do dataframe
+str(dados)
+```
+
+---
+
+## Ajuste das variáveis
+
+Transformamos colunas categóricas em fatores.
+
+```{r factors}
+dados[, c("metacomm_id", "cd_site", "meta_lvl", "type")] <- 
+  lapply(dados[, c("metacomm_id", "cd_site", "meta_lvl", "type")], factor)
+```
+
+---
+
+## Exploração inicial dos dados
+
+Visualizamos a distribuição do LCBD e sua variação com as variáveis que pretendemos investigar.
+
+```{r explore}
+hist(dados$lcbd_total, main = "Distribuição de LCBD Total")
+summary(dados$lcbd_total)
+
+plot(dados$lcbd_total ~ dados$type) #Rio perene vs. intermitente
+plot(dados$lcbd_total ~ dados$rang_corr) #Ordem do rio
+plot(dados$lcbd_total ~ dados$metacomm_id) #metacomunidades
+```
+
+Nesta primeira visualização, o tipo e a ordem do rio não parecem ter muita relação com o LCBD. Porém é possível visualizar diferenças de valores de LCBD entre as metacomunidades. Agora, vamos modelar esses dados.
+
+---
+
+## Ajuste dos modelos GLM
+
+Ajustamos dois modelos:  
+
+- **Distribuição Gamma** com link log  
+
+- **Distribuição Log-normal** com link log  
+
+Estes modelos nos informarão qual distribuição descreve melhor os valores de LCBD.
+
+```{r models}
+model_gamma <- glmmTMB(
+  lcbd_total ~ type + rang_corr + metacomm_id,
+  data = dados,
+  family = Gamma("log")
+)
+
+model_log <- glmmTMB(
+  lcbd_total ~ type + rang_corr + metacomm_id,
+  data = dados,
+  family = lognormal("log")
+)
+```
+
+---
+
+## Comparação e diagnóstico dos modelos
+
+Comparamos os modelos pelo **AIC** (Critério de Informação de Akaike): menor AIC indica melhor ajuste.
+
+```{r compare-models}
+AIC(model_log, model_gamma)
+```
+
+Observamos que o modelo Gamma apresentou menor AIC, logo tem potencial de ser o modelo escolhido. Vamos avaliar outros aspectos...
+
+
+Em seguida, vamos visualizar a relação dos dados observados com os preditos pelos modelos
+```{r compare}
+plot(dados$lcbd_total ~ fitted(model_log))
+plot(dados$lcbd_total ~ fitted(model_gamma))
+```
+
+Não parece haver tanta diferença.
+
+
+Agora utilizamos a função `simulateResiduals()` do pacote **DHARMa** para verificar resíduos simulados e a função `check_model()` do pacote **performance** para checar suposições gerais dos modelos.
+
+```{r diagnostics}
+resG <- simulateResiduals(model_gamma, n = 1000, plot = TRUE) #Modelo Gamma
+resLN <- simulateResiduals(model_log, n = 1000, plot = TRUE) #Modelo lognormal
+
+check_model(model_gamma) #Modelo Gamma
+check_model(model_log) #Modelo lognormal
+```
+
+
+De modo geral, é perceptível que o modelo gamma apresentou um melhor ajuste aos dados, com resíduos mais uniformes e com melhores predições.
+
+
+Vamos avaliar as relações das variáveis:
+```{r summary}
+summary(model_gamma)
+```
+
+Todas parecem ter um efeito significativo para explicar o LCBD Total.
+
+---
+
+## Visualização dos efeitos ajustados
+
+Plotamos as predições com a função `ggpredict()` do pacote **ggeffects**.
+
+```{r predictions}
+ggpredict(model_gamma) %>% plot()
+```
+
+---
+
+## Autocorrelação espacial dos resíduos
+
+Tudo parece explicar muito bem, com um ótimo ajuste. Vamos ver se há autocorrelação espacial nos resíduos do modelo Gamma.
+
+```{r spatial-autocorrelation}
+testSpatialAutocorrelation(resG, x = dados$longitude, y = dados$latitude)
+```
+
+
+O teste de autocorrelação identificou que há autocorrelação espacial. Vamos tentar adicionar as variáveis de latitude e longitude no modelo e ver o que acontece com os resíduos:
+
+```{r}
+model_gamma1 <- glmmTMB(
+  lcbd_total ~ type + rang_corr + metacomm_id + latitude*longitude,
+  data = dados,
+  family = Gamma("log")
+)
+
+
+resG <- simulateResiduals(model_gamma1, n = 1000, plot = TRUE)
+check_model(model_gamma1)
+testSpatialAutocorrelation(resG, x = dados$longitude, y = dados$latitude)
+summary(model_gamma1)
+
+```
+
+Algumas variáveis perderam sua significância, a autocorrelação espacial piorou, latitude e longitude são colineares com as metacomunidades e a retirada da variável de metacomunidade não melhora o modelo. No contexto desses dados, vale tentar a adição das variáveis ambientais, que podem explicar melhor a contribuição local para a diversidade beta do que as variáveis utilizadas, ou utilizar outra distribuição de probabilidade (beta, por exemplo). Caso ainda assim tenha autocorrelação espacial, a utilização de modelos GAM pode descrever melhor os dados. Esse processo mostrou que mesmo um modelo com um ótimo ajuste pode não ser o modelo mais adequado.
+
+---
+
+## Conclusão
+
+Neste script exploramos a modelagem de LCBD com GLMs usando as distribuições Gamma e Log-normal. Concluímos que a distribuição Gamma apresentou melhor ajuste aos dados, porém o modelo ainda apresenta autocorrelação espacial que pode vir a ser resolvida com a adição de outras variáveis, utilização de outro família de distribuição ou a utilização de modelos GAM.
+
+
+---

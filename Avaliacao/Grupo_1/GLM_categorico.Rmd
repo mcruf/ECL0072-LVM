@@ -1,0 +1,147 @@
+---
+title: "GLM para dados categóricos"
+author: "Gabriela Neres, Mariane Melo, Pedro Lopes"
+#date: "`r format (Sys.time(), '%d %B, %Y')`"
+output:
+   html_document:
+      theme: journal
+      number_sections: yes
+      toc: true
+      toc_float:
+        collapsed: false
+        smooth_scroll: false
+        position: left
+        width: 250px
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+## Introdução
+
+Os pinguins passam por diferentes estágios de desenvolvimento ao longo de sua vida, desde filhotes até adultos. Cada estágio apresenta desafios fisiológicos e ecológicos distintos que podem influenciar sua condição corporal e saúde. Aqui utilizaremos **modelos multinomiais** para investigar a relação entre o estágio de vida e a condição de saúde (baixo peso, peso normal, sobrepeso) em pinguins do Arquipélago de Palmer.
+
+---
+
+## Carregando os pacotes utilizados
+```{r packages}
+library(ggplot2) # Visualização dos gráficos
+library(dplyr) # Manipulação dos dados
+library(nnet) # Modelos multinomiais
+library(tidyr) # Organização dos dados
+```
+
+---
+
+## Importação dos dados
+```{r dataset}
+pinguins <- readRDS("Dados/palmerpenguins_extended.rds")
+
+# Visualizar a estrutura dos dados
+str(pinguins)
+```
+
+O dataset contém informações morfométricas e biológicas de pinguins coletadas entre 2021-2025
+
+---
+
+## Análise exploratória
+```{r explore}
+# Ver distribuição das variáveis
+table(pinguins$health_metrics)
+
+table(pinguins$life_stage)
+```
+
+Podemos ver que as variáveis que iremos utilizar são categóricas. As **métricas de saúde** dividem-se em:
+
+- saudável;
+
+- abaixo do peso;
+
+- acima do peso.
+
+Já os **estágios de vida** estão divididos em:
+
+- filhote;
+
+- juvenil;
+
+- adulto.
+
+### Visualização das proporções
+```{r prop}
+ggplot(pinguins, aes(x = life_stage, fill = health_metrics)) +
+  geom_bar() +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Através do gráfico de barras é possível observar a proporção relativa de cada condição de saúde dos pinguins dentro de cada estágio de vida, dessa forma podemos visualizar alguns padrões preliminares, como  qual estágio possui mais dados e maior proporção de sobrepeso ou baixo peso.
+
+---
+
+## Modelo multinomial
+
+Em modelos multinomiais, é preciso definir uma categoria de referência, de forma que todas as comparações serão feitas em relação a esta. Aqui escolhemos **"healthy" (peso normal)** como referência por ser o estado ideal de saúde.
+
+```{r mod}
+# Definir "healthy" como variável referência
+pinguins$health_metrics <- relevel(as.factor(pinguins$health_metrics), ref = "healthy")
+
+# Ajustar modelo
+modelo <- multinom(health_metrics ~ life_stage, data = pinguins)
+```
+
+O modelo `health_metrics ~ life_stage` modela a probabilidade de cada condição de saúde em função do estágio de vida.
+
+---
+
+## Resultados
+
+### Probabilidades preditas
+```{r prob}
+# Cálculo de probabilidades para cada estágio
+novos_dados <- data.frame(life_stage = unique(pinguins$life_stage))
+probabilidades <- predict(modelo, newdata = novos_dados, type = "probs")
+resultados <- cbind(novos_dados, probabilidades)
+
+print(round(resultados[, c("underweight", "healthy", "overweight")] * 100, 1))
+```
+
+As probabilidades preditas mostram a distribuição esperada de condições de saúde para cada estágio de vida, segundo o modelo. Valores foram convertidos em porcentagem para facilitar a interpretação.
+
+### Gráfico final
+
+```{r grap}
+# Preparar dados para o gráfico
+dados_grafico <- resultados %>%
+  pivot_longer(cols = -life_stage, 
+               names_to = "condicao_saude", 
+               values_to = "probabilidade") %>%
+  mutate(
+    condicao_saude = factor(condicao_saude, 
+                           levels = c("underweight", "healthy", "overweight"),
+                           labels = c("Baixo Peso", "Peso Normal", "Sobrepeso")),
+    life_stage = factor(life_stage, 
+                       levels = c("chick", "juvenile", "adult"),
+                       labels = c("Filhote", "Juvenil", "Adulto"))
+  )
+
+# Gráfico de probabilidades
+ggplot(dados_grafico, aes(x = life_stage, y = probabilidade, fill = condicao_saude)) +
+  geom_col(position = "stack") +
+  labs(x = "Estágio de Vida", y = "Probabilidade", fill = "Condição") +
+  theme_minimal()
+```
+
+- **Estágio com maior risco de baixo peso: Juvenil (24,5%).** Isso pode se dar pelo período crítico de transição entre os estágios filhote e adulto.
+
+- **Estágio com maior risco de sobrepeso: Adulto (47%).** Pode se relacionar com a menor atividade e/ou mudanças metabólicas (por exemplo: período reprodutivo).
+
+- **Estágio com melhor condição: Filhote (63.3%).** Os pinguins apresentam cuidado parental e por isso a alimentação dos filhotes é controlada pelos pais, de forma a garantir a sobrevivência da prole.
+
+
+Através disso, é possível ver que o estágio de vida influencia significativamente a condição corporal dos pinguins, com padrões distintos de risco para baixo peso e sobrepeso em diferentes fases do desenvolvimento.

@@ -1,0 +1,234 @@
+##########################
+#			                   #
+#     Dados ecológicos   # 
+#			                   #
+##########################
+
+
+
+A maioria dos dados incluídos nesta pasta foram extraídos de diversas fontes públicas.
+Cada dado descreve uma situação ecológica distinta.
+
+
+Abaixo, uma breve descrição de cada banco de dados
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# palmerpenguins_extended.rds
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Extraído de: https://www.kaggle.com/datasets/samybaladram/palmers-penguin-dataset-extended?resource=download
+Também disponível via pacote do r: https://allisonhorst.github.io/palmerpenguins/ (porém com menos anos de amostragem)
+
+Os dados foram coletados no Arquipélago Palmer, próximo à Antártida, ao longo dos anos 2021-2025.
+Esses dados fornecem informações sobre três espécies de pinguins (pinguins-de-adélia, pinguins-gentoo e 
+pinguins-de-barbicha), e inclui variáveis biológicas, como dimensões do bico e massa corporal.
+
+Além disso, o banco de dados conta com outras variáveis, como tipo de dieta, ano de observação,
+estágio de vida e indicadores de saúde. Esse conjunto de informação permitem compreender de forma mais detalhada
+a biologia e ecologia de pinguins.
+
+
+> Informações presentes:
+
+- species: espécie de pinguim
+- island: ilha em que foi realizada a amostragem
+- bill_length_mm: comprimento do bico (mm)
+- bill_depth_mm: altura do bico (mm)
+- flipper_length_mm: comprimento da asa (mm)
+- body_mass_g: massa corporal (g)
+- sex: sexo do pinguim amostrado
+- diet: tipo de dieta
+- life_stage: estágio de desenvolvimento
+- health_metrics: condição de saúde em relação ao peso
+- year: ano da amostragem
+
+
+###########################################################################
+
+#~~~~~~~~~~~~
+# koalas.rds
+#~~~~~~~~~~~~
+
+Dado adquirido pelo livro do Zuur (2009):
+https://www.highstat.com/index.php?view=article&id=17&catid=18
+
+Os coalas vem sofrendo declínios na sua abundância e distribuição devido 
+à desflorestação e degradação das florestas de eucalipto, juntamente com a caça histórica, 
+doenças, incêndios florestais, seca e urbanização. Mais de 50% das florestas originais de eucalipto foram desmatadas 
+para agricultura e desenvolvimento urbano. Os coalas estão, portanto, ameaçados pela perda e fragmentação de seu habitat 
+e por ameaças associadas à urbanização, como carros e cães domésticos. 
+Para permitir o desenvolvimento de estratégias de gestão bem-sucedidas, é importante que os planejadores de conservação 
+sejam capazes de quantificar o impacto dessas ameaças na distribuição de coalas na área.
+
+Os dados apresentados são baseados em pesquisas realizadas para
+determinar a presença ou ausência de coalas em 300 locais em Noosa (Austrália).
+Em cada estação de amostragem, foi registrada a porcentagem de árvores que eram espécies
+primárias e secundárias (preferência alimentar). A distribuição do habitat dos coalas 
+# (classificado em habitat altamente adequado, adequado, marginal e inadequado) e a localização 
+# de estradas pavimentadas foram mapeadas em um sistema de informações geográficas.
+
+
+> Informações presentes:
+
+- site: Estação de amostragem
+- subsite: Estação de subamostragem (medidas repetidas)
+- easting: coordenadas leste-oeste (UTM)
+- northing: coordenadas norte-sul (UTM)
+- presence: presência/ausência de coala
+- pprim_ssite: porcentagem de árvores primárias
+- psec_ssite: porcentagem de árvores secundárias
+- phss_(1,2.5,5)km: porcentagem de hábitat altamente adequado dentro de um raio de 1, 2.5 e 5 kms (habitats altamente adequado + adequado).
+- pm_(1,2.5,5)km: porcentagem de hábitat marginal dentro de um raio de 1, 2.5 e 5 kms.
+- pdens_(1,2.5,5)km: densidade de fragmentação (no. fragmentos/ha) dentro de um raio de 1, 2.5 e 5 kms (habitats altamente adequado + adequado + marginal).
+- edens_(1,2.5,5)km: densidade de efeito de borda (comprimento de borda/ha) dentro de um raio de 1, 2.5 e 5 kms (habitats altamente adequado + adequado + marginal).
+- rdens_(1,2.5,5)km: densidade de ruas pavimentadas (comprimento de estrada/ha) dentro de um raio de 1, 2.5 e 5 kms (habitats altamente adequado + adequado + marginal).
+
+
+###########################################################################
+
+#~~~~~~~~~~~~~~~
+# fisheries.rds
+#~~~~~~~~~~~~~~~
+
+Banco de dados simulado que descreve uma típica pescaria de atum no Oceano Atlântico Sul.  
+Assim como outros métodos de pescaira, a pesca de atum é caracterizada pela captura incidental 
+de espécies não-alvo (bycatch), que variam em abundância e distribuição.  
+
+A distribuição espacial das espécies (alvo e não-alvo) é modulada por fatores oceanográficos, espaciais e sazonais.  
+Além disso, por se tratar de um dado enviesado (fruto da atividade pesqueira), é importante contabilizar os fatores pesqueiros
+na avaliação da abundância.
+
+O conjunto de informações permite explorar uma gama de questões relacionadas à dinâmica espaço-temporal das (i) espécies alvos
+(ii) espécies não-alvos (bycatch), e assim subsidiar medidas de manejo pesqueiro e conservação.
+
+
+> Informações presentes:
+
+- Ano: ano da pescaria
+- Mes: mês da pescaria
+- N_anzol: número de anzóis utilizados (medida de esforço pesqueiro)
+- Barco: identidade do navio pesqueiro
+- Pais: país de origem do navio pesqueiro
+- Long: longitude da pescaria (Graus)
+- Lat: latitude da pescaria (Graus)
+- Thunnus_albacares - Lamna_nasus: abundância das espécies pescadas em cada pescaria
+- sst: temperatura do mar
+- sal: salinidade do mar
+- chla: concentração de clorofila (produtividade)
+- depth: profundidade do leito marinho em que ocorreu a pescaria
+- dlm: camada de mistura de massas de água
+- il: índice lunar
+
+
+@Espécies alvo da pesca: Thunnus_albacares, Thunnus_atlanticus, Katsuwonus_pelamis, Prionace_glauca
+@Espécies não-alvo da pesca: demais espécies
+
+
+###########################################################################
+
+#~~~~~~~~~~~~~~~~~~~~~~
+# benthos_exposure.rds
+#~~~~~~~~~~~~~~~~~~~~~~
+
+Dado adquirido pelo livro do Zuur (2009):
+https://www.highstat.com/index.php?view=article&id=17&catid=18 (Nome original do banco de dados: RIKZ)
+
+Dados bentônicos marinhos foram coletados em 9 áreas intermareais ao longo da 
+costa holandesa. Os dados foram coletados pelo instituto holandês RIKZ no verão de 2002. 
+Em cada área de inter-maré (denominada "praia"), foram coletadas cinco amostras,
+e a macrofauna bentônica foram coletadas junstas com variáveis abióticas.
+
+A questão subjacente a esses dados é se existe uma relação entre riqueza de espécies, 
+exposição e NAP. A exposição é um índice composto pelos seguintes elementos: ação das ondas, 
+comprimento da zona de arrebentação, declive, tamanho dos grãos e profundidade da camada 
+anaeróbica. Já NAP representa a altura de uma estação de amostragem em relação aonível médio da maré.
+
+
+- Sample: número da amostra
+- Richness: riqueza de macrofauna bentônica
+- Exposure: índice de exposição (8, 10, 11)
+- NAP: altura da estação de amostragem em relação à maré 
+- Beach: Praia em que foi feito a amostragem
+
+
+
+##############
+
+#~~~~~~~~~~~~~~~~~
+# salamanders.rds
+#~~~~~~~~~~~~~~~~~
+Dado extraído do pacote glmmTMB - data("Salamanders").
+Cedido originalmente por Price et al. (2015, 2016).
+
+- Price SJ, Muncy BL, Bonner SJ, Drayer AN, Barton CD (2016) Effects of mountaintop removal mining and valley filling on the occupancy and abundance of stream salamanders. Journal of Applied Ecology 53 459–468. doi:10.1111/1365-2664.12585
+- Price SJ, Muncy BL, Bonner SJ, Drayer AN, Barton CD (2015) Data from: Effects of mountaintop removal mining and valley filling on the occupancy and abundance of stream salamanders. Dryad Digital Repository. doi:10.5061/dryad.5m8f6
+
+O dado reúne informações sobre a contagem de diversas espécies de salamandras, com amostragens realizadas ao longo de 23 rios.
+Algumas espécies possuem estágio larval e adulto.
+
+> Informações incluídas:
+- site: Local de amostragem 
+- mined: Região que sofreu ou não mineração
+- cover: No. de objetos cobrindo a região (pedras, troncos de madeira, etc.; padronizado)
+- sample: No. da amostra (4 réplicas dentro de cada 'site')
+- DOP: Dias transcorridos desde a última precipitação (padronizado)
+- Wtemp: Temperatura da água (padronizada)
+- DOY: Dia do ano (padronizado)
+
+
+IMPORTANTE: todas as covariáveis foram padronizadas (z-score)
+
+
+###########################################################################
+
+#~~~~~~~~~~~~~~~~~~
+# mammal_sleep.rds
+#~~~~~~~~~~~~~~~~~~
+
+Dado extraído do pacote 'faraway', que retirou as informações do trabalho publicado por Allison & Cicchetti (1976).
+
+- Allison, T. and Cicchetti, D.V. (1976). Sleep in mammals: ecological and constitutional correlates. Science, 194(4266), pp.732-734. doi: 10.1126/science.982039 
+
+Todas as espécies de mamíferos passam algum tempo dormindo, com algumas espécies passando grande parte de suas vidas nesse estado.
+Podemos supor que o sono desempenha alguma função biológica (ainda desconhecida), mas, se for o caso, por que as necessidades de sono 
+variam tanto de espécie para espécie? 
+
+Esse dado, reúne informações sobre hábitos de sono e outras características de espécies adaptadas a uma ampla variedade de nichos ecológicos.
+
+> Informações presentes:
+- mammals: os diferentes grupos de mamíferos (39 espécies; 13 ordens)
+- body: massa corporal (g)
+- brain: massa cerebral (g)
+- nondream: número de horas em estado 'não-sonhando'
+- dream: número de horas em estado 'sonhando'
+- sleep: número total de horas dormidas (nondream + dream)
+- lifespan: tempo de vida máximo (anos)
+- gestation: tempo de gestação (dias)
+- predation: índice de predação: 1 =  mínimo (menos provável de ser predado) a 5 = máximo (mais provável de ser predado)
+- exposure: índice de exposição ao sono: 1 = menos exposto (o animal dorme em uma toca bem protegida) 5 = mais exposto
+- danger: índice de perigo: 1 = menor perigo (de outros animais) 5 = maior perigo (de outros animais) 
+
+
+###########################################################################
+
+#~~~~~~~~~~~~~~~~~~~~~
+# plant_herbivore.rds
+#~~~~~~~~~~~~~~~~~~~~~
+
+Dados disponibilizados por Moreno et al. (2019) e baixados em:
+https://ddd.uab.cat/record/194390
+
+- Moreno et al. (2019). What does a zero mean? Understanding false, random and structural zeros in ecology. https://doi.org/10.1111/2041-210X.13185
+
+> Informações presentes:
+
+- Subject: número que identifica cada planta individual
+- Location: fator que identifica os locais de coleta	
+- Species: fator que identifica as espécies de plantas
+- Damaged: número de cabeças predadas em uma planta individual
+- Dissected: número de cabeças dissecadas em uma planta individual
+- Total_heads: número total de cabeças em uma planta individual
+

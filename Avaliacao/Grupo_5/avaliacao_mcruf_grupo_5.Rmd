@@ -1,0 +1,272 @@
+---
+title: "Avaliação do relatório"
+output: pdf_document
+---
+
+
+
+- **Grupo:** Layla Paiva de Almeida
+
+- **Capítulos entregues:** 4/6
+
+- **Relatório entregue no prazo:** Não
+
+- **Nota:** B
+
+
+------------------------------------------------
+
+
+# Comentário geral
+
+O relatório apresenta uma excelente consistência na abordagem e apresentação de cada estudo de caso, mantendo um alto grau de clareza e organização na estrutura ao longo dos quatro primeiros capítulos. É perceptível o cuidado em manter clareza e uniformidade na apresentação ao longo de todo o texto, o que torna a leitura fluida e agradável. Um destaque positivo é a forma como as hipóteses e os objetivos específicos foram sempre expostos de maneira muito clara dentro de cada capítulo, orientando bem o leitor. Observam-se, contudo, alguns pontos que requerem revisão e aprofundamento, como a necessidade de refinar algumas abordagens metodológicas (e.g., multicolinearidade, uso do offset, modelagem Log-Normal) e a interpretação mais aprofundada dos resultados estatísticos sob a ótica da função de ligação (e.g., logit, log). Por fim, o relatório encontra-se incompleto devido à ausência dos Capítulos 5 (Distribuições Complementares) e 6 (GAM).
+
+
+\vline
+
+# Comentários específicos
+
+## Cap. 1: Dados binários
+
+- Seção 1:
+  - Preciosismo: o objetivo de "*...encontrar a relação entre uma variável dependente (Y) e uma ou mais variáveis independentes (X)*" não é uma propriedade específica de GLMs, e sim de modelos correlativistas em geral (LM, GAM, GL(A)MM, SEM, etc.).
+
+
+- Seção 3:
+  - Gostei da forma que você expôs seu estudo de caso, principlamente por deixar bem destacado o que é a sua variável resposta e suas variáveis preditoras.
+
+
+- Seção 4:
+  - Legal que você percebeu que teria que alterar a primeira linha do banco de dados! 
+    - Também achei legal que soube identificar corretamente quais colunas são numéricas e qual é fator.
+  - Preciosismo: considere corrigir *converção* para *conversão*.
+
+
+- Seção 4.1:
+  - Você está corretíssima em avaliar, inicialmente, a multicolinearidade das suas covariáveis. No entanto, a abordagem que você adotou (rodar um GLM) não é totalmente adequada e precisa ser revisado:
+    - Idealmente, você deveria fazer uma análise de multicolinearidade para visualizar as correlações cruzadas entre todas as suas covariávies. Se a correlação entre duas covariáveis for > 0.7 e, escolhe-se apenas a covariável com maior intuição biológica/ecológica para inserir no modelo. Daria, também, para você fazer uma análise de VIF (Variance Inflation Factor).
+      - **Cuidado!** O uso de termos como *muito significativo* ou *mais significativo* deve ser evitado quando você explora as relações das suas covariáveis. Conforme comentado em sala de aula, o número de asteriscos e o valor do p-valor <u> não medem o grau de significância </u> biológica e muito menos a força da relação; apenas diz se o coeficiente associado à variável é estatisticamente diferente de zero — ou seja, se rejeitamos a hipótese nula de ausência de efeito. Em tese, não comprovamos efetivamente a nossa hipótese (presença de efeito da variável); apenas rejeitamos ou deixamos de rejeitar a hipótese nula. Quando p-valor < 0.05, rejeitamos a hipótese nula e podemos afirmar que há uma relação entre a covariável a variável resposta. Repare, contudo, que não temos como atribuir o sentido de 'força' de relação (a relação é muito forte, ou muito fraca, ...).
+  - Reveja as suas figuras desta seção, porque você não usou o tipo de gráfico mais adequado para explorar a relação de uma *variável binária* com uma *variável numérica*. Quando sua covariável é numérica, você explora (idealmente) via a seguinte função:
+
+```{r echo=F}
+library(ggplot2)
+dados <- readRDS("/Users/mcruf/Library/CloudStorage/OneDrive-Personal/Arbeit/Lectures_and_Talks/UFRN/Lectures/ECL0072-GLM_GAM/Dados/koalas.rds")
+
+colnames(dados) <- dados[1, ] # Definindo a primeira linha como o título de cada coluna
+
+dados <- dados[-1, ] # Retirando a primeira linha repetida
+
+dados <- dados[ ,-c(1:4)] # Retirando as colunas que não serão usadas para análise, pois são apenas identificação de cada site
+
+dados[ , 2:18] <- lapply(dados[ , 2:18], as.numeric) # Convertendo as colunas para numérico
+
+dados$presence <- as.factor(dados$presence) # Convertendo o dado de presença e ausencia para ser lida como um fator
+
+```
+
+
+
+```{r echo=T, eval=T, out.width ="50%", fig.align = 'center'}
+
+ggplot(dados, aes(x = pm_1km, y = presence)) + #substituir x pelas outras covariáveis
+  geom_jitter(height = 0.05, width = 0, alpha = 0.3) +
+  theme_bw()
+
+```
+
+  - Quando a covariável for um fator, aí você usaria geom_bar conforme:
+
+```{r echo=T, eval=F}
+ggplot(dados, aes(x = VARIAVEL_CATEGORICA, y = presence)) +
+  geom_bar(position = "fill") +
+
+```
+  
+  - Parabéns pela clareza na apresentação de suas hipóteses e objetivos (específicos).
+
+
+- Seção 5:
+  - Muito bem estruturada e conduzida!
+  - Algumas observações pontuais:
+    - Você avalia um modelo (`mod4`) que insere duas covariáveis que, na prática, são redundantes: `edens_2.5km` e `edens_5km`. Isso não faz muito sentido e precisaria ser revisto. Quando computo a correlação entre essas duas covariáveis, repare como o valor é grande -> isso é mais um indício que o método que você adotou para selecionar as variáveis não foi adequado.
+
+```{r echo=T, eval=T, out.width ="70%", fig.align = 'center'}
+plot(dados$edens_2.5km~dados$edens_5km)
+
+cor(dados$edens_2.5km,dados$edens_5km)
+```
+
+  - Você comenta: "*...todas as variáveis apresentaram diferênça significativa em relação á probabilidade de presença da espécie.*"
+    - Repare que a covariável `edens_2.5km` não foi apontada como significativa no seu modelo.
+    - Sempre que for apresentar seus resultados, é importante guiar o leitor ao longo da leitura. Por exemplo, no último parágrafo você fala: "*As porcentagens de áreas primárias, floresta marginal e densidade de borda na escala de 5km foram relacionadas positivamente à presença de coalas na Austrália. Já a Porcentagem de densidade do efeito de borda na escala 2.5km foi negativamente relacionada à presença de coalas.*"
+      - Repare que você destacou apenas se as relações foram positivas ou negativas; Idealmente, você deveria expor de forma mais direta o que essas relações significam. Por exemplo:
+        - *Já a Porcentagem de densidade do efeito de borda na escala 2.5km foi negativamente relacionada à presença de coalas, indicando, portanto, que os coalas ocorrem mais em áreas mais preservadas (menor efeito de borda).*
+  - Por fim, faltou você destacar a escala em que os coeficientes estão expressos (logit) e, consequentemente, como se dá a sua interpretação. Lembre-se que em modelos binomiais, os resultados estão expressos na forma de `log(razão de chances)`!
+    
+
+\vline
+
+## Cap. 2: Dados discretos
+
+- Seção 1:
+  - Preciosismo: "*...são valores que não podem ser quebrados, pois representam unidades DISCRETAS*"
+  - Preciosismo 2: Acho que na sua introdução geral caberia você destacar as distribuições de probabilidade que podemos recorrer em casos de variáveis discretas (Poisson e Binomial Negativa), assim como destacar no que elas diferem. Acho que introduzir isso logo no início deixa mais claro para um leitor quais distribuições são adequadas - inclusive para você, quando voltar a consultar seu relatório no futuro.
+
+  
+- Seção 3:
+  - Muito legal que você explora um pouco a estrutura geral do banco de dados, identificando os tipos de variáveis e o que elas dizem.
+
+- Seção 3.1:
+  - Gostei muito de ver como você explorou os dados. Exponho algumas sugestões para você considerar no futuro:
+    - Sempre que for avaliar a relação da sua variável resposta (numérica) com uma covariável que é fator, use um `boxplot` para visualizar melhor as diferenças. Veja como melhora a interpretação do seu segundo gráfico:
+
+```{r echo=F}
+library(ggplot2)
+dados <- readRDS("/Users/mcruf/Library/CloudStorage/OneDrive-Personal/Arbeit/Lectures_and_Talks/UFRN/Lectures/ECL0072-GLM_GAM/Dados/benthos_exposure.rds")
+```
+
+```{r echo=T, out.width ="50%", fig.align = 'center'}
+dados$Exposure <- as.factor(dados$Exposure)
+
+ggplot(dados, aes(Exposure, Richness)) +
+  geom_boxplot(alpha = 0.4) +
+  theme_minimal()
+
+```
+\vline
+
+  - Sua figura aonde você explora a relação conjunta entre `Richness`, `Exposure` e `Sample` não faz sentido. A coluna `Sample` identifica apenas a amostragem, i.e., é o ID da amostragem. Faria sentido você avaliar em função da praia em que foram feitas as coletas. Veja:
+  
+```{r echo=T, out.width ="50%", fig.align = 'center'}
+dados$Beach <- as.factor(dados$Beach)
+ggplot(dados, aes(x = Beach, y = Richness, fill = Exposure)) +
+  geom_boxplot() +
+  facet_wrap(Exposure ~ .) +
+  theme_minimal()
+
+```
+
+  - Senti falta de você explorar um pouco, em forma textual, o que  observou exatamente em cada gráfico que você expôs.
+
+
+- Seção 4:
+  - Ótima exposição das suas hipóteses e objetivos.
+
+
+- Seção 5: 
+  - Acho muito bom você ter tentando explorar a questão do `offset`, principalmente porque é algo que deve ser considerado em modelos de contagem quando o esforço amostral não foi mantido constante.
+    - Entretanto, a forma que você usou o `offset` não está correta, porque a *praia* não é sinônimo de esforço amostral - inclusive, todas as praias foram amostradas 5 veses (vide: `table(dados$Beach)`).
+      - Infelizmente, no banco de dados em questão não temos como saber como foi o esforço amostral dos autores. Por exemplo, não sabemos se usaram transectos/quadrates, e se o método de amostragem foi mantido igual ao longo do experimento. Em função disso, no exemplo em questão, precisamos forçadamente assumir que o esforço foi mantido constante. Seria interessante você deixar isso exposto no seu relatório.
+  - Obs.: quando você avalia a relação `head(cbind(mod_nb$fitted.values, mod_nb$linear.predictors))`, você está comparando a mesma coisa, sendo que *fitted.values* é referente aos valores preditos na escala natura, e *linear.predictors* faz referência aos valores na escala da função de ligação (log).
+    - Aqui, você tem que comparar os valores *observados* com os valores preditos (sejam estes na escala natural o da função de ligação), veja:
+
+
+```{r echo=F, eval=T}
+library(MASS)
+mod_nb <- glm.nb(Richness ~ Exposure + NAP, data = dados)
+```    
+
+```{r echo=T, eval=T, out.width ="50%", fig.align = 'center'}
+plot(dados$Richness ~ mod_nb$fitted.values)
+```
+
+  - Você comenta: "*Ambas as variáveis se mostraram significativas.*"
+    - Você não expôs o sumário estatístico do `mod_nb`, de modo que o leitor não tem como verificar a sua afirmação.
+  - Assim como no capítulo anterior, faltou você explorar um pouco mais os resultados sob a ótica do que os valores estão lhe dizendo exatamente (e em que escala são expressos). 
+    - Além disso, como uma das suas covariáveis é fator (`Exposure`), é muito importante que você destaque que o primeiro nível do fator é absorvido no intercepto; logo, tudo é comparado ao nível de referência - no seu caso, `Exposure8`. Reveja isso!
+  - Preciosismo: A sua última frase está vaga; Você fala que "*...as variáveis apresentam diferenças*". Diferenças no que?
+
+
+## Cap. 3: Dados contínuos
+
+- Seção 1: 
+  - Caberia você comentar sobre as distribuições de probabilidade que se adequam para esses tipos de dados (e.g., log-Normal e Gama)
+    - Isso inclui comentar um pouco sobre a estrutura de cada uma. Por exemplo, essas distribuições não admitem o valor 0 na variável resposta.
+
+
+- Seção 3:
+  - Considere corrigir sua frase para *A pergunta da análise será: Os fatores oceanográficos influenciam na captura das espécies alvo?*
+    - Você incialmente fala em fatores espaço-temporais e pesqueiros, mas não aborda isso na sua análise exploratória e nem nos modelos estatísticos.
+
+- Seção 3.1:
+  - Preciosismo: No seu código você usa o termo 'BPUE', mas esse termo é utilizado quando se avalia as capturas padronizadas do *bycatch* - i.e., a captura das espécies não-alvo da pesca! O mais correto seria você usar o termo 'Catch' e 'CPUE' para representar a captura total e a captura padronizada por unidade de esforço, respectivamente.
+  - Sugestão: quando for fazer gráficos, preste atenção no que você define como variável 'x' e 'y'. Como CPUE é sua variável resposta, convém especificar ela sempre como 'y' nos seus gráficos.
+    - Inclusive a interpretação do(s) gráfico(s) fica mais intuitiva.
+  - Muito bom você ter avaliado a relação da CPUE com todas as covariáveis que você citou inicalmente. Senti falta, contudo, de você explorar o que conseguiu observar nesses gráficos. Além disso, devo reforcar a necessidade de você avaliar sempre (!) a questão de multicolinearidade. Lembre-se disso em trabalhos futuros, tá?
+  - Hmh, há alguns termos nos seus objetivos específicos que precisam ser polidos.
+    - Repare que você formula suas frases de um jeito que parece que suas covariáveis foram categorizadas (ambientes mais/menos quentes, salinos, profundos, etc.) - logo, em um contexto de ANOVA. Na verdade, você está avaliando se as capturas (CPUE) aumentam ou diminuem ao longo de um gradiente de temperatura, salinidade, etc. 
+
+
+- Seção 4:
+  - Muito legal ver que você verificou se há presença de NA & NaNs na sua variável resposta. Considere adotar isso como prática rotineira sempre que for avaliar qualquer banco de dados - inclusive, deveria ser estendido para as covariáveis também. 
+    - Dica: a função `summary(dados)` já lhe retorna se certas colunas possuem ou não NAs e NaNs.
+  - Seria interessante você destacar o motivo pelo qual a variável resposta não pode conter o valor 0. 
+  - **Eita!** Sua abordagem de modelagem via modelo log-Normal está equivocada. Da forma que você está apresentando (i.e., transformando apenas a variável resposta no log), o modelo ainda assume a premissa de *homocedasticidade*, porque você está essencialmente usando uma distribuição 'Normal', a qual assume uma média que é independente da variância. Na distribuição log-Normal, no entanto, a média depende da variância (e vice-versa), e são expressos na escala log. Existe uma especificação matemática específica para a distribuição log-Normal. Reveja esta seção!
+    - O correto teria sido você usar a distribuição `lognormal` dentro da função `glmmTMB()` - vide script da aula prática!
+  - **Eita2!** Também está equivocado o uso do teste de razão de verossimilhança (LRT), por dois motivos principais:
+    - O teste só pode ser realizado quando um modelo está aninhado no outro.
+    - Quando você transforma sua variável resposta em log (para o modelo log-Normal que você testou), isso immplica que você modificou a natrueza do seus dados. Portanto, não pode comparar. Neste caso, a única métrica que você pode usar para comparar, é o AIC e os ajustes gráficos dos resíduos (se necessário).
+  - Você usa o termo: "*Porém, não apresentou boa homogeniedade de variância.*"
+    - É mais correto você reformular no sentido se o pressuposto de homocedasticidade foi violado ou não.
+  - O que você interpreta do sumário estatístico do modelo que você escolheu? Em que escala estão os coeficientes e como eles são interpretados? Faltou você destacar isso nos seus resultados...
+  - Repito meu comentário do capítulo anterior sobre quando você compara os valores de `fitted.values` e `linear.predictors`.
+  - **Eita3!** Você comenta: "*Os resultados da modelagem para a variável CPUE2 indicam influências significativas de variáveis ambientais*"
+    - Preste atenção: o sumário (numérico) do seu modelo não indica nenhuma covariável como estatísticamente significativa. Você está interpretando seus resultados apenas visualmente, mas os gráficos que você expõe não te dizem se determinada variável foi estatisticamente significativa, ou não. Reveja isso.
+  - As demais interpretações estão corretas, exceto quando expõe a relação da CPUE com profundidade. 
+    - Como os valores de profunidade estão expressos em valores negativos (quanto mais negativo, maior a profunidade), a interpretação correta seria: "*A captura por unidade de esforço é maior em águas mais rasas*."
+      - Seu gráfico também mostra isso.
+  - Preciosismo: É mais correto você expressar sua última frase sob o ponto de vista da influência das variáveis na variabilidade da sua CPUE; e não se a CPUE difere ou não entre as diferentes variáveis.
+ 
+\vline
+
+
+## Cap. 4: Dados categóricos
+
+
+- Seção 2:
+  - Preciosismo: reformule sua frase; está misturando contexto dos dados dos pinguins com o contexto dos dados da pesca. 
+
+
+- Seção 3:
+  - Opa! Corrija a seguinte frase "*Além disso, as outras variáveis ambientais também podem ter afetado as capturas:*"
+    - Não faz parte do contexto desse seu capítulo.
+  - Nos seus objetivos específicos, considere reformulá-los conforme sugestão abaixo:
+    - "*Permitirá avaliar se a incidência de sobrepeso difere entre as espécies/sexos/estágios de vida*"
+      - Detalhe: assumindo que você está focando na questão de sobrepeso. Se eu nível de referência for outro, por exemplo, 'abaixo do peso', então você teria que adequar as frase de acordo com isso.
+    
+
+- Seção 4:
+  - A sua abordagem metodológica em testar modelos separados para cada covariável não está errada. No entanto, você está em um caso em que suas 3 hipóteses poderiam ser testadas em um único modelo no qual constariam as suas três covariáveis (espécie, sexo e dieta).
+    - Isso seria o equivalente de uma ANOVA trifatorial (três fatores).
+  - **Cuidado!** Há um erro no seu seu script referente aos seus três modelos, o qual se propagou na suas figuras aonde expressa os resultados sob a perspectiva de 'razão de chances'; consequentemente, também respaldou na interpretação dos resultados. Para os três modelos, você computa:
+  
+```{r echo=T, eval=F}
+
+### Excluindo os interceptos (para melhor visualização)
+results <- results[-c(1:3),]
+```
+
+Repare que você considera como se todos os seus resultados tivessem 3 interceptos. Na verdade, essa relação muda a depender de quantos níveis tem em cada fator. 
+  
+  - Por exemplo, para o seu `modelo1`, só temos 2 interceptos (3 espécies, sendo 1 absorvida no intercepto). O mesmo se aplica para a variável `life_stage` no deu `modelo2`.
+  - Já para a variável 'sex' (`modelo3`), só teremos 1 intercepto (2 sexos, sendo 1 absorvido no intercepto).
+    - Isso precisa ser corrigido nos seus três modelos, e os resultados reinterpretados!
+
+  - Quando for expor os resultados do modelo multionomial, lembre-se que tudo é comparado ao nível de referência da própria variável resposta (neste caso, *healthy*) e da covariável testa (neste caso, *Adelie*). 
+
+
+\vline
+
+
+
+## Cap. 5: Distribuições complementares
+
+- Faltou você incluir o capítulo sobre as distribuições complementares que foram apresentadas na 7a aula;
+  - Aqui poderia ter escolhido uma das três distribuições que dei em aula (beta, zero-infalcionado e tweedie).
+
+\vline
+
+
+## Cap. 6: GAM
+
+- Faltou você explorar o capítulo sobre GAMs.

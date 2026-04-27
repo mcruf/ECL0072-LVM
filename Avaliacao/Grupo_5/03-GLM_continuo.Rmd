@@ -1,0 +1,242 @@
+---
+title: "GLM para dados contínuos"
+author: "Layla Paiva"
+#date: "`r format (Sys.time(), '%d %B, %Y')`"
+output:
+   html_document: #Salvar como html
+      theme: journal #cerulean,flatly,united,cosmo,simplex
+      number_sections: yes
+      toc: true               # Gera sumário (Table of Contents)
+      toc_float:              # Faz o sumário “flutuar” ao lado
+        collapsed: false      # Não inicia “fechado”
+        smooth_scroll: false  # Desativa rolagem suave (opcional)
+        position: left        # Posiciona o sumário à esquerda
+        width: 250px          # Define a largura do sumário
+---
+
+## Modelo Linear Generalizado para Dados Contínuos
+
+Dados contínuos são aqueles que se apresentam em números fracionários. São valores que podem ser quebrados e apresentar decimais, pois representam medidas, como por exemplo altura, peso, etc.
+
+## Na prática
+
+Utilizando os dados disponíveis na pasta `/Dados` da disciplina, escolhi a base de dados `/fisheries.rds`, referente a um estudo sobre a pesca de atum e a coleta incidente de outras espécies não alvo.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# 1. Importando o banco de dados
+dados <- readRDS("~/Disciplinas do Mestrado/ECL0072 - MODELOS LINEARES GENERALIZADOS E ADITIVOS PARA DADOS ECOLÓGICOS/ECL0072-GLM_GAM-gh-pages/ECL0072-GLM_GAM-gh-pages/Dados/fisheries.rds")
+
+#Pacotes que serão utilizados
+library(ggplot2)
+library(MASS) #seleção automática de modelos
+library(dplyr)
+library(DHARMa)
+library(ggeffects) #para plotar os resultados
+library(performance)
+```
+
+## Análise Exploratória
+
+Entendendo os dados e como estes se dispõem no arquivo.
+
+```{r echo=TRUE}
+# Análise Exploratória
+str(dados)
+
+summary(dados)
+```
+
+O arquivo possui 476 linhas de dados e 33 variáveis, das quais, as 7 primeiras colunas são referentes à identificação de cada local de amostragem e coleta, seguidas de 20 espécies que foram coletadas, finalizando com 6 colunas com fatores ambientais.
+
+A pergunta da análise será: Os fatores oceanográficos, espaço-temporais e pesqueiros influenciam na captura das espécies alvo?
+
+Nesse sentido, a variável dependente (Y) será uma nova medida, chamada captura-por-unidade-de-esforço (CPUE), calculada a partir do número total de peixes alvo capturados por amostra.
+
+Já as variáveis independentes (X) serão:
+  - sst: temperatura do mar
+  - sal: salinidade do mar
+  - depth: profundidade do leito marinho em que ocorreu a pescaria
+  - il: índice lunar
+
+###Convertendo a natureza das variáveis
+
+Como as análises serão feitas com variáveis numéricas, não é necessário conversão.
+
+### Entendendo as variáveis
+
+Selecionando as espécies
+```{r echo=TRUE}
+especies_alvo <- c("Thunnus_albacares",
+                   "Thunnus_atlanticus",
+                   "Katsuwonus_pelamis",
+                   "Prionace_glauca")
+```
+
+Calculando o CPUE:
+
+```{r echo=TRUE}
+library(dplyr)
+#Número de peixes alvo por N de anzol
+dados <- dados %>%
+         rowwise() %>%  # analisa linha por linha
+         mutate(Bycatch = sum(c_across(all_of(especies_alvo))),
+                CPUE = Bycatch/N_anzol) %>%
+         data.frame()
+
+```
+
+Vizualizando as possíveis relações:
+
+É possível que as diferentes profundidades em que ocorreu a pesca e o índice lunar possa ter afetado as capturas.
+```{r echo=TRUE}
+
+library(ggplot2)
+#Relação entre captura por unidade de esforço e profundidade de coleta
+ggplot(dados, aes(CPUE, depth)) +
+  geom_point(alpha = 0.4) +
+  theme_minimal()
+
+#Relação entre captura por unidade de esforço e índice lunar
+ggplot(dados, aes(CPUE, il)) +
+  geom_point(alpha = 0.4) +
+  theme_minimal()
+```
+
+Além disso, as outras variáveis ambientais também podem ter afetado as capturas:
+
+```{r echo=TRUE}
+#Relação entre captura por unidade de esforço e temperatura do mar
+ggplot(dados, aes(CPUE, sst)) +
+  geom_point(alpha = 0.4) +
+  theme_minimal()
+
+#Relação entre captura por unidade de esforço e salinidade do mar
+ggplot(dados, aes(CPUE, sal)) +
+  geom_point(alpha = 0.4) +
+  theme_minimal()
+```
+## Hipóteses
+
+Com as análises iniciais, podemos formar nossas hipóteses!
+
+-   $H_1:$ A temperatura do mar influencia a captura por unidade de esforço
+-   $H_2:$ A profundidade de coleta do mar influencia a captura por unidade de esforço
+
+-   $H_3:$ O índice lunar influencia a captura por unidade de esforço
+-   $H_4:$ A salinidade do mar influencia a captura por unidade de esforço
+
+##Objetivos
+
+Avaliar como fatores ambientais marinhos influenciam a captura por unidade de esforço amostral na pesca de atum.
+
+###Objetivos Específicos
+
+(i) **Avaliar o efeito da temperatura do mar na captura dos peixes alvo**
+    -   Permitirá determinar se o número de peixes alvo capturados difere significativamente entre ambientes mais ou menos quentes.
+(ii) **Avaliar o efeito da profundidade do mar na captura dos peixes alvo**
+    -   Permitirá determinar se o número de peixes alvo capturados difere significativamente entre ambientes de coleta mais ou menos profundos.
+(iii) **Avaliar o efeito do índice lunar na captura dos peixes alvo**
+    -   Permitirá determinar se o número de peixes alvo capturados difere significativamente durante o ciclo lunar.
+(vi) **Avaliar o efeito da salinidade do mar na captura dos peixes alvo**
+    -   Permitirá determinar se o número de peixes alvo capturados difere significativamente entre ambientes mais ou menos salinos.
+
+
+## Análises & Resultados
+
+Preparando os dados
+
+```{r echo=T}
+
+#verificando a presença de zeros ou inconsistências na variável y
+any(dados$CPUE <= 0)
+any(is.infinite(dados$CPUE))
+any(is.na(dados$CPUE))
+any(is.nan(dados$CPUE))
+```
+
+Como Y possui zeros, vamos adicionar uma constante
+```{r echo=TRUE}
+# Usando 10% da mediana do CPUE
+dados$CPUE2 <- dados$CPUE + (0.1 * median(dados$CPUE))
+
+
+# Transformando para log
+dados$CPUE2_log <- log(dados$CPUE2)
+``` 
+
+
+Rodando os modelos:
+
+```{r echo=TRUE}
+# Modelo Gama
+modelo_G <- glm(CPUE2 ~ sst + sal + depth + il,
+                family = Gamma(link = "log"),
+                data = dados)
+
+
+# Modelo log-Normal
+modelo_LN <- glm(CPUE2_log ~ sst + sal + depth + il,
+                 family = gaussian,
+                 data = dados)
+```
+
+Comparando o melhor ajuste
+```{r echo=TRUE}
+# AIC
+AIC(modelo_G, modelo_LN)
+
+# Teste de razão de verossimilhança
+lmtest::lrtest(modelo_LN,modelo_G)
+```
+
+Como valor de LogLik foi maior no modelo 2 (1065), então o modelo Gama se ajusta melhor aos dados quando comparado ao log-normal.
+
+```{r echo=TRUE}
+# Checando a deviancia de cada modelo
+modelo_G$deviance
+modelo_LN$deviance
+```
+
+Novamente o modelo gama apresentou valor maior (363.46).Porém, como é uma medida de deviancia, significa dizer que o modelo gama apresenta uma discrepância maior em relação ao modelo perfeito, quando comparado ao log-normal.
+
+
+```{r echo=T, message=F}
+
+# checando os Residuos de cada modelo
+resG <- simulateResiduals(modelo_G, n=1000)
+resLN <- simulateResiduals(modelo_LN, n=1000)
+
+check_model(resG)
+check_model(resLN)
+```
+
+Os resíduos do modelo gama apresentam boa semelhança com o esperado, e boa distribuição. Não apresenta resíduos extremamente discrepantes que influencie os resultados e apresentaram baixa colinearidade. Porém, não apresentou boa homogeniedade de variância.
+
+Os resíduos do modelo log-normal apresentaram pouco desvio do esperado, uma boa distribuição e baixa colinearidade. Assim como no primeiro modelo, apresentou alta variância, mas também baixa linearidade.
+
+
+Entendendo os resultados
+```{r echo=T, message=F}
+summary(modelo_G)
+```
+
+De modo geral, o modelo Gama se apresentou mais ajustado para os dados utilizados.
+
+
+Analizando as predições
+```{r echo=T, message=F, warning=F}
+names(modelo_G)
+
+head(cbind(modelo_G$fitted.values, modelo_G$linear.predictors))
+
+
+ggpredict(modelo_G) %>% plot()
+
+```
+Os resultados da modelagem para a variável CPUE2 indicam influências significativas de variáveis ambientais. A relação entre CPUE2 e a Temperatura da Superfície do Mar (SST) mostra um leve aumento com o aumento da temperatura, sugerindo que temperaturas mais altas podem estar associadas a uma maior captura por unidade de esforço, embora essa tendência seja modesta.
+
+Por outro lado, a salinidade exibe uma relação inversa com CPUE2, com a captura por unidade de esforço diminuindo à medida que a salinidade aumenta. Esse efeito sugere que condições de maior salinidade podem ser desfavoráveis para a captura.
+
+A análise também revelou uma tendência positiva entre CPUE2 e a profundidade. Com o aumento da profundidade, a captura por unidade de esforço tende a aumentar, o que pode refletir maior eficiência nas capturas em águas mais profundas. Ademais, o gráfico de predições mostra que há uma relação linear positiva entre captura por unidade de esforço e o índice lunar, com CPUE2 aumentando à medida que il cresce.
+
+Por fim, as hipóteses foram corroboradas, demonstrando como a captura por unidades de esforço diferem em relação às variáveis ambientais.

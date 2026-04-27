@@ -1,0 +1,334 @@
+---
+title: "Avaliação do relatório"
+output: pdf_document
+---
+
+
+
+- **Grupo:** Samuel Lima, Niege Félix
+
+- **Capítulos entregues:** 6/6
+
+- **Relatório entregue no prazo:** Sim
+
+- **Nota:** A
+
+
+------------------------------------------------
+
+
+# Comentário geral
+
+O relatório ficou muito bem estruturado, apresentando de forma clara e coerente os objetivos, hipóteses e resultados (na maioria das vezes). Observou-se um bom domínio dos conceitos abordados e uma sequência lógica entre as seções de cada capítulo, o que facilitou a leitura e compreensão do tema abordado. Os exemplos e interpretações demonstram envolvimento com o conteúdo. Para aprimoramento futuro, sugiro discutirem mais explicitamente os resultados das análises exploratórias e dos modelos, devendo-se atentar à interpretação dos coeficientes dos modelos Binomial e Multionomial, além da atenção aos pressupostos. Por fim, sugiro atentarem para manter o mesmo padrão de formatação entre os diferentes capítulos para manter consistência.
+
+
+# Comentários específicos
+
+## Cap. 1: Dados binários
+
+- Seção 1:
+  - Achei bem legal como vocês organizaram a introdução de vocês. Simples, porém clara e objetiva. Também achei legal terem explorado o recurso de inserir um `hyperlink` para acessar a página do Brazil Dry!
+
+
+- Seção 2.2:
+  - Vocês apresentam os dados/tabelas, porém não discutem explícitamente o que estão observando. 
+  - Vocês apresentam uma tabela com "Proporção de predadores e não predadores (herbivoros e demais)". 
+    - Vejo que vocês calcularam apenas a relação  de `Npredadores/N_naopredadores`. Como a categoria 'naopredadores' envolve essencialmente todas as demais categorias de guildas, faria mais sentido vocês avaliarem a relação `Npredadores / (Npredadores + N_naopredadores)`.
+  - Revejam a última frase desta seção. Não deu para entender muito o que vocês querem dizer.
+  - Senti falta de vocês avaliarem a multicolinearidade, i.e., correlação entre as variáveis preditoras. Lembrem-se que esse aspecto é importante avaliar para evitar a inclusão de variáveis redundantes no mesmo modelo (variáveis com correlação > 0.7).
+
+
+- Seção 3:
+  - Parabéns por exporem as equações matemáticas e distinguir cada componente do modelo. 
+  - Pequena correção na equação matemática do modelo completo:
+
+$$logit(p_i) = \beta_0 + \beta_1\text{Riqueza}_i + \beta_2\text{Facilitacao}_i + \beta_3\text{AbundanciaPresas}_i$$
+
+  - O símbolo do somatório só seria válido se essas covariáveis fossem fatores (onde as letras seriam representativas dos níveis em cada fator).
+
+
+- Seção 3.1:
+  - Seria interessante explicarem o por quê de terem padronizado as covariáveis.
+
+
+- Seção 3.2:
+  - Como a diferença de AICs foi mínima entre os diferentes modelos testados, poderia ter sido interessante vocês usarem um teste de razão de verossimilhança (likelihood ratio test), para testarem se há diferenças estatísticas significativas entre o melhor modelo (`mod3`) e pior modelo (`mod2`). Dessa forma vocês teriam um respaldo a mais na decisão da escolha de modelo de vocês.     
+    - Por exemplo, se o teste resultar em um p-valor > 0.5, temos respaldo que o modelo mais complexo (mod 3) não difere significativamente do modelo mais simples (mod2). Assim, pelo princípio da parcimônia, poderia se escolher o modelo mais simples (mod2).
+  - Quando checam a correlação espacial, poderia ser interessante explorar o resultado do teste estatístico junto com um `bubble plot` dos resíduos. Assim teria como ver se os resíduos apresentam uma tendência espacial.
+
+
+- Seção 4:
+  - A primeira frase está parcialmente correta. Vocês estão confundindo *probabilidade* com *razão de chances (odds)*. Notem que cada coeficiente mostra quanto o **log da razão de chances** da presença de predadores muda quando a variável explicativa aumenta em uma unidade, mantendo as demais covariáveis constantes.
+    - Por exemplo, se analisarem a variável 'facilitation', a interpretação seria o quanto o log da razão de chances da presença de predadores muda quando aumentamos o nível de facilitação em uma unidade (considernado as demais covariáveis constantes). 
+    - Para interpretar a razão de chances na escala natural, faz-se a relação $e^{\beta_j}$, onde $\beta_j$ é o coeficiente da covariável sendo considerada - neste exemplo, 'facilitation'.
+      - Logo: $e^{0.2544} = 1.29$
+      - A interpretação, portanto, é: A *razão de chances* de presença de predadores é aproximadamente 29% maior para cada aumento de uma unidade na facilitação.
+    - A interpretação em termos de *probabilidade* é um pouco diferente e exige mais cuidado. Para interpretar os resultados na forma de probababilidade (considerando a ideia de aumentarmos a facilitação em uma unidade), precisamos calcular as probabilidades para (i) quando a covariável é 0 (baseline) e (ii) o efeito da covariável. Vejamos  
+      - Considerando a situação baseline (efeito da covariável é 0):
+
+$$p_{baseline} = \frac{1}{(1 + e^-{1.4478})} = 0.81 \\
+p_1 = \frac{1}{(1 + e^-{1.4478 + 0.2544})} = 0.85 $$
+
+  - Desta forma, pode-se concluir que quando se aumenta a facilitação em uma unidade, aumenta-se a probabilidade de presença do predador de 81% para 85%; ou seja, uma mudança de 5% percentuais.
+      
+  - Senti falta vocês explorarem um pouco a questão da significância estatística de cada covariável e bem como também como interpretar o sinal dos parâmetros (postivo/negativo).
+  
+\vline
+
+## Cap. 2: Dados discretos
+
+- Seção 2:
+  - Vocês computam as seguintes estatísticas:
+
+```{r echo=T, eval=F}
+bd %>% 
+  summarise(Abundancia = sum(insect_abundance),
+            Riqueza = sum(insect_richness))
+```
+
+  - Reparem, contudo, que a riqueza não está sendo calculada de modo certo. Se vocês objetivam saber a maior riqueza registrada ao longo do experimento, o certo seria pedir o `max(insect_richness)`, conforme:
+
+
+```{r echo=T, eval=F}
+bd %>% 
+  summarise(Abundancia = sum(insect_abundance),
+            Riqueza = max(insect_richness))
+```
+
+  - Cuidado com os eixos dos gráficos! Reparem que os valores numéricos do eixo Y foi suprimido em todos os gráficos.
+  
+  - Achei interessante ver que as parcelas com maiores riquezas de espécies (8 & 16) apresentaram as menores abundâncias totais de inseto, enquanto esse padrão se reverte quando se avalia a abundância média.
+    - Uma pena vocês não terem discutido muigo os resultados dos gráficos apresentados nesta seção.
+    - Curiosidade: esse padrão se repete quando se considera a `mediana` ao invés da `média`?
+  
+  - Há uma clara relação positiva entre potencial de facilitação e abundância de insetos.
+  
+  - Embora vocês comentem "*Aparentemente não há tendências para latitude e longitude, mas há uma pequena concentração de pontos nos seus menores valores*", eu consigo visualizar alguns padrões na relação abundância de insetos e as coordenadas geográficas, principalmente longitude.
+    - A relação com latitude não é tão clara, porém consigo distinguir uma relação decrescente entre latitudes -5.5395 e -5.5385, e um certo pico de abundância em torno da coordenada -5.5380.
+    - Na longitude, há um pico de abundância entre longitudes -36.9640 e -36.9635.
+
+
+- Seção 2.2:
+  - Lembrem-se de sempre explicar o por quê de escolherem certas análises. Vocês não justificam o motivo de padronizar os dados; Cá entre nós, já sabemos o motivo. No entanto, sempre imaginem um leitor desconhecido lendo o trabalho de vocês pela primeira vez. Tem que ir guiando esse leitor...
+
+
+- Seção 3:
+  - Muito bem apresentada esta seção como um todo - parabéns! 
+  
+  - Me permitem fazer uma sugestão aqui no início: não esqueçam de incluir a equação do próprio modelo (i.e., a relação y ~ x1 + x2 + ...). Isso é importante para visualizar o próprio modelo que vocês estão propondo, e é importante a nível de publicações acadêmicas.
+
+
+- Seção 3.1:
+  - Vejo que vocês testaram um modelo com interação - legal!
+    - Houve uma motivação para essa escolha? Fizeram uma análise exploratória dessa relação? Caso sim (ou mesmo, não), seria importante incluir isso na seção de 'análise exploratória dos dados'.
+  - Outra coisa: estava pensando na questão do offset do modelo de vocês. Embora contar o número de plantas vivas em cada parcela possa ser considerada uma medida de esforço, o mais preciso seria considerar o tempo de busca ativa que vocês passaram em cada parcela. O máximo nível de refinamento seria a padronização por no. de plantas vivas e tempo de busca ativa 
+    - Nesse caso, a abundância seria expressa como número de indivíduos por planta viva por hora (ou minutos,...).
+  - Gostei muito de ver como estruturaram esta seção: clara e objetiva. 
+    - As interpretações das análises residuais estão corretíssimas.
+
+
+- Seção 4:
+  - Hmh, repararam no valor altíssimo que acusou para o erro padrão do intercepto (Std. Error = 6287.3686)? E isso porque está na escala log...
+    - Isso essencialmente indica que há uma incerteza gigante em torno da abundância média de insetos estimada
+        - Lembrando que o intercepto é interpretado como a média da variável resposta na ausência de covariáveis; 
+        - Além disso, lembrando que o erro padrão está na mesma escala da variáveis. No caso da variável resposta, a função `summary(bd$insect_abundance)` indica uma abundância máxima de 80 (indivíduos?). Agora cruzem essa informação com os valores do erro padrão. Eita!
+  - No contexto das análises de vocês, o mais correto teria sido escolher o modelo 3 (`mod_3`). Isso porque:
+    - Como não houve diferença expressiva entre os AICs dos modelos `mod_3` e `mod_4`, e muito menos acusado pelo teste estatístico (LRT), o princípio da parsimônia ditaria a escola do `mod_3` (mais simples e com mesmo poder explicativo.)
+    - Além disso, reparem como o `summary(mod_3)` resulta em valores muito mais realísticos e precisos.
+  - Algumas considerações adicionais em relação à interpretação dos resultados apresentados:
+    - Vocês comentam: "*...a associação positiva entre o potencial de facilitação de árvores e a abundância de insetos depende da riqueza de espécies de árvores (e vice-versa).*"
+      - Há uma pequena inversão de termos. Seria mais correto formular a frase como algo na linha de: "*Os resultados indicam que a facilitação e a riqueza de espécies modulam conjuntamente a abundância de insetos, com maiores abundâncias estimadas em locais onde a relação positiva entre essas variáveis é mais acentuada.*"
+    - Além disso, também comentam: "*Importante notar que o intercepto não foi significativamente diferente de zero, o que pode ser um problema devido a incerteza.*"
+      - Bom, isso não é um problema em si. Confrome já comentado, o intercepto indica o valor esperado da variável resposta (aqui, abundância de insetos) quando *todas* as variáveis explicativas são zero.
+      - Como “zero” pode não ser um valor biologicamente interpretável (ex: 0 de latitude, 0 de riqueza, 0 de facilitação), o fato de ele não ser significativo não afeta a validade do modelo em si.
+      - O mais preocupante no modelo é o valor de erro padrão para o intercepto, conforme comentado previamente.
+     - Por último, vocês concluem que "*...quando a riqueza de espécies e o potencial de facilitação de árvores aumentam em uma unidade, há um aumento médio de 2 insetos!*"
+        - Essa interpretação também está equivocada. Vocês assumem que o valor 2.05 para o coeficiente do termo de interação `plant_richness:facilitation` seja sinônimo de +2 insetos” quando ambas aumentam 1 unidade. O que acontece é que em um GLM com função de ligação log.
+        - Cada coeficiente é aditivo na escala log; No entanto, exponenciando-os, converte-se essa relação em efeitos multiplicativos sobre a média esperada. No contexto da interação, para um aumento simultâneo de 1 unidade em ambos os preditores com interação, o fator multiplicativo é 
+
+$$exp(\beta_\text{facilitation} + \beta_\text{plant\_richness} + \beta_\text{plant\_richness:facilitation}) \approx 1.6$$
+
+  - Conclui-se, portanto, que a abundância esperada é multiplicada por um fator de 1.60, i.e.,  um aumento médio de ~60%.
+        
+
+\vline
+
+
+## Cap. 3: Dados contínuos
+
+- Seção 2.3:
+  - Pequena correção: vocês falam "*...geralmente são analisados com estatísticas descritivas como média, desvio-padrão e variância*"
+    - Isso não é uma propriedade específica de dados contínuos em si. Dá para fazer estatística descritiva em cima de dados discretos (bem como dados categóricos).
+
+
+- Seção 3:
+  - O que significam os asteriscos ao lado de algumas distribuições? Eu já sei o que é, mas outro leitor não saberia (nem vocês quando retornarem a esse documento em um futuro não muito distante).
+
+
+- Seção 4:
+  - Não deu para ler muito bem as equações e me parece que há uma repetida.
+
+
+- Seção 8:
+  - Há um pequeno equívoco na forma em como vocês estão tratando o modelo log-Normal. Da forma que vocês estão apresentando (i.e., transformando apenas a variável resposta no log), o modelo ainda assume a premissa de *homocedasticidade*, porque vocês estão essencialmente usando uma distribuição 'Normal', a qual assume uma média que é independente da variância. Na distribuição log-Normal, no entanto, a média depende da variância (e vice-versa), e são expressos na escala log. Existe uma especificação matemática específica para a distribuição log-Normal.
+    - O correto teria sido vocês usarem a distribuição `lognormal` dentro da função `glmmTMB()` - vide script da aula prática.
+
+
+- Seção 9:
+  - As hipóteses poderiam ter sido mais bem formuladas
+
+
+- Seção 10:
+  - Faltou vocês discutirem mais as análises exploratórias...lembrem sobre meus comentários anteriores a respeito do ponto de vista de um leitor externo.
+  - Explicar o motivo de padronizarem as covariáveis...
+  - Vocês criam uma seção (7) sobre modelos log-Normal, mas nos exemplos também exploram a distribuição Gama. Eu sei que isso é um tanto quanto preciosismo, mas é importante vocês se manterem atento a esses pequenos detalhes - faz toda a diferença na clareza e fluidez da interpretação dos resultados.
+  - Reparei que vocês testaram modelos usado algumas interações bastante complexas - por exemplo ` poly(Lat,4) * poly(Long,2)`.
+    - Isso não é um problema em si, mas dificulta tremendamente a interpretação dos parâmetros. Por via de regra, se não souber explicar como interpretar os parâmetros, é porque a relação proposta é complexa demais e uma simplificação se faz necessária.
+  - Faltou explicarem também a interpretação dos testes estatísticos (LRT, por exemplo)
+  - Eu seria mais cautelosa com a interpretação dos resultados da interação entre os diferentes efeitos polinomiais.
+
+\vline
+
+## Cap. 4: Dados categóricos
+
+- Seção 1:
+  - Pequena correção: "... é preciso quando nossa variável resposta é **categórica** e com **mais de duas categorias.**"
+
+
+- Seção 2:
+  - Careceu vocês discutirem um pouco o que observaram na breve análise exploratória. 
+     - Por exemplo, o que vocês observam de diferente quando calculam o No. de pinguins para cada categoria de estado de saúde e os dois estágios de vida (adulto e pintinho)? Corrobora com a hipótese de vocês?
+
+
+- Secão 2.1:
+  - **Prestem atenção!** As análises exploratórias de vocês vão além do objetivo que vocês apresentaram no início da sessão, i.e., "*Nosso objetivo será testar se a saúde dos pinguins é influenciada por seus estágios de vida.*"
+    - Na análise exploratória, vocês também avaliaram a relação com espécies e ilhas, mas isso não está especificado no objetivo geral do trabalho.
+
+
+- Seção 3:
+  - Pequena correção: vocês não estão apresentando o modelo em si, mas sim, a parametrização da distribuição binomial.
+    - O modelo propriamente falando é aquele em que expomos a relação do preditor linear com as covariáveis: ($\eta_i = \beta_0 + \beta_1x_i + beta_2x_i + ...$)
+
+
+- Seção 4.1:
+  - Há um pequeno erro de interpretação quando vocês falam "*Quando o sinal for negativo, indica que a probabilidade diminui para aquela categoria.*".
+    - Os coefienctes não são expressos em *probabilidade*, e sim *razão de chances* (na escala log). É a mesma lógica que é usada em modelos logísticos (vide meus comentários sobre isso no primeiro capítulo.)
+  - Faltou vocês analisarem o último gráfico e fazer uma conclusão geral
+
+\vline
+
+
+
+## Cap. 5: Distribuições complementares
+
+- Seção 1:
+  - Achei muito legal vocês terem exposto brevemente os conceitos teóricos das três distribuições de probabilidade que foram abordados na aula.
+  
+
+- Seção 1.1:
+  - Pequena correção: quando falam
+
+
+- Seção 1.3:
+  - O fato da variável ser restrita no intervalo (aberto) entre (0,1) não configura um *pressuposto* em si;
+    - Quando falamos em pressupostos, nos referimos principalmente à questões envolvendo os resíduos do modelo, e outros aspectos mais gerais que se aplicam independentemente da distribuição considerada (e.g., representativadade, escolha correta da distribuição de probabilidade, ...)
+  - Não se interpreta a 'forma da distribuição' como probabilidade
+    - A distribuição Beta pode assumir diversos formatos (é muito flexível); mas ela não é restrita à assimetria e/ou forma de 'sino', como vocês comentaram.
+
+
+- Seção 2:
+  - Atribui-se o temro 'zero-inflacionado' *principalmente* para dados de contagens; logo, associado às distribuições Poisson e Binomial Negativa
+    - Existem versões zero-inflacionadas para às distribuições Beta e Binomial, mas são casos mais raros
+  - Modelos zero-inflacionados são compostos por dois componentes, os quais essencialmente modelam:
+    - 1) a presença/ausência da espécie (riqueza, ou qualquer outra *variável discreta*) - usando modelo Binomial
+    - 2) a abundância da espécie - usando modelo Poisson ou BN!
+  - O que vai distinguir as versões ZIP/ZINB das ZAP/ZANB é como os zeros são considerados e o foco que se dá no modelo binomial:
+    - Em modelos ZIP/ZINB distingui-se os zeros verdadeiros dos zeros falsos, e o foco do modelo binomial está na ausência da espécie (o valor 0)
+    - Em modelos ZAP/ZANB, não se distingues as fontes dos zeros e o foco do modelo binomial está na presença da espécie (o valor 1)
+  - Legal vocês terem explorado o uso de tabelas em arquivos RMarkdown!
+
+
+- Seção 3:
+  - Pequena correção conceitual: a distribuição pode ser aplicada tanto para variáveis numéricas contínuas quanto discretas - não apenas valores contínuos, como vocês destacaram.
+  - Quando $1 < p <2$, isso implica em uma distribuição que tem muitos valores concentrados no 0 (ou próxima a 0). 
+    - Por isso que essa distribuição consegue se adequar em casos de dados muito assimétricos à direita
+
+
+- Seção 3.4:
+  - Revisem os pressupostos - vide meu comentário sobre isso já feito para a distribuição Beta
+  - **Cuidado!** A seguinte afirmação está incorreta: "*A distribuição Tweedie, por si só, não considera autocorrelação temporal ou espacial.; Caso exista dependência, deve-se usar modelos estendidos (como GAMs ou GLMMs).*"
+    - O pressuposto de independência residual se aplica para todo e qualquer modelo GLM e GAM. Independentemente da distribuição de probabilidade, os resíduos tem que ser independententes.
+    - O modelo GAM *pode* ajudar a corrigir a violação do pressuposto de independência, mas em muitos casos isso não é garantido.
+
+
+- Seção 4:
+  - Revejam o texto introdutório; está incompleto.
+  - Vocês replicaram exatamente o mesmo exemplo que foi tratado na aula prática; Na ausência de dados próprios, era para vocês terem explorados seguindo os exemplos de dados que foram expostos no último slide da aula 7!
+  - A hipótese não está clara; Vocês falam em plantas intactas, mas quais delas: as nativas ou exóticas?
+
+
+- Seção 4.3:
+  - Revejam a frase: "*Sim, dados os resultados dos gráficos, temos de fato, uma frequência para espécies invasoras e nativas.*"
+    - Está incompleta e não revela o que se observa no gráfico.
+
+
+- Seção 4.4:
+  - Sejam mais detalhados na análise dos gráficos. Vocês comentam "*Sim, houve variação!*", mas essa informação é pouca informativa. Sejam claros e expõem o que estão observando.
+
+
+- Seção 4.6:
+  - Faltou vocês apresentarem e discutirem os resultados (parâmetros estimados) do melhor modelo escolhido por vocês (i.e., `ZINB1`).
+  
+\vline
+
+
+## Cap. 6: GAM
+
+- Seção 1.3:
+  - Obs.: A violação da independência residual pode ser corrigida usando efeitos aleatórios (estruturados ou não estruturados)
+
+
+- Seção 1.4:
+  - Vocês comentam: "*Se essa relação for incorreta, pode haver sobredispersão ou subdispersão.*"
+    - Na verdade, se a esocolha da distribuição de probabilidade estiver incorreta, os erros vão se revelar no `Erro padrão` da covariável e, consequentemente, no p-valor. Logo, o maior erro está na interpretação errada que se vai tirar das relações (e sua significância) das covariáveis com a variável resposta.
+
+
+- Seção 1.7:
+  - Não estou entendendo muito bem o que vocês querem dizer nesta seção;
+  - Suspeito que vocês estão relacionando o uso de GAMs apenas no contexto de dados espaciais e/ou temporais; 
+    - Se for o caso, saibam que GAM é usado *sempre* quando se detecta uma relação altamente não linear entre a variável resposta e a covariável. A covariável pode ou não ser uma coordenada geográfica, mas ela não está restrita a ela. Poderia ser temperatura, umidade, ....
+
+
+- Seção 1.8:
+  - O pressuposto de homocedasticidade é avaliado em relação aos resíduos do modelo.
+
+
+- Seção 2:
+  - Pequena correção na formulação da hipótese:
+    - Em ecologia marinha, as produtividades são mais altas em águas mais frias; a produtividade vai diminuíndo à medida que se aproxima da linha do equador, aonde as águas são mais quentes e menos produtivas. Por isso a afirmação da hipótese de vocês não está totalmente correta.
+
+- Seção 2.1:
+  - Novamente, faltou vocês discutirem um pouco mais o que vocês observaram na análise exploratória. Por exemplo, o que observam no histograma de abundância de *Thunnus albacares*?
+
+- Seção 2.1.1:
+  - Legal vocês terem usado a correlação de Spearman - está corretíssima a abordagem de vocês.
+  - Vocês comentam que não há uma correlação expressiva, mas discordo parcialmente
+    - Vejam que a relação `atum vs. latitude` resultou em uma correlação de 54%. Isso não é tão baixo...
+
+
+- Seção 2.2:
+  - Faltou vocês destacarem a natureza da variável resposta para justificarem o uso das distribuições Poisson/BN.
+  - Senti falta de vocês justificarem alguns dos modelos testados
+    - Por exemplo, vocês usam um modelo ZANB (`mod_glm5b`), porém não explicam por que usaram covariáveis na parte binomial do ZANB.
+    - Outro exemplo: vocês rodaram GAMs usando apenas modelos Poisson zero-inflacionados (ZIP), mas ignoram as versões ZINB. Considerando que também testaram anteriormente modelos usando distribuição BN, vocês deveria aplicar a mesma ideia quando testam modelos GAMs.
+
+
+- Seção 2.4:
+  - Corretíssima a observação que vocês fizeram quando computaram `coef(mod_gam2)`, i.e., a de que o modelo utilizou 29 funções básicas.
+  - Muito legal ver os resultados nos 4 últimos gráficos.
+  - Algumas observações adicionais:
+    - Sempre que forem utilizar um pacote do R, dêm uma lida no manual da função que vocês estão utilizando para entender como que as coisas estão implementadas. 
+      - Pelo sumário do modelo de vocês, reparem por exemplo que a função de ligação usada pela função `gam` com família `ZIP` é a função itendidade (e não a log, como é o padrão para uma distribuição Poisson).
+    - Vocês poderiam/deveriam também avaliar outros aspectos que são mostrados no resultado do modelo GAM, a exemplo:
+      - edf (graus de liberdade efetivos) = 23.81; isso indica que a relação espacial é bastante complexa, com forte variação não linear (se fosse próximo de 1, seria quase linear).
+      - deviância explicada = 86%; o modelo tem uma excelente capacidade explicativa, porque consegue explicar 86% da variabilidade observada na abundância de atum

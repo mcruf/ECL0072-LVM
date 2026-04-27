@@ -1,0 +1,165 @@
+---
+title: "Relatório: Regressão Beta para Proporções"
+author: "Fabricio Albuquerque"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    theme: cosmo
+    df_print: paged
+    code_folding: hide
+    number_sections: true
+fontsize: 11pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(glmmTMB)
+library(ggplot2)
+library(dplyr)
+library(DHARMa)
+library(ggeffects)
+library(performance)
+library(patchwork)
+```
+
+# Introdução
+
+Modelos com **distribuição Beta** são apropriados para **variáveis resposta que são proporções ou taxas** estritamente entre 0 e 1 (ex.: proporção de bycatch). A família Beta modela bem esses dados porque sua forma é flexível (pode ser simétrica ou assimétrica) e trabalha na escala contínua (0,1).  
+
+**Observação:** valores exatamente iguais a 0 ou 1 precisam ser tratados (transformados ou usando variantes zero-/um-inflados) — aqui usei ajuste simples substituindo 1 por 0.99 quando necessário.
+
+# Objetivos
+
+- Preparar os dados de captura e calcular proporções de bycatch;
+- Ajustar um modelo Beta com `glmmTMB` usando link logit;  
+- Fazer diagnóstico de resíduos (DHARMa) e testar autocorrelação espacial/temporal;  
+- Interpretar os efeitos e apresentar gráficos de predição.
+
+# 1. Carregando os dados
+
+```{r load-data}
+# Ajuste o caminho conforme seu projeto (usar here::here() é recomendado)
+dados <- readRDS("../Dados/fisheries.rds")
+str(dados)
+summary(dados)
+```
+
+# 2. Preparação e exploração dos dados
+
+```{r prep-explore, fig.height=4}
+# Converter variáveis categóricas
+dados[, c("Ano", "Mes", "Barco")] <- lapply(dados[, c("Ano", "Mes", "Barco")], factor)
+
+# Definir espécies alvo e não-alvo
+especies_alvo <- c("Thunnus_albacares", "Thunnus_atlanticus", "Katsuwonus_pelamis")
+especies_nalvo <- setdiff(colnames(dados)[8:27], especies_alvo)
+
+# Filtrar outliers no esforço de anzol
+dotchart(dados$N_anzol, main = "N_anzol - antes")
+dados2 <- filter(dados, N_anzol <= 1500)
+dotchart(dados2$N_anzol, main = "N_anzol - depois")
+
+# Calcular bycatch e proporção relativa de bycatch
+dados2 <- dados2 %>%
+  rowwise() %>%
+  mutate(catch = sum(c_across(all_of(especies_alvo))),
+         bycatch = sum(c_across(all_of(especies_nalvo))),
+         t_catch = catch + bycatch,
+         r_bycatch = ifelse(t_catch == 0, NA, bycatch / t_catch)) %>%
+  data.frame()
+
+# Remover NA resultantes (caso haja amostras sem captura)
+dados2 <- dados2 %>% filter(!is.na(r_bycatch))
+
+# Visualizar distribuição da proporção
+p1 <- ggplot(dados2, aes(x = r_bycatch)) +
+  geom_histogram(bins = 10, fill = 'darkorange', color = 'darkorange', alpha = 0.2) +
+  labs(x = 'Proporção de bycatch', y = 'Frequência') +
+  theme_minimal()
+
+p2 <- ggplot(dados2, aes(y = r_bycatch)) +
+  geom_boxplot(fill = 'darkorange', color = 'darkorange', alpha = 0.2) +
+  labs(y = 'Proporção de bycatch') +
+  theme_minimal()
+
+p1 + p2
+```
+
+**Comentário:** A distribuição mostra se os dados estão próximos de 0 ou 1 e se demandam transformações ou modelos com zero/one inflation.
+
+# 3. Tratamento de 0s e 1s
+
+```{r treat-zeros}
+# Substituir 1 por 0.99 (estratégia simples; documente essa escolha)
+table(dados2$r_bycatch == 1)
+dados2 <- dados2 %>%
+  mutate(r_bycatch_adj = case_when(
+    r_bycatch == 1 ~ 0.99,
+    r_bycatch == 0 ~ 0.01,    # opcional: evitar zeros estritos
+    TRUE ~ r_bycatch
+  ))
+summary(dados2$r_bycatch_adj)
+```
+
+
+# 4. Ajuste do modelo Beta
+
+```{r fit-beta}
+# Modelo Beta com link logit, preditores: Mes, Lat, Long
+modelo_bt <- glmmTMB(r_bycatch_adj ~ Mes + Lat + Long,
+                     family = beta_family(link = "logit"),
+                     data = dados2)
+summary(modelo_bt)
+```
+
+**Interpretação:** Os coeficientes na escala do link (logit) representam mudanças no logit da proporção. Exponenciar não fornece razões de chances diretas como em binomial. Em vez disso, pode ser interresante interpretar via predições marginais.
+
+# 5. Diagnóstico dos resíduos
+
+```{r diag-beta, fig.height=4}
+res_bt <- simulateResiduals(modelo_bt, n = 1000)
+plot(res_bt)
+
+# Avaliações adicionais
+check_model(modelo_bt)
+
+# Teste de autocorrelação espacial (DHARMa)
+testSpatialAutocorrelation(res_bt, x = dados2$Long, y = dados2$Lat)
+
+# Teste temporal (reagrupando por mês)
+res_by_month <- recalculateResiduals(res_bt, group = dados2$Mes)
+testTemporalAutocorrelation(res_by_month, time = unique(dados2$Mes))
+```
+
+**Comentário:** DHARMa transforma resíduos para facilitar testes estatísticos (uniformidade, dispersão, autocorrelação). Autocorrelação espacial/temporal sugere incluir termos espaciais (ex.: efeitos aleatórios).
+
+# 6. Predições marginais e visualização
+
+```{r pred-plot, fig.height=4}
+# Predição do efeito de Lat (mantendo Mes e Long na média)
+new_lat <- expand.grid(
+  Lat = seq(min(dados2$Lat, na.rm=TRUE), max(dados2$Lat, na.rm=TRUE), length.out = 100),
+  Mes = factor(levels(dados2$Mes)[1]),
+  Long = mean(dados2$Long, na.rm = TRUE)
+)
+
+pred_lat <- predict(modelo_bt, newdata = new_lat, type = "response", se.fit = TRUE)
+# predict.glmmTMB returns fit on response scale quando type='response'
+new_lat$fit <- pred_lat
+# Para intervalos de confiança, é conveniente usar ggeffects
+ggeffects::ggpredict(modelo_bt, terms = "Lat [all]") %>% plot() + labs(title = "Predição marginal: Lat")
+
+# Efeito de Mes (como fator)
+ggeffects::ggpredict(modelo_bt, terms = "Mes") %>% plot() + labs(title = "Predição marginal: Mês")
+```
+
+**Comentário:** Use `ggpredict()` para obter predições marginais com ICs e facilitar interpretação na escala da proporção.
+
+# 7. Interpretação final e limitações
+
+- O modelo Beta ajustado mostra como a proporção de bycatch varia com latitude, longitude e mês.  
+- Se testes indicarem autocorrelação espacial/temporal, considere modelos com estrutura espacial ou incluir efeitos aleatórios.  
+- Trate com cuidado valores em 0/1 e documente qualquer ajuste (substituição, transformação).
+

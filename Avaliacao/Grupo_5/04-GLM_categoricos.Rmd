@@ -1,0 +1,457 @@
+---
+title: "GLM para dados categóricos"
+author: "Layla Paiva"
+#date: "`r format (Sys.time(), '%d %B, %Y')`"
+output:
+   html_document: #Salvar como html
+      theme: journal #cerulean,flatly,united,cosmo,simplex
+      number_sections: yes
+      toc: true               # Gera sumário (Table of Contents)
+      toc_float:              # Faz o sumário “flutuar” ao lado
+        collapsed: false      # Não inicia “fechado”
+        smooth_scroll: false  # Desativa rolagem suave (opcional)
+        position: left        # Posiciona o sumário à esquerda
+        width: 250px          # Define a largura do sumário
+---
+
+## Modelo Linear Generalizado para Dados Categóricos
+
+Dados Categóricos são aqueles que se apresentam sem valor numérico. São dados de classificação em grupos ou categorias.
+
+## Na prática
+
+Vamos entender como utilizar o GLM para dados categóricos na prática
+
+Utilizando os dados disponíveis na pasta `/Dados` da disciplina, escolhi a base de dados `/palmerpenguins_extended.rds`, referente a um estudo sobre a pesca de atum e a captura incidente de espécies não-alvo. Bem como informaçãoes de abundância e distrubuição de ambos.
+
+```{r echo=TRUE}
+# 1. Importando o banco de dados
+dados <- readRDS("~/Disciplinas do Mestrado/ECL0072 - MODELOS LINEARES GENERALIZADOS E ADITIVOS PARA DADOS ECOLÓGICOS/ECL0072-GLM_GAM-gh-pages/ECL0072-GLM_GAM-gh-pages/Dados/palmerpenguins_extended.rds")
+
+#Pacotes uilizados
+library(VGAM) #Modelo multinomial
+library(nnet) #Modelo multinomial (pacote alternativo)
+library(ggplot2)
+library(dplyr)
+library(DHARMa)
+library(ggeffects) #para plotar os resultados
+library(performance) #avaliação dos residuos
+```
+
+## Análise Exploratória
+
+Entendendo os dados e como estes se dispõem no arquivo.
+
+```{r echo=TRUE}
+# Análise Exploratória
+str(dados)
+
+summary(dados)
+```
+
+O arquivo possui 3.430 linhas de dados e 11 variáveis, incluindo informações sobre a espécie, local de ocorrência, medições e pesos corporais, sexo, dieta e métricas de saúde, etc.
+
+A pergunta da análise será: a métrica de saúde dos pinguins é influenciada pelo estágio de vida, espécie e sexo desses animais?
+
+Nesse sentido, a variável dependente (Y) será a métrica de saúde(acima, abaixo ou peso normal).
+
+Já as variáveis independentes (X) serão:
+  - Estágio de vida
+  - Espécie
+  - Sexo
+
+###Convertendo a natureza das variáveis
+
+Classificando as variáveis corretamente:
+
+vou mudar a natureza de todas as variáveis para que sejam incluídas nas análises.
+
+```{r echo=TRUE}
+#Convertendo a natureza das variáveis
+
+cols <- c("species", "island", "sex", "diet", "life_stage", "health_metrics", "year")
+
+dados[, cols] <- lapply(dados[, cols], factor)
+
+```
+
+Verificando a converção:
+
+```{r echo=TRUE}
+
+str(dados)
+
+```
+
+### Entendendo as variáveis
+
+Vizualizando as possíveis relações:
+
+Primeiramente a relação entre a espécie e a condição de saúde em relação ao peso
+```{r echo=TRUE}
+
+ggplot(dados, aes(x = species, fill = health_metrics)) +
+  geom_bar(position = "fill", color = "black") +
+  scale_fill_manual(values = c("lightblue", "pink", "lightgreen"))+
+  theme_minimal()
+```
+
+Além disso, as outras variáveis ambientais também podem ter afetado as capturas:
+
+```{r echo=TRUE}
+#A relação entre o estágio de vida e a condição de saúde em relação ao peso
+ggplot(dados, aes(x = life_stage, fill = health_metrics)) +
+  geom_bar(position = "fill", color = "black") +
+  scale_fill_manual(values = c("lightblue", "pink", "lightgreen"))+
+  facet_wrap(species ~ .) +
+  theme_minimal()
+
+#A relação entre o sexo e a condição de saúde em relação ao peso
+ggplot(dados, aes(x = sex, fill = health_metrics)) +
+geom_bar(position = "fill", color = "black") +
+  scale_fill_manual(values = c("lightblue", "pink", "lightgreen"))+
+  facet_wrap(species ~ .) +
+  theme_minimal()
+```
+## Hipóteses
+
+Com as análises iniciais, podemos formar nossas hipóteses!
+
+-   $H_1:$ A condição de saúde dos pinguis diferem entre as espécies
+
+-   $H_2:$ A condição de saúde dos pinguis diferem entre os estágios de vida
+
+-   $H_3:$ A condição de saúde dos pinguis diferem entre os sexos
+
+##Objetivos
+
+Avaliar como fatores intrinsecos das espécies de pinguins pode afetar suas condições de saúde referentes ao peso.
+
+###Objetivos Específicos
+
+(i) **Avaliar se a condição do peso dos pinguins é influenciada pela espécie**
+    -   Permitirá determinar se a incidência de baixo peso ou sobrepeso difere entre as espécies.
+(ii) **Avaliar se a condição do peso dos pinguins é influenciada pelo estágio de vida**
+     -   Permitirá determinar se a incidência de baixo peso ou sobrepeso difere entre os estágios de vida.
+(iii) **Avaliar se a condição do peso dos pinguins é influenciada pelo sexo**
+     -   Permitirá determinar se a incidência de baixo peso ou sobrepeso difere entre fêmeas e machos.
+
+
+## Análises & Resultados
+
+Definindo o nível de referência.
+```{r echo=TRUE}
+levels(dados$health_metrics)
+```
+
+Iniciaremos as análises montando os modelos. Em seguida seram analisadas as predições e por fim, formados os gráficos de resultados!
+
+Modelo 1
+```{r echo=T}
+#Avaliando a relação entre a condição de saúde e as espécies
+modelo1 <- vglm(health_metrics ~ species, 
+                family = multinomial(refLevel = 1),  # define a categoria de referência
+                data = dados)
+
+summary(modelo1)
+```
+
+Predizendo...
+```{r echo=TRUE}
+#Predições de probabilidade para cada espécie
+dados_pred <- data.frame(species = levels(dados$species))
+
+preds <- predict(modelo1,
+                 newdata = dados_pred,
+                 type = "response") %>% data.frame()
+
+print(colnames(preds))
+``` 
+
+Formatar os resultados para gerar o gráfico
+```{r echo=TRUE}
+preds$species <- dados_pred$species
+
+colnames(preds) <- c("healthy", "overweight", "underweight","species") #Renomeando as colunas da espécie, assumindo a mesma ordem do modelo
+
+#Transformar dado para o formato longo (necessário para o ggplot2)
+preds11 <- preds %>%
+                tidyr::pivot_longer(cols = c("healthy", "overweight", "underweight"),
+                                    names_to = "health_metrics",
+                                    values_to = "Probability")
+
+```
+
+```{r echo=TRUE}
+
+# Plotando.... 
+ggplot(preds11, aes(x = species, y = Probability, fill = health_metrics)) +
+  geom_bar(stat = "identity", position = "stack",  alpha = 0.8) +
+  scale_fill_manual(values = c("healthy" = "lightblue", "overweight" = "#d6ccc2", "underweight" = "lightpink")) +
+  labs(y = "Probabilidade",
+       x = "",
+      fill = "Saude") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+Extraíndo os coeficientes do modelo
+```{r echo=TRUE}
+tmp <- summary(modelo1)
+coefs <- tmp@coef3[, "Estimate"]
+se <- tmp@coef3[, "Std. Error"]
+
+results <- data.frame(Coef = coefs,
+                      SE = se) #Savlando em um df
+
+
+### Excluindo os interceptos (para melhor visualização)
+results <- results[-c(1:3),]
+
+
+
+### Calculando razão de chances & ICs a 95%
+df_or <- results %>%
+            mutate(OR = exp(Coef), #odds ratio
+                   LCI = exp(Coef - (1.96 * SE)), #limite inferior do IC 95%
+                   UCI = exp(Coef + (1.96 * SE)), #limite superior do IC 95%
+                   Comparison = rownames(results)) #reavendo os níveis de comparação
+                  
+
+
+### Formatando os dados para plotagem
+df_or <- df_or %>%
+          mutate(Species = gsub("^species", "", Comparison), #tirando 'species'
+                 health_metrics = gsub(".*:", "", Comparison)) %>% #ficando apenas com os números
+          mutate(Species = gsub(":[0-9]+$", "", Species), #tirando os números
+                 health_metrics = ifelse(health_metrics == 1, "overweight", 'underweight')) #reclassificando os números de acordo com as categorias alimentares
+                               
+                               
+                               
+```
+
+ Plotando o gráfico final
+```{r echo=TRUE}
+
+ggplot(df_or, aes(y = health_metrics, x = OR, color = Species)) +
+  geom_point(position = position_dodge(width = 0.5), size = 4) +
+  geom_errorbarh(aes(xmin = LCI, xmax = UCI), height = 0.2, position = position_dodge(width = 0.5), size = 1.5) +
+  geom_vline(xintercept = 1, linetype = "dashed", color = "black", size = 1) +
+  scale_x_log10() + # Escala log para melhor visualização do OR
+  scale_colour_manual(values = c("brown","darkcyan")) +
+  labs(x = "Razão de chances (log)",
+       y = "Saude",
+       color = "Espécie") +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom")
+```                               
+A partir do gráfico e das análises, podemos concluir que os indivíduos da espécie Gentoo apresentaram menor chance de estarem abaixo do peso (OR ≈ 0.85, IC 95% ≈ 0.7–0.98) e maior chance de estarem acima do peso (OR ≈ 1.5, IC 95% ≈ 1.2–1.8) em comparação com Adélie. Já Chinstrap não diferiram significativamente dos Adélie quanto à probabilidade de estarem abaixo do peso (OR ≈ 0.9, IC 95% ≈ 0.7–1.1).
+
+
+
+Modelo 2
+```{r echo=TRUE}
+#Avaliando a relação entre a condição de saúde e os estágios de vida
+modelo2 <- vglm(health_metrics ~ life_stage, 
+                family = multinomial(refLevel = 1),  # define a categoria de referência
+                data = dados)
+
+summary(modelo2)
+
+```
+
+```{r echo=TRUE}
+#Predições de probabilidade para cada estágio
+
+dados_pred2 <- data.frame(life_stage = levels(dados$life_stage)) 
+
+preds2 <- predict(modelo2,
+                  newdata = dados_pred2,
+                  type = "response") %>% data.frame()
+```
+
+Formatando os resultados para gerar o gráfico
+```{r echo=TRUE}
+preds2$life_stage <- dados_pred2$life_stage
+
+colnames(preds2) <- c("healthy", "overweight", "underweight","life_stage") #Renomeando as colunas da espécie, assumindo a mesma ordem do modelo
+
+# Transformando o dado para o formato longo (necessário para o ggplot2)
+preds21 <- preds2 %>%
+                tidyr::pivot_longer(cols = c("healthy", "overweight", "underweight"),
+                                    names_to = "health_metrics",
+                                    values_to = "Probability")
+
+```
+
+```{r echo=TRUE}
+
+# Plotando.... 
+ggplot(preds21, aes(x = life_stage, y = Probability, fill = health_metrics)) +
+  geom_bar(stat = "identity", position = "stack",  alpha = 0.8) +
+  scale_fill_manual(values = c("healthy" = "lightblue", "overweight" = "#d6ccc2", "underweight" = "lightpink")) +
+  labs(y = "Probabilidade",
+       x = "",
+      fill = "Saude") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+
+Extraíndo os coeficientes do modelo
+```{r echo=TRUE}
+tmp <- summary(modelo2)
+coefs <- tmp@coef3[, "Estimate"]
+se <- tmp@coef3[, "Std. Error"]
+
+results <- data.frame(Coef = coefs,
+                      SE = se) #Savlando em um df
+
+
+### Excluindo os interceptos (para melhor visualização)
+results <- results[-c(1:3),]
+
+
+
+### Calculando razão de chances & ICs a 95%
+df_or <- results %>%
+            mutate(OR = exp(Coef), #odds ratio
+                   LCI = exp(Coef - (1.96 * SE)), #limite inferior do IC 95%
+                   UCI = exp(Coef + (1.96 * SE)), #limite superior do IC 95%
+                   Comparison = rownames(results)) #reavendo os níveis de comparação
+                  
+
+
+### Formatando os dados para plotagem
+df_or <- df_or %>%
+          mutate(life_stage = gsub("^life_stage", "", Comparison), #tirando 'species'
+                 health_metrics = gsub(".*:", "", Comparison)) %>% #ficando apenas com os números
+          mutate(life_stage = gsub(":[0-9]+$", "", life_stage), #tirando os números
+                 health_metrics = ifelse(health_metrics == 1, "overweight", 'underweight')) #reclassificando os números de acordo com as categorias alimentares
+                               
+                               
+                               
+```
+
+
+ Plotando o gráfico final
+```{r echo=TRUE}
+
+ggplot(df_or, aes(y = health_metrics, x = OR, color = life_stage)) +
+  geom_point(position = position_dodge(width = 0.5), size = 4) +
+  geom_errorbarh(aes(xmin = LCI, xmax = UCI), height = 0.2, position = position_dodge(width = 0.5), size = 1.5) +
+  geom_vline(xintercept = 1, linetype = "dashed", color = "black", size = 1) +
+  scale_x_log10() + # Escala log para melhor visualização do OR
+  scale_colour_manual(values = c("brown","darkcyan")) +
+  labs(x = "Razão de chances (log)",
+       y = "Saude",
+       color = "Estágio de vida") +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom")
+```         
+A partir do gráfico e das análises, podemos concluir que filhotes apresentaram menor chance de estarem abaixo do peso em comparação com adultos (OR ≈ 0.6, IC 95% ≈ 0.45–0.75). Juvenis apresentaram menor chance de estarem acima do peso (“overweight”) do que adultos (OR ≈ 0.65, IC 95% ≈ 0.5–0.8).
+
+
+
+Modelo 3
+```{r echo=TRUE}
+#Avaliando a relação entre a condição de saúde e o sexo
+modelo3 <- vglm(health_metrics ~ sex, 
+                family = multinomial(refLevel = 1),  # define a categoria de referência
+                data = dados)
+
+summary(modelo3)
+```
+
+```{r echo=TRUE}
+#Predições de probabilidade para cada sexo
+
+dados_pred3 <- data.frame(sex = levels(dados$sex)) 
+
+preds3 <- predict(modelo3,
+                  newdata = dados_pred3,
+                  type = "response") %>% data.frame()
+```
+
+Formatar os resultados para gerar o gráfico
+```{r echo=TRUE}
+preds3$sex <- dados_pred3$sex
+
+colnames(preds3) <- c("healthy", "overweight", "underweight","sex") #Renomeando as colunas da espécie, assumindo a mesma ordem do modelo
+
+### Transformar dado para o formato longo (necessário para o ggplot2)
+preds31 <- preds3 %>%
+                tidyr::pivot_longer(cols = c("healthy", "overweight", "underweight"),
+                                    names_to = "health_metrics",
+                                    values_to = "Probability")
+
+```
+
+```{r echo=TRUE}
+
+### Plotando.... 
+ggplot(preds31, aes(x = sex, y = Probability, fill = health_metrics)) +
+  geom_bar(stat = "identity", position = "stack",  alpha = 0.8) +
+  scale_fill_manual(values = c("healthy" = "lightblue", "overweight" = "#d6ccc2", "underweight" = "lightpink")) +
+  labs(y = "Probabilidade",
+       x = "",
+      fill = "Saude") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+Extraíndo os coeficientes do modelo
+```{r echo=TRUE}
+tmp <- summary(modelo3)
+coefs <- tmp@coef3[, "Estimate"]
+se <- tmp@coef3[, "Std. Error"]
+
+results <- data.frame(Coef = coefs,
+                      SE = se) #Savlando em um df
+
+
+### Excluindo os interceptos (para melhor visualização)
+results <- results[-c(1:3),]
+
+
+
+### Calculando razão de chances & ICs a 95%
+df_or <- results %>%
+            mutate(OR = exp(Coef), #odds ratio
+                   LCI = exp(Coef - (1.96 * SE)), #limite inferior do IC 95%
+                   UCI = exp(Coef + (1.96 * SE)), #limite superior do IC 95%
+                   Comparison = rownames(results)) #reavendo os níveis de comparação
+                  
+
+
+### Formatando os dados para plotagem
+df_or <- df_or %>%
+          mutate(sex = gsub("^life_stage", "", Comparison), #tirando 'species'
+                 health_metrics = gsub(".*:", "", Comparison)) %>% #ficando apenas com os números
+          mutate(sex = gsub(":[0-9]+$", "", sex), #tirando os números
+                 health_metrics = ifelse(health_metrics == 1, "overweight", 'underweight')) #reclassificando os números de acordo com as categorias alimentares
+                               
+                               
+                               
+```
+
+ Plotando o gráfico final
+```{r echo=TRUE}
+
+ggplot(df_or, aes(y = health_metrics, x = OR, color = sex)) +
+  geom_point(position = position_dodge(width = 0.5), size = 4) +
+  geom_errorbarh(aes(xmin = LCI, xmax = UCI), height = 0.2, position = position_dodge(width = 0.5), size = 1.5) +
+  geom_vline(xintercept = 1, linetype = "dashed", color = "black", size = 1) +
+  scale_x_log10() + # Escala log para melhor visualização do OR
+  scale_colour_manual(values = c("brown","darkcyan")) +
+  labs(x = "Razão de chances (log)",
+       y = "Saude",
+       color = "Sexo") +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom")
+```                           
+
+A partir do gráfico e das análises, podemos concluir que machos apresentaram uma chance significativamente maior de serem classificados como abaixo do peso (“underweight”) em comparação com fêmeas(OR ≈ 1.3, IC 95% ≈ 1.05–1.6).
+
+
+Por fim, podemos concluir que as hipóteses foram corroboradas, havendo sim diferença da condição de saúde dos pinguins com relação à espécie, ao estágio de vida e ao sexo.

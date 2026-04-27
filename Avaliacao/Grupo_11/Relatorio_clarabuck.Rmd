@@ -1,0 +1,29 @@
+---
+title: "Relatório GLM para dados binários"
+author: "Clara Buck"
+date: "`r Sys.Date()`"
+output: html_document
+      theme: journal 
+      number_sections: yes
+      toc: true               
+      toc_float:              
+        collapsed: false      
+        smooth_scroll: false  
+        position: left        
+        width: 250px          
+---
+
+## Introdução
+
+Este relatório apresenta uma análise exploratória sobre a relação entre o **tamanho do peixe-leão (*Pterois spp.*)** e a **profundidade dos pontos de mergulho** no arquipélago de Fernando de Noronha.  
+Os dados foram obtidos a partir de campanhas de monitoramento e registros de mergulhos entre 2020 e 2023. O objetivo principal é observar padrões iniciais de variação do comprimento total dos indivíduos em diferentes **estratos de profundidade** (rasos e fundos), considerando também variáveis associadas à **exposição e categoria de unidade de conservação**.  
+
+As análises apresentadas a seguir buscam identificar tendências visuais e possíveis relações que servirão de base para modelos posteriores de predição (GLM).  
+
+---
+
+## 1. Carregamento e preparação dos dados
+
+Nesta seção são instalados e carregados os pacotes necessários, e o banco de dados é importado para o ambiente de trabalho.  
+Em seguida, são realizadas transformações de variáveis e criação de novas categorias, incluindo o **estrato de profundidade** (raso/fundo).
+

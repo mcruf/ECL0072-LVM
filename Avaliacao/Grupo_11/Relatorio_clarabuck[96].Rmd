@@ -1,0 +1,101 @@
+---
+title: "Relatório GLM para dados binários"
+author: "Clara Buck"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: journal
+    number_sections: yes
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+      position: left
+      width: 250px
+
+---
+
+## Introdução
+
+Este relatório apresenta uma análise exploratória sobre a relação entre o **tamanho do peixe-leão (*Pterois spp.*)** e a **profundidade dos pontos de mergulho** no arquipélago de Fernando de Noronha.  
+Os dados foram obtidos a partir de campanhas de monitoramento e registros de mergulhos entre 2020 e 2023. O objetivo principal é observar padrões iniciais de variação do comprimento total dos indivíduos em diferentes **estratos de profundidade** (rasos e fundos), considerando também variáveis associadas à **exposição e categoria de unidade de conservação**.  
+
+As análises apresentadas a seguir buscam identificar tendências visuais e possíveis relações que servirão de base para modelos posteriores de predição (GLM).  
+
+---
+
+## 1. Carregamento e preparação dos dados
+
+Nesta seção são instalados e carregados os pacotes necessários, e o banco de dados é importado para o ambiente de trabalho.  
+Em seguida, são realizadas transformações de variáveis e criação de novas categorias, incluindo o **estrato de profundidade** (raso/fundo).
+
+```{r echo=T, message=F, warning=F}
+if(!require(readxl)){install.packages('readxl'); library(readxl)}
+if(!require(plyr)){install.packages('plyr'); library(plyr)}
+if(!require(tidyverse)){install.packages('tidyverse'); library(tidyverse)}
+if(!require(dplyr)){install.packages('dplyr'); library(dplyr)}
+
+# Leitura do banco de dados
+
+# df <- readr::read_csv("C:/Users/Dell/Documents/analises_lionfish/BD_lionfish_biometria.csv", 
+#                       na = c("na","NA"))
+
+df <- readr::read_csv("/Users/mcruf/Library/CloudStorage/OneDrive-Personal/Arbeit/Lectures_and_Talks/UFRN/Lectures/ECL0072-GLM_GAM/Avaliacao/Grupo_11/BD_lionfish_biometria.csv", 
+                      na = c("na","NA"))
+
+
+# Criação de estrato de profundidade
+df$estrato <- ifelse(df$prof_m <= 30, "raso", "fundo")
+
+# Conversão de variáveis categóricas
+df$uc   <- as.factor(df$uc)
+df$data <- as.factor(df$data)
+df$site <- as.factor(df$site)
+df$expo <- as.factor(df$expo)
+df$estrato <- as.factor(df$estrato)
+
+``` 
+
+## 2. Criação de variáveis binárias
+
+Aqui, as variáveis categóricas foram convertidas para formato binário (0 e 1), com o objetivo de facilitar futuras análises de modelos lineares generalizados (GLM).
+
+```{r echo=T, message=F, warning=F}
+df$cat_uc <- ifelse(df$uc == "PARNAFN",1, 0) %>% as.factor()
+df$cat_expo <- ifelse(df$expo == "dentro",1, 0) %>% as.factor()
+df$cat_estrato <- ifelse(df$estrato == "raso",1, 0) %>% as.factor()
+
+# Conferência
+str(df)
+```
+
+## 3. Relação entre comprimento total e estrato de profundidade
+
+Nesta análise exploratória é avaliada a variação do comprimento total (cm) dos indivíduos em função do estrato de profundidade.
+São apresentados dois tipos de visualização:
+
+- Nuvem de pontos – mostrando a dispersão dos dados.
+
+- Boxplot – evidenciando a mediana e a variação dos comprimentos em cada estrato.
+
+
+```{r echo=T}
+df %>%
+filter(!is.na(ct_cm) & !is.na(cat_estrato)) %>%
+ggplot(aes(x = ct_cm, y = cat_estrato)) +
+geom_point(size = 4, col = 'gray50', alpha = 0.25) +
+theme_minimal() +
+labs(x = "Comprimento total (cm)", y = "Estrato (0=fundo, 1=raso)",
+title = "Dispersão do comprimento total por estrato de profundidade")
+
+
+df %>%
+filter(!is.na(ct_cm) & !is.na(cat_estrato)) %>%
+ggplot(aes(x = cat_estrato, y = ct_cm)) +
+geom_boxplot(fill = "cyan3", color = "cyan4", alpha = 0.6, outlier.color = "darkgoldenrod1") +
+theme_minimal() +
+labs(x = "Estrato de profundidade", y = "Comprimento total (cm)",
+title = "Distribuição do comprimento total por estrato")
+```
+
+Podemos perceber pelo boxplot uma maior concentração de indivíduos maiores em estratos mais profundos do arquipélago, enquanto indivíduos menores se concentram em áreas mais rasas.

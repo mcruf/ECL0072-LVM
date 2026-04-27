@@ -1,0 +1,301 @@
+---
+title: "Avaliação do relatório - Maiara Menezes"
+output: pdf_document
+---
+
+
+
+------------------------------------------------
+
+
+# Comentário geral
+
+O relatório está bem estruturado, apresentando as análises exploratórias de maneira clara e bem conectadas às hipóteses, com todos os modelos propostos bem alinhados aos objetivos de cada capítulo. Destaco a preocupação em explicitar a estrutura do modelo completo em cada capítulo, o que contribui para a clareza metodológica. Parabéns! Devo, contudo, também destacar alguns pontos que carecem maior atenção, sobretudo as confusões reiteradas entre a escala do preditor linear *vs.* a escala da resposta, e a respectiva interpretação dos coeficientes dos modelos. Também é necessário revisar a interpretação dos coeficientes de variáveis categóricas, já que ao longo de todos os capítulos estes foram interpretados como variáveis numéricas. Meus parabéns pelo esforço e dedicação para este curso e, princiaplmente, por ter vencido as barreiras do RMarkdown!!
+
+
+\vline
+
+# Comentários específicos
+
+## Cap. 1: Dados binários
+
+- Seção 1:
+  - Cuidado: proporção de machos/fêmeas na é, em si, um dado binário. 
+    - Mas é um dado cuja informação pode derivar de um dado binário.
+      - Confesso que faltou eu trazer um exemplo com dados de proporção nesta aula de GLM binomial - mas já está anotado para incluir essa parte da próxima vez que der a disciplina!
+  - Pela sua frase "*Esses dados foram coletados a partir da pesca industrial de espinhel entre os anos 2003 e 2003*", vejo que tentou usar as funcionalidades do Markdown para atualizar os valores automaticamente no texto. Muito legal isso - parabéns!!
+    - **Preciosismo**: repare que o dado possui informações apenas para o ano de 2003; logo, o texto teria que ser atualizado. Uma alternativa seria você se referir aos meses do ano para seu texto fazer, de fato, sentido! Pode usar `min(dados$Mes)` e `max(dados$Mes)`
+    
+<br>
+
+- Seção 2:
+  - Sua análise exploratória está bem estruturada e informatiava - parabéns!
+    - Curiosidade: caso quisesse saber com precisão a temperatura/profundidade média/mediana de ocorrência e ausência da cavala, você poderia recorrer ao seguinte código:
+
+
+```{r echo=T, eval = F}
+
+## Comandos base
+tapply(dados$sst, dados$Acanthocybium_solandri, mean) # média
+tapply(dados$sst, dados$Acanthocybium_solandri, median) # mediana (boxplots)
+tapply(dados$depth, dados$Acanthocybium_solandri, mean) # média
+tapply(dados$depth, dados$Acanthocybium_solandri, median) # mediana (boxplots)
+
+
+
+## Comandos dplyr
+dados %>% 
+  group_by(Acanthocybium_solandri) %>% 
+  summarise(sst_avg = mean(sst),
+            sst_median = median(sst),
+            depth_avg = mean(depth),
+            depth_median = median(depth))
+
+
+```
+  
+<br>
+  
+- Seções 3 e 4:
+  - Parabéns pela clareza das suas hipóteses e objetivos. Você alinhou-las muito bem às análises exploratórias.
+
+<br>
+
+- Seção 5:
+  - A formulação geral do modelo matemática está corretíssima, mas a descrição textual  dos índices pode ser mais um pouco refinada e faltou você mencioar a função de ligação. Veja minha sugestão abaixo:
+    - > Onde $logit(p_i)$ é a função de ligação, $y_i$ representa a ocorrência da cavala na pescaria $i$, $n_i$ é o número total de pescarias, $p_i$ é a probabiliadade de ocorrência da cavala, $\beta_0$ é o intercepto, $x_{i,j}$ corresponde ao valor da $j$-ésima covariável e $\beta_j$ é o coeficiente que quantifica o efeito dessa covariável.
+
+  - **Cuidado!** A formulação do modelo "completo" (segundo modelo desta seção) não está totalmente correta. Como você inclui explícitamente as variáveis *Temperatura* e *Profundidade* na estrutura do modelo, não há necessidade dos símbolos de somatório e, consequentemente, os índices $j$ e $k$. Veja como o seu modelo geral pode ser decomposto:
+  
+$$logit(p_i) = \eta_i = \beta_0 + \sum_{j=1}^{J} \beta_j x_{ij} $$
+
+No contexto da sua hipótese, o símbolo de somatório $\sum_{j=1}^{J}$ pode ser representado pela soma das suas coviariáveis que você está avaliando:
+
+
+$$\sum_{j=1}^{J} \beta_j x_{ij} = \beta_1Temperatura_i + \beta_2Profundidade_i$$
+Portanto, o modelo das suas hipóteses pode ser reescrito conforme:
+
+$$logit(p_i) = \eta_i = \beta_0 + \beta_1Temperatura_i + \beta_2Profundidade_i$$
+
+<br>
+
+- Seção 6:
+  - **Curiosidade:** Para selecão de modelos, muitas vezes se recorre ao $\Delta AIC$, o qual mede a diferença entre o AIC do modelo avaliado e o modelo de menor AIC (melhor modelo). De acordo com Burnham & Anderson (2002), modelos com $\Delta AIC \leqslant 3$ podem ser considerados igualmente plausíveis. No seu caso, vemos que não há virtualmente nenhuma diferença do melhor (mod0) e pior modelo (mod3).
+  
+  - Hmh, considere rever a sua frase: "*Logo, podemos assumir que as covariáveis escolhidas não foram suficientes para explicar / estimar o sucesso de captura da cavala.*"
+    - Você não pode tirar essa conclusão do teste de razão de verossimilhança (LRT). No LRT, você está testando diretamente a hipótese nula, i.e., $H_0: \beta_{temperatura} = 0$. Como o p-valor foi $> 0.05$, não rejeitamos a $H_0$. Perceba, que o fato de não rejeitarmos a $H_0$, isso não implica em "provar ausência de efeito".
+      - O LRT apenas indica ausência de evidência estatística, não evidência de ausência de efeito da covariável.
+    - Você poderia reformular sua frase para algo como "*Pode-se assumir que a temperatura não apresentou efeito detectável sobre a probabilidade de captura da cavala*"
+    
+- Senti falta de você explorar duas coisas de forma mais aprofundada:
+  - 1) Explorar os resultados numéricos do modelo logístico, i.e., o `summary(mod1)`.
+    - Em que escalas os resultados estão estimados?
+    - Como interpretar os resultados numéricos?
+  - 2) Explorar mais a sua análise residual e os gráficos que expôs; você focou essencialmente no pressuposto da normaldiade, mas há o pressuposto da homocedasticidade e independência cuja avaliação é mais imporante. 
+
+
+<br>
+
+
+## Cap. 2: Dados discretos
+
+- Seções 1-2:
+  - Estas duas seções estão muito bem apresentadas: contextualização dos dados sucinta e clara exposicão dos objetivos e hipóteses frente aos resultados da análise exploratória. 
+
+<br>
+
+- Seção 3:
+  - Penso que teria sido válido expor alguns aspectos da  distribuição binomial negativa para nesta seção de modo a discutir as diferenças mais claramente entre um modelo Poisson e um BN.
+    - Lembrando que uma das maiores restrições da distribuição Poisson é que ela assume que a média dos dados é igual a variância ($\mu = \sigma^2$). Dados ecológicos muitas vezes - se não quase sempre - apresentam uma variância muito maior do que a média, sendo a distribuição BN muitas vezes mais indicada.
+
+  - **Preciosismo:** você escreve: "*Adicionalmente, como estamos trabalhando com um modelo aditivo generalizado [...]*".
+    - Você está se referindo a um GAM (modelo *aditivo* generalizado), quando o modelo apresentado é um GLM (modelo *linear* generalizado).
+
+  - **Cuidado!** você está misturando alguns conceitos-chave de um GLM. No seu texto, você comenta: "$log(\lambda_i)$ *é o componente randômico, que sempre deverá assumir um valor positivo; [...]*". Há alguns erros concetuais que merecem destaque.
+    - Conforme exposto em aula, um GLM/GAM é composto por 3 componentes, conforme destacado abaixo:
+
+**Componente aleatório**
+$$y_i \sim \text{Poisson}(\lambda_i)$$
+**Componente sistemático (preditor linear)**
+$$\eta_i = \beta_0 + \sum_{j=1}^J \beta_j$$
+**Função de ligação**  
+$$g(\lambda_i) = \log(\lambda_i) = \eta_i$$
+  - Repare que o componente aleatório se refere à distribuição de probabilidade conferida aos dados - neste caso, a distribuição poisson. A função de ligação estabelece a ligação entre os componentes sistemáticos e aleatórios. Como o componente sistemático só pode assumir valores positivos, usa-se uma função de ligação logaritma de modo a assegurar que o modelo sempre retorne valores positivos.
+
+  - A equação do seu modelo completo não está totalmente correta. Pela verão apresentada, interpreta-se que a variávl `Exposição` esteja sendo tratada como numérica, quando ela é, de fato, categórica. A forma correta (e mais enxuta) de representar uma equação com fatores é:
+  
+$$log(\lambda_i) = \eta_i = \beta_0 + \sum_{j=2}^{J} \beta_j Exposure_{i} +  \beta_kNAP_{i} $$
+- repare que nessa formulação, os níveis de cada fator (exposição, nap) estão resumidos no somatório de cada fator. Quando se abre o somatório, a equação torna-se essencialmente:
+
+$$\eta_i = \beta_0 + \beta_1Exposure10_i + \beta_2Exposure11_i + \beta_3NAP_i$$
+- Veja que `Exposure8` não aparece na equação, porque está sendo absorvido no intercepto.
+  
+<br>
+
+- Seção 4:
+  - Gostei de como interpretou os resultados da análise residual do modelo 3 e, a partir daí, decidir testar o mesmo modelo mas com uma distribuição de proabilidade diferente (no caso, BN).
+  
+  - **Cuidado!** você realizou um teste de razão de verossimilhança (LRT) para avaliar se `mod4` difere significativamente de `mod3`.
+    - LRTs só podem ser realizados em situações em que um modelo está aninhado dentro do outro e dentro da mesma distribuição de probabilidade. 
+      - Exemplo: modelo1 ($\eta_1 = A + B$) está aninhado dentro de modelo2 ($\eta_2 = A + B + C$)
+      - No seu caso, seus modelos além de não serem aninhados, seguem distribuições de probabilidades diferentes.
+      - Neste caso,recomenda-se olhar apenas para o AIC e os ajustes gráficos dos resíduos.
+
+  - Achei curioso não ter dado muita diferença entre os AICs do modelo Poisson e BN; normalmente observa-se uma diferença bem acentuada. 
+    - Obs.: isso não é problema - é apenas uma observação que estou expondo textualmente!
+
+  - A interpretação dos resultados numéricos está quase correta, mas deve ser ajustada um pouco mais e os valores que expõe no texto, atualizados - eles não correspondem aos valores visto no summary.
+    - Note que sua interepretação para o parâmetro "Exposure" não está totalmente correta. Você está interpretando os resultados como se esta variável fosse numérica, mas você a considerou como fator. Logo, a interpretação dos resultados fica relativo ao nível do fator que foi absorvido no interecepto - neste caso, Exposure8 ( o menor nível de exposição).
+      - Assim, a interpretação dos resultados tem que sempre ter o intercepto como ponto de pertida. Poderia começar suas frase como algo na linha de: "*Comparado às praias com menor nível de exposição (Exposure8), há uma diminuição singificativa na riqueza bentônica à medida que se avança para parias com maior nível de exposição (Exposure10 e Exposure11).*"
+    - Além disso, houve uma ligeira confusão entre a escala original e logarítmica dos coeficientes estimados. 
+      - O modelo Poisson (e BN) opera com uma função de ligação logarítmica - portanto, todos os valores estimados pelo modelo estarão expressos na escala *log.* Para transformar na escala original, você precisa aplicar a função exponencial em cima dos valores estimados - e não aplicar o logaritmo, como você fez.
+    - Outra coisa que é **muito** importante ter em mente é que quando se trabalha com distribuições que operam na escala logarítmica, os efeitos passam a ser *multiplicativos* sobre a média, e não aditivos como você está interpretando. Além disso, há duas vias de intererpretar os resultados, dependendno se queremos interpretar os efeitos das covariáveis isoladamente (relativamente) ou se queremos prever a riqueza esperada para um determinado ponto. Vejamos:
+
+<br>
+    - **Interpretção isolada (razões de médias):** nesta abordagem interpreta-se o efeito de cada covariável mantendo as demais constantes, sem incorporar o intercepto.
+      - **Exemplo 1:** efeito do NAP - $exp(-0.5137) = 0.598$; isso significa que, para cada aumento de 1 unidade de NAP, e mantendo as demais variáveis constantes, a média esperada da riqueza passa a ser 59.8%  do valor anterior. Portanto, podemos interpretar esses resultados também sob a forma de que cada incremento unitário de NAP está associado a uma redução de aproximadamente 40% na riqueza média esperada (1-0.598).
+      - **Exemplo 2:** efeito Exposure10 - $exp(-0.5898) = 0.554$; mantendo NAP constante, uma praia com Exposure10 apresenta uma riqueza média esperada de aproximadamente 55.5% da riqueza esperada na categoria de referência (i.e., Exposure8). De forma equivalente, isso implica que há uma redução de ~44.5% na riqueza quando comparamos às praias no nível de referência (Exposure8).
+
+<br>
+
+  - **Interpretção conjunta: (média absoluta)** aqui se considera o intercepto no cálculo, uma vez que se quer estimar o valor da média absoluta para uma combinação específica de covariáveis $\lambda = exp(\beta_0 + \beta_{1}NAP + ...$
+    - **Exemplo 1:** considerando uma praia com Exposure8 (nível de referência) e NAP=1, a média esperada é: $\lambda = \exp(2.5269 - 0.5137) \approx 7.48 \text{ espécies}$
+    - **Exemplo 2:** considerando uma praia com Exposure8 (nível de referência) e todas as covariáveis (NAP = Expousre10 = Exposure11 = 1), a média esperada é: $\lambda = \exp(2.5269 - 0.5137 - -0.5898 -1.3312) \approx 3.56 \text{ espécies}$
+
+
+<br>
+
+## Cap. 3: Dados contínuos
+
+- Seção 1:
+  - Muito perspicaz a sua observação sobre os 'NAs' no banco de dados! Parabéns por se ligar nisto!
+    - Minha sugestão é que a função `na.omit()` seja utilizada apenas quando todas as colunas do banco de dados forem efetivamente usadas na análise. Isso ocorre porque essa função remove todas as linhas que contêm pelo menos um valor ausente (NA), independentemente de a coluna correspondente ser ou não utilizada no modelo. Dessa forma, existe o risco de você estar descartando observações desnecessariamente, mesmo quando há informações completas para as variáveis que entram na análise.
+      - Uma alternativa mais adequada seria aplicar a remoção de NAs apenas às variáveis de interesse, seja selecionando previamente as colunas que serão utilizadas ou utilizando o argumento `na.action` diretamente na função de ajuste do modelo:
+
+<br>
+
+```{r eval=F, echo=T}
+
+## Alternativa 1
+dados_limpos <- na.omit(dados[, c("sleep", "Body")])
+
+## Alternativa 2
+glm(sleep ~ body, na.action = na.omit)
+```
+
+<br>
+
+  - **Cuidado!** você comenta: "*Adicionalmente, vemos que há uma uma relação negativa entre tempo de sono e a massa corporal que precisa ser investigada.*"
+    - Essa tendência é *muito* sutil e, de fato, pode estar sendo influenciada pelo ponto referente ao elefante (outlier)
+
+<br>
+
+- Seção 2:
+  - Legal que você irá explorar as as duas distribuições!
+  - Hmh, você está confundindo algumas coisinhas. Vamos lá distrinchá-las:
+  <br>
+  
+  **- 1)** As duas primeiras fórmulas que você apresenta nesta seção não representa o modelo estatístico em si, e sim a função matemática (função densidade) que descreve a forma da distribuição Gama. O modelo estatístico não é descrito pela função densidade isoladamente. A função de densidade apenas caracteriza a distribuição assumida para a variável resposta (Y). Em um contexto de GLM, o que se modela é o *valor esperado* de Y, que é relacionado às covariáveis por meio de um preditor linear através da função de ligação.
+  
+    <br>
+  
+  **- 2)** a interpretação dos parâmetros $\alpha$ e $\beta$ da distribuição Gama como média e variância, respectivamente, está equivocada.
+    - Os parâmetros $\alpha$ e $\beta$ são parâmetros matemáticos da distribuição Gama e descrevem a forma ($\alpha$) e a escala ($\beta$) da distribuição. Esse parâmetros não têm interpretação direta em termos de covariáveis, e nem se conectam naturalmente com uma função de ligação. Por isso, em GLMs/GAMs (e modelos afins) a função Gama é reparametrizada em termos de $\mu$ (média) e $\phi$ (dispersão), que são parâmetros com uma interpretação mais intuitiva e se conectam facilmente à função de ligação. Veja como é essa reparametrização e qual seria a forma mais adequada de você representar o modelo em um trabalho:
+
+
+**Reparametrização da distribuição Gama**
+
+$$Y_i \sim \text{Gama}(\mu_i, \phi)$$
+com:
+
+$$E(Y) = \mu = \frac{\alpha}{\beta}; \text{Var}(Y) = \frac{\alpha}{\beta^2}$$
+Define-se o parâmetro de dispersão como:
+
+$$\phi = \frac{1}{\alpha}$$
+Logo:
+
+$$\alpha = \frac{1}{\phi};\ \beta = \frac{1}{\mu \phi}$$
+
+**Formulação do modelo estatístico**
+
+$$Y_i \sim \text{Gama}(\mu_i, \phi) \quad \text{ou} \quad Y_i \sim \text{Lognormal}(\mu_i, \sigma^2)$$
+$$\log(\mu_i) = \beta_0 + \beta_1 x_{i1} + \cdots + \beta_p x_{ip}$$
+
+<br>
+
+- Seção 3:
+  - Hmh, há novamente uma leve confusão entre a escala do preditor e a escala da resposta, e os valores não estão bem alinhados com os valores do `summary()`. O modelo ajustado se dá sob a seguinte forma:
+  
+$$Y_i \sim \text{Gama}(\mu_i, \phi) \\ 
+\log(\mu_i) = \beta_0 + \beta_1 x_{i1} + \cdots + \beta_p x_{ip} \\
+\mu_i = exp(\beta_0 + \beta_1 x_{i1} + \cdots + \beta_p x_{ip})
+$$
+Lembrando que:
+
+$$\exp(a + b) = \exp(a)\cdot\exp(b)$$
+
+Logo:
+
+$$\mu_i = 
+\underbrace{\exp(\beta_0)}_{\text{nível de referência}}
+\times
+\underbrace{\exp(\beta_1\,\text{body}_i)}_{\text{efeito body}}
+\times
+\underbrace{\exp(\beta_2\,\text{predation}_i)}_{\text{efeito predation}}
+\times
+\underbrace{\exp(\beta_3\,\text{exposure}_i)}_{\text{efeito exposure}}$$
+
+
+- Dado à escala log imposta pela função de ligação, os coeficientes não retratam reduções/aumentos aditivas em horas, e sim efeitos multiplicativos sobre a média. Além disso, tem que se distinguir se o desejo é interpretar o efeito da covariável isoladamente ($exp(\beta_{covar})$) ou em conjunto ($exp(\beta_0 + \beta_{covar})$) - vide meu comentário sobre isso no capítulo 2. Vejamos um exemplo:
+  - Para `body` teremos:
+    - $\beta_{\text{body}} = -0.0001149$, logo $\exp(-0.0001149) \approx 0.999885$. Para cada aumento de 1 unidade em body (1 g), mantendo as demais variáveis constantes, a média esperada do tempo de sono é multiplicada por 0.999885, ou seja, há uma redução de aproximadamente 0.0115% no tempo médio de sono.
+    
+
+  - **Cuidado!** Você transformou suas variáveis `exposure` e `predation` como fatores, mas está interpretando-as no resulado como se fossem numéricas. Lembre-se que com variáveis categóricas, o primeiro nível do fator é *sempre* absorvido no intercepto. Logo, cada coeficiente representa a diferença em relação ao nível de referência - no seu caso, dado por `exposure1` e `predation1`.
+    - Exemplo para `exposure5`: $\exp(-0.9246) \approx 0.397$. Interpretamos, portanto, que quando as demais variáveis são mantidas constantes, indivíduos no nível exposure5 apresentam uma duração média de sono cerca de 60% menor do que indivíduos no nível de referência de exposição.
+    
+  - **Cuidado 2!** Você comenta: "*[...] observamos que aceitamos as nossas hipóteses testadas a respeito do tamanho corporal e da exposição durante o sono, e rejeitamos a hipótese sobre a propensação à predação.*"
+    - É inadequado afirmar que 'aceitamos as nossas hipoteses'. Na abordagem estatística clássica (frequentista), os testes de hipóteses não permitem afirmar que uma hipótese foi “aceita”. Formalmente, o que podemos concluir é apenas se rejeitamos ou não rejeitamos a *hipótese nula*, com base no nível de significância adotado.Assim, quando um efeito de uma variável não é estatisticamente significativo, a interpretação correta é que não houve evidência suficiente nos dados para rejeitar a hipótese nula, e não que a hipótese alternativa tenha sido aceita. Essa interpretação muda completamente na abordagem bayesiana....
+
+ - **Cuidado 3!** Os gráficos apresentados não representam diretamente os resultados do modelo ajustado. A função geom_smooth(method = "gam") ajusta um  modelo GAM baseado em uma distribuição Gaussiana (Normal). Você está propondo um modelo GLM com uma distribuição Gama. Dessa forma, os padrões exibidos no gráfico não correspondem às estimativas do modelo e não devem ser utilizados para ilustrar seus resultados
+  - A função`geom_smooth()` deve ser usado apenas para vias de exploração visual. 
+  - Para representar graficamente o modelo ajustado, é necessário utilizar valores preditos a partir do próprio modelo, mantendo as demais covariáveis constantes. Suponha que você queira visualizar o efeito de `body`, no R você faria:
+
+
+```{r echo=T, eval=F}
+
+## Data frame para predições
+dfpred <- data.frame(body = seq(min(dados$body, na.rm = TRUE), 
+                                max(dados$body, na.rm = TRUE),
+                                length.out = 100),
+                    predation = levels(dados$predation)[1], # nível de referência (constante)
+                    exposure  = levels(dados$exposure)[1]) # nível de referência (constante)
+
+
+## Gerando as predições com base no dfpred
+predicoes <- predict(modelo_G, 
+                     newdata = dfpred, 
+                     type = "response", 
+                     se.fit = TRUE)
+
+## Adicionando valores preditos, erros padroes e intervalos de confianca
+predicoes$fit <- pred_G$fit
+predicoes$se <- pred_G$se.fit
+predicoes$lower <- predicoes$fit - 1.96 * dfpred_lat$se
+predicoes$upper <- predicoes$fit + 1.96 * dfpred_lat$se
+
+
+## Gerando o grafico
+ggplot(predicoes, aes(x = body, y = fit)) +
+  geom_line(size = 1.2) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
+  theme_minimal()
+
+```
+
+
+ 
+ 
+ 
+
+    

@@ -1,0 +1,1482 @@
+---
+title: "Relatório da disciplina: Modelos Lineares Generalizados e Aditivos para Dados Ecológicos"
+author: "Bianca Guerreiro"
+date: "12-10-2025"
+output:
+   html_document: #Salvar como html
+      theme: journal #cerulean,flatly, united, cosmo, simplex  
+      number_sections: yes
+      toc: true               # Gera sumário (Table of Contents)
+      toc_float:              # Faz o sumário “flutuar” ao lado
+        collapsed: false      # Não inicia “fechado”
+        smooth_scroll: false  # Desativa rolagem suave (opcional)
+        position: left        # Posiciona o sumário à esquerda
+        width: 250px          # Define a largura do sumário
+---
+
+# GLM para dados binários
+
+## Introdução
+
+Dados binários são caracterizados por variáveis que assumem apenas dois estados possíveis, geralmente representados como 0 e 1, correspondendo a eventos de sucesso/fracasso ou ocorrência/não ocorrência etc. Esse tipo de dado é comum em estudos ecológicos, nos quais frequentemente se deseja modelar a probabilidade de ocorrência de uma espécie em função de características ambientais.
+
+Neste relatório, aplicaremos modelos lineares generalizados (GLMs) com distribuição binomial para analisar a ocorrência do guigó-da-Caatinga (<i>Callicebus barbarabrownae</i>), um primata endêmico e ameaçado da Caatinga. Aqui, o objetivo é avaliar como a estrutura do entorno desses fragmentos, representada por atributos da paisagem, influencia a probabilidade de ocorrência de <i>C. barbarabrownae</i>.
+
+Para definir as paisagens de presença e ausência da espécie, compilamos registros primários (aqueles feitos pelos próprios autores em campo) da literatura contendo informações de presença e ausência da espécie em diferentes fragmentos florestais.
+
+Vejamos as informações contidas no banco de dados:
+```{r echo=F}
+setwd("D:/doutorado/relatorio_disciplina_marie/relatorio_disciplina_marie")
+
+```
+```{r}
+dados <- read.csv("binomial/relat_dados_ocorrencia_cap2.csv")
+```
+```{r include=FALSE}
+dados <- subset(dados, select = -X)
+```
+```{r}
+str(dados)
+```
+`dados$ID` representa a identidade de cada paisagem estudada. Ao todo, o banco de dados tem 84 paisagens distintas.
+
+``` {r}
+length(unique(dados$ID))
+```
+
+A variável `dados$buffer` indica o tamanho (raio) considerado para cada paisagem. Em estudos de ecologia da paisagem, é recomendável que o tamanho da paisagem seja definido a partir de uma análise de escala do efeito, a fim de identificar a escala na qual a variável dependente é melhor explicada pelas variáveis independentes do modelo. No presente conjunto de dados, cada paisagem foi avaliada em 10 tamanhos de buffer diferentes.
+
+``` {r}
+table(dados$buffer) #cada buffer é repetido 84 vezes (que é o número total de paisagens)
+#ou:
+table(unique(dados[, c("ID", "buffer")])$ID) #cada paisagem contem 10 tamanhos de buffer
+```
+
+A variável `dados$situacao` indica se há presença ou ausência do guigó em cada paisagem. Ao todo, são 38 paisagens de ausência e 46 paisagens de presença.
+
+``` {r}
+table(unique(dados[, c("ID", "situacao")])$situacao)
+```
+`dados[,4:13]` são diferentes métricas da paisagem, calculadas a partir do pacote `landscapemetrics` (Hesselbarth et al., 2019) com base em imagens da Coleção 7 do MapBiomas, referentes ao ano de 2021. Onde:
+
+ - `dados$prop_habitat` é a proporção de floresta na paisagem (em %);
+ - `dados$dens_frags` é a densidade de fragmentos da paisagem (frags/100 ha);
+ - `dados$media_area_frags` é a média da área de todos os fragmentos da paisagem (ha);
+ - `dados$med_dist_eucl` é a média da distância euclidiana do vizinho mais próximo (calculada para cada fragmento da paisagem e expressa em metros);
+ - `dados$pcore` diferente das outras métricas, essa é calculada apenas para o fragmento em que foi registrada a presença ou ausência da espécie (fragmento central da paisagem). Mede a área central do fragmento (em hectares), desconsiderando a borda;
+ - `dados$dens_borda` é a densidade de borda dos fragmentos da paisagem (m/ha);
+ - `dados$shape_mn` é um índice que mede o formato médio dos fragmentos da paisagem. Seu valor é sempre maior ou igual a 1; quanto mais próximo de 1, mais próximo de uma forma quadrada é o fragmento, e quanto mais distante de 1, mais complexo é o formato;
+ - `dados$iagreg` é uma métrica de agregação, que indica o grau de agrupamento entre os fragmentos de floresta, variando de 0% (fragmentos mais isolados) a 100% (fragmentos mais próximos e conectados);
+ - `dados$clumpy` é o índice de aglomeração, que mede o padrão de distribuição espacial dos fragmentos. Valores próximos de 1 indicam paisagens altamente agregadas, enquanto valores próximos de 0 indicam uma distribuição mais aleatória;
+ - `dados$coesao` é o índice de coesão, que expressa o grau de conectividade física entre fragmentos de floresta na paisagem (em %). Quanto maior o valor, mais conectada e estruturalmente coesa é a paisagem.
+
+<br>
+
+## Checando multicolinearidade
+
+Como possuímos várias variáveis independentes, o primeiro passo é selecionar aquelas que não estejam fortemente correlacionadas entre si. Como temos 10 diferentes tamanhos de paisagem, o ideal seria avaliar cuidadosamente as correlações entre as métricas em cada tamanho de buffer. 
+
+A seguir, apresentarei _os resultados dos testes de correlação realizados para a maior paisagem (buffer com raio de 3000 m)_.
+
+Para verificar a multicolinearidade entre as métricas de paisagem, calculei as correlações pareadas entre todas as variáveis utilizando o coeficiente de correlação de Pearson, por meio da função `cor()` do R.
+
+```{r}
+b3000 <- subset(dados, buffer== "3000") #selecionando apenas os buffers de raio de 3000m
+
+# Correlation matrix
+nrow(b3000) #checando se estão as 84 paisagens
+names(b3000) #checando as colunas que contém minhas variáveis independentes
+M <- cor(b3000[4:13], use = "complete.obs")
+round(M,2)
+```
+
+Aqui, adotei o limiar de |r| > 0.7 para indicar correlação forte. Quando duas métricas apresentaram correlação elevada, e uma delas era `dados$prop_habitat`, essa última foi priorizada para ser mantida, considerando sua importância ecológica para a espécie-alvo.
+
+Dessa forma, pelos valores de correlação de Pearson, as métricas mque não estão correlacionadas com `dados$prop_habitat` são:
+
+  - `dados$media_area_frags`;
+  - `dados$med_dist_eucl`;
+  - `dados$dens_borda`;
+  - `dados$shape_mn`;
+  - `dados$clumpy`;
+
+Mas, dessas, `dados$shape_mn` e `dados$media_area_frags` estão positivamente correlacionadas (r = 0.71).
+
+```{r}
+plot(b3000$shape_mn, b3000$media_area_frags)
+```
+<br>
+
+Como o formato médio dos fragmentos (`dados$shape_mn`) é principalmente um proxy da quantidade de borda na paisagem e já possuimos uma métrica para isso (`dados$dens_borda`), manterei `dados$media_area_frags` que dá uma informação da área média dos fragmentos na paisagem.
+
+Assim, as métricas selecionadas para explicar a ocorrência da espécie nas paisagens geradas pelo buffer de 3000m, serão:
+
+ - `dados$prop_habitat`;
+ - `dados$media_area_frags`;
+ - `dados$med_dist_eucl`;
+ - `dados$dens_borda`;
+ - `dados$clumpy`;
+
+O resultado das análises de multicolinearidade para os demais tamanhos de buffer no código a seguir, mas, para não alongar o relatório, deixei o resultado em formato de comentário no própio código.
+
+```{r, echo=TRUE, results='hide'}
+# Checando as correlações para os outros tamanhos de paisagem
+
+## subsets para os outros tamanhos
+b399 <- subset(dados, buffer== "399")
+b688 <- subset(dados, buffer== "688")
+b977 <- subset(dados, buffer== "977")
+b1266 <- subset(dados, buffer== "1266")
+b1555 <- subset(dados, buffer== "1555")
+b1844 <- subset(dados, buffer== "1844")
+b2133 <- subset(dados, buffer== "2133")
+b2422 <- subset(dados, buffer== "2422")
+b2711 <- subset(dados, buffer== "2711")
+
+# Correlação métricas b399
+M <- cor(b399[4:13], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_habitat, ficam: dens_frags, med_dist_eucl, shape_mn e clumpy
+
+# Correlação métricas b688
+M <- cor(b688[4:13], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_habitat, ficam: dens_frags, med_dist_eucl, shape_mn e clumpy
+
+# Correlação métricas b977
+M <- cor(b977[4:13], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_habitat, ficam: dens_frags, med_dist_eucl, shape_mn e clumpy
+
+# Correlação métricas b1266
+M <- cor(b1266[4:13], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_habitat, ficam: med_dist_eucl, shape_mn e clumpy
+
+# Correlação métricas b1555
+M <- cor(b1555[4:13], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_habitat, ficam: shape_mn e clumpy
+
+# Correlação métricas b1844
+M <- cor(b1844[4:13], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_habitat, ficam: med_area_frags, shape_mn e clumpy
+
+# Correlação métricas b2133
+M <- cor(b2133[4:13], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_habitat, ficam: med_dist_eucl, shape_mn e clumpy
+
+# Correlação métricas b2422
+M <- cor(b2422[4:13], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_habitat, ficam: med_area_frags, med_dist_eucl, shape_mn e clumpy
+
+# Correlação métricas b2711
+M <- cor(b2711[4:13], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_habitat, ficam: med_area_frags, med_dist_eucl, shape_mn e clumpy
+
+```
+
+## Análise exploratória
+Utilizarei apenas o buffer de 3000m de raio como exemplo para uma breve análise exploratória dos dados.
+
+```{r, fig.width=10, fig.height=15}
+b3000 <- subset(dados, buffer== "3000") #selecionando o buffer de 3000m
+b3000_occur <- subset(b3000, situacao== "presenca") #criando subset para ocorrência
+b3000_absc <- subset(b3000, situacao== "ausencia") #criando subset para ausência
+
+par(mfrow = c(6, 2)) 
+par(mar = c(4, 4, 2, 1))
+#prop_habitat
+hist(b3000_absc$prop_habitat, main = "Ausência - prop_habitat", xlab = "", col = "lightgray")
+hist(b3000_occur$prop_habitat, main = "Presença - prop_habitat", xlab = "", col = "lightblue")
+
+#dens_frags
+hist(b3000_absc$dens_frags, main = "Ausência - dens_frags", xlab = "", col = "lightgray")
+hist(b3000_occur$dens_frags, main = "Presença - dens_frags", xlab = "", col = "lightblue")
+
+#med_dist_eucl
+hist(b3000_absc$med_dist_eucl, main = "Ausência - med_dist_eucl", xlab = "", col = "lightgray")
+hist(b3000_occur$med_dist_eucl, main = "Presença - med_dist_eucl", xlab = "", col = "lightblue")
+
+#media_area_frags
+hist(b3000_absc$media_area_frags, main = "Ausência - media_area_frags", xlab = "", col = "lightgray")
+hist(b3000_occur$media_area_frags, main = "Presença - media_area_frags", xlab = "", col = "lightblue")
+
+#shape_mn
+hist(b3000_absc$shape_mn, main = "Ausência - shape_mn", xlab = "", col = "lightgray")
+hist(b3000_occur$shape_mn, main = "Presença - shape_mn", xlab = "", col = "lightblue")
+
+#clumpy
+hist(b3000_absc$clumpy, main = "Ausência - clumpy", xlab = "", col = "lightgray")
+hist(b3000_occur$clumpy, main = "Presença - clumpy", xlab = "", col = "lightblue")
+```
+Os painéis à esquerda correspondem às paisagens classificadas como ausência (em cinza), enquanto os painéis à direita representam as paisagens de presença (em azul).
+
+De modo geral, as paisagens associadas à presença da espécie apresentam menor cobertura florestal média em comparação às áreas de ausência. Além disso, o formato médio dos fragmentos é maior nessas paisagens, indicando que, onde o guigó ocorre, os fragmentos tendem a ser mais irregulares e, consequentemente, possuem maior proporção de borda.
+
+<br>
+
+## Transformando as variáveis
+Essas são as variáveis do conjunto de dados:
+```{r}
+str(dados)
+```
+Precisamos transformar algumas variáveis:
+
+ -`dados$ID` está como *character* e deve ser convertida para *factor*, caso seja incluída posteriormente nos modelos;
+
+ -`dados$buffer` está como número inteiro, mas será convertida para *factor*, caso se deseje incluí-la como variável explicativa;
+
+ -`dados$situacao` está como *character*, mas corresponde à nossa variável resposta binária. Assim, será transformada em valores 0 e 1, sendo 1 para presença (sucesso de ocorrência do guigó) e 0 para ausência (insucesso de ocorrência).
+
+```{r}
+cols <- c("ID", "buffer") #colunas que quero transformar em factor
+dados[, cols] <- lapply(dados[, cols], factor)
+dados$situacao <- ifelse(dados$situacao == "presenca", 1, 0) #transformando presença em 1 e ausência em 0
+```
+
+<br>
+
+## Gerando modelos
+
+Como para cada tamanho de buffer foram selecionadas métricas diferentes, irei gerar os modelos para cada um deles. Utilizei GLMs com distribuição binomial e função de ligação logit.
+
+```{r , echo=F}
+## subsets por tamanho de buffer
+b399 <- subset(dados, buffer== "399")
+b688 <- subset(dados, buffer== "688")
+b977 <- subset(dados, buffer== "977")
+b1266 <- subset(dados, buffer== "1266")
+b1555 <- subset(dados, buffer== "1555")
+b1844 <- subset(dados, buffer== "1844")
+b2133 <- subset(dados, buffer== "2133")
+b2422 <- subset(dados, buffer== "2422")
+b2711 <- subset(dados, buffer== "2711")
+b3000 <- subset(dados, buffer== "3000")
+```
+
+Modelos nulos:
+
+```{r, echo=TRUE, results='hide'}
+### Nulo ----
+b399_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b399)
+b688_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b688)
+b977_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b977)
+b1266_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b1266)
+b1555_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b1555)
+b1844_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b1844)
+b2133_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b2133)
+b2422_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b2422)
+b2711_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b2711)
+b3000_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b3000)
+```
+
+Como são muitos modelos (e combinações possíveis), uso uma função que gera todas combinações possíveis e salva cada modelo em um objeto:
+
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Função para criar todos os modelos e gerar objetos separados
+create_glm_models_objects <- function(data, vars, prefix){
+  model_names <- c()  # vetor para armazenar nomes dos modelos criados
+  
+  for(n in 1:length(vars)){
+    combos <- combn(vars, n, simplify = FALSE)
+    
+    for(i in seq_along(combos)){
+        f <- as.formula(paste("situacao ~", paste0("scale(", combos[[i]], ")", collapse = " + ")))
+        model_name <- paste0(prefix, "_", paste(combos[[i]], collapse = "_")) # Nome do objeto baseado nas variáveis
+      model <- glm(f, family = binomial(link = "logit"), data = data) #Gerando o modelo no environment
+      assign(model_name, model, envir = .GlobalEnv)
+      
+      model_names <- c(model_names, model_name) # Adicionando o nome ao vetor
+      
+      message("Modelo criado: ", model_name)}}
+      return(model_names)}
+
+```
+
+Modelos para os buffers de raios de: 399, 688 e 977 m
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Variáveis preditoras
+vars <- c("prop_habitat", "dens_frags", "med_dist_eucl", "shape_mn", "clumpy")
+modelos_399 <- create_glm_models_objects(b399, vars, "b399")
+modelos_688 <- create_glm_models_objects(b688, vars, "b688")
+modelos_977 <- create_glm_models_objects(b977, vars, "b977")
+```
+
+Modelos para os buffers de raios de: 1266 e 2133 m
+
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Variáveis preditoras
+vars <- c("prop_habitat", "med_dist_eucl", "shape_mn", "clumpy")
+modelos_1266 <- create_glm_models_objects(b1266, vars, "b1266")
+modelos_2133 <- create_glm_models_objects(b2133, vars, "b2133")
+```
+
+Modelos para o buffer de raio de 1555 m
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Variáveis preditoras
+vars <- c("prop_habitat", "shape_mn", "clumpy")
+modelos_1555 <- create_glm_models_objects(b1555, vars, "b1555")
+```
+
+Modelos para os buffers de raios de: 1844 e 2711 m
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Variáveis preditoras
+vars <- c("prop_habitat", "media_area_frags", "shape_mn", "clumpy")
+modelos_1844 <- create_glm_models_objects(b1844, vars, "b1844")
+modelos_2711 <- create_glm_models_objects(b2711, vars, "b2711")
+```
+
+Modelos para o buffer de raio de 2422 m
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Variáveis preditoras
+vars <- c("prop_habitat", "media_area_frags", "med_dist_eucl", "shape_mn", "clumpy")
+modelos_2422 <- create_glm_models_objects(b2422, vars, "b2422")
+```
+
+Modelos para o buffer de raio de 3000 m
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Variáveis preditoras
+vars <- c("prop_habitat", "media_area_frags", "med_dist_eucl", "dens_borda", "clumpy")
+modelos_3000 <- create_glm_models_objects(b3000, vars, "b3000")
+```
+
+Agora, preciso salvar todos esses modelos em um único objeto para então gerar uma tabela e compará-los pelo AIC.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+todos_modelos_nomes <- c("b399_null_model", "b688_null_model", "b977_null_model", "b1266_null_model","b1555_null_model", "b1844_null_model", "b2133_null_model", "b2422_null_model", "b2711_null_model", "b3000_null_model", modelos_399, modelos_688, modelos_977, modelos_1266, modelos_1555, modelos_1844, modelos_2133, modelos_2422, modelos_2711, modelos_3000) #nomes
+
+todos_modelos_lista <- lapply(todos_modelos_nomes, get) #criando lista com todos os modelos
+
+names(todos_modelos_lista) <- todos_modelos_nomes # nomeando a lista para identificar os modelos
+
+library("AICcmodavg") #pacote que uso para gerar tabela de AIC
+
+modelos_AIC <- aictab(cand.set = todos_modelos_lista, modnames = todos_modelos_nomes)
+
+modelos_AIC <- data.frame(modelos_AIC)
+
+library(DT) #Pacote que encontrei para gerar tabela interativa
+
+datatable(modelos_AIC, caption = "Tabela com AIC de todos modelos gerados", options = list(pageLength = 10, scrollX = TRUE))
+
+```
+Pela análise dos valores de AIC, os modelos com melhor ajuste foram `b399_med_dist_eucl_clumpy` e `b399_dens_frags_med_dist_eucl_clumpy`, ambos apresentando ΔAIC < 2. Modelos com ΔAIC inferior a 2 são geralmente considerados igualmente plausíveis (Burnham & Anderson, 2002), sugerindo que ambos capturam de forma satisfatória os padrões de presença e ausência da espécie nas paisagens analisadas.
+
+A seguir, iremos analisar graficamente o ajuste do modelo:
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+library(DHARMa)
+## Simulando os resíduos
+resid_sim_1 <- simulateResiduals (b399_med_dist_eucl_clumpy, n=1000)
+plot(resid_sim_1)
+
+resid_sim_2 <- simulateResiduals (b399_dens_frags_med_dist_eucl_clumpy, n=1000)
+plot(resid_sim_2)
+```
+
+Aparentemente, ambos modelos estão bem ajustados.
+Podemos fazer uma análise mais minuciosa dos resíduos usando a função `check_model()` do pacote *performance*:
+
+```{r echo=T, message=F, fig.width=10, fig.height=7}
+library(performance)
+check_model(b399_med_dist_eucl_clumpy)
+check_model(b399_dens_frags_med_dist_eucl_clumpy)
+```
+
+Em geral, os modelo estão bem ajustados, apesar da falha pontual no 'binned residuals' para o segundo modelo.
+
+Este último gráfico mostra que as probabilidades médias preditas (próximo de 50% e 60%) o modelo não foi bem calibrado, uma vez que há resíduos fora da banda. Isso pode sugerir variáveis omitidas ou má especificação da função de ligação.
+
+<br>
+
+## Analisando os resultados
+
+Por se tratar de um modelo logístico, todos os parâmetros estão expressos na escala logit e são interpretados sob a forma de *razão de chance*. Esses parâmetros podem ser transformados em probabilidades convertendo-os para escala natural conforme:
+
+$$p = \frac{1}{1 + exp(-\eta)}$$
+
+```{r}
+summary(b399_med_dist_eucl_clumpy)
+```
+
+
+
+Avaliando individualmente os valores estimados para cada covariável, observamos que:
+
+ - `Intercept` (0.1195): representa a probabilidade de presença do guigó quando todas as covariáveis (nesse caso, média da distância euclidiana e clumpiness index) estão na média (que é 0, pois estão padronizadas).
+ 
+    Convertendo para probabilidades, temos:
+    $p = \frac{1}{1+exp(-0.1195))}  \approx 0.53$
+    
+    
+
+- `scale(med_dist_eucl)`: O coeficiente é negativo, ou seja, quanto maior a distância euclidiana média ao vizinho mais próximo, menor a probabilidade de ocorrência da espécie. Não é estatisticamente significativo (p = 0.201), então não podemos afirmar isso com confiança, mas o efeito sugere tendência.
+
+    Convertendo para probabilidades, temos:
+    $p = \frac{1}{1+exp(-1 \times(0.1195 - 0.4901))}  \approx 0.41$
+    
+  Quando a distância média ao vizinho mais próximo é 1 desvio padrão acima da média, a chance de presença do guigó é cerca de 45%, ou seja, menor do que quando a média é 0 (intercepto).
+ 
+
+<br>
+
+- `scale(clumpy)`: Interpretação similar a anterior. O coeficiente é negativo, ou seja, quanto maior a agregação dos fragmentos na paisagem, menor é a probabilidade de ocorrência da espécie. Não é estatisticamente significativo (p = 0.685), então não podemos afirmar isso com confiança, mas o efeito sugere tendência.
+
+    Convertendo para probabilidades, temos:
+    $p = \frac{1}{1+exp(-1 \times (0.1195 - 0.1372))}  \approx 0.50$
+   
+   Quando o clumpiness index (indicie de agregação dos fragmentos) é 1 desvio padrão acima da média, a chance de presença do guigó é cerca de 50%, ou seja, um pouco menor do que quando a média é 0 (intercepto) e maior do que quando a distância média ao vizinho mais próximo é 1 desvio padrão acima da média.
+
+<br>
+
+
+<br>
+
+
+# GLM para dados discretos
+
+## Introdução
+
+Dados de abundância são tipicamente contagens inteiras (0,1,2,3, ...) e exigem modelos que lidem com sua natureza discreta e não-negativa. Os modelos lineares generalizados (GLMs) com família de distribuição adequada, normalmente Poisson ou Binomial Negativa, são a primeira escolha. Em Ecologia, as contagens costumam apresentar sobredispersão (variância > média) e/ou excesso de zeros, casos em que a família Poisson simples pode ser inadequada.
+
+Aqui modelamos a abundância de <i>Callicebus barbarabrownae</i> em 30 fragmentos medidos por playback, esperando relacioná-la a atributos da paisagem (e.g. % de mata no entorno, tamanho do fragmento, isolamento, conectividade, matriz dominante, etc.).
+
+Vejamos as informações contidas no banco de dados:
+```{r echo=F}
+setwd("D:/doutorado/relatorio_disciplina_marie/relatorio_disciplina_marie")
+
+```
+```{r}
+dados <- read.csv("discreta/dados_cap2.csv")
+```
+```{r include=FALSE}
+dados <- subset(dados, select = c(-X, - area, - n_frags, -cv_area_frags, -cv_dist_eucl, -shape_cv, -mean_cdi, -cv_cdi, -prop_cdi))
+```
+```{r}
+str(dados)
+```
+`dados$ID` representa a identidade de cada paisagem estudada. Ao todo, o banco de dados tem 30 paisagens distintas.
+
+``` {r}
+length(unique(dados$ID))
+```
+A variável `dados$buffer` indica o tamanho (raio) considerado para cada paisagem. Em estudos de ecologia da paisagem, é recomendável que o tamanho da paisagem seja definido a partir de uma análise de escala do efeito, a fim de identificar a escala na qual a variável dependente é melhor explicada pelas variáveis independentes do modelo. No presente conjunto de dados, cada paisagem foi avaliada em 10 tamanhos de buffer diferentes.
+
+``` {r}
+table(dados$buffer) #cada buffer é repetido 30 vezes (que é o número total de paisagens)
+#ou:
+table(unique(dados[, c("ID", "buffer")])$ID) #cada paisagem contem 10 tamanhos de buffer
+```
+
+A variável `dados$n_groups`, será nossa variável resposta, a abundância de grupos no fragmento central da paisagem. Como temos 30 paisagens ao todo, possuímos também 30 fragmentos centrais cuja a abundância de <i> Callicebus barbarabrownae</i> foi medida.
+
+``` {r}
+summary(unique(dados[, c("ID", "n_groups")])$n_groups)
+```
+ A abundância de <i>Callicebus barbarabrownae</i> variou de 0 a 11 grupos por fragmento. 75% dos fragmentos possui abundâncias de 0 a 4 grupos por fragmento. Vamos olhara para a distribuição de frequênicias da nossa variável resposta:
+
+``` {r}
+hist(unique(dados[, c("ID", "n_groups")])$n_groups)
+```
+A variável `dados$area_frag` representa a área de cada fragmento florestal (em hectares) onde a densidade de grupos foi estimada. No conjunto de dados, a área dos fragmentos variou amplamente, entre 2 e 316 hectares.
+
+```{r}
+summary(dados$area_frag)
+```
+
+Como a relação entre a área do fragmento e a abundância de primatas é amplamente reconhecida como positiva, essa variável é um importante fator a ser considerado na modelagem.
+
+Embora a área pudesse ser incorporada na variável resposta, por exemplo, expressando a abundância como número de grupos por hectare (densidade), isso geraria uma resposta contínua, o que não é o foco desta parte do relatório, que foca na análise de dados discretos (contagens). Assim, a área será incluída no modelo como um offset, termo que ajusta a expectativa da variável resposta proporcionalmente ao tamanho da área amostrada, permitindo controlar o efeito da variação na área dos fragmentos sobre o número observado de grupos. Dessa forma, o modelo estima a abundância esperada por unidade de área, sem a necessidade de transformar diretamente a variável resposta.
+
+No R, o offset é especificado dentro da função de ajuste do modelo, geralmente como offset(log(area_frag)). O uso do logaritmo garante que o ajuste seja feito na mesma escala do preditor linear (no caso de modelos Poisson ou quasi-Poisson), permitindo interpretar o efeito da área como uma correção multiplicativa da taxa de ocorrência. Assim, o modelo estima a taxa de grupos por hectare, controlando adequadamente o efeito do esforço amostral associado à área de cada fragmento.
+
+
+As outras informações do banco de dados (`dados[,5:14]`) são diferentes métricas da paisagem, calculadas a partir do pacote `landscapemetrics` (Hesselbarth et al., 2019) com base em imagens da Coleção 7 do MapBiomas, referentes ao ano de 2021. Onde:
+
+ - `dados$prop_florest` é a proporção de floresta na paisagem (em %);
+ - `dados$dens_frags` é a densidade de fragmentos da paisagem (frags/100 ha);
+ - `dados$media_area_frags` é a média da área de todos os fragmentos da paisagem (ha);
+ - `dados$med_dist_eucl` é a média da distância euclidiana do vizinho mais próximo (calculada para cada fragmento da paisagem e expressa em metros);
+ - `dados$pcore` diferente das outras métricas, essa é calculada apenas para o fragmento em que foi registrada a presença ou ausência da espécie (fragmento central da paisagem). Mede a área central do fragmento (em hectares), desconsiderando a borda;
+ - `dados$dens_borda` é a densidade de borda dos fragmentos da paisagem (m/ha);
+ - `dados$shape_mn` é um índice que mede o formato médio dos fragmentos da paisagem. Seu valor é sempre maior ou igual a 1; quanto mais próximo de 1, mais próximo de uma forma quadrada é o fragmento, e quanto mais distante de 1, mais complexo é o formato;
+ - `dados$iagreg` é uma métrica de agregação, que indica o grau de agrupamento entre os fragmentos de floresta, variando de 0% (fragmentos mais isolados) a 100% (fragmentos mais próximos e conectados);
+ - `dados$clumpy` é o índice de aglomeração, que mede o padrão de distribuição espacial dos fragmentos. Valores próximos de 1 indicam paisagens altamente agregadas, enquanto valores próximos de 0 indicam uma distribuição mais aleatória;
+ - `dados$coesao` é o índice de coesão, que expressa o grau de conectividade física entre fragmentos de floresta na paisagem (em %). Quanto maior o valor, mais conectada e estruturalmente coesa é a paisagem.
+
+<br>
+
+## Checando multicolinearidade
+
+Como possuímos várias variáveis independentes, o primeiro passo é selecionar aquelas que não estejam fortemente correlacionadas entre si. Como temos 10 diferentes tamanhos de paisagem, o ideal seria avaliar cuidadosamente as correlações entre as métricas em cada tamanho de buffer. 
+
+A seguir, apresentarei _os resultados dos testes de correlação realizados para a maior paisagem (buffer com raio de 3000 m)_.
+
+Para verificar a multicolinearidade entre as métricas de paisagem, calculei as correlações pareadas entre todas as variáveis utilizando o coeficiente de correlação de Pearson, por meio da função `cor()` do R.
+
+```{r}
+b3000 <- subset(dados, buffer== "buffer3000") #selecionando apenas os buffers de raio de 3000m
+
+# Correlation matrix
+nrow(b3000) #checando se estão as 30 paisagens
+names(b3000) #checando as colunas que contém minhas variáveis independentes
+M <- cor(b3000[5:14], use = "complete.obs")
+round(M,2)
+```
+
+Aqui, adotei o limiar de |r| > 0.7 para indicar correlação forte. Quando duas métricas apresentaram correlação elevada, e uma delas era `dados$prop_florest`, essa última foi priorizada para ser mantida, considerando sua importância ecológica para a espécie-alvo.
+
+Dessa forma, pelos valores de correlação de Pearson, as métricas que não estão correlacionadas com `dados$prop_florest` e que foram selecionadas para explicar a abundânica da espécie nas paisagens geradas pelo buffer de 3000m, são:
+
+  - `dados$dens_frags`;
+  - `dados$shape_mn`;
+  - `dados$clumpy`; 
+  - além de `dados$prop_florest`.
+
+O resultado das análises de multicolinearidade para os demais tamanhos de buffer no código a seguir, mas, para não alongar o relatório, deixei o resultado em formato de comentário no própio código.
+
+```{r, echo=TRUE, results='hide'}
+# Checando as correlações para os outros tamanhos de paisagem
+
+## subsets para os outros tamanhos
+b399 <- subset(dados, buffer== "buffer399")
+b688 <- subset(dados, buffer== "buffer688")
+b977 <- subset(dados, buffer== "buffer977")
+b1266 <- subset(dados, buffer== "buffer1266")
+b1555 <- subset(dados, buffer== "buffer1555")
+b1844 <- subset(dados, buffer== "buffer1844")
+b2133 <- subset(dados, buffer== "buffer2133")
+b2422 <- subset(dados, buffer== "buffer2422")
+b2711 <- subset(dados, buffer== "buffer2711")
+
+# Correlação métricas b399
+M <- cor(b399[5:14], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_florest, ficam: dens_frags, shape_mn e clumpy 
+
+# Correlação métricas b688
+M <- cor(b688[5:14], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_florest, ficam: dens_frags, med_dist_eucl, shape_mn e clumpy
+
+# Correlação métricas b977
+M <- cor(b977[5:14], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_florest, ficam: dens_frags, med_dist_eucl, dens_borda, shape_mn e clumpy
+
+# Correlação métricas b1266
+M <- cor(b1266[5:14], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_florest, ficam: dens_frags, med_dist_eucl, dens_borda, shape_mn e clumpy. 
+#Obs: media area frags podia até entrar mas ela tem uma correlação relativamente alta (maior que |0.6|) com várias métricas, por isso não inclui
+
+# Correlação métricas b1555
+M <- cor(b1555[5:14], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_florest, ficam: dens_frags, med_dist_eucl, shape_mn e clumpy
+
+# Correlação métricas b1844
+M <- cor(b1844[5:14], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_florest, ficam: dens_frags, shape_mn e clumpy
+
+# Correlação métricas b2133
+M <- cor(b2133[5:14], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_florest, ficam: dens_frags, shape_mn e clumpy
+
+# Correlação métricas b2422
+M <- cor(b2422[5:14], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_florest, ficam: dens_frags, shape_mn e clumpy
+
+# Correlação métricas b2711
+M <- cor(b2711[5:14], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_florest, ficam: dens_frags, shape_mn e clumpy
+
+```
+
+## Gerando modelos
+
+Como para cada tamanho de buffer foram selecionadas métricas diferentes, irei gerar os modelos para cada um deles. Primeiro, utilizarei GLMs com distribuição Poisson e função de ligação log.
+
+```{r , echo=F}
+## subsets por tamanho de buffer
+b399 <- subset(dados, buffer== "buffer399")
+b688 <- subset(dados, buffer== "buffer688")
+b977 <- subset(dados, buffer== "buffer977")
+b1266 <- subset(dados, buffer== "buffer1266")
+b1555 <- subset(dados, buffer== "buffer1555")
+b1844 <- subset(dados, buffer== "buffer1844")
+b2133 <- subset(dados, buffer== "buffer2133")
+b2422 <- subset(dados, buffer== "buffer2422")
+b2711 <- subset(dados, buffer== "buffer2711")
+b3000 <- subset(dados, buffer== "buffer3000")
+```
+
+Modelos nulos:
+
+```{r, echo=TRUE, results='hide'}
+### Nulo ----
+b399_null_model <- glm(n_groups ~ 1 + offset(log(area_frag)), family = poisson(link = "log"), data = b399)
+b688_null_model <- glm(n_groups ~ 1 + offset(log(area_frag)), family = poisson(link = "log"), data = b688)
+b977_null_model <- glm(n_groups ~ 1 + offset(log(area_frag)), family = poisson(link = "log"), data = b977)
+b1266_null_model <- glm(n_groups ~ 1 + offset(log(area_frag)), family = poisson(link = "log"), data = b1266)
+b1555_null_model <- glm(n_groups ~ 1 + offset(log(area_frag)), family = poisson(link = "log"), data = b1555)
+b1844_null_model <- glm(n_groups ~ 1 + offset(log(area_frag)), family = poisson(link = "log"), data = b1844)
+b2133_null_model <- glm(n_groups ~ 1 + offset(log(area_frag)), family = poisson(link = "log"), data = b2133)
+b2422_null_model <- glm(n_groups ~ 1 + offset(log(area_frag)), family = poisson(link = "log"), data = b2422)
+b2711_null_model <- glm(n_groups ~ 1 + offset(log(area_frag)), family = poisson(link = "log"), data = b2711)
+b3000_null_model <- glm(n_groups ~ 1 , family = poisson(link = "log"), data = b3000)
+```
+
+Como são muitos modelos (e combinações possíveis), uso uma função que gera todas combinações possíveis e salva cada modelo em um objeto:
+
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Função para criar todos os modelos e gerar objetos separados
+create_glm_models_objects_poisson <- function(data, vars, prefix){
+  model_names <- c()
+  
+  for(n in 1:length(vars)){
+    combos <- combn(vars, n, simplify = FALSE)
+    
+    for(i in seq_along(combos)){
+      f <- as.formula(paste("n_groups ~", paste0("scale(", combos[[i]], ")", collapse = " + "), "+ offset(log(area_frag))"))
+      
+      model_name <- paste0(prefix, "_", paste(combos[[i]], collapse = "_"))
+      model <- glm(f, family = poisson(link = "log"), data = data)
+      assign(model_name, model, envir = .GlobalEnv)
+      model_names <- c(model_names, model_name)
+      message("Modelo criado: ", model_name)}}
+  return(model_names)}
+
+```
+
+Modelos para os buffers de raios de: 399, 1844, 2133, 2422, 2711 e 3000 m
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Variáveis preditoras
+vars <- c("prop_florest", "dens_frags", "shape_mn", "clumpy")
+modelos_399 <- create_glm_models_objects_poisson(b399, vars, "b399")
+modelos_1844 <- create_glm_models_objects_poisson(b1844, vars, "b1844")
+modelos_2133 <- create_glm_models_objects_poisson(b2133, vars, "b2133")
+modelos_2422 <- create_glm_models_objects_poisson(b2422, vars, "b2422")
+modelos_2711 <- create_glm_models_objects_poisson(b2711, vars, "b2711")
+modelos_3000 <- create_glm_models_objects_poisson(b3000, vars, "b3000")
+```
+
+Modelos para os buffers de raios de: 688 e 1555 m
+
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Variáveis preditoras
+vars <- c("prop_florest", "dens_frags", "med_dist_eucl", "shape_mn", "clumpy")
+modelos_688 <- create_glm_models_objects_poisson(b688, vars, "b688")
+modelos_1555 <- create_glm_models_objects_poisson(b1555, vars, "b1555")
+```
+
+Modelos para os buffers de raios de: 977 e 1266 m
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Variáveis preditoras
+vars <- c("prop_florest", "dens_frags", "med_dist_eucl", "dens_borda", "shape_mn", "clumpy")
+modelos_977 <- create_glm_models_objects_poisson(b977, vars, "b977")
+modelos_1266 <- create_glm_models_objects_poisson(b1266, vars, "b1266")
+```
+
+Agora, preciso salvar todos esses modelos em um único objeto para então gerar uma tabela e compará-los pelo AIC.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+todos_modelos_nomes <- c("b399_null_model", "b688_null_model", "b977_null_model", "b1266_null_model","b1555_null_model", "b1844_null_model", "b2133_null_model", "b2422_null_model", "b2711_null_model", "b3000_null_model", modelos_399, modelos_688, modelos_977, modelos_1266, modelos_1555, modelos_1844, modelos_2133, modelos_2422, modelos_2711, modelos_3000) #nomes
+
+todos_modelos_lista <- lapply(todos_modelos_nomes, get) #criando lista com todos os modelos
+
+names(todos_modelos_lista) <- todos_modelos_nomes # nomeando a lista para identificar os modelos
+
+library("AICcmodavg") #pacote que uso para gerar tabela de AIC
+
+modelos_AIC <- aictab(cand.set = todos_modelos_lista, modnames = todos_modelos_nomes)
+
+modelos_AIC <- data.frame(modelos_AIC)
+
+library(DT) #Pacote que encontrei para gerar tabela interativa
+
+datatable(modelos_AIC, caption = "Tabela com AIC de todos modelos gerados", options = list(pageLength = 10, scrollX = TRUE))
+
+```
+Pela análise dos valores de AIC, os modelos com melhor ajuste foram:
+   - b688_prop_florest_med_dist_eucl
+   - b688_prop_florest_med_dist_eucl_shape_mn_clumpy
+   - b688_prop_florest_med_dist_eucl_clumpy
+
+Todos apresentando ΔAIC < 2.
+
+A seguir, iremos analisar graficamente o ajuste do modelo:
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+library(DHARMa)
+## Simulando os resíduos
+resid_sim_1 <- simulateResiduals (b688_prop_florest_med_dist_eucl, n=1000)
+plot(resid_sim_1)
+
+resid_sim_2 <- simulateResiduals (b688_prop_florest_med_dist_eucl_shape_mn_clumpy, n=1000)
+plot(resid_sim_2)
+
+resid_sim_3 <- simulateResiduals (b688_prop_florest_med_dist_eucl_clumpy, n=1000)
+plot(resid_sim_3)
+```
+
+Aparentemente, ambos modelos não estão bem ajustados.
+Podemos avaliar também usando a função `check_model()` do pacote *performance*:
+
+```{r echo=T, message=F, fig.width=10, fig.height=7}
+library(performance)
+check_model(b688_prop_florest_med_dist_eucl)
+check_model(b688_prop_florest_med_dist_eucl_shape_mn_clumpy)
+check_model(b688_prop_florest_med_dist_eucl_clumpy)
+
+check_overdispersion(b688_prop_florest_med_dist_eucl)
+check_overdispersion(b688_prop_florest_med_dist_eucl_shape_mn_clumpy)
+check_overdispersion(b688_prop_florest_med_dist_eucl_clumpy)
+```
+
+Parece que os modelos não estão bem ajustados e com sobredispersão. Podemos tentar construir os modelos, agora usando a distribuição _binomial negativa_.
+
+Para isso precisaremos do pacote MASS:
+```{r}
+library(MASS)
+```
+ 
+Modelos nulos:
+
+```{r, echo=TRUE, results='hide'}
+### Nulo ----
+b399_null_model <- glm.nb(n_groups ~ 1 + offset(log(area_frag)), data = b399)
+b688_null_model <- glm.nb(n_groups ~ 1 + offset(log(area_frag)), data = b688)
+b977_null_model <- glm.nb(n_groups ~ 1 + offset(log(area_frag)), data = b977)
+b1266_null_model <- glm.nb(n_groups ~ 1 + offset(log(area_frag)), data = b1266)
+b1555_null_model <- glm.nb(n_groups ~ 1 + offset(log(area_frag)), data = b1555)
+b1844_null_model <- glm.nb(n_groups ~ 1 + offset(log(area_frag)), data = b1844)
+b2133_null_model <- glm.nb(n_groups ~ 1 + offset(log(area_frag)), data = b2133)
+b2422_null_model <- glm.nb(n_groups ~ 1 + offset(log(area_frag)), data = b2422)
+b2711_null_model <- glm.nb(n_groups ~ 1 + offset(log(area_frag)), data = b2711)
+b3000_null_model <- glm.nb(n_groups ~ 1 + offset(log(area_frag)), data = b3000)
+```
+
+Como são muitos modelos (e combinações possíveis), uso uma função que gera todas combinações possíveis e salva cada modelo em um objeto:
+
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Função para criar todos os modelos e gerar objetos separados
+create_glm_models_objects_binom_neg <- function(data, vars, prefix){
+  if(missing(prefix) || prefix == "")
+    stop("Por favor, forneça um prefixo válido (ex: prefix = 'nb').")
+  if(length(vars) == 0)
+    stop("O vetor 'vars' está vazio.")
+  model_names <- c()
+  for(n in 1:length(vars)){
+    combos <- combn(vars, n, simplify = FALSE)
+    for(i in seq_along(combos)){
+      f <- as.formula(paste("n_groups ~", paste0("scale(", combos[[i]], ")", collapse = " + "), "+ offset(log(area_frag))"))
+      model_name <- paste0(prefix, "_", paste(combos[[i]], collapse = "_"))
+      message("Criando modelo: ", model_name)
+      model <- MASS::glm.nb(f, data = data)
+      assign(model_name, model, envir = .GlobalEnv)
+      model_names <- c(model_names, model_name)}}
+    return(model_names)}
+```
+
+Modelos para os buffers de raios de: 399, 1844, 2133, 2422, 2711 e 3000 m
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Variáveis preditoras
+vars <- c("prop_florest", "dens_frags", "shape_mn", "clumpy")
+modelos_399 <- create_glm_models_objects_binom_neg(b399, vars, "b399")
+modelos_1844 <- create_glm_models_objects_binom_neg(b1844, vars, "b1844")
+modelos_2133 <- create_glm_models_objects_binom_neg(b2133, vars, "b2133")
+modelos_2422 <- create_glm_models_objects_binom_neg(b2422, vars, "b2422")
+modelos_2711 <- create_glm_models_objects_binom_neg(b2711, vars, "b2711")
+modelos_3000 <- create_glm_models_objects_binom_neg(b3000, vars, "b3000")
+```
+
+Modelos para os buffers de raios de: 688 e 1555 m
+
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Variáveis preditoras
+vars <- c("prop_florest", "dens_frags", "med_dist_eucl", "shape_mn", "clumpy")
+modelos_688 <- create_glm_models_objects_binom_neg(b688, vars, "b688")
+modelos_1555 <- create_glm_models_objects_binom_neg(b1555, vars, "b1555")
+```
+
+Modelos para os buffers de raios de: 977 e 1266 m
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Variáveis preditoras
+vars <- c("prop_florest", "dens_frags", "med_dist_eucl", "dens_borda", "shape_mn", "clumpy")
+modelos_977 <- create_glm_models_objects_binom_neg(b977, vars, "b977")
+modelos_1266 <- create_glm_models_objects_binom_neg(b1266, vars, "b1266")
+```
+
+Agora, preciso salvar todos esses modelos em um único objeto para então gerar uma tabela e compará-los pelo AIC.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+todos_modelos_nb_nomes <- c("b399_null_model", "b688_null_model", "b977_null_model", "b1266_null_model","b1555_null_model", "b1844_null_model", "b2133_null_model", "b2422_null_model", "b2711_null_model", "b3000_null_model", modelos_399, modelos_688, modelos_977, modelos_1266, modelos_1555, modelos_1844, modelos_2133, modelos_2422, modelos_2711, modelos_3000) #nomes
+
+todos_modelos_nb_lista <- lapply(todos_modelos_nb_nomes, get) #criando lista com todos os modelos
+
+names(todos_modelos_nb_lista) <- todos_modelos_nb_nomes # nomeando a lista para identificar os modelos
+
+aic_vals <- sapply(todos_modelos_nb_lista, AICcmodavg::AICc)
+k_vals <- sapply(todos_modelos_nb_lista, function(m) attr(logLik(m), "df"))
+delta_aic <- aic_vals - min(aic_vals)
+
+aic_table <- data.frame(AICc = sapply(todos_modelos_nb_lista, AICcmodavg::AICc),Delta_AICc = round(delta_aic, 2), K = k_vals)
+
+# Ordenar do melhor para o pior
+aic_table <- aic_table[order(aic_table$AICc), ]
+
+library(DT) #Pacote que encontrei para gerar tabela interativa
+
+datatable(aic_table, caption = "Tabela com AIC de todos modelos gerados", options = list(pageLength = 10, scrollX = TRUE))
+
+```
+
+<br>
+
+Agora, parece que o melhor modelo é b688_prop_florest_med_dist_eucl, vamos checar o ajuste do modelo.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+library(DHARMa)
+## Simulando os resíduos
+resid_sim_1 <- simulateResiduals (b688_prop_florest_med_dist_eucl, n=1000)
+plot(resid_sim_1)
+check_overdispersion(b688_prop_florest_med_dist_eucl)
+testZeroInflation(resid_sim_1) #não há evidência de inflação de 0
+```
+
+O modelo não está subestimando ou superestimando zeros — a estrutura de zeros dos seus dados está bem representada pelo modelo. Parece que o modelo continua com alguns problemas nos resíduos, mas já não está com sobredispersão.
+
+## Analisando os resultados
+
+```{r}
+summary(b688_prop_florest_med_dist_eucl)
+```
+A proporção de floresta teve um efeito negativo e significativo sobre a abundância de <i>Callicebus barbarabrownae</i> (β = -0.76, p < 0.001), enquanto a distância euclidiana média entre fragmentos também apresentou efeito negativo, porém não significativo (β = -0.15, p = 0.43).
+Assim, paisagens com maior cobertura florestal (e fragmentos mais distantes entre si) tendem a apresentar menor abundância da espécie. Esse é um resultado diferente do esperado, uma vez que essa espécie é altamente dependente de florestas e paisagens com maior cobertura florestal são melhores. Porém, a detecção da espécie em paisagens com maiores coberturas florestais (e fragmentos maiores) pode ser menor. Além disso, o modelo ainda não está completamentamente ajustado e outras variáveis poderiam ajudar a explicar a variação na abundância de <i>Callicebus barbarabrownae</i> (como por exemplo a estrutura local dos fragmentos em que foi amostrado).
+
+
+<br>
+
+# GLM para dados contínuos
+
+## Introdução
+Dados contínuos são aqueles que podem assumir qualquer valor dentro de um intervalo, como medidas de densidade, altura ou área.
+
+Durante meu mestrado, verifiquei que a melhor escala espacial para explicar a densidade atual de <i>Callicebus barbarabrownae</i> (varíavel contínua) era a de buffers com 1.844 m de raio em torno dos fragmentos. A densidade da espécie nos 30 fragmentos amostrados é maior do que densidades registradas na literatura para essa espécie e para o gênero como um todo. Além disso, as maiores densidades foram registradas em paisagens com cobertura florestal baixa a mediana e com fragmentos pouco agregados.
+
+Esses padrões sugerem que a espécie pode estar vivenciando um débito de extinção. Por isso, o objetivo desta seção do relatório é avaliar como a estrutura passada da paisagem explica a densidade atual de <i>Callicebus barbarabrownae</i>. Minha hipótese é que a estrutura passada da paisagem seja um melhor preditor da densidade atual, uma vez que:
+
+  - <i>Callicebus barbarabrownae</i> é altamente dependente de florestas e ocorre em regiões com forte pressão de conversão de habitat;
+
+  - Por ser um primata de porte médio, não utiliza a matriz e possui longos tempos de geração;
+
+  - Suas dinâmicas comportamentais, como dispersão de juvenis e territorialidade, dependem da conectividade entre fragmentos.
+
+Dessa forma, esses primatas podem não reagir imediatamente à perda de habitat, e densidades atuais elevadas em paisagens com baixa cobertura florestal e fragmentos pouco próximos podem ser reflexos de uma estrutura passada da paisagem.
+
+## Gerando modelos
+Como as análises de multicolinearidade já foram feitas previamente, aqui vou ir direto para o ajuste dos modelos que melhor explicaram a densidade de Callicebus barbarabrownae em 2021, mas agora em um intervalo de tempo que vai de 1985 a 2021.
+
+```{r}
+### Manipulando os dados ----
+dados <- read.csv("D:/doutorado/cap_3/metricas/dados_cap3_doc.csv")
+dados$dens_groups <- dados$n_groups/dados$area_frag
+str(dados)
+```
+Gerei subsets para cada ano e guardei isso em um objeto chamado "aXXXX", onde "XXXX" é o valor do ano. Não deixei no html para não ocupar espaço com a manipulação dos dados, mas está disponível no arquivo .rmd. Em seguida, gerei, para todos os anos, os seguintes modelos:
+
+ - densidade de grupos ~ clumpy
+ - densidade de grupos ~ cobertura florestal + clumpy
+ - e densidade de grupos ~ clumpy + densidade de fragmentos
+
+```{r echo=F, results='hide', message=FALSE, warning=FALSE}
+#### Fazendo subsets por ano ----
+a1985 <- subset(dados, ano== "1985")
+a1985 <- subset(a1985, select = -X)
+a1986 <- subset(dados, ano== "1986")
+a1986 <- subset(a1986, select = -X)
+a1987 <- subset(dados, ano== "1987")
+a1987 <- subset(a1987, select = -X)
+a1988 <- subset(dados, ano== "1988")
+a1988 <- subset(a1988, select = -X)
+a1989 <- subset(dados, ano== "1989")
+a1989 <- subset(a1989, select = -X)
+a1990 <- subset(dados, ano== "1990")
+a1990 <- subset(a1990, select = -X)
+a1991 <- subset(dados, ano== "1991")
+a1991 <- subset(a1991, select = -X)
+a1992 <- subset(dados, ano== "1992")
+a1992 <- subset(a1992, select = -X)
+a1993 <- subset(dados, ano== "1993")
+a1993 <- subset(a1993, select = -X)
+a1994 <- subset(dados, ano== "1994")
+a1994 <- subset(a1994, select = -X)
+a1995 <- subset(dados, ano== "1995")
+a1995 <- subset(a1995, select = -X)
+a1996 <- subset(dados, ano== "1996")
+a1996 <- subset(a1996, select = -X)
+a1997 <- subset(dados, ano== "1997")
+a1997 <- subset(a1997, select = -X)
+a1998 <- subset(dados, ano== "1998")
+a1998 <- subset(a1998, select = -X)
+a1999 <- subset(dados, ano== "1999")
+a1999 <- subset(a1999, select = -X)
+a2000 <- subset(dados, ano== "2000")
+a2000 <- subset(a2000, select = -X)
+a2001 <- subset(dados, ano== "2001")
+a2001 <- subset(a2001, select = -X)
+a2002 <- subset(dados, ano== "2002")
+a2002 <- subset(a2002, select = -X)
+a2003 <- subset(dados, ano== "2003")
+a2003 <- subset(a2003, select = -X)
+a2004 <- subset(dados, ano== "2004")
+a2004 <- subset(a2004, select = -X)
+a2005 <- subset(dados, ano== "2005")
+a2005 <- subset(a2005, select = -X)
+a2006 <- subset(dados, ano== "2006")
+a2006 <- subset(a2006, select = -X)
+a2007 <- subset(dados, ano== "2007")
+a2007 <- subset(a2007, select = -X)
+a2008 <- subset(dados, ano== "2008")
+a2008 <- subset(a2008, select = -X)
+a2009 <- subset(dados, ano== "2009")
+a2009 <- subset(a2009, select = -X)
+a2010 <- subset(dados, ano== "2010")
+a2010 <- subset(a2010, select = -X)
+a2011 <- subset(dados, ano== "2011")
+a2011 <- subset(a2011, select = -X)
+a2012 <- subset(dados, ano== "2012")
+a2012 <- subset(a2012, select = -X)
+a2013 <- subset(dados, ano== "2013")
+a2013 <- subset(a2013, select = -X)
+a2014 <- subset(dados, ano== "2014")
+a2014 <- subset(a2014, select = -X)
+a2015 <- subset(dados, ano== "2015")
+a2015 <- subset(a2015, select = -X)
+a2016 <- subset(dados, ano== "2016")
+a2016 <- subset(a2016, select = -X)
+a2017 <- subset(dados, ano== "2017")
+a2017 <- subset(a2017, select = -X)
+a2018 <- subset(dados, ano== "2018")
+a2018 <- subset(a2018, select = -X)
+a2019 <- subset(dados, ano== "2019")
+a2019 <- subset(a2019, select = -X)
+a2020 <- subset(dados, ano== "2020")
+a2020 <- subset(a2020, select = -X)
+a2021 <- subset(dados, ano== "2021")
+a2021 <- subset(a2021, select = -X)
+a2022 <- subset(dados, ano== "2022")
+a2022 <- subset(a2022, select = -X)
+a2023 <- subset(dados, ano== "2023")
+a2023 <- subset(a2023, select = -X)
+
+#### Selecionando apenas as colunas que importam para os modelos ----
+
+names(a1985)
+a1985 <- a1985[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a1985)
+table(is.na(a1985))
+
+names(a1986)
+a1986 <- a1986[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a1986)
+table(is.na(a1986))
+
+names(a1987)
+a1987 <- a1987[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a1987)
+table(is.na(a1987))
+
+names(a1988)
+a1988 <- a1988[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a1988)
+table(is.na(a1988))
+
+names(a1989)
+a1989 <- a1989[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a1989)
+table(is.na(a1989))
+
+names(a1990)
+a1990 <- a1990[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a1990)
+table(is.na(a1990))
+
+names(a1991)
+a1991 <- a1991[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a1991)
+table(is.na(a1991))
+
+names(a1992)
+a1992 <- a1992[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a1992)
+table(is.na(a1992))
+
+names(a1993)
+a1993 <- a1993[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a1993)
+table(is.na(a1993))
+
+names(a1994)
+a1994 <- a1994[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a1994)
+table(is.na(a1994))
+
+names(a1995)
+a1995 <- a1995[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a1995)
+table(is.na(a1995))
+
+names(a1996)
+a1996 <- a1996[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a1996)
+table(is.na(a1996))
+
+names(a1997)
+a1997 <- a1997[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a1997)
+table(is.na(a1997))
+
+names(a1998)
+a1998 <- a1998[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a1998)
+table(is.na(a1998))
+
+names(a1999)
+a1999 <- a1999[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a1999)
+table(is.na(a1999))
+
+names(a2000)
+a2000 <- a2000[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2000)
+table(is.na(a2000))
+
+names(a2001)
+a2001 <- a2001[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2001)
+table(is.na(a2001))
+
+names(a2002)
+a2002 <- a2002[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2002)
+table(is.na(a2002))
+
+names(a2003)
+a2003 <- a2003[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2003)
+table(is.na(a2003))
+
+names(a2004)
+a2004 <- a2004[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2004)
+table(is.na(a2004))
+
+names(a2005)
+a2005 <- a2005[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2005)
+table(is.na(a2005))
+
+names(a2006)
+a2006 <- a2006[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2006)
+table(is.na(a2006))
+
+names(a2007)
+a2007 <- a2007[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2007)
+table(is.na(a2007))
+
+names(a2008)
+a2008 <- a2008[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2008)
+table(is.na(a2008))
+
+names(a2009)
+a2009 <- a2009[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2009)
+table(is.na(a2009))
+
+names(a2010)
+a2010 <- a2010[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2010)
+table(is.na(a2010))
+
+names(a2011)
+a2011 <- a2011[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2011)
+table(is.na(a2011))
+
+names(a2012)
+a2012 <- a2012[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2012)
+table(is.na(a2012))
+
+names(a2013)
+a2013 <- a2013[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2013)
+table(is.na(a2013))
+
+names(a2014)
+a2014 <- a2014[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2014)
+table(is.na(a2014))
+
+names(a2015)
+a2015 <- a2015[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2015)
+table(is.na(a2015))
+
+names(a2016)
+a2016 <- a2016[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2016)
+table(is.na(a2016))
+
+names(a2017)
+a2017 <- a2017[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2017)
+table(is.na(a2017))
+
+names(a2018)
+a2018 <- a2018[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2018)
+table(is.na(a2018))
+
+names(a2019)
+a2019 <- a2019[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2019)
+table(is.na(a2019))
+
+names(a2020)
+a2020 <- a2020[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2020)
+table(is.na(a2020))
+
+names(a2021)
+a2021 <- a2021[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2021)
+table(is.na(a2021))
+
+names(a2022)
+a2022 <- a2022[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2022)
+table(is.na(a2022))
+
+names(a2023)
+a2023 <- a2023[, c(1, 3, 4, 7, 9, 11, 21)]
+names(a2023)
+table(is.na(a2023))
+```
+
+```{r}
+### Ajustando modelos----
+
+#### Clumpy ----
+a1985_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a1985)
+a1986_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a1986)
+a1987_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a1987)
+a1988_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a1988)
+a1989_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a1989)
+a1990_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a1990)
+a1991_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a1991)
+a1992_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a1992)
+a1993_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a1993)
+a1994_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a1994)
+a1995_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a1995)
+a1996_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a1996)
+a1997_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a1997)
+a1998_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a1998)
+a1999_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a1999)
+a2000_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2000)
+a2001_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2001)
+a2002_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2002)
+a2003_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2003)
+a2004_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2004)
+a2005_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2005)
+a2006_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2006)
+a2007_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2007)
+a2008_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2008)
+a2009_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2009)
+a2010_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2010)
+a2011_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2011)
+a2012_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2012)
+a2013_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2013)
+a2014_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2014)
+a2015_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2015)
+a2016_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2016)
+a2017_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2017)
+a2018_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2018)
+a2019_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2019)
+a2020_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2020)
+a2021_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2021)
+a2022_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2022)
+a2023_CL <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy), data = a2023)
+
+#### Clumpy + forest cover ----
+a1985_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a1985)
+a1986_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a1986)
+a1987_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a1987)
+a1988_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a1988)
+a1989_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a1989)
+a1990_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a1990)
+a1991_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a1991)
+a1992_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a1992)
+a1993_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a1993)
+a1994_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a1994)
+a1995_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a1995)
+a1996_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a1996)
+a1997_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a1997)
+a1998_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a1998)
+a1999_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a1999)
+a2000_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2000)
+a2001_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2001)
+a2002_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2002)
+a2003_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2003)
+a2004_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2004)
+a2005_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2005)
+a2006_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2006)
+a2007_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2007)
+a2008_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2008)
+a2009_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2009)
+a2010_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2010)
+a2011_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2011)
+a2012_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2012)
+a2013_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2013)
+a2014_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2014)
+a2015_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2015)
+a2016_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2016)
+a2017_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2017)
+a2018_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2018)
+a2019_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2019)
+a2020_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2020)
+a2021_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2021)
+a2022_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2022)
+a2023_CL_FC <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pland), data = a2023)
+
+#### Clumpy + patch density ----
+a1985_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a1985)
+a1986_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a1986)
+a1987_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a1987)
+a1988_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a1988)
+a1989_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a1989)
+a1990_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a1990)
+a1991_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a1991)
+a1992_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a1992)
+a1993_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a1993)
+a1994_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a1994)
+a1995_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a1995)
+a1996_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a1996)
+a1997_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a1997)
+a1998_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a1998)
+a1999_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a1999)
+a2000_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2000)
+a2001_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2001)
+a2002_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2002)
+a2003_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2003)
+a2004_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2004)
+a2005_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2005)
+a2006_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2006)
+a2007_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2007)
+a2008_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2008)
+a2009_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2009)
+a2010_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2010)
+a2011_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2011)
+a2012_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2012)
+a2013_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2013)
+a2014_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2014)
+a2015_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2015)
+a2016_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2016)
+a2017_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2017)
+a2018_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2018)
+a2019_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2019)
+a2020_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2020)
+a2021_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2021)
+a2022_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2022)
+a2023_CL_PD <- glm(log10(dens_groups+0.001) ~ scale(lsm_c_clumpy) + scale(lsm_c_pd), data = a2023)
+
+### Tabela AIC ----
+#### Todos ----
+modelos <- list (a1985_CL, a1986_CL,  a1987_CL, a1988_CL, a1989_CL, a1990_CL, a1991_CL, a1992_CL, a1993_CL, a1994_CL, a1995_CL, a1996_CL, a1997_CL, a1998_CL, a1999_CL, a2000_CL, a2001_CL, a2002_CL, a2003_CL, a2004_CL, a2005_CL, a2006_CL, a2007_CL, a2008_CL, a2009_CL, a2010_CL, a2011_CL, a2012_CL, a2013_CL, a2014_CL, a2015_CL, a2016_CL, a2017_CL, a2018_CL, a2019_CL, a2020_CL, a2021_CL, a2022_CL, a2023_CL, a1985_CL_FC, a1986_CL_FC, a1987_CL_FC, a1988_CL_FC, a1989_CL_FC, a1990_CL_FC,      a1991_CL_FC, a1992_CL_FC, a1993_CL_FC, a1994_CL_FC, a1995_CL_FC, a1996_CL_FC, a1997_CL_FC, a1998_CL_FC, a1999_CL_FC, a2000_CL_FC, a2001_CL_FC, a2002_CL_FC, a2003_CL_FC, a2004_CL_FC, a2005_CL_FC, a2006_CL_FC, a2007_CL_FC, a2008_CL_FC, a2009_CL_FC, a2010_CL_FC, a2011_CL_FC,  a2012_CL_FC, a2013_CL_FC, a2014_CL_FC, a2015_CL_FC, a2016_CL_FC, a2017_CL_FC, a2018_CL_FC, a2019_CL_FC, a2020_CL_FC, a2021_CL_FC, a2022_CL_FC, a2023_CL_FC, a1985_CL_PD, a1986_CL_PD, a1987_CL_PD, a1988_CL_PD, a1989_CL_PD, a1990_CL_PD, a1991_CL_PD, a1992_CL_PD, a1993_CL_PD, a1994_CL_PD, a1995_CL_PD, a1996_CL_PD, a1997_CL_PD, a1998_CL_PD, a1999_CL_PD, a2000_CL_PD, a2001_CL_PD, a2002_CL_PD, a2003_CL_PD, a2004_CL_PD, a2005_CL_PD, a2006_CL_PD, a2007_CL_PD, a2008_CL_PD, a2009_CL_PD, a2010_CL_PD, a2011_CL_PD, a2012_CL_PD, a2013_CL_PD, a2014_CL_PD, a2015_CL_PD, a2016_CL_PD, a2017_CL_PD, a2018_CL_PD, a2019_CL_PD, a2020_CL_PD, a2021_CL_PD, a2022_CL_PD, a2023_CL_PD)
+
+length(modelos)
+
+mod_names <- c( "a1985_CL", "a1986_CL", "a1987_CL", "a1988_CL", "a1989_CL", "a1990_CL", "a1991_CL", "a1992_CL", "a1993_CL", "a1994_CL", "a1995_CL", "a1996_CL", "a1997_CL", "a1998_CL", "a1999_CL", "a2000_CL", "a2001_CL", "a2002_CL", "a2003_CL", "a2004_CL", "a2005_CL", "a2006_CL", "a2007_CL", "a2008_CL", "a2009_CL", "a2010_CL", "a2011_CL", "a2012_CL", "a2013_CL", "a2014_CL", "a2015_CL", "a2016_CL", "a2017_CL", "a2018_CL", "a2019_CL", "a2020_CL", "a2021_CL", "a2022_CL", "a2023_CL", "a1985_CL_FC", "a1986_CL_FC", "a1987_CL_FC", "a1988_CL_FC", "a1989_CL_FC", "a1990_CL_FC", "a1991_CL_FC", "a1992_CL_FC", "a1993_CL_FC", "a1994_CL_FC", "a1995_CL_FC", "a1996_CL_FC", "a1997_CL_FC", "a1998_CL_FC", "a1999_CL_FC", "a2000_CL_FC", "a2001_CL_FC", "a2002_CL_FC", "a2003_CL_FC", "a2004_CL_FC","a2005_CL_FC", "a2006_CL_FC", "a2007_CL_FC", "a2008_CL_FC", "a2009_CL_FC", "a2010_CL_FC", "a2011_CL_FC", "a2012_CL_FC", "a2013_CL_FC", "a2014_CL_FC", "a2015_CL_FC", "a2016_CL_FC", "a2017_CL_FC", "a2018_CL_FC", "a2019_CL_FC", "a2020_CL_FC", "a2021_CL_FC", "a2022_CL_FC", "a2023_CL_FC", "a1985_CL_PD", "a1986_CL_PD", "a1987_CL_PD", "a1988_CL_PD", "a1989_CL_PD", "a1990_CL_PD", "a1991_CL_PD", "a1992_CL_PD", "a1993_CL_PD", "a1994_CL_PD", "a1995_CL_PD", "a1996_CL_PD", "a1997_CL_PD", "a1998_CL_PD", "a1999_CL_PD", "a2000_CL_PD", "a2001_CL_PD", "a2002_CL_PD", "a2003_CL_PD", "a2004_CL_PD", "a2005_CL_PD", "a2006_CL_PD", "a2007_CL_PD", "a2008_CL_PD", "a2009_CL_PD", "a2010_CL_PD", "a2011_CL_PD", "a2012_CL_PD", "a2013_CL_PD", "a2014_CL_PD", "a2015_CL_PD", "a2016_CL_PD", "a2017_CL_PD", "a2018_CL_PD", "a2019_CL_PD", "a2020_CL_PD", "a2021_CL_PD", "a2022_CL_PD", "a2023_CL_PD")
+
+length(mod_names)
+
+library("AICcmodavg")
+modelos_AIC <- aictab(cand.set = modelos, modnames = mod_names)
+modelos_AIC <- data.frame(modelos_AIC)
+library(stringr)
+modelos_AIC[c('ano', 'var')] <- str_split_fixed(modelos_AIC$Modnames, '_', 2)
+modelos_AIC$ano <- gsub("a","", modelos_AIC$ano)
+str(modelos_AIC)
+
+library(DT) #Pacote que encontrei para gerar tabela interativa
+
+datatable(modelos_AIC, caption = "Tabela com AIC de todos modelos gerados", options = list(pageLength = 10, scrollX = TRUE))
+```
+A princípio os melhores modelos explicando a densidade atual de Callicebus barabarabrownae incluem métricas da paisagem nos anos de 2001 a 2005. Vamos visualizar de outra forma:
+
+```{r}
+##### Gráfico ----
+library(ggplot2)
+cols <- c("CL_PD" = "#377eb8", "CL_FC" = "#4daf4a", "CL" = "#984ea3")
+TODOS <- ggplot(modelos_AIC, aes(x = as.numeric(ano), y = AICc))+
+  theme_classic(base_size = 16)+
+  geom_vline(xintercept = c(1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025), color = "gray")+
+  geom_point(aes(colour = factor(var)), size = 2)+
+  geom_line(aes(x = as.numeric(ano), y = AICc, group = var, colour = factor(var)))+
+  scale_x_continuous(breaks = c(1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025))+
+  scale_colour_manual(values = cols, name = "")+
+  labs(x = "Ano", y = "AICc")
+TODOS
+```
+
+Como esperado, de froma geral a estrura passada dos dados está melhor relacionada com a densidade atual de Callicebus barbarabrownae do que a estrutura atual.
+
+Vou agora analisar o ajuste do modelo como menor valor de AIC. Que incluiu a densidade e a agregação dos fragmentos em 2004.
+
+```{r echo=T, message=F, fig.width=10, fig.height=7}
+library(performance)
+res <- simulateResiduals(a2004_CL_PD, n=1000)
+check_model(res)
+```
+O modelo ainda tem que ser melhor ajustado. Aqui vou fazer um exercício e mudar de distribuição gaussiana (normal) para a gamma, dessa vez sem transformar minha variavel resposta (sem logaritmizar).
+
+```{r echo=T, message=F, fig.width=10, fig.height=7}
+a2004_CL_PD <- glm(dens_groups+0.0001 ~ lsm_c_clumpy + lsm_c_pd, family = Gamma(link = "log"),data = a2004)
+res <- simulateResiduals(a2004_CL_PD, n=1000)
+check_model(res)
+```
+Não parece ter melhorado, o modelo parece continuar superestimando quando os valores de densidade são mais baixos e subestimando quando os valores são mais altos.
+
+## Analisando os resultados
+O modelo não parece estar bem ajustado e talvez seguir para um GLMM seja uma boa opção nesse caso. De qualquer forma, irei interpretar os resultados do melhor modelo que explicou a densidade atual de <i>Callicebus barbarabrownae</i>, que incluiu clumpy (métrica de agregação) e densidade dos fragmentos em 2004.
+
+```{r}
+summary(a2004_CL_PD)
+```
+
+Nenhuma das variáveis testadas parece contribuir significativamente com a variação da densidade de grupos de <i>Callicebus barbarabrownae</i>, mas o que podemos observar é que há uma tendência de que em paisagens com menor densidade de fragmento e menor agregação de fragmentos, haja uma maior densidade de grupos dessa espécie de primata.
+
+<br>
+
+# GLM para dados categóricos
+## Introdução
+Modelos lineares generalizados também podem ser aplicados a dados categóricos, isto é, variáveis cuja resposta assume categorias distintas (nomes), como sexo (fêmea ou macho), espécie, estágio de vida, etc. De forma semelhante aos dados binários, busca-se identificar como diferentes fatores explicam a probabilidade de ocorrência de uma ou mais categorias da variável resposta.
+
+Nesta seção, utilizarei o conjunto de dados ´palmerpenguins_extended.rds´. O objetivo é avaliar como a métrica de saúde dos pinguins, classificada em “acima do peso”, “peso normal” e “abaixo do peso”, se relaciona com variáveis explicativas como estágio de vida, espécie e sexo.
+
+```{r}
+dados <- readRDS("D:/doutorado/relatorio_disciplina_marie/relatorio_disciplina_marie/categoricos/palmerpenguins_extended.rds")
+str(dados)
+```
+
+Primeiro, devemos transformar as varíaveis de "character" para "factor".
+
+```{r}
+#Transformando as variáveis
+cols <- c("species", "island", "sex", "diet", "life_stage", "health_metrics")
+dados[, cols] <- lapply(dados[, cols], factor)
+str(dados)
+```
+
+## Análise exploratória
+
+Quantos pinguins estão acima ou abaixo do peso?
+```{r}
+ggplot(dados, aes(x = health_metrics, fill = health_metrics)) +
+  geom_bar() +
+  labs(x = "Métrica de saúde", y = "Número de indivíduos") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+A maioria dos pinguins parece estar classificada como em sobrepeso ou  abaixo do peso. Como será que isso é dentro de cada espécie?
+
+```{r}
+ggplot(dados, aes(x = species, fill = health_metrics)) +
+  geom_bar(position = "fill") +
+  labs(x = "Espécie", y = "Proporção", fill = "Peso") +
+  theme_minimal()
+```
+
+Gentoo é a espécie com maior proporção de pinguins com sobrepeso, enquanto Chinstrap parece ter ligeiramente uma maior proporção de pinguins abaixo do peso. Será que tem diferença para os sexos?
+
+```{r}
+ggplot(dados, aes(x = sex, fill = health_metrics)) +
+  geom_bar(position = "fill") +
+  facet_wrap(~ species) +
+  labs(x = "Sexo", y = "Proporção",fill = "Peso") +
+  theme_minimal()
+```
+
+Dentro de cada espécie, a categoria de saúde (saudável, sobrepeso, abaixo do peso) não parece ser influenciada pelo sexo.
+
+## Gerando modelos
+
+Antes de ajustar os modelos, devemos definir o nível de referência.
+```{r}
+levels(dados$health_metrics)
+```
+
+Nesse caso o nível saudável é o primeiro e ele pode ser um bom nível de referência.
+
+Irei ajustar X modelos e compará-los por AIC:
+
+```{r}
+library(VGAM)
+# Modelos
+modelo_1 <- vglm(health_metrics ~ species, family = multinomial(refLevel = 1), data = dados)
+modelo_2 <- vglm(health_metrics ~ species + sex, family = multinomial(refLevel = 1), data = dados)
+modelo_3 <- vglm(health_metrics ~ species + sex + diet, family = multinomial(refLevel = 1), data = dados)
+modelo_4 <- vglm(health_metrics ~ species + sex + diet + island, family = multinomial(refLevel = 1), data = dados) #pode depender da ilha em que esão os penguins também
+
+#AIC
+aic_m1 <- AIC(modelo_1)
+aic_m2 <- AIC(modelo_2)
+aic_m3 <- AIC(modelo_3)
+aic_m4 <- AIC(modelo_4)
+
+aic_tabela <- data.frame(Modelo = c("modelo_1", "modelo_2", "modelo_3", "modelo_4"),
+                         AIC = c(aic_m1, aic_m2, aic_m3, aic_m4))
+aic_tabela <- aic_tabela[order(aic_tabela$AIC), ]
+print(aic_tabela)
+```
+Parece que os modelos 3 e 4 explicam bem melhor a variação na métrica de saúde dos penguins.
+
+## Analisando resultados
+Apesar de o modelo 3 e o modelo 4 terem valores bem semelhantes de AIC, o modelo que inclui a ilha parece não agregar tanto. Por isso, vou analisar os resultados do primeiro modelo unicamente. O modelo incluiu a espécie, o sexo e a dieta como variáveis explanatórias. 
+
+```{r}
+summary(modelo_3)
+```
+A variável resposta (health_metrics) tem três categorias, que estão niveladas da seguinte forma:
+  - 1:  “healthy” (saudável) — nível de referência,
+  - 2:  “overweight” (acima do peso).
+  - 3: “underweight” (abaixo do peso),
+
+O modelo estima dois conjuntos de coeficientes,que quando terminam em:
+
+  - ":1", é log-odds de estar em “overweight” vs “healthy”;
+
+  - ":2", é log-odds de estar em “underweight” vs “healthy”.
+
+O log-odds, é o logit (logaritmo natural da razão de chances de um evento).
+
+Dessa forma, podemos converter e entender as razões de chance da seguinte forma:
+
+```{r}
+exp(coef(modelo_3))
+```
+Não sei se a interpretação está correta, mas entendo que a espécie Chinstrap tem mais chances de estar em sobrepeso do que Adelie. Além disso, machos têm mais chance de estarem em sobrepeso ou abaixo do peso. E que as dietas Krill, parental e lula parecem diminuir as chances de sobrepeso e aumentar a chances dos pinguins ficarem abaixo do peso. 

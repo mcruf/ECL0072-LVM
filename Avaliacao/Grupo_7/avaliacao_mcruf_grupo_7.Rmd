@@ -1,0 +1,171 @@
+---
+title: "Avaliação do relatório"
+output: pdf_document
+---
+
+
+
+- **Grupo:** Maria Luísa de Medeiros Falcão
+
+- **Capítulos entregues:** 3/6
+
+- **Relatório entregue no prazo:** Não
+
+- **Nota:** B
+
+
+------------------------------------------------
+
+
+# Comentário geral
+
+Embora o relatório esteja incompleto, o material apresentado mostra um bom domínio dos conceitos básicos em torno de GLMs e uma leitura atenta dos resultados obtidos, especialmente os resultados das análises residuais. Os capítulos desenvolvidos revelam um bom entendimento das ferramentas de modelagem e uma preocupação genuína em interpretar corretamente os *outputs* estatísticos. Seria importante incluir uma seção de análise exploratória dos dados em todos os capítulos, de modo a avaliar as relações entre variáveis, multicolinearidade e detectar outliers antes da fase de ajuste dos modelos. Além disso, as hipóteses e objetivos específicos deveriam ser destacados mais explícitamente em cada capítulo. Também vale revisar algumas interpretações pontuais e justificar de forma mais clara as escolhas metodológicas feitas. No geral,é perceptível o seu esforço e envolvimento com o relatório.
+
+
+\vline
+
+# Comentários específicos
+
+## Cap. 1: Dados binários
+
+- Faltou você explorar o capítulo sobre dados binários
+
+
+## Cap. 2: Dados discretos
+
+- Faltou você explorar o capítulo sobre dados discretos.
+
+## Cap. 3: Dados contínuos
+
+- Seção 1:
+  - Gostei da sua breve introdução aonde apresenta já ao leitor as distribuições de probabilidade que são adequadas para dados contínuos. Apenas senti falta de você expor suas hipóteses e objetivos diante do banco de dados em questão.
+  - Também gostei muito de ver que você ineriu trechos de códigos de forma a atualizar certas informações automaticamente ao longo do seu relatório (e.g., uso de `min(dados$Ano)`, `dim(dados)[1]` no script).
+    - Há um pequeno erro de interpretação quando você fala: "*....fornecem informações sobre 476 peixes de 20 espécies*".
+      - O número 476 é referente ao número de *pescarias* (amostras), e não *indivíduos* de peixes.
+
+
+- Seção 2:
+  - Seu cálculo de CPUE está corretíssimo - Parabéns! Sua abordagem em avaliar a presença do valor 0 também está correta. Isso é, de fato, fundamental avaliar quando se recorre à distribuições Gama e log-Normal.
+  - Você poderia ter indicado, previamente, os motivos que te fizeram analisar em modelos separados os efeitos espaço-temporais, efeitos oceanográficos e efeitos pesqueiro sobre a CPUE. Quanto mais você guiar o leitor, melhor - inclusive para você no futuro, quando voltar a acessar esse documento.
+  - Faltou você incluir uma seção contendo a análise exploratória dos dados, em especial para avaliar as relações de CPUE com suas covariáveis, bem como as correlações cruzadas entre suas covariáveis (avaliação de multicolinearidade). 
+    - Lembre-se:a análise exploratória é um passo fundamental na modelagem e tem que ser feita antes de rodar os modelos. Isso permite detectar a força e direção das relações, bem como detectar possíveis erros contidos nos (e.g., outliers).
+  - A sua interpretação das análises residuais estão corretas para ambos os modelos testados. No entanto, considere os seguinte ajustes:
+    - Você comenta: "*...então talvez o modelo não esteja bem ajustado*".
+      - Evite o termo *talvez*; um modelo está ou não bem ajustado. No seu caso, há uma violação expressiva do pressuposto de homocedasticidade; logo, o modelo não se ajustou bem aos dados.
+    - Quando aplica a função `check_model(modelo_Gamma)`, você comenta na sequência: "*Pelo gráfico do posterior predictive check o modelo está subestimando um pouco os dados.*"
+      - Não compartilho da mesma interpretação que você. Se você reparar o painel superior à esquerda, a curva dos dados (verde) está bem rente à curva do modelo (azul). Se a curva dos dados estivesse toda abaixo da curva do modelo, então sim, poderíamos inferir que o modelo subestima.
+    - Você comenta: "*...a variância não é perfeitamente constante, mas a heterocedasticidade é leve e afeta principalmente os valores altos*"
+      - **Cuidado!** O painel mostra uma forte violação do pressuposto de homocedasticidade, porque a variância não é constante ao longo dos valores ajustados.
+  - O que você interpreta no gráfico da relação entre os valores preditos e observados
+  
+`plot(dados$CPUE~fitted(modelo_Gamma))`?
+
+  - Muito boa sua interpretação das análises de autocorrelação espacial e temporal - parabéns! Considre os seguinte aspecto sobre autocorrelação residual:
+    - A análise de autocorrelação residual é realizada para avaliar o pressuposto da independência residual. Se o pressuposto for violado, pode-se assumir que os resíduos não são independentes. Quando o banco de dados apresenta uma estrutura espacial (e/ou temporal), é muito provável que os dados apresentam-se correlacionados espacialmente (e/ou temporalmente). Na prática, isso significa que locais de amostragens próximos uns aos outros (geograficamente e temporalmente) são mais similares entre eles, e vice-versa. Isso é de se esperar, se considerarmos que esses locais partilham de condições ambientais similares, logo modulando respostas similares.
+  - Gostei também como explorou os resultados (summary) do melhor modelo. No entanto, senti falta de você mencionar a escala em que esses coeficientes foram estimados (log, porque a função de ligação para distribuição Gama é log).
+    - **Cuidado!** O uso de termos como *altamente significativo* ou *mais significativo* deve ser evitado quando você explora as relações das suas covariáveis. Conforme comentado em sala de aula, o número de asteriscos e o valor do p-valor <u> não medem o grau de significância </u> biológica e muito menos a força da relação; apenas diz se o coeficiente associado à variável é estatisticamente diferente de zero — ou seja, se rejeitamos a hipótese nula de ausência de efeito. Em tese, não comprovamos efetivamente a nossa hipótese (presença de efeito da variável); apenas rejeitamos ou deixamos de rejeitar a hipótese nula. Quando p-valor < 0.05, rejeitamos a hipótese nula e podemos afirmar que há uma relação entre a covariável a variável resposta. Repare, contudo, que não temos como atribuir o sentido de 'força' de relação (a relação é muito forte, ou muito fraca, ...).
+    - Você comenta: "*...isso pode ser devido o fato de ambos terem tido valores marginalmente próximos de p < 0.05*"
+      - Perfeito que você cruzou essas informações!
+
+
+- Seção 3:
+  - **Cuidado!** O seu modelo `modelo_LogNOcDLM` inclui duas covariáveis que são fortemente correlacionadas entre si: clorofila (chla) e profundidade da camada de mistura (dlm). Veja:
+
+
+```{r echo=F, eval=T, message=F, warning=F}
+library(dplyr)
+dados <- readRDS("/Users/mcruf/Library/CloudStorage/OneDrive-Personal/Arbeit/Lectures_and_Talks/UFRN/Lectures/ECL0072-GLM_GAM/Dados/fisheries.rds")
+
+dados[, c("Ano", "Mes", "Barco")] <- lapply(dados[, c("Ano", "Mes", "Barco")], factor)
+
+
+especies_alvo <- c("Thunnus_albacares",
+                   "Thunnus_atlanticus",
+                   "Katsuwonus_pelamis",
+                   "Prionace_glauca")
+
+dados <- dados %>%
+  rowwise() %>%  # linha a linha
+  mutate(
+    Catch = sum(c_across(all_of(especies_alvo))),  # soma da abundância das espécies alvo
+    CPUE = Catch / N_anzol   # padronização por esforço (número de anzóis)
+  ) %>%
+  data.frame()
+
+dados$CPUE2 <- dados$CPUE + (0.1 * median(dados$CPUE))
+
+```
+
+```{r echo=T, eval=T}
+cor(dados$dlm, dados$chla)
+``` 
+
+  - Por isso que é *muito* imporante fazer uma análise exploratória dos dados antes de rodar os modelos!
+  - Sua interpretação da análise residual dos modelos oceanográficos estão, no geral, muito boas - parabéns! Entretanto, considere os seguintes ajustes pontuais:
+    - Quando usado a função `check_model()` para avaliar o ajuste do modelo, você comenta "*Aqui vemos que no geral os resíduos estão bem distribuído...*"
+      - Na verdade, não estão. Há uma violação clara de homocedasticidade, assim como de linearidade.
+  - Olha só, por fim você achou o problema da elevada correlação entre `chla` e `dlm`. Muito bom; no entanto, reitero que isso deveria ter sido feito na fase de análise exploratória dos dados.
+  - Repare que nesta secão, você destaca bem em que escala estão os coeficientes estimados (log) - não foi o caso na última seção.
+    - Evite termos vagos como *parece estar...*. 
+      - Use algo como "*DLM influencia negativamente a CPUE*"
+  - Você comenta: "*...como vimos profundidade não parece afetar tanto CPUE2, talvez por isso vemos uma variação pequena.*"
+    - Variação pequena de que? Da variável resposta ou covariável? Seja mais específica. De todo modo, a interpretação está equivocada. O fato de não ter sido detectado uma relação significativa entre CPUE e profundidade reside ao fato de que essa covariável tem baixo poder explicativo sobre a variabilidade da variável resposta. Conseguimos ver isso avaliando a simples relação entre essas duas variáveis:
+    
+```{r, echo=T, eval=T, out.width ="50%", fig.align = 'center'}
+plot(dados$CPUE2~dados$depth)
+```
+
+Repare que a relação é muito difusa, sem um padrão claro de relação.
+
+  - Há, também, um pequeno equívoco na interpretação da relação CPUE vs. profundidade.
+    - Como os valores de profunidade estão expressos em valores negativos (quanto mais negativo, maior a profunidade), a interpretação correta seria: "*A captura por unidade de esforço é maior em águas mais rasas*."
+      - Seu gráfico também mostra isso.
+  
+
+- Seção 4:
+  - Hmh, não ficou claro por quê inseriu a variável `Catch` e `N_anzol` nos seus modelos. Isso não faz muito sentido, porque CPUE é definida conforme a razão $\frac{Catch}{N_{anzol}}$.
+    - Isso significa que catch e N_anzol não são variáveis independentes em relação a CPUE. Incluir qualquer uma delas (ou as duas) como preditora da CPUE introduz colinearidade perfeita/estrutural e leva a estimativas espúrias, coeficientes mal comportados e erros padrão inflados.
+    - É preciso corrigir isso no seu relatório, tá? Considere um modelo usando apenas o efeito do `Barco`. A título prático, vou ignorar que o modelo apresenta erros estruturais e seguir com a avaliação dos resíduos e resultados.
+  - A análise residual está muito bem interpretada - parabéns!
+  - Lembrando que quando se usa uma variável categórica como preditora (i.e., `Barco`), o primeiro nível do fator é sempre absorvido pelo intercepto - i.e., o nível de referência. Logo, os coeficientes estimados são relativos ao nível de referência.
+    - Faltou você destacar isso.
+
+
+## Cap. 4: Dados categóricos
+
+Maria, você apenas me enviou o script do R - ficou faltando o arquivo em versão *.html*, como você fez para os dois demais capítulos. Segue alguns comentários pontuais:
+
+- Achei interessante você ter lembrado que há duas versões de modelo multinomial: nominal e ordinal. Gostei de ver que você tentou implementar uma multinomial ordinal, mas esta abordagem não se aplica para o seu estudo de caso, porque a métrica de saúde não segue uma sequência natural; não é como se seus pinguins passassem primeiro pelo estágio 'abaixo do peso', para depois chegar em 'peso normal' e por fim em 'acima do peso'. 
+  - Isso teria sido aplicável, caso tivesse usado o estágio de desenvolvimento dos pinguins como variável resposta.
+- Mesmo assumindo que a variável 'métrica de saúde' seja ordinal, a interpretação dos seus coeficientes não está totalmente correta.
+  - Os valores de intercepto correspondem ao pontos de 'corte' entre as categorias. 
+    - Por exemplo, `(Intercept):1` corresponde ao ponto de corte entre a categoria 1 (“healthy”) e as demais (“overweight” ou “underweight”). Ou seja, é o logit de $P(Y) \leq 0$ quando `life_stage` está no nível de referência.
+  - Entre os coeficientes estimados, vamos focar no `life_stage.L`.O efeito linear negativo sugere que, conforme o estágio de vida avança (de chick para adult), a probabilidade de estar em categorias mais altas de health_metrics (isto é, overweight) aumenta.
+- Embora tenha apreciado que tenha tentado explorar os resultados do modelo multionomial ordinal em forma de gráficos, seus dois últimos gráficos estão um tanto quanto estranhos. Seria interessante rever a melhor forma de como plotar os resultados do modelo.
+
+
+
+## Cap. 5: Distribuições complementares
+
+- Seção 1:
+  - Modelos zero-inflacionados são compostos por dois componentes, os quais essencialmente modelam:
+    - 1) a presença/ausência da espécie (riqueza, ou qualquer outra *variável discreta*) - usando modelo Binomial
+    - 2) a abundância da espécie - usando modelo Poisson ou BN!
+  - O que vai distinguir as versões ZIP/ZINB das ZAP/ZANB é como os zeros são considerados e o foco que se dá no modelo binomial:
+    - Em modelos ZIP/ZINB distingui-se os zeros verdadeiros dos zeros falsos, e o foco do modelo binomial está na ausência da espécie (o valor 0)
+    - Em modelos ZAP/ZANB, não se distingues as fontes dos zeros e o foco do modelo binomial está na presença da espécie (o valor 1)
+    - Considere destacar isso na sua introdução.
+  - Nos histogramas, você não está avaliando a 'distribuição de abundância', e sim apenas um 'histograma da abundância'. O termo *distribuição* deve ser restrito à questões espaciais.
+  - Gostei em ver que você explorou a questão de zero-inflação para todas as espécies do banco de dados. Entretanto, para simplificar, teria sido suficiente você escolher apenas uma espécie para fazer as análises, a exemplo de *Pseudotriton_ruber* ou *Eurycea_cirrigera_Adult*, as quais apresentaram as maiores proporções de 0.
+    - De todo modo, você soube explorar muito bem as questões do `for/loop` dentro desse contexto. Parabéns!
+  - Quando avaliado os valores de AIC para os seus modelos com estrutura ZIP/ZINB, repare que a diferença de AIC foi bem marginal para algumas espécies (e.g., *Pseudotriton_ruber*, *Eurycea_cirrigera_Adult*)
+  - Não ficou claro porque você escolheu explorar apenas os resultados da espécie *Pseudotriton_ruber*. Seria interessante você conferir mais detalhes a esse respeito.
+    - A interpretação da avaliação dos resíduos segue corretíssima.
+  - Depois que fez a análise residual, faltou você explorar o sumário estatístico do melhor modelo escolhido.
+    
+    
+    
+## Cap. 6: GAM
+
+- Faltou você explorar o capítulo sobre GAMs.
+

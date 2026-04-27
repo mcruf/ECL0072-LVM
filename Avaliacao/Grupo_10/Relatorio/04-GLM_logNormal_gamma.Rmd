@@ -1,0 +1,170 @@
+---
+title: "GLM com Distribuições Contínuas (Gama e Log-Normal)"
+subtitle: "Relatório - Disciplina de GLM e GAM para  Ecologia"
+author: "Fabricio Albuquerque"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: readable
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+Modelagem de CPUE (Catch per Unit Effort) em pescarias oceânicas
+
+# 1. Introdução
+
+Este relatório demonstra a aplicação de **Modelos Lineares Generalizados (GLMs)** com distribuições **Gama** e **Log-Normal** para modelar **variáveis contínuas e positivas**, como a **CPUE** (Catch Per Unit Effort) — métrica comum em estudos pesqueiros. O uso de modelos contínuos (Gama e Log-Normal) é fundamental quando a variável resposta é positiva e assimétrica, como em métricas de esforço pesqueiro.
+
+Os objetivos são:
+
+- Explorar e transformar os dados para adequação aos modelos contínuos;
+- Ajustar GLMs com distribuições Gama e Log-Normal via `glmmTMB`;
+- Diagnosticar resíduos espaciais e temporais;
+- Comparar modelos e interpretar efeitos.  
+
+# 2. Carregando pacotes e dados
+
+```{r}
+library(glmmTMB)
+library(ggplot2)
+library(MASS)
+library(dplyr)
+library(DHARMa)
+library(ggeffects)
+library(performance)
+
+dados <- readRDS("../Dados/fisheries.rds")
+
+str(dados)
+```
+
+# 3. Preparação e exploração dos dados
+
+## 3.1 Conversão de variáveis fator
+
+```{r}
+dados[, c("Ano", "Mes", "Barco")] <- lapply(dados[, c("Ano", "Mes", "Barco")], factor)
+```
+
+## 3.2 Cálculo da abundância de espécies alvo
+
+```{r}
+especies_alvo <- c("Thunnus_albacares",
+                   "Thunnus_atlanticus",
+                   "Katsuwonus_pelamis")
+
+dotchart(dados$N_anzol)
+dados2 <- filter(dados, N_anzol <= 1500)
+
+dados2 <- dados2 %>%
+  rowwise() %>%
+  mutate(catch = sum(c_across(all_of(especies_alvo))),
+         CPUE = catch / N_anzol) %>%
+  data.frame()
+```
+
+## 3.3 Visualização dos dados
+
+```{r}
+hist(dados2$CPUE, main = "Distribuição da CPUE", col = "skyblue")
+summary(dados2$CPUE)
+
+ggplot(dados2, aes(x = Mes, y = CPUE)) +
+  geom_boxplot(fill = 'cyan4', col = 'cyan4', alpha = 0.15) +
+  stat_summary(fun = mean, geom="point", shape=19, size=1.5, color="black") +
+  theme_minimal()
+```
+
+## 3.4 Relações espaciais
+
+```{r}
+ggplot(dados2, aes(x = Lat, y = CPUE)) +
+  geom_point(size = 3, col = 'darkorange', alpha = 0.4) +
+  geom_smooth(method = "lm", col = 'cyan4') +
+  theme_minimal()
+
+ggplot(dados2, aes(x = Long, y = CPUE)) +
+  geom_point(size = 3, col = 'darkorange', alpha = 0.4) +
+  geom_smooth(method = "lm", col = 'cyan4') +
+  theme_minimal()
+```
+
+# 4. Modelagem da CPUE
+
+Variáveis contínuas e estritamente positivas (como CPUE) requerem distribuições **Gama** ou **Log-Normal**.  
+Para evitar zeros, adicionamos uma pequena constante:  
+
+```{r}
+dados2$CPUE2 <- dados2$CPUE + (0.1 * median(dados2$CPUE))
+```
+
+## 4.1 Modelo Gama
+
+```{r}
+modelo_G <- glmmTMB(CPUE2 ~ Mes + Lat + Long,
+                    family = Gamma(link = "log"), 
+                    data = dados2)
+```
+
+## 4.2 Modelo Log-Normal
+
+```{r}
+modelo_LN <- glmmTMB(CPUE2 ~ Mes + Lat + Long,
+                     family = lognormal(link = "log"), 
+                     data = dados2)
+```
+
+# 5. Comparação e diagnóstico dos modelos
+
+```{r}
+AIC(modelo_G, modelo_LN)
+```
+
+## 5.1 Resíduos simulados
+
+```{r}
+resG <- simulateResiduals(modelo_G, n = 1000)
+resLN <- simulateResiduals(modelo_LN, n = 1000)
+
+plot(resG)
+```
+
+## 5.2 Diagnóstico visual
+
+```{r}
+check_model(modelo_G)
+check_model(modelo_LN)
+```
+
+## 5.3 Autocorrelação espacial e temporal
+
+```{r}
+testSpatialAutocorrelation(resG, x = dados2$Long, y = dados2$Lat)
+res <- recalculateResiduals(resG, group = dados2$Mes)
+testTemporalAutocorrelation(res, time = unique(dados2$Mes))
+```
+
+# 6. Interpretação e resultados
+
+```{r}
+summary(modelo_G)
+exp(fixef(modelo_G)$cond)
+```
+
+# 7. Visualização dos efeitos marginais
+
+```{r}
+ggpredict(modelo_G) %>% plot()
+```
+
+# 8. Conclusões
+
+O modelo **Gama** apresentou melhor desempenho segundo o AIC, embora ambos tenham exibido resíduos adequados.  
+A CPUE aumentou com a **latitude** e variou conforme os **meses**, indicando influência sazonal e espacial na abundância relativa do bycatch.  
+

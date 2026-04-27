@@ -1,0 +1,103 @@
+/* 1. Background image for title slide */
+.title-slide {
+  background-size: cover;
+  background-position: center;
+  color: white; /* text color adjustment for readability */
+  position: relative; /* needed for absolute positioning inside */
+  padding-bottom: 5em;   /* increase upward shift */
+
+}
+
+
+
+
+/* 3. Horizontal line between main title and contact info */
+/*.title-slide h1 {
+  margin-bottom: 0.5em;
+  border-bottom: 3px solid #ff9900; 
+  padding-bottom: 0.2em;
+}
+*/
+
+.title-slide h1,
+.title-slide h2,
+.title-slide .subtitle,
+.title-slide p.lead,
+.title-slide hr {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.title-slide h2::after,
+.title-slide p.lead::after {
+  content: "";
+  display: block;
+  width: 100%;            
+  height: 3px;            
+  background: #adb5bd;    
+  margin-top: 0.25em;
+}
+
+
+
+/* 4. Logo on bottom right side */
+.title-slide::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;   /* distance from bottom */
+  right: 50px;    /* distance from right */
+  width: 35%;   /* logo width */
+  height: 35%;  /* logo height */
+  background-image: url("../Figuras/detetive_ecologico.png"); /* adjust path */
+  background-size: contain; /* keep proportions */
+  background-repeat: no-repeat;
+}
+
+
+/* 5. Logo on top right side */
+.title-slide::before {
+content: "";
+  position: absolute;
+  top: 0px;   /* distance from bottom */
+  right: 350px;    /* distance from right */
+  width: 27%;   /* logo width */
+  height: 27%;  /* logo height */
+ /* background-image: url("../Figuras/logo_ppgeco.png");*/
+  background-image: url("../Figuras/logo_ppgeco2.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+
+/* Title color on title slide */
+.title-slide h1 {
+  color: #343a40 !important;  /* Change to your preferred color */
+}
+
+
+.title-slide h2 {
+  color: #ff9900 !important;  /* Change to your preferred color */
+}
+
+
+
+/* Comment box */
+p.comment {
+background-color: #F9DCC4;
+padding: 10px;
+border: 1px solid black;
+margin: 50px;
+border-radius: 5px;
+text-align: center
+}
+
+
+
+.three-column-container {
+display: flex;
+}
+
+.three-column-item {
+flex: 1; /* Distributes space equally */
+padding: 10px;
+}

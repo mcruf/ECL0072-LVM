@@ -1,0 +1,263 @@
+---
+title: "Relatório zero inflacionados"
+author: "Maria Luísa de Medeiros Falcão"
+date: "2025-10-22"
+output: 
+ html_document:
+    theme: journal   # opções: cerulean, flatly, united, cosmo, simplex
+    number_sections: yes
+    toc: true               # Gera sumário (Table of Contents)
+    toc_depth: 2
+    toc_float:              # Faz o sumário “flutuar” ao lado
+      collapsed: false      # Não inicia “fechado”
+      smooth_scroll: false  # Desativa rolagem suave (opcional)
+      position: left        # Posiciona o sumário à esquerda
+      width: 250px          # Define a largura do sumário
+
+---
+
+
+## Introdução
+
+Distribuições para dados zero-inflacionados
+Em dados de contagem, é comum observar um número excessivo de zeros em relação ao esperado por distribuições como a Poisson ou a Binomial Negativa. Nesses casos temos um zero-inflation e pode ocorrer, por exemplo, quando há amostras onde a espécie realmente não pode ocorrer (zeros estruturais), além de zeros por erro de amostragem.
+Para lidar com essa característica, utilizam-se modelos de distribuição zero-inflacionada, como os modelos Zero-Inflated Poisson (ZIP) e Zero-Inflated Negative Binomial (ZINB), ou os ZAP = Zero-altered Poisson; ZANB = Zero-altered Negative Binomial. Esses modelos combinam dois processos: um que modela a ocorrência de zeros e outro que modela a contagem quando o evento é possível. 
+
+Primeiramente vamos carregar os pacotes
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(glmmTMB) #Para rodar modelos ZIP/ZINB e ZAP/ZANB
+library(dplyr) #Manipulação dos dados
+library(ggplot2) #Visualização
+library(patchwork) #Para visualização de gráficos
+library(DHARMa) #Avaliação de modelos
+library(performance) #Avaliação de modelos
+```
+
+
+## Conjunto de dados 
+
+Para exemplificarmos essas duas distribuições usaremos um conjunto de dados de salamdras, armazenados no diretório `/Dados` da disciplina. Os dados reúne informações sobre a contagem de diversas espécies de salamandras, com amostragens realizadas ao longo de 23 rios.
+
+Definindo diretório e importando o banco de dados
+
+```{r echo=T}
+setwd("~/Doutorado/Disciplinas/GLM/ECL0072-GLM_GAM-gh-pages/ECL0072-GLM_GAM-gh-pages")
+
+#Importando dados
+dados <- readRDS("Dados/Salamanders.rds")
+```
+
+Ver os dados
+```{r echo=T}
+View(dados)
+str(dados)
+```
+
+Pelo jeito "mined" já está como fator, então não precisa de transformação.
+
+Vamos ver a frequência de zeros na variável resposta (abundância) 
+Para isso, primeiramente criaremos um objeto "especies" para se referir as espécies 
+
+```{r echo=T}
+especies <- c("Gyrinophilus_porphyriticus",
+              "Pseudotriton_ruber",
+              "Desmognathus_monticola",
+              "Eurycea_cirrigera_Adult",
+              "Eurycea_cirrigera_Larval",
+              "Desmognathus_spp_Larval",
+              "Desmognathus_fuscus")
+```
+
+Vamos criar uma tabela com proporção de zeros:
+Para isso usando o "sapply()" se aplica uma função a cada coluna (as espécies) do data frame. O "funtion(x) eu determino que para cada coluna, você vai executar a operação mean(x == 0). Este (x == 0) cria um vetor de TRUE (1) - que é a presença de zero e FALSE (0) - que é a ausência de 0, e o mean faz a média desses valores (0 e 1) dando a proporção de 0 para cada espécie
+```{r echo=T}
+proporcao_zeros <- sapply(dados[, especies], function(x) mean(x == 0))
+proporcao_zeros
+```
+
+Vamos ver como estão distribuídas as abundâncias em torno de areas mineradas ou não. Para rodar de uma vez para cada espécie eu vou fazer um "loop"
+
+```{r echo=T}
+for(sp in especies){ #roda o código uma vez para cada espécie da lista
+  p <- ggplot(dados, aes_string(x = sp)) +
+    geom_histogram(fill = "cyan4", alpha = 0.6, col = "white") +
+    facet_wrap(~ mined, ncol = 1) +
+    labs(x = paste("Nº de salamandras", sp),
+         y = "Frequência") +
+    ggtitle(paste("Distribuição de abundância -", sp)) +
+    theme_minimal(base_size = 14)
+  
+  print(p) # mostra o gráfico
+}
+```
+
+Y = Frequencia, aqui é número de amostras que tiveram essa quantidade e x = quantidade de salamandras contadas na amostra.
+Observamos que em locais com mineradoras apresentam mais zeros em numero de salamandras encontradas comparado a locais sem mineradora
+
+Agora vamos rodar os modelos de ZIP e ZINB, para isso:
+Fazemos uma lista vazia onde vamos guardar os modelos de cada espécie.
+
+```{r echo=T}
+resultados <- list()
+
+for(sp in especies){
+  formula <- as.formula(paste(sp, "~ mined"))
+  modelos <- glmmTMB(formula, 
+                     ziformula = ~1, #Estamos considerando apenas o intercepto (sem covariáveis) na parte zero-inflada do modelo. Ou seja, a probabilidade de gerar um zero estrutural é a mesma para todas as observações.
+                     family = poisson, 
+                     data = dados)
+  resultados[[sp]] <- modelos
+}
+```
+
+Mesma coisa sendo que agora pra binomial negativa
+
+```{r echo=T}
+resultados_nb <- list()  # nova lista para modelos binomial negativo
+
+for(sp in especies){
+  formula <- as.formula(paste(sp, "~ mined"))
+  modelos <- glmmTMB(formula, 
+                     ziformula = ~1, 
+                     family = nbinom2,  
+                     data = dados)
+  resultados_nb[[sp]] <- modelos
+}
+```
+
+
+Calculando o AIC
+```{r echo=T}
+AIC_table <- data.frame( #aqui estamos criando uma tabela que por enquanto está vazia
+  especie = especies, # nessa tabela terá a coluna especie referente pras espécies
+  AIC_poisson = NA, # cria uma coluna onde terá o AIC de poisson, mas que por enquanto está vazia, por isso "NA"
+  AIC_nbinom = NA # Mesma coisa sendo que pra poisson
+)
+```
+
+
+Agora criamos o Loop para preencher os valores de AIC para cada espécie
+
+```{r echo=T}
+for(sp in especies){
+  AIC_table[AIC_table$especie == sp, "AIC_poisson"] <- AIC(resultados[[sp]])
+  AIC_table[AIC_table$especie == sp, "AIC_nbinom"]  <- AIC(resultados_nb[[sp]])
+}
+# Determinar o melhor modelo para cada espécie
+AIC_table$melhor_modelo <- ifelse(
+  AIC_table$AIC_poisson < AIC_table$AIC_nbinom, 
+  "Poisson", 
+  "Binomial Negativa"
+)
+```
+
+Mostrar tabela final
+```{r echo=T}
+AIC_table
+```
+
+Em sua maioria o modelo binomial negativo explicou melhor os dados. Porém o que teve menor AIC foi o modelo Poisson para espécie Pseudotriton_ruber
+
+
+Seleciona o modelo da lista de modelos binomial negativa
+
+```{r echo=T}
+melhor_modelo <- resultados[["Pseudotriton_ruber"]]
+
+# Simular resíduos
+simres <- simulateResiduals(melhor_modelo, n = 1000)
+```
+
+Vamos plotar os resíduos
+```{r echo=T}
+plot(simres)
+```
+
+Pelo primeiro gráfico, o QQ plot residuals os pontos estão bem próximos da linha diagonal, ou seja, os resíduos estão até que bem comportados. O resultado de KS test p > 0.05 significa que não rejeita a hipótese nula, ou seja, resíduos parecem uniformes. Dispersion test: p = 0.664, ou seja, não há indicação de sobredispersão. E pelo Outlier test: p = 1 significa que não há outliers problemáticos. O catPred indica as categorias previstas pelo modelo (no seu caso, provavelmente "mined" sim/não). No segundo gráfico cada boxplot mostra a distribuição dos resíduos simulados para cada nível dessa categoria. O Levene Test que aparece na legenda testa se a variância dos resíduos é homogênea entre as categorias (ou seja, se os resíduos estão espalhados de forma semelhante em todos os grupos). “n.s.” significa não significativo, ou seja, não há violação da homogeneidade.
+
+Vamos agora usar o check_model para avaliar graficamente os principais pressupostos de um modelo, mostrando se há problemas de ajuste, sobredispersão, resíduos mal distribuídos, ou heterogeneidade de variância.
+```{r echo=T}
+check_model(simres) 
+```
+
+O primeiro gráfico do lado esquerdo não está aparecendo. O segundo gráfico a direita vemos que a variância dos resíduos observados está acima dos preditos, então o modelo parece estar subestimando, aperenta ter um sobredispersão. Para o gráfico de homogeneidade de variância, se espera que se forme um linha verde horizontal, no caso da imagem, ela tem um leve aumento a medida que aumenta os valores preditos, ou seja, ele indica que a variância dos resíduos aumenta com os valores previstos, que pode ser um sinal de que o modelo pode estar realmente subestimando a variabilidade para valores maiores. Para o g´rafico de distribuição de quantis de resíduos se espera que os resíduos estejam distribuídos próximo a linha verde, e eles parecem seguir esse padrão, então segundo esse gráfico, parece que os resíduos estão bem distribuídos.
+
+```{r echo=T}
+testResiduals(simres) 
+```
+Avalia a sobredispersão estatisticamente. Pelo P-valor > 0.05 nos indica que não rejeitamos H0, ou seja, os resíduos parecem uniformemente distribuídos. Ou seja, o modelo não apresenta problemas de ajuste grosseiro. Para o dispersion o valor p > 0.05 nos indica que não rejeitamos a hipótese nula, ou seja, a dispersão está de acordo com o esperado. O valor de dispersion é ligeiramente maior que 1 1.1262, mas não muito, dessa forma, não há evidência de sobredispersão significativa, ou seja, o modelo não está subestimando a variabilidade de forma preocupante. Observando agora os gráficos gerados, vemso que no de QQplot residuals os resíduos seguem até que bem a linha vermelha (que é a distribuição esperada). O segundo gráfico mostra a parte da dispersão que foi aproximadamente 1.12, o que indica uma leve sobredispersão, mas nada preocupante. No terceiro gráfico não há barras destacando outliers (nenhum ponto marcado), o que confirma o teste estatístico: nenhum outlier problemático. Dessa forma o modelo parece se ajustar bem e não ter problemas tão expressivos assim.
+
+
+## Agora pra ZANB e ZAP 
+
+```{r echo=T}
+resultados_ZAP <- list()
+for(sp in especies){
+  formula <- as.formula(paste(sp, "~ mined"))
+  modelos <- glmmTMB(formula, 
+                     ziformula = ~1, #Estamos considerando apenas o intercepto (sem covariáveis) na parte zero-inflada do modelo. Ou seja, a probabilidade de gerar um zero estrutural é a mesma para todas as observações.
+                     family = truncated_poisson(link = "log"), 
+                     data = dados)
+  resultados_ZAP[[sp]] <- modelos
+}
+
+
+resultados_ZANB <- list()
+for(sp in especies){
+  formula <- as.formula(paste(sp, "~ mined"))
+  modelos <- glmmTMB(formula, 
+                     ziformula = ~1, #Estamos considerando apenas o intercepto (sem covariáveis) na parte zero-inflada do modelo. Ou seja, a probabilidade de gerar um zero estrutural é a mesma para todas as observações.
+                     family = truncated_nbinom2(link = "log"), 
+  data = dados)
+resultados_ZANB[[sp]] <- modelos
+}
+```
+
+
+Calculando o AIC
+
+```{r echo=T}
+AIC_table <- data.frame( #aqui estamos criando uma tabela que por enquanto está vazia
+  especie = especies, # nessa tabela terá a coluna especie referente pras espécies
+  AIC_poisson = NA, # cria uma coluna onde terá o AIC de poisson, mas que por enquanto está vazia, por isso "NA"
+  AIC_nbinom = NA, # Mesma coisa sendo que pra poisson
+  AIC_ZANB = NA,
+  AIC_ZAP = NA
+)
+```
+
+Aqui criamos o Loop para preencher os valores de AIC para cada espécie
+
+```{r echo=T}
+for(sp in especies){
+  AIC_table[AIC_table$especie == sp, "AIC_poisson"] <- AIC(resultados[[sp]])
+  AIC_table[AIC_table$especie == sp, "AIC_nbinom"]  <- AIC(resultados_nb[[sp]])
+  AIC_table[AIC_table$especie == sp, "AIC_ZANB"]  <- AIC(resultados_ZANB[[sp]])
+  AIC_table[AIC_table$especie == sp, "AIC_ZAP"]  <- AIC(resultados_ZAP[[sp]])
+}
+# Determinar o melhor modelo para cada espécie
+AIC_table$melhor_modelo <- ifelse(
+  AIC_table$AIC_poisson < AIC_table$AIC_nbinom, 
+  "Poisson", 
+  "Binomial Negativa"
+)
+
+# Mostrar tabela final
+AIC_table
+```
+
+Aparentemente não melhorou os modelos com ZAP  e ZANB pelo AIC.
+
+
+
+
+
+
+
+
+
+
+
+
+

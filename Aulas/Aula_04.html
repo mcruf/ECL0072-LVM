@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Modelos Lineares Generalizados e Aditivos para Dados Ecológicos (ECL0072)</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Marie-Christine Rufener" />
+    <script src="libs/header-attrs-2.29/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Modelos Lineares Generalizados e Aditivos para Dados Ecológicos (ECL0072)
+]
+.subtitle[
+## Aula 04: GLM para dados discretos
+]
+.author[
+### Marie-Christine Rufener
+]
+
+---
+
+
+## &lt;span style="color: #ee6c4d;"&gt;Conteúdo programático &lt;/span&gt; 
+
+&lt;br&gt;
+
+
+**1. O que é um dado discreto?**  
+
+
+**2. Distribuição Poisson**  
+
+
+**3. Distribuição Binomial Negativa**  
+
+  &gt; Prática 
+
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Leitura sugerida &lt;/span&gt; 
+
+
+
+**Livros**
+- **Cap. 9:** Zuur et al. (2009)
+- **Cap. 5 :** Faraway (2016)
+- **Cap. 4 (seção 4.6):** Bolker (2008)
+- **Cap. 7:** Agresti (2015)*
+
+
+.footnote[*Leitura mais técnica]
+
+---
+class: inverse, center, middle
+
+# O que é um dado discreto?
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Dados discretos &lt;/span&gt;
+
+
+Tipo de informação que assume apenas valores inteiros e contáveis (e.g., 12, 35, 283, ....)
+  - Número de ocorrência que um determinado evento ocorre no tempo  
+
+&lt;br&gt;
+
+
+&lt;img src="../Figuras/Exemplo_dado_contagem.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Dados discretos &lt;/span&gt;
+
+Distribuições de probabilidade discretas:
+
+- Bernoulli/Binomial
+- Multinomial
+- Poisson 
+- Binomial Negativa 
+- Poisson/ Binomial Negativa zero-inflacionado
+- Geométrica
+- Hipergeométrica*
+
+
+.footnote[*Não pertence à família exponencial de distribuições]
+
+
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Exemplo prático &lt;/span&gt;
+
+A pesca de espinhel costuma ser utilizada para capturar grandes espécies pelágicas, com destaque para os atuns.
+  - Em cada evento de pesca (pescaria) são registradas as espécies que foram capturadas, sejam estas alvo ou não-alvo, além de muitas outras informações auxiliares.  
+  
+    &gt; **Pergunta:** há uma época do ano em que se captura mais atuns?
+
+
+&lt;img src="../Figuras/Longline_fisheries.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse, center, middle
+
+# Distribuição Poisson
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;
+
+
+Definida sob variáveis discretas positivas 
+  - `\(Y \in \text{{0, 1, 2, 3, ...}}\)`
+
+
+`$$\large f(y; \lambda) = \frac{\lambda^y e^{-\lambda}}{y!}$$`
+
+&lt;img src="../Figuras/Distribuicao_Poisson.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;
+
+&lt;br&gt;
+
+`$$\large y_i \sim Poisson(\lambda_i) ~~~ (\lambda_i  \geq 0)$$`
+
+&lt;br&gt;
+
+`$$\large E(Y) = \lambda, ~~~~~Var(Y) = \lambda$$`
+
+&lt;br&gt;
+
+`\(\large \lambda_i\)`: número médio de eventos (e.g., abundância média de uma espécie ou número médio de espécies não-alvo por pescaria)
+
+
+
+--
+
+&lt;p class="comment"&gt;
+&lt;b&gt;ATENÇÃO&lt;/b&gt;
+&lt;br&gt;
+
+Assume que a média = variância! 
+&lt;/p&gt;
+
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;
+
+Podemos relacionar a média de eventos `\(\lambda_i\)` a um conjunto de covariáveis conforme a relação:
+
+
+.pull-left[
+&lt;br&gt;
+
+`$$\large y_i \sim Poisson(\lambda_i)$$`
+
+`$$\large log(\lambda_i) = \eta_i$$`
+`$$\large \eta_i = \beta_0 + \beta_1x_{i_1} + \beta_2x_{i_2} + \dots + \beta_px_{i_p}$$`
+]
+.pull-right[
+
+
+&lt;p class="comment"&gt;
+&lt;b&gt;ATENÇÃO&lt;/b&gt;
+&lt;br&gt;
+
+Usamos a &lt;i&gt;função logarítmica&lt;/i&gt; como função de ligação de forma que `\(\lambda \geq 0\)`
+
+&lt;/p&gt;
+
+]
+
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Offset &lt;/span&gt; 
+
+Dados de contagem muitas vezes são medidos em relação a uma referência, como uma área ou um período de tempo
+
+
+&lt;img src="../Figuras/Offset.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Offset &lt;/span&gt; 
+
+Se a referência não for padronizada ao longo do estudo, teremos conclusões equivocadas 
+
+
+&lt;img src="../Figuras/Offset_2.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Offset &lt;/span&gt; 
+
+
+
+É necessário padronizar a variável resposta
+
+--
+
+- Dividindo Y pelo *esforço amostral* (densidade)
+  - E.g.: `\(\text{No. de plântulas}/m^2\)`
+      - Variável contínua -&gt; distribuição Normal, Gama, ....
+
+
+--
+
+&lt;br&gt;
+
+- Contabilizando diretamente no modelo
+  - **Offset**
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Offset &lt;/span&gt; 
+
+
+O offset é uma variável preditora especial que entra no componente sistemático do modelo, porém não tem parâmetro para ser estimado
+
+&lt;br&gt;
+
+`$$\large y_i \sim Poisson(\lambda_i\color{Tomato}{E_i})$$`
+
+--
+
+
+`$$\large log(\lambda_i\color{Tomato}{E_i}) = log(\lambda_i) + log(\color{Tomato}{E_i})$$`
+
+--
+
+`$$\large \beta_0 + \beta_1x_{i_1} + \beta_2x_{i_2} + \dots + \beta_px_{i_p}+ log(\color{Tomato}{E})$$`
+&lt;br&gt;
+
+- Lembrando que `\(log(\lambda) = \eta\)`
+- `\(E_i\)` é a exposição (esforço amostral)
+
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Sobredispersão &lt;/span&gt; 
+
+Dados discretos frequentemente apresentam sobredispersão
+- `\(\text{Var(dados)} &gt; \text{Var(modelo)}\)`
+
+
+&lt;img src="../Figuras/Overdispersion.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Sobredispersão &lt;/span&gt; 
+
+
+.pull-left[
+**Causa:**
+  - Omissão de variáveis preditoras importantes
+  
+  - Dados zero-inflacionados
+  
+  - Dependência entre as observações
+
+]
+
+
+
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Sobredispersão &lt;/span&gt; 
+
+
+.pull-left[
+**Causa:**
+  - Omissão de variáveis preditoras importantes
+  
+  - Dados zero-inflacionados
+  
+  - Dependência entre as observações
+
+
+-------
+
+**Consequência:**
+  - Erros padrão inflacionados (subestimação da variabilidade)
+  
+  - Significância estatística equivocada
+
+]
+
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Sobredispersão &lt;/span&gt; 
+
+
+.pull-left[
+**Causa:**
+  - Omissão de variáveis preditoras importantes
+  
+  - Dados zero-inflacionados
+  
+  - Dependência entre as observações
+
+
+-------
+
+**Consequência:**
+  - Erros padrões inflacionados (subestimação da variabilidade)
+  
+  - Significância estatística equivocada
+
+]
+
+
+.pull-right[
+&lt;br&gt;
+
+**Solução:**
+  - Incluir novas variáveis preditoras
+  
+  - Modelo quasi-Poisson (desuso)
+  
+  - Modelo Poisson com efeito(s) aleatório(s)
+  
+  - Modelo Binomial Negativo
+  
+  - Modelo Poisson/BN zero-inflacionado
+]
+
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Sobredispersão &lt;/span&gt; 
+
+**Detectando sobredispersão**
+
+
+- Análise gráfica dos resíduos:
+
+.pull-left[
+&lt;img src="../Figuras/Overdispersion_residuals.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+.pull-right[
+
+Em GLMs, passamos a analisar os resíduos padronizados
+
+- E.g.: **Resíduos de Pearson**
+
+    `\(r_i = \frac{y_i-\hat{\lambda_i}}{\sqrt{\hat{\lambda_i}}}\)`
+
+
+Espera-se que a média dos resíduos seja próxima de 0 e a variância próxima de 1!
+
+]
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Sobredispersão &lt;/span&gt; 
+
+**Detectando sobredispersão**
+
+
+- Teste de razão de dispersão:
+  - Calcula o fator de dispersão (`\(\phi\)`) - o quanto a variância residual desvia do modelo Poisson 
+
+
+$$\large \phi = \frac{\chi^2}{df}= \frac{\sum_{i=1}^{n} \frac{(y_i-\hat{\lambda_i)^2}}{\hat{\lambda_i}}}{n-p} $$
+- onde:
+  - `\(y_i\)` = valores observados
+  - `\(\hat{\lambda_i}\)` = valores preditos
+  - `\(n\)` = número de observações
+  - `\(p\)` = número de parâmetros no modelo
+  - `\(\chi^2\)` = qui-quadrado (soma dos resíduos de Pearson ao quadrado)
+  
+---
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Sobredispersão &lt;/span&gt; 
+
+**Detectando sobredispersão**
+
+
+- Teste de razão de dispersão:
+  - Calcula o fator de dispersão (`\(\phi\)`) - o quanto a variância residual desvia do modelo Poisson 
+  &lt;br&gt;
+  
+      - `\(\mathbf{\phi \approx 1}\)`: não há evidência de sobredispersão
+      - `\(\mathbf{\phi &gt; 1}\)`: sobredispersão (o modelo subestima a variância)
+      - `\(\mathbf{\phi &lt; 1}\)`: subdispersão (raro!)
+
+
+---
+class: inverse, center, middle
+
+# Distribuição Binomial Negativa
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Binomial Negativa &lt;/span&gt;
+
+Alternativa quando os dados apresentam sobredispersão
+- É uma extensão da distribuição Poisson
+
+
+`$$\large Y \sim Poisson(\color{Tomato}\lambda)$$`
+
+`$$\large \color{Tomato}\lambda \sim Gama(k, \beta)$$`
+
+
+
+A média da distribuição Poisson (`\(\lambda\)`) não é mais assumida como fixa
+  - variável aleatória que segue uma distribuição Gama
+
+--
+
+&lt;br&gt;
+
+
+&gt; &lt;span style="color: #ee6c4d;"&gt;A distribuição Binomial Negativa é uma distribuição composta (Poisson + Gama). &lt;/span&gt;
+
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Binomial Negativa &lt;/span&gt;
+
+Assim como a distribuição Poisson, a distribuição BN apresenta forte assimetria à direita
+
+
+`$$\large f(y; \mu, k) = \frac{\Gamma(y+k)}{\Gamma(k)\times\Gamma(y+1)} \times \left (\frac{k}{\mu + k}\right)^k \times \left(1 - \frac{k}{\mu + k}\right)^y$$`
+
+
+
+&lt;img src="../Figuras/Distribuicao_BN.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+
+
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Binomial Negativa &lt;/span&gt;
+
+Podemos resumir o modelo conforme
+
+
+`$$\large Y \sim BN(\mu, k)$$`
+
+`$$E(Y) = \mu, ~~~~~Var(Y) = \mu + \frac{\mu^2}{k}$$`
+
+onde:
+- `\(\mu\)`: média da distribuição BN
+- `\(k\)`: parâmetro de dispersão (forma/*shape*)
+
+--
+
+
+&lt;p class="comment"&gt;
+&lt;b&gt;ATENÇÃO&lt;/b&gt;
+&lt;br&gt;
+
+O que significa quando `\(k \rightarrow \infty\)`?
+
+&lt;/p&gt;
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Prática no R &lt;/span&gt;
+
+
+&lt;br&gt;
+&lt;br&gt;
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="../Figuras/Rlogo.png" alt="Pratica_aula_04.R &amp;lt;br&amp;gt;" width="25%" /&gt;
+&lt;p class="caption"&gt;Pratica_aula_04.R &lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Prática no R &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Relatório:  &lt;/span&gt;  
+
+
+**fisheries.rds**
+
+- Abundância de diversas espécies alvos e não-alvos da pesca
+  - Associar a abundância de uma espécie a fatores oceanográficos, espaciais, sazonais e pesqueiros
+    - Alternativamente, pode-se calcular a riqueza de espécies avaliar sua relação com os demais fatores 
+
+
+----
+
+**benthos_exposure.rds**
+
+- Riqueza de macrofauna bentônica registrada em diferentes praias
+  - Associar a riqueza à fatores de exposição a estresse ambiental e altura em relação a maré
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+  "highlightStyle": "github",
+  "highlightLines": true,
+  "countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

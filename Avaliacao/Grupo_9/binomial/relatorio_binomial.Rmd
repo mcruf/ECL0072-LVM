@@ -1,0 +1,435 @@
+---
+title: "Relatório da disciplina: Modelos Lineares Generalizados e Aditivos para Dados Ecológicos"
+author: "Bianca Guerreiro"
+date: "12-10-2025"
+output:
+   html_document: #Salvar como html
+      theme: journal #cerulean,flatly, united, cosmo, simplex  
+      number_sections: yes
+      toc: true               # Gera sumário (Table of Contents)
+      toc_float:              # Faz o sumário “flutuar” ao lado
+        collapsed: false      # Não inicia “fechado”
+        smooth_scroll: false  # Desativa rolagem suave (opcional)
+        position: left        # Posiciona o sumário à esquerda
+        width: 250px          # Define a largura do sumário
+---
+
+# GLM para dados binários
+
+## Introdução
+
+Dados binários são caracterizados por variáveis que assumem apenas dois estados possíveis, geralmente representados como 0 e 1, correspondendo a eventos de sucesso/fracasso ou ocorrência/não ocorrência etc. Esse tipo de dado é comum em estudos ecológicos, nos quais frequentemente se deseja modelar a probabilidade de ocorrência de uma espécie em função de características ambientais.
+
+Neste relatório, aplicaremos modelos lineares generalizados (GLMs) com distribuição binomial para analisar a ocorrência do guigó-da-Caatinga (<i>Callicebus barbarabrownae</i>), um primata endêmico e ameaçado da Caatinga. Aqui, o objetivo é avaliar como a estrutura do entorno desses fragmentos, representada por atributos da paisagem, influencia a probabilidade de ocorrência de <i>C. barbarabrownae</i>.
+
+Para definir as paisagens de presença e ausência da espécie, compilamos registros primários (aqueles feitos pelos próprios autores em campo) da literatura contendo informações de presença e ausência da espécie em diferentes fragmentos florestais.
+
+Vejamos as informações contidas no banco de dados:
+```{r echo=F}
+setwd("C:/Users/bvcg1/OneDrive/Área de Trabalho/relatorio_disciplina_marie")
+
+```
+```{r}
+dados <- read.csv("binomial/relat_dados_ocorrencia_cap2.csv")
+```
+```{r include=FALSE}
+dados <- subset(dados, select = -X)
+```
+```{r}
+str(dados)
+```
+`dados$ID` representa a identidade de cada paisagem estudada. Ao todo, o banco de dados tem 84 paisagens distintas.
+
+``` {r}
+length(unique(dados$ID))
+```
+
+A variável `dados$buffer` indica o tamanho (raio) considerado para cada paisagem. Em estudos de ecologia da paisagem, é recomendável que o tamanho da paisagem seja definido a partir de uma análise de escala do efeito, a fim de identificar a escala na qual a variável dependente é melhor explicada pelas variáveis independentes do modelo. No presente conjunto de dados, cada paisagem foi avaliada em 10 tamanhos de buffer diferentes.
+
+``` {r}
+table(dados$buffer) #cada buffer é repetido 84 vezes (que é o número total de paisagens)
+#ou:
+table(unique(dados[, c("ID", "buffer")])$ID) #cada paisagem contem 10 tamanhos de buffer
+```
+
+A variável `dados$situacao` indica se há presença ou ausência do guigó em cada paisagem. Ao todo, são 38 paisagens de ausência e 46 paisagens de presença.
+
+``` {r}
+table(unique(dados[, c("ID", "situacao")])$situacao)
+```
+`dados[,4:13]` são diferentes métricas da paisagem, calculadas a partir do pacote `landscapemetrics` (Hesselbarth et al., 2019) com base em imagens da Coleção 7 do MapBiomas, referentes ao ano de 2021. Onde:
+
+ - `dados$prop_habitat` é a proporção de floresta na paisagem (em %);
+ - `dados$dens_frags` é a densidade de fragmentos da paisagem (frags/100 ha);
+ - `dados$media_area_frags` é a média da área de todos os fragmentos da paisagem (ha);
+ - `dados$med_dist_eucl` é a média da distância euclidiana do vizinho mais próximo (calculada para cada fragmento da paisagem e expressa em metros);
+ - `dados$pcore` diferente das outras métricas, essa é calculada apenas para o fragmento em que foi registrada a presença ou ausência da espécie (fragmento central da paisagem). Mede a área central do fragmento (em hectares), desconsiderando a borda;
+ - `dados$dens_borda` é a densidade de borda dos fragmentos da paisagem (m/ha);
+ - `dados$shape_mn` é um índice que mede o formato médio dos fragmentos da paisagem. Seu valor é sempre maior ou igual a 1; quanto mais próximo de 1, mais próximo de uma forma quadrada é o fragmento, e quanto mais distante de 1, mais complexo é o formato;
+ - `dados$iagreg` é uma métrica de agregação, que indica o grau de agrupamento entre os fragmentos de floresta, variando de 0% (fragmentos mais isolados) a 100% (fragmentos mais próximos e conectados);
+ - `dados$clumpy` é o índice de aglomeração, que mede o padrão de distribuição espacial dos fragmentos. Valores próximos de 1 indicam paisagens altamente agregadas, enquanto valores próximos de 0 indicam uma distribuição mais aleatória;
+ - `dados$coesao` é o índice de coesão, que expressa o grau de conectividade física entre fragmentos de floresta na paisagem (em %). Quanto maior o valor, mais conectada e estruturalmente coesa é a paisagem.
+
+<br>
+
+## Checando multicolinearidade
+
+Como possuímos várias variáveis independentes, o primeiro passo é selecionar aquelas que não estejam fortemente correlacionadas entre si. Como temos 10 diferentes tamanhos de paisagem, o ideal seria avaliar cuidadosamente as correlações entre as métricas em cada tamanho de buffer. 
+
+A seguir, apresentarei _os resultados dos testes de correlação realizados para a maior paisagem (buffer com raio de 3000 m)_.
+
+Para verificar a multicolinearidade entre as métricas de paisagem, calculei as correlações pareadas entre todas as variáveis utilizando o coeficiente de correlação de Pearson, por meio da função `cor()` do R.
+
+```{r}
+b3000 <- subset(dados, buffer== "3000") #selecionando apenas os buffers de raio de 3000m
+
+# Correlation matrix
+nrow(b3000) #checando se estão as 84 paisagens
+names(b3000) #checando as colunas que contém minhas variáveis independentes
+M <- cor(b3000[4:13], use = "complete.obs")
+round(M,2)
+```
+
+Aqui, adotei o limiar de |r| > 0.7 para indicar correlação forte. Quando duas métricas apresentaram correlação elevada, e uma delas era `dados$prop_habitat`, essa última foi priorizada para ser mantida, considerando sua importância ecológica para a espécie-alvo.
+
+Dessa forma, pelos valores de correlação de Pearson, as métricas mque não estão correlacionadas com `dados$prop_habitat` são:
+
+  - `dados$media_area_frags`;
+  - `dados$med_dist_eucl`;
+  - `dados$dens_borda`;
+  - `dados$shape_mn`;
+  - `dados$clumpy`;
+
+Mas, dessas, `dados$shape_mn` e `dados$media_area_frags` estão positivamente correlacionadas (r = 0.71).
+
+```{r}
+plot(b3000$shape_mn, b3000$media_area_frags)
+```
+<br>
+
+Como o formato médio dos fragmentos (`dados$shape_mn`) é principalmente um proxy da quantidade de borda na paisagem e já possuimos uma métrica para isso (`dados$dens_borda`), manterei `dados$media_area_frags` que dá uma informação da área média dos fragmentos na paisagem.
+
+Assim, as métricas selecionadas para explicar a ocorrência da espécie nas paisagens geradas pelo buffer de 3000m, serão:
+
+ - `dados$prop_habitat`;
+ - `dados$media_area_frags`;
+ - `dados$med_dist_eucl`;
+ - `dados$dens_borda`;
+ - `dados$clumpy`;
+
+O resultado das análises de multicolinearidade para os demais tamanhos de buffer no código a seguir, mas, para não alongar o relatório, deixei o resultado em formato de comentário no própio código.
+
+```{r, echo=TRUE, results='hide'}
+# Checando as correlações para os outros tamanhos de paisagem
+
+## subsets para os outros tamanhos
+b399 <- subset(dados, buffer== "399")
+b688 <- subset(dados, buffer== "688")
+b977 <- subset(dados, buffer== "977")
+b1266 <- subset(dados, buffer== "1266")
+b1555 <- subset(dados, buffer== "1555")
+b1844 <- subset(dados, buffer== "1844")
+b2133 <- subset(dados, buffer== "2133")
+b2422 <- subset(dados, buffer== "2422")
+b2711 <- subset(dados, buffer== "2711")
+
+# Correlação métricas b399
+M <- cor(b399[4:13], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_habitat, ficam: dens_frags, med_dist_eucl, shape_mn e clumpy
+
+# Correlação métricas b688
+M <- cor(b688[4:13], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_habitat, ficam: dens_frags, med_dist_eucl, shape_mn e clumpy
+
+# Correlação métricas b977
+M <- cor(b977[4:13], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_habitat, ficam: dens_frags, med_dist_eucl, shape_mn e clumpy
+
+# Correlação métricas b1266
+M <- cor(b1266[4:13], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_habitat, ficam: med_dist_eucl, shape_mn e clumpy
+
+# Correlação métricas b1555
+M <- cor(b1555[4:13], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_habitat, ficam: shape_mn e clumpy
+
+# Correlação métricas b1844
+M <- cor(b1844[4:13], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_habitat, ficam: med_area_frags, shape_mn e clumpy
+
+# Correlação métricas b2133
+M <- cor(b2133[4:13], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_habitat, ficam: med_dist_eucl, shape_mn e clumpy
+
+# Correlação métricas b2422
+M <- cor(b2422[4:13], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_habitat, ficam: med_area_frags, med_dist_eucl, shape_mn e clumpy
+
+# Correlação métricas b2711
+M <- cor(b2711[4:13], use = "complete.obs")
+round(M,2)
+# Priorizando a prop_habitat, ficam: med_area_frags, med_dist_eucl, shape_mn e clumpy
+
+```
+
+## Análise exploratória
+Utilizarei apenas o buffer de 3000m de raio como exemplo para uma breve análise exploratória dos dados.
+
+```{r, fig.width=10, fig.height=15}
+b3000 <- subset(dados, buffer== "3000") #selecionando o buffer de 3000m
+b3000_occur <- subset(b3000, situacao== "presenca") #criando subset para ocorrência
+b3000_absc <- subset(b3000, situacao== "ausencia") #criando subset para ausência
+
+par(mfrow = c(6, 2)) 
+par(mar = c(4, 4, 2, 1))
+#prop_habitat
+hist(b3000_absc$prop_habitat, main = "Ausência - prop_habitat", xlab = "", col = "lightgray")
+hist(b3000_occur$prop_habitat, main = "Presença - prop_habitat", xlab = "", col = "lightblue")
+
+#dens_frags
+hist(b3000_absc$dens_frags, main = "Ausência - dens_frags", xlab = "", col = "lightgray")
+hist(b3000_occur$dens_frags, main = "Presença - dens_frags", xlab = "", col = "lightblue")
+
+#med_dist_eucl
+hist(b3000_absc$med_dist_eucl, main = "Ausência - med_dist_eucl", xlab = "", col = "lightgray")
+hist(b3000_occur$med_dist_eucl, main = "Presença - med_dist_eucl", xlab = "", col = "lightblue")
+
+#media_area_frags
+hist(b3000_absc$media_area_frags, main = "Ausência - media_area_frags", xlab = "", col = "lightgray")
+hist(b3000_occur$media_area_frags, main = "Presença - media_area_frags", xlab = "", col = "lightblue")
+
+#shape_mn
+hist(b3000_absc$shape_mn, main = "Ausência - shape_mn", xlab = "", col = "lightgray")
+hist(b3000_occur$shape_mn, main = "Presença - shape_mn", xlab = "", col = "lightblue")
+
+#clumpy
+hist(b3000_absc$clumpy, main = "Ausência - clumpy", xlab = "", col = "lightgray")
+hist(b3000_occur$clumpy, main = "Presença - clumpy", xlab = "", col = "lightblue")
+```
+Os painéis à esquerda correspondem às paisagens classificadas como ausência (em cinza), enquanto os painéis à direita representam as paisagens de presença (em azul).
+
+De modo geral, as paisagens associadas à presença da espécie apresentam menor cobertura florestal média em comparação às áreas de ausência. Além disso, o formato médio dos fragmentos é maior nessas paisagens, indicando que, onde o guigó ocorre, os fragmentos tendem a ser mais irregulares e, consequentemente, possuem maior proporção de borda.
+
+<br>
+
+## Transformando as variáveis
+Essas são as variáveis do conjunto de dados:
+```{r}
+str(dados)
+```
+Precisamos transformar algumas variáveis:
+
+ -`dados$ID` está como *character* e deve ser convertida para *factor*, caso seja incluída posteriormente nos modelos;
+
+ -`dados$buffer` está como número inteiro, mas será convertida para *factor*, caso se deseje incluí-la como variável explicativa;
+
+ -`dados$situacao` está como *character*, mas corresponde à nossa variável resposta binária. Assim, será transformada em valores 0 e 1, sendo 1 para presença (sucesso de ocorrência do guigó) e 0 para ausência (insucesso de ocorrência).
+
+```{r}
+cols <- c("ID", "buffer") #colunas que quero transformar em factor
+dados[, cols] <- lapply(dados[, cols], factor)
+dados$situacao <- ifelse(dados$situacao == "presenca", 1, 0) #transformando presença em 1 e ausência em 0
+```
+
+<br>
+
+## Gerando modelos
+
+Como para cada tamanho de buffer foram selecionadas métricas diferentes, irei gerar os modelos para cada um deles. Utilizei GLMs com distribuição binomial e função de ligação logit.
+
+```{r , echo=F}
+## subsets por tamanho de buffer
+b399 <- subset(dados, buffer== "399")
+b688 <- subset(dados, buffer== "688")
+b977 <- subset(dados, buffer== "977")
+b1266 <- subset(dados, buffer== "1266")
+b1555 <- subset(dados, buffer== "1555")
+b1844 <- subset(dados, buffer== "1844")
+b2133 <- subset(dados, buffer== "2133")
+b2422 <- subset(dados, buffer== "2422")
+b2711 <- subset(dados, buffer== "2711")
+b3000 <- subset(dados, buffer== "3000")
+```
+
+Modelos nulos:
+
+```{r, echo=TRUE, results='hide'}
+### Nulo ----
+b399_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b399)
+b688_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b688)
+b977_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b977)
+b1266_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b1266)
+b1555_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b1555)
+b1844_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b1844)
+b2133_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b2133)
+b2422_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b2422)
+b2711_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b2711)
+b3000_null_model <- glm(situacao ~ 1, family = binomial(link = logit), data = b3000)
+```
+
+Como são muitos modelos (e combinações possíveis), uso uma função que gera todas combinações possíveis e salva cada modelo em um objeto:
+
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Função para criar todos os modelos e gerar objetos separados
+create_glm_models_objects <- function(data, vars, prefix){
+  model_names <- c()  # vetor para armazenar nomes dos modelos criados
+  
+  for(n in 1:length(vars)){
+    combos <- combn(vars, n, simplify = FALSE)
+    
+    for(i in seq_along(combos)){
+        f <- as.formula(paste("situacao ~", paste0("scale(", combos[[i]], ")", collapse = " + ")))
+        model_name <- paste0(prefix, "_", paste(combos[[i]], collapse = "_")) # Nome do objeto baseado nas variáveis
+      model <- glm(f, family = binomial(link = "logit"), data = data) #Gerando o modelo no environment
+      assign(model_name, model, envir = .GlobalEnv)
+      
+      model_names <- c(model_names, model_name) # Adicionando o nome ao vetor
+      
+      message("Modelo criado: ", model_name)}}
+      return(model_names)}
+
+```
+
+Modelos para os buffers de raios de: 399, 688 e 977 m
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Variáveis preditoras
+vars <- c("prop_habitat", "dens_frags", "med_dist_eucl", "shape_mn", "clumpy")
+modelos_399 <- create_glm_models_objects(b399, vars, "b399")
+modelos_688 <- create_glm_models_objects(b688, vars, "b688")
+modelos_977 <- create_glm_models_objects(b977, vars, "b977")
+```
+
+Modelos para os buffers de raios de: 1266 e 2133 m
+
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Variáveis preditoras
+vars <- c("prop_habitat", "med_dist_eucl", "shape_mn", "clumpy")
+modelos_1266 <- create_glm_models_objects(b1266, vars, "b1266")
+modelos_2133 <- create_glm_models_objects(b2133, vars, "b2133")
+```
+
+Modelos para o buffer de raio de 1555 m
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Variáveis preditoras
+vars <- c("prop_habitat", "shape_mn", "clumpy")
+modelos_1555 <- create_glm_models_objects(b1555, vars, "b1555")
+```
+
+Modelos para os buffers de raios de: 1844 e 2711 m
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Variáveis preditoras
+vars <- c("prop_habitat", "media_area_frags", "shape_mn", "clumpy")
+modelos_1844 <- create_glm_models_objects(b1844, vars, "b1844")
+modelos_2711 <- create_glm_models_objects(b2711, vars, "b2711")
+```
+
+Modelos para o buffer de raio de 2422 m
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Variáveis preditoras
+vars <- c("prop_habitat", "media_area_frags", "med_dist_eucl", "shape_mn", "clumpy")
+modelos_2422 <- create_glm_models_objects(b2422, vars, "b2422")
+```
+
+Modelos para o buffer de raio de 3000 m
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+### Variáveis preditoras
+vars <- c("prop_habitat", "media_area_frags", "med_dist_eucl", "dens_borda", "clumpy")
+modelos_3000 <- create_glm_models_objects(b3000, vars, "b3000")
+```
+
+Agora, preciso salvar todos esses modelos em um único objeto para então gerar uma tabela e compará-los pelo AIC.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+todos_modelos_nomes <- c("b399_null_model", "b688_null_model", "b977_null_model", "b1266_null_model","b1555_null_model", "b1844_null_model", "b2133_null_model", "b2422_null_model", "b2711_null_model", "b3000_null_model", modelos_399, modelos_688, modelos_977, modelos_1266, modelos_1555, modelos_1844, modelos_2133, modelos_2422, modelos_2711, modelos_3000) #nomes
+
+todos_modelos_lista <- lapply(todos_modelos_nomes, get) #criando lista com todos os modelos
+
+names(todos_modelos_lista) <- todos_modelos_nomes # nomeando a lista para identificar os modelos
+
+library("AICcmodavg") #pacote que uso para gerar tabela de AIC
+
+modelos_AIC <- aictab(cand.set = todos_modelos_lista, modnames = todos_modelos_nomes)
+
+modelos_AIC <- data.frame(modelos_AIC)
+
+library(DT) #Pacote que encontrei para gerar tabela interativa
+
+datatable(modelos_AIC, caption = "Tabela com AIC de todos modelos gerados", options = list(pageLength = 10, scrollX = TRUE))
+
+```
+Pela análise dos valores de AIC, os modelos com melhor ajuste foram `b399_med_dist_eucl_clumpy` e `b399_dens_frags_med_dist_eucl_clumpy`, ambos apresentando ΔAIC < 2. Modelos com ΔAIC inferior a 2 são geralmente considerados igualmente plausíveis (Burnham & Anderson, 2002), sugerindo que ambos capturam de forma satisfatória os padrões de presença e ausência da espécie nas paisagens analisadas.
+
+A seguir, iremos analisar graficamente o ajuste do modelo:
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+library(DHARMa)
+## Simulando os resíduos
+resid_sim_1 <- simulateResiduals (b399_med_dist_eucl_clumpy, n=1000)
+plot(resid_sim_1)
+
+resid_sim_2 <- simulateResiduals (b399_dens_frags_med_dist_eucl_clumpy, n=1000)
+plot(resid_sim_2)
+```
+
+Aparentemente, ambos modelos estão bem ajustados.
+Podemos fazer uma análise mais minuciosa dos resíduos usando a função `check_model()` do pacote *performance*:
+
+```{r echo=T, message=F, fig.width=10, fig.height=7}
+library(performance)
+check_model(b399_med_dist_eucl_clumpy)
+check_model(b399_dens_frags_med_dist_eucl_clumpy)
+```
+
+Em geral, os modelo estão bem ajustados, apesar da falha pontual no 'binned residuals' para o segundo modelo.
+
+Este último gráfico mostra que as probabilidades médias preditas (próximo de 50% e 60%) o modelo não foi bem calibrado, uma vez que há resíduos fora da banda. Isso pode sugerir variáveis omitidas ou má especificação da função de ligação.
+
+<br>
+
+## Analisando os resultados
+
+Por se tratar de um modelo logístico, todos os parâmetros estão expressos na escala logit e são interpretados sob a forma de *razão de chance*. Esses parâmetros podem ser transformados em probabilidades convertendo-os para escala natural conforme:
+
+$$p = \frac{1}{1 + exp(-\eta)}$$
+
+```{r}
+summary(b399_med_dist_eucl_clumpy)
+```
+
+
+
+Avaliando individualmente os valores estimados para cada covariável, observamos que:
+
+ - `Intercept` (0.1195): representa a probabilidade de presença do guigó quando todas as covariáveis (nesse caso, média da distância euclidiana e clumpiness index) estão na média (que é 0, pois estão padronizadas).
+ 
+    Convertendo para probabilidades, temos:
+    $p = \frac{1}{1+exp(-0.1195))}  \approx 0.53$
+    
+    
+
+- `scale(med_dist_eucl)`: O coeficiente é negativo, ou seja, quanto maior a distância euclidiana média ao vizinho mais próximo, menor a probabilidade de ocorrência da espécie. Não é estatisticamente significativo (p = 0.201), então não podemos afirmar isso com confiança, mas o efeito sugere tendência.
+
+    Convertendo para probabilidades, temos:
+    $p = \frac{1}{1+exp(-1 \times(0.1195 - 0.4901))}  \approx 0.41$
+    
+  Quando a distância média ao vizinho mais próximo é 1 desvio padrão acima da média, a chance de presença do guigó é cerca de 45%, ou seja, menor do que quando a média é 0 (intercepto).
+ 
+
+<br>
+
+- `scale(clumpy)`: Interpretação similar a anterior. O coeficiente é negativo, ou seja, quanto maior a agregação dos fragmentos na paisagem, menor é a probabilidade de ocorrência da espécie. Não é estatisticamente significativo (p = 0.685), então não podemos afirmar isso com confiança, mas o efeito sugere tendência.
+
+    Convertendo para probabilidades, temos:
+    $p = \frac{1}{1+exp(-1 \times (0.1195 - 0.1372))}  \approx 0.50$
+   
+   Quando o clumpiness index (indicie de agregação dos fragmentos) é 1 desvio padrão acima da média, a chance de presença do guigó é cerca de 50%, ou seja, um pouco menor do que quando a média é 0 (intercepto) e maior do que quando a distância média ao vizinho mais próximo é 1 desvio padrão acima da média.
+
+<br>

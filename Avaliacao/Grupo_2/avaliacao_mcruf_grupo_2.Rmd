@@ -1,0 +1,221 @@
+---
+title: "Avaliação do relatório"
+output: pdf_document
+---
+
+-   **Grupo:** Aline bueno, José Daniel Bastos e Juliana Moureira
+
+-   **Capítulos entregues:** 6/6
+
+-   **Relatório entregue no prazo:** Sim
+
+-   **Nota:** A
+
+------------------------------------------------------------------------
+
+# Comentário geral
+
+Todos os capítulos foram apresentados, com alguns contendo maiores detalhamentos do que outros. No geral, o grupo demonstrou domínio da maioria dos assuntos abordados, devendo-se, contudo, atentar ao uso correto do termo `offset()`. Devo destacar que a maioria dos capítulos careceram de hipóteses e objetivos claros, e as análises exploratórias e resultados discutidos poderiam ter sido discutidos de forma mais detalhada. Apesar dessas ressalvas pontuais, o relatóro está satisfatório diante dos propósitos da disciplina.
+
+
+
+\vline
+
+
+# Comentários específicos
+
+## Cap. 1: Dados binários
+
+- Seção 1:
+  - Gostei muito como vocês introduziram os GLMs (seção 1.1) e, posteriormente, o modelo logístico (seção 1.2).
+  
+- Seção 1.1:
+  - A equação correta é: $\mu_i = \beta_0 + \sum_{j=1}^{p} \beta_j x_{ij}$
+  - Os símbolos matemáticos corretos são: $\mu$ (e não 'u'), $\eta$ (e não 'n')
+  - Reparem no somatório: temos $p$ preditores que vão do primeiro preditor ($j=1$) até $p$ preditores; Vocês colocam de 0-1 dado ao dado binário, mas isso é em relação à *variável resposta* (o lado esquerdo da equação) e não em relação aos preditores (lado direito da equação).
+  - Vocês comentam: "*É uma propriedade relativa a natureza da variável predita*"
+      - O correto é se referir como *variável resposta* (e não predita)
+
+- Seção 1.2:
+  - Como vocês apresentam as equações (o que é ótimo - parabéns!), é importante terem em mente que é necessário explicar o que tem na equação. Vocês não explicam o que é $n_i$ e $p_i$ no modelo Binomial.
+  - Pequeno erro na equação: não tem o $y_i$ antes do símbolo de somatória. A equação correta é: $logit(p_i) = \eta_i = \beta_0 + \sum_{j=1}^{p} \beta_j x_{ij}$
+  - Vocês apresentam $\beta_1$, mas a equação que vocês apresentam é com vários preditores (i.e., $\beta_j$).
+      - O correto é se referir como $\beta_j$ e não $\beta_1$, que seria o caso de um modelo com apenas um único preditor (covariável).
+  - Vocês comentam: "*...as chances do evento ocorrer são multiplicados por $e$ *".
+      - Na verdade,agora fala-se em 'probabilidade' e não 'chances'. Falamos em chance quando estamos avaliando os parâmetros na escala logit; falamos em probabilidade, quando convertemos os parâmetros na escala natural.
+      - Não multiplica-se a probabilidade pelo exponencial $e$, como vocês afirmam. Calcula-se a probabilidade exponenciando o preditor linear ($\eta$), que é descrito pela relação $\eta = \beta_0 + \sum_{j=1}^{p} \beta_j x_{ij}$
+    -   ...para um $\beta_1 = 0.7$, o $e^{0.7}$
+  
+-   Seção 2:
+  -  Penso que caberia terem gastado um tempo a mais para explicar o banco de dados que irão usar. É sempre importante situar o leitor diante da problemática exposta.
+  - Vocês comentam: "*Assim, esperavamos que esse evento estaria relacionado a salinidade nos locais de estudo.*"
+      - Por quê? Sejam mais claros com a hipótese de vocês.
+  - As covariáveis (sst, sal, chla, depth, dlm, il) foram padronizadas para avaliar a colinearidade, mas vocês não explicam o por quê de terem realizado essa transformação.
+  - Senti falta de explorarem com mais cuidado a variável resposta (presença/ausência) com algumas covariáveis, em específico salinidade, apontada na hipótese de vocês.
+  - Revejam o critério de seleção das covariáveis quando avaliam a correlação entre elas via `corrplot()`. Lembrem-se: duas variáveis são consideradas altamenta colineares quando a correlação for \> 0.7 (70%). No caso do banco de dados em questão, essa condição ocorreu apenas entre as variáveis `clorofila` e `dlm`. Portanto, deve-se escolher qual dessas duas covariáveis tem maior intuição biológica e excluir a outra na hora de montar os modelos. Todas as demais covariáveis podem ser mantidas e testadas no modelo.
+  - Seria interessante vocês comentarem que estratégia de modelagem adotaram: no caso, vocês recorreram a o método '*forward step-wise*', em que se adiciona as covariáveis sequencialmente no modelo.
+  - Sejam mais claros na escolha do melhor modelo. De modo geral, houve pouca variação no AIC entre os modelos testados, com o melhor modelo (`mod0`) diferindo apenas de 3 pontos do pior modelo (`mod3`). Vocês apresentam os resultados do modelo `mod1`, mas não explicam o por quê da sua escolha. Em tese, este modelo apresentou o segundo menor AIC.
+  - Discutam mais os resultados apresentados, tanto para análise residual quanto análise do sumário estatístico do modelo. Lembrando: análise residual precede (sempre!) a análise dos resultados do modelo. Só interpretamos o modelo quando temos a certeza de um bom ajuste.
+      - O que vocês interpretam do sumário? Em que escala estão os parâmetros estimados? A relação presença/ausência vs. salinidade foi positiva, negativa?
+      - O que vocês interpretam dos gráficos dos resíduos? O que cada gráfico está analisando? Por que verificaram correlação espacial e temporal? O último presumo que seja pelo fato do banco de dados possuir esses dois componentes, no entanto, vocês não deixam isso claro.
+
+\vline
+
+
+## Cap. 2: Dados discretos
+
+- Seção 1:
+  - Preciosismo: Vocês comentam: "*Não há valores “entre” (ex: não existe 2,5 corais).*"
+      - Não há valores *fracionários*
+      
+      
+- Seção 1.1:
+    - Faltou vocês discutirem o que observaram em cada figura apresentada.
+    - Faltou, também, explorarem a relação da riqueza com as demais covariáveis.
+       -  Apenas apresentaram a relação riqueza *vs.* praia.
+       
+- Seção 2:
+  - Vocês comentam: "*Quando estamos modelando contagens de eventos raros, onde:*"
+      - Não se restringe a eventos raros
+  - Vocês comentam: "*Os eventos são independentes entre si.*"
+      - Correto, mas isso não é uma propriedade específica da distribuição Poisson. Isso é uma característica geral de GLMs/GAMs.
+  - Vocês comentam: "*A média de ocorrências é constante no tempo ou espaço.*"
+      - Não totalmente. O que ocorre é que a distribuição Poisson assume que a média $\mu$ seja igual à variância $\sigma$. Ambas, por consquência, são constantes ao longo do experimento (amostragens); não é específico ao espaço e tempo, e sim à unidade amostral.
+      - Aqui caberia vocês destacarem a questão do `offset`, frequentemente utilizado no contexto de modelos para dados discretos. Lembrem-se: se a amostragem não foi padronizada ao longo do experimento, precisa-se contabilizar a diferença de esforço amostral no modelo. Uma forma de fazer isso, é usando o offset. No caso dos dados apresentados, o que vocês assumiram?
+  - Na seção 1.1 vocês apresentam (apenas) a relação entre riqueza e praia, porém não incluem essa covariável nos modelos. Por que?
+    - Cabe lembrar que a análise residual tem que ser realizada antes (!) de avaliar os resultados do modelo.
+      - Vocês apresentaram a análise residual sempre após os resultados
+  - Faltou discutirem em mais detalhes os resultados estatísticos (tanto da Poisson quanto da Binomial Negativa)
+      - Em que escala estão os parâmetros estimados? Qual a relação dos parâmetros com a riqueza: positiva, negativa? Essa relação foi significativa?
+  - Vocês comentam: "*...vimos que os parametros ‘exposição’ e ‘NAP’ são significativos em relação a riqueza.*"
+      - Os parâmetros *influenciam* de forma significativa a variabilidade da riqueza
+  - Seria importante frisar que, embora o modelo Binomial Negativo tenha apresentado uma melhor qualidade de ajuste quando contrastado com o modelo Poisson, há ainda algumas violações residuais que carecem mais atenção (e.g., homogeneidade da variância). Nesse contexto, teria sido interessante formular algumas hipóteses em como poderíamos melhorar a qualidade do ajuste - e.g., acrescentar mais covariáveis (e.g., praia), incluir um efeito aleatório, ....
+
+\vline
+
+## Cap. 3: Dados contínuos
+
+- Seção 1:
+  - No final da última frase, poderiam já ter antecipado quais distribuições se enquadram para essa categoria de dados; por exemplo, distribuição Gama e log-Normal (além da própria distribuição Normal)
+  
+- Seção 2.2:
+  - A apresentação desta seção ficou muito bem apresentada. No entanto, aponto alguns aspectos para terem mais cuidado no futuro:
+    - Na introdução, vocês mencionam quais covariáveis serão analisadas, mas a análise exploratória reflete apenas uma parte das covariáveis mencionadas. Por exemplo, faltou apresentarem a relação CPUE vs. salinidade (Barco, Longitude). Sejam consistentes.
+      - Faltou vocês avaliarem a multicolinearidade. Por exemplo, as covariáveis `clorofila` e `dlm` são muito correlacionadas (86%!). Elas não podem ser incluídas simultaneamente no mesmo modelo, e portanto precisa-se escolher qual variável será mantida.
+  - Vocês comentam "*O Gráfico 2 sugere um padrão sazonal, com Mes 3 e 6...*" 
+      - Não seria mês 1 e 3? De toda forma, não interpretaria que há um padrão sazonal claro, já que os demais meses as medianas são similares.
+    - Vocês comentam "*...um padrão de heterocedasticidade claro (formato de “leque”), onde a variância da CPUE aumenta conforme a média aumenta.*" 
+      - Há um equívoco aqui. Esse tipo de análise só se pode fazer efetivamente quando se analiza os resíduos do modelo (gráfico de resíduos vs. valores ajustados). O gráfico que vocês estão analisando é a relação da variável resposta (CPUE) com a covariável (Latitude). Sendo assim, o que se observa na verdade é uma clara agregação de CPUE em menores latitudes, entre -10 e 10 graus. Isso pode sugerir que essa região seja um 'hotspot' de abundância de atuns.
+      
+
+- Seção 2.3:
+  - Na verdade, vocês escolhem um GLM principalmente pela assimetria dos dados (a qual não consegue ser capturada por uma distribuição Normal).
+  - Há um pequeno equívoco na forma em como vocês estão tratando o modelo log-Normal. Da forma que vocês estão apresentando (i.e., transformando apenas a variável resposta no log), o modelo ainda assume a premissa de *homocedasticidade*, porque vocês estão essencialmente usando uma distribuição 'Normal', a qual assume uma média que é independente da variância. Na distribuição log-Normal, no entanto, a média depende da variância (e vice-versa), e são expressos na escala log. Existe uma especificação matemática específica para a distribuição log-Normal.
+      - O correto teria sido vocês usarem a distribuição `lognormal` dentro da função `glmmTMB()` - vide script da aula prática.
+
+
+- Seção 3.1:
+  - **Cuidado:** vocês usaram `chla` e `dlm` no mesmo modelo. Videm meu comentário na seção 2.2.
+  
+- Seção 3.2:
+  - Acho mais intuitivo fazer a análise de colinearidade antes de rodar o modelo.
+  - Vocês comentam "*A colinearidade moderada restante (chla e dlm, VIF 5-6) é esperada, pois são variáveis oceanográficas correlacionadas.*"
+      - Se elas são correlacionadas, elas não podem ser consideradas juntamente no mesmo modelo.
+  - **Eita!** Vocês comentam: "*O Gráfico 4 mostra um excelente ajuste:*"
+      - Na verdade, está longe de ser excelente. Há uma violação *severa* no gráfico de resíduos *vs.* valores preditos (painel à direita). Há um claro padrão curvilíneo nos resíduos, o que indica violação da homocedasticidade. Que soluções vocês traríam para tentar corrigir esse problema?
+
+
+- Seção 3.3:
+  - **Cuidado!** O número de asteriscos e o valor do p-valor não medem o grau de significância biológica e muito menos a força da relação; apenas diz se o coeficiente associado à variável é estatisticamente diferente de zero — ou seja, se rejeitamos a hipótese nula de ausência de efeito. Em tese, não comprovamos efetivamente a nossa hipótese (presença de efeito da variável); apenas rejeitamos ou deixamos de rejeitar a hipótese nula. Quando p-valor < 0.05, rejeitamos a hipótese nula e podemos afirmar que há uma relação entre a covariável a variável resposta. Repare, contudo, que não temos como atribuir o sentido de 'força' de relação (a relação é muito forte, ou muito fraca, ...).
+  - Vocês comentam: "*...sugerindo que este efeito da latitude é consistente em todas as longitudes.*"
+      - Mudem *consistente* -> *constante*
+  - Assim como já comentado nos capítulos prévios, senti falta de vocês explorarem mais os resultados do modelo (sinal do parâmetro, interpretação, etc.). Por exemplo, latitude foi uma variável significativa para explicar a variabilidade da CPUE...o fato do parâmetro estimado ser positivo, o que vocês podem concluir da relação CPUE\~Latitude?
+  - Vocês comentam: "*sst (Temperatura) não teve efeito linear...*"
+      - O correto é dizer: sst não contribui para explicar a variabilidade de CPUE; ou seja, não há uma relação *significativa* entre ambas as variáveis.
+
+\vline
+
+## Cap. 4: Dados categóricos
+
+- Seção 1:
+  - Gostei da introdução.
+  - Faltou vocês apresentarem/comentarem sobre o banco de dados que irão usar. Lembrem-se: outra pessoa deveria conseguir entender e replicar o trabalho apresentado.
+  - Alinhado ao contexto anterior, faltou vocês expor o que exatamente irão analisar (qual a variável resposta e as preditoras). Consigo apenas deduzir se for olhando para o código de vocês.
+  - Os itens `Sáude x Espécie`, `Saúde x Sexo` e `Saúde x Estágio de vida` não são auto-explicativos; faltou vocês incluirem as figuras da análise exploratória. Não consigo acessar as informações que vocês citam (e.g., *observamos uma probabilidade maior de pinguins machos ficarem com sobrepeso em relação as fêmeas.*).
+  - Penso que mover os textos que aparecem ao final desta seção poderiam ser integrados à introdução, apresentada no início da seção.
+
+
+- Seção 2:
+  - Hmh, a primeira figura é pouco informativa. Considerem adaptar o código da seguinte forma (essencialmente, igual ao código da 2a figura):
+
+```{r echo=T, eval = F, message=F, warning=F}
+  ggplot(dados, aes(x = health_metrics, fill = life_stage)) +
+  geom_bar(position = "fill") + 
+  labs(y = "Proportion") + 
+  scale_y_continuous(labels = scales::percent_format())
+```
+  
+  - Ótimas interpretações ao final da seção!
+
+- Seção 3:
+  - Faltou vocês discutirem os resultados observados (tanto os numéricos quanto os gráficos)....
+  - Vocês rodam um segundo modelo que nem é mencionado nas hipóteses que foram levantadas no início do capítulo (dieta vs. estado de saúde). Por que? Sejam claros e objetivos. Prestem atenção!
+
+\vline
+
+## Cap. 5: Distribuições complementares
+
+- Seção 1:
+  - Achei legal vocês já terem destacado na introdução a abordagem analítica que irão adotar.
+  - Faltou expor um pouco as hipóteses/objetivos que impulsionaram os modelos propostos.
+
+- Seção 2.2:
+  - **Cuidado:** Vocês estão confundindo o uso do `offset()`. O offset é usado quando se quer corrigir os dados pelo esforço amostral! No caso do banco de dados em questão, o esforço amostral é medido pelo número de anzol que foi utilizado em cada pescaria (coluna `N_anzol` do banco de dados).
+    - Se quisessem padronizar os dados, no caso para terem *bycatch rate* (ao invés de *BPUE*), vocês teriam que fazer a relação conforme: `Abu_Mola_mola / (Abu_Esp_alvo + Abu_Mola_mola)`.
+        - Notem, contudo, que essa divisão gera um *dado contínuo*; logo, vocês teriam que partir para uma das seguintes distribuições: Gama, log-Normal ou Tweedie.
+        - Para se manterem dentro do contexto de dados de contagem, o que vocês poderiam (e deveriam) ter feito é modelar a abundância de *Mola_mola* e usar o log da coluna `N_anzol` como offset em todos os modelos (i.e., binomial negativo, ZINB, ZANB e Tweedie).
+  - Vocês comentam: "*Convertemos variáveis categóricas...*"
+      - Na verdade, vocês convertem uma variável *character* para *factor* (ambas podem ser consideradas como variável categóricas).
+
+
+- Seção 2.3:
+  - Cadê a análise exploratória da variável resposta com as demais covariáveis que vocês estão considerando?
+  
+  
+- Seção 2.4:
+  - Alguns pontos precisam ser revistos nos modelos propostos:
+      - Utilizar barco como efeito aleatório seria uma abordagem interessante, porém foge do escopo da disciplina e de fato nem foi abordado em aula prática. A não independência dos dados nasce principalmente do componente espacial (long/lat) e temporal (mes, ano,....), e não do barco, como vocês inferem. A inclusão de barco como efeito aleatório (ou fixo, a depender do objetivo do estudo) se dá pela diferença de capturabilidade que é observada entre barcos.
+  - O uso do offset está errado nesse contexto - videm meu comentário mais acima.
+  - Lendo o script, vejo que vocês padronizaram as covariáveis, porém vocês não comentam isso em nenhum momento. Isso deveria fazer parte da seção de análise exploratória dos dados.
+  - Gostei como vocês expuseram as diferentes definições de cada modelo. 
+    - Pequena correção: a definição do modelo m_ZANB não está totalmente correta. O primeiro estágio modela apenas a presença/ausência da espécie, enquanto que o segundo estágio modela a abundância (dado que a espécie estava presente).
+    
+
+- Seção 3.2:
+  - Faltou vocês avaliarem o pressuposto da independência residual (espacial e temporal), dado que os dados foram coletados ao longo do espaço e tempo.
+  - Evitem o termo 'modelo vencedor'; usem algo como 'melhor modelo'...
+  
+  
+- Seção 3.3:
+  - Lembrem: no '*conditional model*' vocês estão avaliando a influência das covariáveis sobre a *abundância* de *Mola_mola*, enquanto que no '*zero-inflation model*' vocês estão avaliando a ausência/presença da espécie.
+  - A interpretação do efeito aleatório está correta. 
+    - Curiosidade: o fato de não observarmos diferença de capturabilidade entre os diferentes barcos se deve ao fato de se tratar de uma espécie não-alvo da pesca.
+
+\vline
+
+
+## Cap. 6: GAM
+
+- Seção 1:
+  - Sempre que forem suspeitar de um dado zero-inflacionado, calculem a porcentagem de zeros. Vocês fizeram isso no capítulo 5.
+  - Na análise de multicolinearidade vocês comentam que há alta correlação entre as variáveis profundidade e camada de mistura.
+      - Na verdade, a alta correlação se dá entre as variáveis `chla` e `dlm`. A correlação entre as demais variáveis estão ok. Vocês não precisariam excluir ambas as variáveis do modelo; bastaria excluir apenas a variável com menor intuição biológica.
+  - Faltou vocês analisarem e comentarem mais a análise exploratória de vocês para justificar o uso de um GAM. Vocês deixaram de analisar duas variáveis que teria justificado o uso do GAM: a relação de *Lamna_nasus* com `latitude` e `longitude.` Plotem essas relações e vejam o padrão altamente não-linear que surge.
+  - Como o esforço amostral não é constante, o correto seria usar o `log(N_anzol)` como offset em todos os modelos de vocês. Vocês só aplicaram isso em um único modelo. Videm meus comentários anteriores sobre essa questão!
+  - Achei bem legal terem explorado o pacote `GAMLSS` para testar distribuições zero-inflacionadas no contexto de GAM!
+      - No entanto, cuidado: tem um modelo que vocês usam a distribuição `ZAGA()`. Isso é uma distribuição Gamma ajustada no zero; essa distribuição é adequada para dados contínuos e não de contagem como vocês tão modelando.
+  - Senti falta de vocês conduzirem melhor o raciocínio lógico que foi utilizado na construção dos modelos. Achei confuso e pouco intuitivo.
+      - Por exemplo, no modelo `zanbi_gam_cov` vocês incluem a variável `Mês` para modelar a parte da presença/ausência. O que motivou vocês a fazerem isso?
+  - Cadê o gráfico do efeito parcial da temperatura? E a interpretação do efeito suavizador?
+      - Faltou a avaliação dos pressupostos de independência residual (espacial e temporal) - pelos mesmos motivos conforme comentado previamente.
+      - No geral, acho que esse capítulo vocês poderiam ter estruturado melhor e divido em seções, como realizaram nos demais capítulos. É importante manter uma consistência para conferir mais clareza.

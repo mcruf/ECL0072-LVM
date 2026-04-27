@@ -1,0 +1,2 @@
+load("/Users/mcruf/Library/CloudStorage/OneDrive-Personal/Arbeit/Lectures_and_Talks/UFRN/Lectures/ECL0072-GLM_GAM/Dados/plant_herbivore.rds")
+load("/Users/mcruf/Library/CloudStorage/OneDrive-Personal/Arbeit/Lectures_and_Talks/UFRN/Lectures/ECL0072-GLM_GAM/Dados/koalas.rds")

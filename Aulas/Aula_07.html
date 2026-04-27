@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Modelos Lineares Generalizados e Aditivos para Dados Ecológicos (ECL0072)</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Marie-Christine Rufener" />
+    <script src="libs/header-attrs-2.29/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Modelos Lineares Generalizados e Aditivos para Dados Ecológicos (ECL0072)
+]
+.subtitle[
+## Aula 07: Distribuições de probabilidade complementares
+]
+.author[
+### Marie-Christine Rufener
+]
+
+---
+
+
+## &lt;span style="color: #ee6c4d;"&gt;Conteúdo programático &lt;/span&gt; 
+
+&lt;br&gt;
+
+
+**1. Distribuição Beta**  
+
+&gt; Prática 
+
+
+**2. Distribuições para dados zero-inflacionados**  
+
+
+**3. Distribuições Tweedie**  
+
+&gt; Prática 
+
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Leitura sugerida &lt;/span&gt; 
+
+
+.pull-left[
+**Livros**
+
+- **Cap. 11:** Zuur et al. (2009)
+- **Cap. 4:** Bolker (2008)
+- **Cap. 3 (seção 3.6):** Faraway (2016)
+- **Cap. 5 (seção 5.5):** Faraway (2016)
+- **Cap. 9 (seção 9.5):** Faraway (2016)
+- **Cap. 7 (seção 7.4):** Agresti (2015)
+]
+
+
+.pull-right[
+**Artigos**
+
+**Moreno, A.B.** (2019). What does a zero mean? Understanding false, random and structural zeros in ecology. Methods in Ecology and Evolution. https://doi.org/10.1111/2041-210X.13185
+
+**Bonat, W.H. et al.** (2016). Extended Poisson-Tweedie: properties and regression models for count data. https://doi.org/10.48550/arXiv.1608.06888
+ 
+]
+
+
+---
+class: inverse, center, middle
+
+# Distribuição Beta
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Beta &lt;/span&gt;
+
+Adequado para variáveis expressas em proporções, frequências relativas ou probabilidades
+
+&lt;br&gt;
+
+&lt;img src="../Figuras/Exemplo_dado_beta.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Beta &lt;/span&gt;
+
+
+A distribuição Beta é uma distribuição de *probabilidade contínua* definida no intervalo (0, 1)
+
+$$\large f(y | \alpha, \beta) = \frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}y^{\alpha-1}(1-y)^{\beta-1}, \quad 0  &lt; y &lt; 1 $$
+
+&lt;img src="../Figuras/Distribuicao_Beta.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Beta &lt;/span&gt;
+
+&lt;br&gt;
+
+`$$\large Y \sim Beta(\alpha,\beta)$$`
+
+`$$\large E(Y) = \frac{\alpha}{\alpha + \beta}, \quad Var(Y) = \frac{\alpha \beta}{(\alpha+\beta)^2 (\alpha+\beta+1)}$$`
+
+&lt;br&gt;
+
+--
+
+Versão reparametrizada `\((\mu, \tau)\)`:
+
+`$$\large \mu = \frac{\alpha}{\alpha+\beta}, \quad \tau = \alpha + \beta$$`
+`$$\large \alpha = \mu \tau, \quad \beta = \tau(1-\mu)$$`
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Beta &lt;/span&gt;
+
+&lt;br&gt;
+
+`$$\large Y \sim Beta(\mu\tau, ~\tau(1-\mu))$$`
+
+`$$\large E(Y) = \mu, \quad Var(Y) = \frac{\mu(1-\mu)}{1+\tau}$$`
+
+&lt;br&gt;
+
+`$$\large logit(\mu) = \eta = \beta_0 + \sum_{j=1}^{p} \beta_j x_{j}$$`
+
+--
+
+Lembrando que:
+
+`\(\large logit(\mu) = log(\frac{\mu}{1-\mu}); \quad \mu = \frac{e^\eta}{1 + e^\eta}\)`
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Beta &lt;/span&gt;
+
+A distribuição Beta também pode ser usada para variáveis que estão limitadas em outro intervalo de valores
+
+- Redimensionar os valores para o intervalo (0,1) conforme:
+
+`$$\large z_i = \frac{y_i-a}{b-a}$$`
+
+onde:
+- a = valor mínimo de Y
+- b = valor máximo de Y
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Prática no R &lt;/span&gt;
+
+
+&lt;br&gt;
+
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="../Figuras/Rlogo.png" alt="Pratica_aula_07_betareg.R &amp;lt;br&amp;gt;" width="25%" /&gt;
+&lt;p class="caption"&gt;Pratica_aula_07_betareg.R &lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+
+---
+class: inverse, center, middle
+
+# Distribuições para dados zero-inflacionados
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Dados zero-inflacionados &lt;/span&gt;
+
+
+Dados de contagens muitas vezes apresentam um excesso de zeros
+
+
+&lt;br&gt;
+
+&lt;img src="../Figuras/Dado_zeroinflacionado2b.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+.footnote[Moreno et al. (2019).  https://doi.org/10.1111/2041-210X.13185 ]
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Dados zero-inflacionados &lt;/span&gt;
+
+
+É preciso distinguir a natureza dos zeros:
+
+
+&lt;img src="../Figuras/Zero_verdadeiro.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Dados zero-inflacionados &lt;/span&gt;
+
+
+É preciso distinguir a natureza dos zeros:
+
+
+&lt;img src="../Figuras/Zero_falso.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Dados zero-inflacionados &lt;/span&gt;
+
+&lt;p class="comment"&gt;
+&lt;b&gt;LEMBRANDO&lt;/b&gt;
+&lt;br&gt;
+
+Dados de contagens são (frequentemente) modelados via as distribuições Poisson e Binomial Negativa!
+
+&lt;/p&gt;
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Dados zero-inflacionados &lt;/span&gt;
+
+
+Há duas formas de se abordar um dado zero-inflacionado:
+
+  - **Modelos de mistura (ZIP/ZINB)**
+    - Assume que os dados foram gerados por dois processos paralelos:
+      - &lt;u&gt;Processo binário&lt;/u&gt;: determina se a observação será um zero 'extra' (i.e., zero-estrutural/zero verdadeiro).
+      - &lt;u&gt;Processo Poisson/BN&lt;/u&gt;: considera que as contagens advém de um processo Poisson, podendo gerar qualquer valor inteiro não negativo, incluindo zeros (i.e., zero-amostral/falso zero).
+
+
+.footnote[ZIP = Zero-inflated Poisson; ZINB = Zero-inflated Negative Binomial]
+
+
+--
+
+&gt; &lt;span style="color: #ee6c4d;"&gt;**Distingue os diferentes tipos de zeros:** "zero verdadeiro" (do processo binário), "falso zero" (do processo Poisson). &lt;/span&gt;
+
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Dados zero-inflacionados &lt;/span&gt;
+
+
+Há duas formas de se abordar um dado zero-inflacionado:
+
+  - **Modelos em dois estágios (ZAP/ZANB)**
+    - Também assume que os dados foram gerados em duas etapas:
+      - &lt;u&gt;Processo binário:&lt;/u&gt; decide se a espécie está presente ou ausente; logo, atua como barreira separando os zeros dos números positivos. 
+      - &lt;u&gt;Processo Poisson/BN truncado:&lt;/u&gt; considera que as contagens surgiram de um processo Poisson/NB truncado em zero ( exclui os zeros)
+
+.footnote[ZAP = Zero-altered Poisson; ZANB = Zero-altered Negative Binomial; Hurdle models]
+
+--
+
+&gt; &lt;span style="color: #ee6c4d;"&gt;**Não distingue os diferentes tipos de zeros:** todos os zeros são gerados apenas pelo processo binário.&lt;/span&gt;
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Dados zero-inflacionados &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| ZIP/ZINB &lt;/span&gt;
+
+
+Considere `\(Y_i\)` o número de flores predadas na amostra `\(i\)`
+
+&lt;br&gt;
+
+
+
+
+`$$\large P(Y_i = y_i) =  \left\{ \begin{array}{lr}
+\pi_i + (1-\pi_i) \times f(y_i = 0|\theta)
+&amp; y_i = 0 \\ (1-\pi_i) \times f(y_i|\theta) &amp; y_i &gt; 0
+\end{array}\right.$$`
+
+onde:
+- `\(\pi_i:\)` probabilidade de um zero estrutural (descrito por uma distribuição Binomial)
+- `\(f(y_i|\theta):\)` distribuição de probabilidade para dado discreto (Poisson/Binomial Negativa) 
+
+
+--
+
+&lt;br&gt;
+
+&gt; &lt;span style="color: #ee6c4d;"&gt;**Para entender melhor o modelo, precisamos decompor as equações em `\(\mathbf{P(Y_i = 0)}\)` e `\(\mathbf{P(Y_i &gt; 0)}\)` &lt;/span&gt;**
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Dados zero-inflacionados &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| ZIP/ZINB &lt;/span&gt;
+
+
+Se assumirmos que `\(Y_i\)` segue uma distribuição Poisson, teremos que:
+
+
+`$$\large f(y_i|\theta) = \frac{\lambda^{y_i}e^{-\lambda_i}}{y_i!}$$`
+--
+
+.pull-left[
+
+**Quando `\(\large \mathbf{y_i = 0}\)` **
+
+`$$P(Y_i = 0) = \pi_i + (1-\pi_i) \times \frac{\lambda^{0} e^{-\lambda_i}}{0!}$$`
+]
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Dados zero-inflacionados &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| ZIP/ZINB &lt;/span&gt;
+
+
+Se assumirmos que `\(Y_i\)` segue uma distribuição Poisson, teremos que:
+
+
+`$$\large f(y_i|\theta) = \frac{\lambda^{y_i} e^{-\lambda_i}}{y_i!}$$`
+
+
+.pull-left[
+
+**Quando `\(\large \mathbf{y_i = 0}\)` **
+
+`$$P(Y_i = 0) = \pi_i + (1-\pi_i) \times \frac{\lambda^{0} e^{-\lambda_i}}{0!}$$`
+Portanto:
+`$$P(Y_i = 0) = \pi_i + (1-\pi_i) \times  e^{-\lambda_i}$$`
+
+]
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Dados zero-inflacionados &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| ZIP/ZINB &lt;/span&gt;
+
+
+Se assumirmos que `\(Y_i\)` segue uma distribuição Poisson, teremos que:
+
+
+`$$\large f(y_i|\theta) = \frac{\lambda^{y_i} e^{-\lambda_i}}{y_i!}$$`
+
+
+.pull-left[
+
+**Quando `\(\large \mathbf{y_i = 0}\)` **
+
+`$$P(Y_i = 0) = \pi_i + (1-\pi_i) \times \frac{\lambda^{0} e^{-\lambda_i}}{0!}$$`
+Portanto:
+`$$P(Y_i = 0) = \pi_i + (1-\pi_i) \times  e^{-\lambda_i}$$`
+
+]
+
+.pull-right[
+**Quando `\(\large \mathbf{y_i &gt; 0}\)` **
+
+`$$P(Y_i = y_i) = (1-\pi_i) \times  \frac{\lambda^{y_i} e^{-\lambda_i}}{y_i!}$$`
+
+]
+
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Dados zero-inflacionados &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| ZIP/ZINB &lt;/span&gt;
+
+&lt;br&gt;
+
+`$$\large Y_i \sim ZIP(\pi_i, \lambda_i)$$`
+
+`\(E(Y_i) = \lambda_i (1-\pi_i)\)`
+
+`\(Var(Y_i) = (1-\pi_i)(\lambda_i + \pi_i\lambda^{2}_i)\)`
+
+
+.pull-left[
+
+&lt;br&gt;
+
+`\(\large logit(\pi_i) = \eta_i= \beta_0 + \sum_{j=1}^{p} \beta_j x_{ij}\)`
+
+`\(\large log(\lambda_i) = \eta_i = \gamma_0 + \sum_{j=1}^{p} \gamma_j z_{ij}\)`
+]
+
+.pull-right[
+&lt;p class="comment"&gt;
+&lt;b&gt;ATENÇÃO&lt;/b&gt;
+&lt;br&gt;
+
+Podemos adicionar covariáveis tanto no processo Binomial quanto no processo Poisson. 
+
+&lt;/p&gt;
+]
+
+
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Dados zero-inflacionados &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| ZIP/ZINB &lt;/span&gt;
+
+
+Quando o modelo ZIP ainda apresenta sobredispersão, pode-se recorrer à versão zero-inflacionada do modelo Binomial Negativo:
+
+
+
+`$$\large P(Y_i = y_i) =  \left\{ \begin{array}{lr} \pi_i + (1-\pi_i) \times f_{NB}(y_i=0|\theta) &amp; y_i = 0 \\ (1-\pi_i) \times f_{NB}(y_i|\theta) &amp; y_i &gt; 0 \end{array}\right.$$`
+
+onde:
+- `\(\pi_i:\)` probabilidade de um zero estrutural (descrito por uma distribuição Binomial)
+- `\(f_{NB}(y_i|\theta)\)` função da distribuição Binomial Negativa
+  - `\(f(y; \mu, k) = \frac{\Gamma(y+k)}{\Gamma(k)\times\Gamma(y+1)} \times \left (\frac{k}{\mu + k}\right)^k \times \left(1 - \frac{k}{\mu + k}\right)^y\)`
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Dados zero-inflacionados &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| ZIP/ZINB &lt;/span&gt;
+
+A versão zero-inflacionada da distribuição Binomial Negativa pode ser representada conforme:
+
+`$$\large Y_i \sim ZINB(\pi_i, \mu_i, k)$$`
+`\(E(Y_i) = \mu_i (1-\pi_i)\)`
+
+`\(Var(Y_i) = (1-\pi_i)(\mu_i + \frac{\mu^2_i}{k})~ +~ \mu^2_i \times (\pi^2_i + \pi_i)\)`
+
+&lt;br&gt;
+
+--
+
+`\(\large logit(\pi_i) = \gamma_0 + \gamma_1Z_{i,1} + \cdots + \gamma_pZ_{i,p}\)`
+
+`\(\large log(\mu_i) = \beta_0 + \beta_1X_{i,1} + \cdots + \beta_pX_{i,p}\)`
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Dados zero-inflacionados &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| ZAP/ZANB &lt;/span&gt;
+
+
+Os exemplos anteriores são aplicados para casos em que se quer discernir as diferentes fontes de zeros
+  - Há casos em que não se quer/sabe diferenciar as fontes de zeros
+      - ***hurdle models*** (ZAP/ZANB)
+
+- Baseados em dois processos ecológicos bem definidos:
+  1. Processo causando a ausência do animal
+  2. Processo influenciando a abundância do animal (dado que ele esteja presente)
+
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Dados zero-inflacionados &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| ZAP/ZANB &lt;/span&gt;
+
+Podemos resumir os *hurdle models* conforme a estrutura:
+
+
+`$$\large P(Y_i = y_i) =  \left\{ \begin{array}{lr}
+p_i 
+&amp; y_i = 0 \\ (1-p_i) \times f^+(y_i|\theta) &amp; y_i &gt; 0
+\end{array}\right.$$`
+
+
+onde:
+- `\(p_i:\)` probabilidade da ausência da espécie
+- `\(f^+(y_i|\theta):\)` distribuição de probabilidade Poisson ou Binomial Negativa *truncada*
+
+
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Dados zero-inflacionados &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| ZAP/ZANB &lt;/span&gt;
+
+**Distribuição truncada**
+
+Podemos ajustar a função Poisson/Binomial Negativa de forma a excluir os zeros da distribuição
+
+--
+
+Considerando uma distribuição Poisson, temos:
+
+`$$\large f(y_i; \lambda_i) = \frac{\lambda^{y_i}  e^{-\lambda_i}}{y!}$$`
+--
+
+Para `\(y_i = 0\)`, teremos:
+`$$\large f(y_i=0; \lambda_i) = e^{-\lambda_i}$$`
+---
+## &lt;span style="color: #ee6c4d;"&gt;Dados zero-inflacionados &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| ZAP/ZANB &lt;/span&gt;
+
+**Distribuição truncada**
+
+Exclui-se os zeros da distribuição dividindo-a pelos casos em que `\(y_i = 0\)`
+
+`$$\large f(y_i &gt; 0; \lambda_i) = \frac{\lambda^{y_i} e^{-\lambda_i}}{(1-e^{-\lambda_i}) y!}$$`
+
+--
+
+&lt;br&gt;
+
+Pode-se aplicar o mesmo raciocínio para a distribuição Binomial Negativa:
+
+
+`$$\large f(y_i &gt; 0; \mu_i, k) = \frac{\frac{\Gamma(y_i+k)}{\Gamma(k)\Gamma(y_i+1)}  \left (\frac{k}{\mu_i + k}\right)^k \left(1 - \frac{k}{\mu_i + k}\right)^{y_i}} {1 - \left (\frac{k}{\mu_i + k}\right)^k}$$`
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Prática no R &lt;/span&gt;
+
+
+&lt;br&gt;
+
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="../Figuras/Rlogo.png" alt="Pratica_aula_07_zeroinflacionado.R &amp;lt;br&amp;gt;" width="25%" /&gt;
+&lt;p class="caption"&gt;Pratica_aula_07_zeroinflacionado.R &lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+
+---
+class: inverse, center, middle
+
+# Distribuição Tweedie
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Tweedie &lt;/span&gt;
+
+É um caso especial da família exponencial de distribuições
+- Distribuição *híbrida*: contínua e discreta (depende do parâmetro `\(p\)`)
+
+&lt;br&gt;
+
+--
+
+`$$\large Y \sim Tw_p(\mu, \sigma^2)$$`
+
+`$$E(Y) = \mu, \quad Var(Y) = \phi\mu^p$$`
+
+
+onde:
+- `\(\mu:\)` média
+- `\(\phi:\)` dispersão
+- `\(p:\)` parâmetro de potência (define o tipo de distribuição) 
+
+
+---
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Tweedie &lt;/span&gt;
+
+&lt;br&gt;
+
+&lt;img src="../Figuras/Distribuição_tweedie.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Distribuição Tweedie &lt;/span&gt;
+
+A distribuição torna-se particularmente útil para dados com:
+- forte assimetria
+- excesso de zeros
+
+
+
+&lt;br&gt;
+
+&gt; Na dúvida, sempre testar essa distribuição em casos de dados zero-inflacionados (poisson, binomial negativa, e gama) 
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Prática no R &lt;/span&gt;
+
+&lt;br&gt;
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="../Figuras/Rlogo.png" alt="Pratica_aula_07_zeroinflacionado.R &amp;lt;br&amp;gt;" width="25%" /&gt;
+&lt;p class="caption"&gt;Pratica_aula_07_zeroinflacionado.R &lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+
+---
+
+## &lt;span style="color: #ee6c4d;"&gt;Prática no R &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Relatório:  &lt;/span&gt;  
+
+Escolher uma das três distribuições apresentadas:
+
+
+**salamanders.rds**
+- Abundância (contagem) de diversas espécies de salamandras
+  - Associar a fatores de mineração
+
+
+**fisheries.rds**
+- Razão de captura incidental (bycatch / captura espécies-alvos)
+  - Associar a razão de bycatch com características oceanográficas, espaço-temporais e/ou fatores operacionais da pesca
+
+- Abundância de espécies não-alvo (e.g., *Isurus_oxyrinchus*, *Ruvettus_pretiosus*, *Makaira_nigricans*)
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+  "highlightStyle": "github",
+  "highlightLines": true,
+  "countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

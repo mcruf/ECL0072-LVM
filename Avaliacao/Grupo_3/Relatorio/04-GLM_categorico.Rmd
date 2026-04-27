@@ -1,0 +1,207 @@
+---
+title: "GLM para dados categóricos"
+author: "Samuel Lima & Niege Félix"
+#date: "`r format (Sys.time(), '%d %B, %Y')`"
+output:
+   html_document: #Salvar como html
+      theme: cosmo #cerulean,flatly,united,cosmo,simplex
+      number_sections: yes
+      toc: true               # Gera sumário (Table of Contents)
+      toc_float:              # Faz o sumário “flutuar” ao lado
+        collapsed: false      # Não inicia “fechado”
+        smooth_scroll: false  # Desativa rolagem suave (opcional)
+        position: left        # Posiciona o sumário à esquerda
+        width: 200px          # Define a largura do sumário
+---
+
+# Introdução
+
+
+Carregando pacotes a serem utilizados e importando o banco de dados
+
+```{r echo=T, message=FALSE, warning=FALSE}
+library(VGAM) #Modelo multinomial
+library(ggplot2)
+library(dplyr)
+library(forcats)
+
+dados <- readRDS("../Dados/palmerpenguins_extended.rds")
+```
+
+
+Exercitaremos aqui o GLM para dados categóricos utilizando o modelo multinomial, que é preciso quando nossa variável resposta tem mais de duas categorias. Para isso, vamos utilizar os dados dos pinguins de Palmer, armazenados no diretório `/Dados` da disciplina.
+
+
+
+> Nosso **objetivo** será testar se a saúde dos pinguins é influenciada por seus estágios de vida. E nossa **hipótese** é que os pinguins em seus primeiros estágios de vida são mais saudáveis.
+
+
+
+# Análise exploratória
+
+Vamos iniciar conhecendo nossos dados:
+
+```{r echo=TRUE}
+head(dados)
+
+str(dados)
+```
+
+Transformando as variáveis `chr` em `factor`
+
+```{r echo=TRUE}
+cols <- c("species", "island", "sex", "diet", "life_stage", "health_metrics")
+dados[, cols] <- lapply(dados[, cols], factor)
+```
+
+
+Observando valores brutos:
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+#Quantos pinguins pintinhos por categoria de saúde
+dados_chick <- dados %>% filter(life_stage=="chick") 
+summary(dados_chick$health_metrics)
+
+#Quantos pinguins adultos por categoria de saúde
+dados_adult <- dados %>% filter(life_stage=="adult") 
+summary(dados_adult$health_metrics)
+
+```
+
+
+## Observando tendências 
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+ggplot(dados, aes(x = life_stage, fill = health_metrics)) +
+  geom_bar(position = "fill",  alpha = 0.8) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c("#d6ccc2","cyan4", "darkorange")) +
+  labs(y = "Proporção", x = "")+
+  theme_minimal(base_size = 15)  
+
+
+ggplot(dados, aes(x = life_stage, fill = health_metrics)) +
+  geom_bar(position = "fill",  alpha = 0.8) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c("#d6ccc2","cyan4", "darkorange")) +
+  labs(y = "Proporção", x = "") +
+  facet_wrap(species ~ .) +
+  theme_minimal(base_size = 15) 
+
+
+ggplot(dados, aes(x = life_stage, fill = health_metrics)) +
+  geom_bar(position = "fill",  alpha = 0.8) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c("#d6ccc2","cyan4", "darkorange")) +
+  labs(y = "Proporção", x = "") +
+  facet_wrap(island ~ .) +
+  theme_minimal(base_size = 15)
+
+```
+
+
+Os pinguins são mais saudáveis no estágio de pintinho para as três espécies e nas três ilhas
+
+
+Como estamos trabalhando com variáveis categóricas, não precisamos verificar outliers. 
+
+
+# Metodologia
+
+Para testar se a saúde dos pinguins é influenciada por seus estágios de vida, vamos utilizar um modelo multinomial nominal, visto que nossa variável resposta (*health_metrics*) é categórica (saudáveis, acima do peso e abaixo do peso) e não é hierárquica.
+
+O modelo multinomial pode ser descrito conforme:
+
+
+$$\large Y \sim Multinomial(n, \mathbf{p)}$$
+
+Onde $n$ é numéro de amostras (no nosso caso, pinguins) e $\mathbf{p}$ é a probabilidade de cada categoria ${(p_1+p_2,...,p_k)}$
+
+O modelo multinomial permite que informemos uma categoria de referência que vai ser comparada com as demais no output do modelo (o default é a primeira categoria). As probabilidades de cada categoria é dada pelas fórmulas:
+
+**Probabilidade da categoria de referência**
+
+$$\large p_1 = \frac{1}{1+\sum_{j=2}^{K}\text{exp}(\eta_j)}$$
+
+**Probabilidade das demais categorias**
+
+$$\large p_k = \frac{\text{exp}(\eta_k)}{1+\sum_{j=2}^{K}\text{exp}(\eta_j)}$$
+
+
+# Resultados
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+## Observando a ordem dos fatores da nossa variável resposta
+levels(dados$health_metrics)
+
+
+modelo_1 <- vglm(health_metrics ~ life_stage, 
+                family = multinomial(refLevel = 1), 
+                data = dados)
+
+summary(modelo_1) 
+```
+
+
+Aqui nossa referência é um pinguim adulto e saudável.
+
+Os números 1 e 2 representam as categorias logo após a referência (acima do peso e abaixo do peso, nesse modelo).
+
+
+Podemos iniciar a interpretação olhando o sinal dos estimates das variáveis que apresentaram um P-valor < 0.05. Quando o sinal for negativo, indica que a probabilidade diminui para aquela categoria. Por exemplo, na terceira linha
+dos coeficientes, temos que a probabilidade de um pinguim pintinho abaixo do
+peso é menor do que um pinguim adulto saudável. A primeira linha `(Intercept:1)`
+indica que a probabilidade de um pinguim ser adulto acima do peso é maior do
+que ser adulto saudável.
+
+
+Agora vamos visualizar as predições das probabilidades para cada estágio de vida:
+
+## Visualizando probabilidades
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+dados_pred2 <- data.frame(life_stage = levels(dados$life_stage)) 
+#Primeiro nível tem que coincidir com o primeiro nível do modelo
+preds2 <- predict(modelo_1,
+                  newdata = dados_pred2,
+                  type = "response") %>% data.frame()
+
+preds2
+```
+
+
+> Corroboramos nossa hipótese inicial!
+
+
+Ainda podemos visualizar as probabilidades em gráfico. Para fazer isso utilizando a função ggplot é preciso fazer algumas alterações..
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# Renomear as colunas, assumindo a mesma ordem do modelo 
+preds2$life_stage <- dados_pred2$life_stage
+
+colnames(preds2) <- c("healthy","overweight","underweight","life_stage") 
+
+# Transformar dado para o formato longo 
+preds2l <- preds2 %>%
+  tidyr::pivot_longer(cols = c("healthy","overweight","underweight"),
+                      names_to = "health_metrics",
+                      values_to = "Probability")
+
+
+preds2l
+#Dessa forma, podemos finalmente plotar o gráfico com as probabilidades
+
+### Plotando.... 
+ggplot(preds2l, aes(x = life_stage, y = Probability, fill = health_metrics)) +
+  geom_bar(stat = "identity", position = "stack",  alpha = 0.8) +
+  scale_fill_manual(values = c("healthy" = "gray50","overweight" = "cyan4",
+                               "underweight"="darkorange")) +
+  labs(y = "Probabilidade",
+       x = "",
+       fill = "health_metrics") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+```

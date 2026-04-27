@@ -1,0 +1,247 @@
+---
+title: "Avaliação do relatório"
+output: pdf_document
+---
+
+
+
+- **Grupo:** Ana Karolina
+
+- **Capítulos entregues:** 5/6
+
+- **Relatório entregue no prazo:** Sim
+
+- **Nota:** A
+
+
+------------------------------------------------
+
+
+# Comentário geral
+
+Gostei muito de ver que você se dedicou a explorar seus próprios dados em cada capítulo — isso mostra curiosidade, autonomia e disposição para investigar as possibilidades que eles oferecem, o que é uma qualidade importante na formação científica. No geral, achei seu relatório bem estruturado e demonstra boa compreensão dos conteúdos abordados. Apenas recomendo que, nas próximas versões, procure manter maior consistência entre os capítulos, especialmente na forma de apresentar objetivos, hipóteses e interpretações. Alguns capítulos estão muito detalhados e outros um pouco mais breves, e equilibrar esse nível de aprofundamento deixará seu trabalho ainda mais coeso e claro. Lembre-se: a ideia primordial deste relatório é de vocês terem um guia prático para consultarem no futuro. Por fim, destaco que faltou você explorar o capítulo referente à aula 7 (distribuições complementares).
+
+\vline
+
+# Comentários específicos
+
+## Cap. 1: Dados binários
+
+- Seção 2.2:
+  - Gostei por você ter buscado uma alternativa diferente da que eu havia proposto em sala de aula para o exerecício prático.
+    - Penso, contudo, que sua abordagem do modelo Binomial poderia ter sido mais adequada se tivesse escolhido uma variável que é naturalmente binária - como, por exemplo, o *sexo* dos pinguins (fêmeas e machos)
+  - Cuidado quando afirma: "*Pinguins com peso maior se enquadram na dieta de peixe.*"
+     - É mais adequado você falar: Pinguins com peso maior *tendem* a estar associados à dieta de peixe.
+  - Ao final desta seção, você comenta: "*É possível ver que a incidência das dietas difere entre as espécies e levemente entre os sexos e também está relacionada ao comprimento do bico.*"
+      - Sua interpretação está equivocada e não reflete os gráficos expostos. Você menciona '*comprimento do bico*', quando está avaliando a presença/ausência de dieta de krill. Reveja essa parte!
+
+
+- Seção 3:
+  - Daria para refinar um pouco mais as suas hipóteses. Veja:
+    - H2: A probabilidade de consumo de peixe difere em relação ao comprimento do bico;
+    - H3: A probabilidade de consumo de peixe difere em relação ao peso corporal;
+  - **Obs.:** é importante destacar que no contexto apresentado, o peso corporal/comprimento do bico são usados como *proxy* de tamanho corporal;
+  - **Obs. 2:** Como na sua análise exploratória você avaliou a relação de dieta com espécies, faltou você destacar isso como uma hipótese adicional.
+
+
+- Seção 4:
+  - Hmh, há um erro de formulação na sua hipótese. Voce fala: "*Avaliar como a composição da dieta influencia na probabilidade do comprimento do bico e na massa corporal em pinguins do Arquipélago Palmer.*"
+    - Você está trocando o sentido das relações e o correto seria expressar a frase como: "Avaliar como comprimento do bico e a massa corporal influenciam na probabilidade de consumo de peixe."
+
+- Seção 4.1:
+  - Reveja a formulação dos seus objetivos específicos; não correspondem totalmente ao que você expôs nas suas hipóteses.
+    - Por exemplo, você expõe um objetivo relacionado ao efeito de espécie, quando isso não está destacado nas suas hipóteses.
+  
+
+- Seção 5:
+  - Reveja sua primeira frase. Para ser mais precisa, reformule suas frases expressando "*probabilidade de consumo de peixe*";
+    - Você sempre se refere como '*influência da dieta*" - essa afirmação estaria correta se você tivesse analisando todos os itens alimentares. Como você filtrou seus dados para englobar apenas duas categorias, sendo elas reclassificadas como variável binária, o foco estará sempre em relação à categoria "1" - no seu caso, probabilidade de consumo de peixe.
+  - Gostei em ver que você formulou seu modelo matematicamente, inclusive por ter acertado a forma que se expressa uma covariável categórica - parabéns!
+    - No entanto, perceba algumas inconsistências que precisam ser corrigidas:
+      - O modelo que você expõe não correponde às hipóteses que você expôs na seção 3. Veja que você não inseriu as variáveis '*comprimento do bico*' e '*peso corporal*'
+      - Além disso, chamo novamente atenção para a questão das espécies (não faz parte das suas hipóteses)
+      - Você inclui '*Dieta*' como covariável, mas ela é  sua variável resposta. Quando se expõe um modelo conforme você fez, o que se expõe é o preditor linear $\eta$, que exprime as relações das suas covariáveis com sua variável resposta. 
+
+
+- Seção 6:
+  - Veja que interessante: olhando apenas para os valores de AIC dos seus modelos, percebe-se que a variável 'comprimento do bico' tem um efeito muito forte sobre a probabilidade de consumo de peixe.
+    - Quando se avalia os modelos usando uma covariável de cada vez (modelos 1 à 3), há uma redução expressiva no AIC para o modelo que usa a variável 'comprimento do bico'.
+  - Obs.: Algo que você poderia ter explorado adicionalmente, seria testar modelos usando duas covariáveis de cada vez - assim ficaria mais alinhado com o método 'forward-stepwise'.
+  - Ficou muito boa a sua interpretação das análises residuais!
+  - Você fala: "*O modelo pode estar superestimando os efeitos.*"
+    - Não necessariamente. Ele pode tanto *sobreestimar* quanto *subestimar*. Cuidado!
+  - Há um pequeno equívoco quando você expressa: "*i.e., tudo é comparado ao nível de referência*".
+    - A dieta é sua variável resposta e não covariável; logo, Krill não está absorvido no intercepto. Você está modelando a probabilidade de consumo de peixe (1) em função de covariáveis.
+  - Você fala: "*2- Em comparação à espécie de referência (Adelie), Chinstrap tem menor chance de se alimentar de peixe;*"
+    - Na verdade, a menor chance está relacionada à espécie Gentoo
+      - O parâmetro estimado é bem menor (-3.201e+00) quando comparado à espécie Chinstrap (-1.468e+00). Isso inclusive corrobora com os gráficos que você expôs no início do capítulo.
+      - Preciosismo: faltou você comentar sobre o resultado do 'bill_length_mm'. Outra coisa: faltou você comentar sobre a questão de significância estatística das relações que você observou.
+      
+      
+\vline
+
+## Cap. 2: Dados discretos
+
+
+- Seção 1:
+  - Preciosismo: Teria sido interessante você também comentar na sua introdução, brevemente, sobre a distribuição Binomial Negativa - inclusive porque mais abaixo você usa essa distribuição.
+  
+
+- Seção 2:
+  - **Atencão!** Vejo que você aplicou a função `scale` para padronizar suas covariáveis, porém elas já foram previamente padronizadas pelos autores do trabalho (padronizar = z-score)
+    - Você até comenta isso na primeira frase desta sua seção. Isso precisa ser corrigido, tá? Por hora, eu vou ignorar esse erro.
+  - Você comenta: "*Observa-se um correlação de 0,96 entre sample e DOY.*"
+    - Faltou você concluir seu pensamento. O que essa alta correlação implica na prática de modelagem?
+
+- Seção 3:
+  - Pequeno erro de interpretação: você não está modelando a distribuição de larvas, e sim sua abundância!
+    - Corrija sua frase: "*É possível perceber que as distribuição das larvas estão em torno de temperaturas com -1 e 1 desvio padrão*"
+  - Você apresentou vários gráficos exploratórios, mas só discutiu os gráficos da relação *abundância x Wtemp* e *abundância x mined*. 
+  - Senti falta de você expor sua(s) hipóteses, tal como fez no primeiro capítulo
+  - Você apresenta diversos cálculos em que calcula a relação $deviance/df.residual$ para os modelos Poisson, porém não comenta nenhum deles.
+    - Esse cálculo é uma forma para checar a sobredispersão.
+
+- Seção 4:
+  - Sua interpretação sobre as diferenças entre as distribuições Poisson e BN estão corretas!
+  - Teria sido interessante se você tivesse avaliado a diferença de AIC entre seu melhor modelo Poisson (`mod_4`) e o modelo BN (`mod_binegativo`). Provavelmente você ia ver uma redução expressiva.
+  - Faltou você avaliar o ajuste do modelo (análise residual) antes de você explorar o sumário estatístico. 
+    - Além disso, no contexto de dados que recorrem à distribuições Poisson/BN, é muito importante pensar na questão do esforço amostral. Se o esforço amostral não foi padronizado, isso precisa ser contabilizado no modelo, no mínimo, via `offset`. Apesar de não termos como saber a questão do esforço amostral para os dados utilizados, seria pertinente você mencionar isso no seu capítulo para não se esquecer desse detalhe importantíssimo nos seus futuros trabalhos.
+    
+- Seção 5:
+  - Faltou, novamente, você explorar os p-valores na relação das suas covariáveis com a abundância de larvas.
+    - Wtemp e DOP, por exemplo, não foram significativos.
+  - Você fala: "*minedno (2.8297), mostra que locais não minerados têm mais chances de terem mais larvas do que os minerados;*"
+    - Sua interpretação está corretíssima, mas o termo 'chances' está equivocado no contexto do modelo apresentado. O certo seria falar "*minedno (2.8297), mostra que larvas em locais não minerados são mais abundandates do que em locais minerados;*"
+  - Senti falta, também, de você expor em que escala estão os coeficientes estimados. Eles estão na escala natural? Log? Exp? Logit?...
+  - Quando se trabalha com dados padronizados, a interpretação dos coeficientes muda um pouco.
+    - Normalmente se interpretaria como o 'aumento de 1 unidade na variável X', mas quando a covariável é padronizada, a interpretação fica como 'aumento de um desvio padrão na variável X.
+      - Isso ocorre porque a padronização resulta em uma variável com uma média centrada no valor 0 e o desvio padrão centrado em 1. Esta variável, portanto, não é mais interpretada na sua unidade original.
+    
+
+\vline
+
+
+## Cap. 3: Dados contínuos
+
+- Seção 1:
+  - Preciosismo: Entendo o motivo pelo qual usou diretamente a distribuição Gama, mas penso que teria sido interessante você também comentar, brevemente, sobre a distribuição log-Normal, que é uma alternativa à Gama.
+  - Como se trata dos seus próprios dados, teria sido apropriado gastar algumas linhas de texto a mais para explicar um pouco sobre a metodologia de coleta (já fica a dica quando for escrever sua dissertação!).
+    - Acredito que seu trabalho se baseia em amostras de água, certo? O volume de água coletado foi padronizado entre suas amostras? Isso é <u> muito </u> importante saber diante do contexto do seu trabalho.
+    - As coletas foram feitas oportunisticamente ou sistematicamente, concentradas em determinados meses do ano? Isso é importante saber, principalmente se quiser avaliar questão de sazonalidade. Vejo que seus dados possuem 41 amostragens; para mim, isso indica que apenas alguns meses em cada ano foram amostrados.
+    - As coletas foram todas feitas no mesmo local (açúde??)?
+
+
+- Seção 2:
+  - Acho que convém você transformar as variáveis `ano`, `mes` e `tempo` como fator.
+  - Ana, eu acredito que uma boa parte da sua análise exploratória está um pouco comprometida por causa do outiler (gigante) que tem no seus dados. Valores tão discrepantes mascaram qualquer tendência que possa existir nos dados e vejo que isso se aplica para o seu estudo de caso. Sempre que cair em uma situação assim, você pode optar por uma das duas alternativas;
+      - Transforme a variável em *log* e refaça suas análises exploratórias
+      - Retire o outlier e refaça suas análises exploratórias
+    - Sei que você comentou que esse dado realmente foi observado, mas o quanto de certeza você tem sobre isso? Há tantos fatores de amostragem que podem dar errado....Acredito que o pode ser necessario você remover esse outlier dos seus dados, porque ele é muito distante dos demais valores (é quase 23 mais alto do que a média!). Além disso, em 13 anos de dados, apenas uma única vez foi observado um valor tão discrepante. Os modelos que irá testar dificilmente vão conseguir capturar esse ponto e pode comprometer todo o restante do modelo (com seus resultados e interpretação). Caso você tem 100% de certeza que esse valor é real, sugeriria retirar essa amostragem das análises, mas comentar sobre esse valor discrepante que foi observado no seu estudo.
+  - Reveja sua última figura desta seção. Sua variável `tempo` não está ordenada por ordem cronológica, impactando diretamente a interpretação da sua figura.
+
+
+- Seção 3:
+  - Hmh, você avaliou multicolinearidade só visualmente? Senti falta dos valores numéricos de correlação. Não ficou claro quais variáveis você deixou de considerar no seu trabalho. Seja mais clara!
+    - Por exmeplo, me parece que `fósforo` e `clorofila` são muito colineares entre eles e também com `turbidez`. Ocorre a mesma coisa com `zmax`. Se o valor de correlação > 0.7, sugiro remover.
+    - Lembre-se: não se coloca covariáveis colineares no mesmo modelo, porque elas são redundantes. Entre duas variáveis correlacionadas, escolhe-se aquela que tem maior intuição biológica/ecológica.
+  - Sua análise exploratória está um tanto quanto incompleta - uma pena! Repare que você não apresentou gráficos em que avalia a relação da sua variável resposta com suas covariáveis. Isso é <u> muito </u> imporante, principalmente para fundamentar as hipóteses que você expõe na próxima seção.   
+
+
+- Seção 4:
+  - *H1:* O que você considera como eutrofização? A concentração de clorofila? Não está claro.
+  - *H3:* Que variável você considera para representar profunidade? Volume? Precipitação?
+
+
+- Seção 5:
+  - **Cuidado!** Conforme apontado na seção 3, me parece que as variáveis `zmax` e `fósforo_total` são muito correlacionadas; Se a correlação entre elas for > 0.7, elas não podem ser inseridas no mesmo modelo.
+  - Você usa `precipitação` e `classif_volume` no mesmo modelo, mas elas são, essencialmente, redundantes e não deveriam constar no mesmo modelo. Precipitação é mais preciso, porque é uma variável numérica, ao contrário de `classif_volume`, que é categórica.
+  - Hmh, me parece que está confundindo algumas coisas:
+    - Você usa tanto a função `glmmTMB` quanto `glm` para rodar um modelo com distribuição Gama. Entretanto, as duas funções fazem a <u>mesma</u> coisa, só que usando funções de pacotes diferentes.
+    - **Cuidado!** Me parece que você está interpretando que o simples fato de usar a função `glmmTMB`, torna o seu modelo um modelo misto. Mas isso não é o caso! Para você tornar seu modelo misto, você precisa adicionar um termo nos seus modelos que represente o efeito aleatório, na forma de: ( 1 | efeito_aleatorio)
+      - Mesmo que tivesse usado um efeito aleatório, é importante que você justifique sua escolha previamente - além de, claro, especificar que variável você está tratando como aleatória.
+    - Você comenta que o melhor modelo foi o `modelo_G2`: esse modelo contém as variáveis zmax e fosfóro, potencialmente muito correlacionadas entre si.
+    
+    
+- Seção 6
+  - Reveja sua frase - você não está rodando modelos de efeitos mistos.
+  - Não faz sentido comparar modelos `modelo_G3` e `modelo_G3glm` pelos motivos apontados anteriormente. Por isso que a análise residual também está idêntica. 
+
+
+- Seção 7:
+  - Olhando para as escalas do seu gráfico de `valores preditos vs. valores observados`, dá para ver que o modelo está subestimando a razão zoo/fito. Seu otlier definitivamente está influenciando muito os resultados. 
+  - Você aplica a funcão `plotResiduals(res_tempo, dados$tempo_num)`, mas isso não corresponde a um gráfico de análise de correlação temporal. Isso é só uma função para ver aspectos gerais dos resíduos, tal como a função `check_model`.
+    - O gráfico que realmente mostra autocorrelação temporal é o painel à direita que aparece depois que roda a função `testTemporalAutocorrelation(res, time = dados$tempo_num)`.
+  - Você comenta: "*É percepitível alguns problemas de previsão de valores. Valores muito altos não estão sendo muito bem preditos e alguns valores pequenos estão superestimados.*"
+    - Seus três gráficos que antecedem essa afirmação não mostram isso. Reveja sua afirmação.
+
+- Seção 8:
+  - Consideravelmente melhor? pior?  
+  - Gostei da interpretação que você fez do resultado numérico do seu modelo. Só lembrando que como está usando uma variável que é fator, o primeiro nível dela será sempre absorvido pelo intercepto. Logo, os resultados são todos relativos ao nível de referência do intercepto.
+
+
+\vline
+
+
+
+## Cap. 4: Dados categóricos
+
+- Seção 1:
+  - Gostei da sua abordagem para o modelo multinomial. Isso, inclusive, constitui uma abordagem clássica de modelos de aprendizagem de máquina
+    - i.e., classificar certas categorias com base em um conjunto de covariáveis.
+  - Preciosismo: Corrija o título do eixo-y da sua segunda figura. Está como `volume`, quando a variável é outra.
+  - Você comenta: "*Tanto o volume de água quanto a profundidade máxima variou ao longo do períodos com consideráveis diferenças entre os 3 (cheia, seca e transição).*"
+    - Seja mais detalhada no que você observou, porque de modo contrário fica muito vago. Nos seus trabalhos, lembre-se de que você tem que guiar o leitor das coisas que você faz e observa.
+  - **Cuidado!** A função `aov` <u>não</u> avalia correlação! Com essa função você está rodando uma ANOVA e, portanto, testando se há diferença significativa no `volume_porc`/`zmax` entre os diferentes níveis do fator `classif_volume`. Reveja esta parte!
+  - Hmh, quando você roda a função `levels(dados$classif_volume) #cheia = 1`, o resultado é *NULL*
+    - Isso indica que sua variável resposta não está codificada como fator, porque caso contrário apareceria os três níveis. Olhando para o output dos seus dados, vejo que ela é classificada como *character*.
+      - Isso certamente influenciou no seu modelo. Portanto, considere rodar os modelos novamente, assegurando que sua variável resposta é de fato um fator.
+
+
+- Seção 2:
+  - Sua observação de que o modelo não é confiável e não deve ser considerado para inferência estatística está ótima.
+    - Gostei de ver que você foi pesquisar o que é o '*Hauck-Donner effect*', detectado no seu primeiro modelo.
+
+
+- Secão 3:
+  - Eu entendi a sua abordagem em usar a razão zoo/fito como preditora do período hidrológico, mas em nenhum momento você apresenta essa relação na sua análise exploratória.
+    - Você tem que manter consistência com suas hipóteses, análise exploratória e os modelos que propõe.
+  - Você comenta: "*Ajuste do modelo é muito mais fraco do que com volume_porc:*"
+    - Cuidado com os termos que usa e deixe suas frases mais completas. O mais correto seria afirmar algo como: "*O ajuste do modelo 2 foi inferior ao do modelo 1, conforme indicado pelo maior valor da deviância residual, sugerindo assim um menor poder explicativo.*"
+  - Cabe ressaltar que o modelo multinomial é uma extensão do modelo logístico. Logo, todos os parâmetros são interpretados na forma de *log(razão de chances)*. Você pode tirar o exponencial dos coeficientes para interpretá-los apenas na escala de *razão de chances*.
+    - Teria dado para você explorar um pouco mais os resultados nesse aspecto - e também graficamente. 
+      - Por exemplo, se exponenciarmos  o coeficiente de `razao_zoo_fito:1`, isso resulta no valor $exp(0.0002769) \approx 1.000277$. O resultado, portanto, poderia ser expresso conforme: *A cada aumento de 1 unidade em razao_zoo_fito, a chance relativa de estar na classe “seca” em vez de “cheia” aumenta cerca de 0.028%*.
+      
+\vline
+
+
+
+## Cap. 5: Distribuições complementares
+
+- Faltou você incluir o capítulo sobre as distribuições complementares que foram apresentadas na 7ª aula;
+  - Aqui poderia ter escolhido uma das três distribuições que dei em aula (beta, zero-infalcionado e tweedie).
+
+\vline
+
+
+## Cap. 6: GAM
+
+- Seção 1:
+  - Considere meus comentários a respeito do seu outlier. Veja, por exemplo, como ele retira todo e qualquer padrão que pode existir na relação entre `razao_zoo_fito` e o `fósforo`.
+  - Sugiro você transformar sua variável `tempo` em fator, e explorar a relação via um gráfico de `boxplot`.
+  - Repito, aqui, o que venho apontando nos seus demais capítulos: seja mais consistente entre as hipóteses que você apresenta e a análise exploratória. Aqui, por exemplo, você avalia a relação com o tempo mas não deixa isso explícito no seu texto introdutório.
+
+
+- Seção 2:
+  - Embora consiga entender o que você fez lendo os seus códigos, é importante que você guie o leitor com textos o que fez/irá fazer.
+    - Por exemplo, você não introduz ao leitor que distribuição de probabilidade vai usar (e por que).
+    - Você também não comenta que irá começar testando modelos GLMs, com diversas estrturas polinomiais. A título do relatório, isso não é um problema. Mas é importante nos atermos a essas boas práticas de comunicação para evitar que isso ocorra em trabalhos que serão eventualmente publicados. 
+
+
+- Seção 3:
+  - Senti falta de você explorar um pouquinho mais os resultados do GAM.
+    - O que exatamente signfica o valor observado para o resultado de `edf`?
+    - Faltou você incluir o gráfico do efeito parcial da sua covariável.
+
+
+- Seção 4:
+  - Sua conclusão em relação aos modelos testados está corretíssima. O que posso sugerir para você no futuro, é de usar GAMs apenas se, na sua análise exploratória dos dados, você observar uma tendência forte e claramente não linerar. Se não for o caso, nem faz sentido testar um GAM.

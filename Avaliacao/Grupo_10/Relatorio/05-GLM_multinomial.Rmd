@@ -1,0 +1,239 @@
+---
+title: "GLM para Dados Categóricos (Modelo Multinomial)"
+subtitle: "Relatório - Disciplina de GLM e GAM"
+author: "Fabricio Albquerque"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: readable
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# 1. Introdução
+
+Este relatório demonstra a aplicação de **Modelos Lineares Generalizados (GLMs)** para **dados categóricos** com mais de duas classes, utilizando especificamente o **modelo multinomial**. O modelo multinomial é uma extensão da regressão logística usada quando a variável resposta nominal possui três ou mais categorias não ordenadas.
+
+Para este exemplo, utilizaremos o conjunto de dados `palmerpenguins_extended`, focando em modelar a variável `health_metrics` (Métrica de Saúde) dos pinguins.
+
+A principal questão a ser avaliada é se as métricas de saúde (`health_metrics`) variam entre as diferentes **espécies** e **estágios de desenvolvimento** (`life_stage`) dos pinguins.
+
+Portanto, temos:
+
+* **y = Métrica de Saúde** (Variável categórica com 3 níveis: "Healthy", "Overweight", "Underweight")
+* **X = Preditores Categóricos** (Espécie, Estágio de Vida, etc.)
+
+Os objetivos deste relatório são:
+
+1.  Explorar visualmente a distribuição da variável resposta categórica.
+2.  Ajustar GLMs multinomiais usando o pacote `VGAM`.
+3.  Interpretar e visualizar os resultados do modelo na forma de probabilidades.
+
+# 2. Carregando pacotes e dados
+
+## 2.1. Carregando pacotes
+
+Primeiro, carregamos os pacotes necessários para a modelagem multinomial (`VGAM` e `nnet` como alternativa), manipulação de dados (`dplyr`) e visualização (`ggplot2`).
+
+```{r pacotes}
+library(VGAM)      # Para o modelo multinomial (vglm)
+library(nnet)      # Pacote alternativo para modelo multinomial (multinom)
+library(ggplot2)   # Para visualização
+library(dplyr)     # Para manipulação de dados
+library(tidyr)     # Para pivotar dados (pivot_longer)
+```
+
+## 2.2. Importando os dados
+
+
+```{r importacao_dados}
+# O caminho do arquivo deve ser ajustado ao seu diretório de trabalho
+dados <- readRDS("../Dados/palmerpenguins_extended.rds")
+```
+
+## 2.3. Preparação e transformação dos dados
+
+As variáveis de interesse (como `species`, `sex`, `diet`, `life_stage`) são do tipo `character` (texto). Para modelagem estatística em R, elas devem ser convertidas para `factor` (fator).
+
+```{r transformacao_dados}
+cols <- c("species", "island", "sex", "diet", "life_stage", "health_metrics")
+dados[, cols] <- lapply(dados[, cols], factor)
+
+# Verificando a estrutura final dos dados
+str(dados)
+```
+
+# 3. Análise Exploratória dos Dados
+
+Antes de modelar, exploramos visualmente a nossa variável resposta (`health_metrics`) em relação aos preditores de interesse. Usamos gráficos de barras de proporção (`position = "fill"`) para entender como a distribuição da saúde muda entre os grupos.
+
+## 3.1. Variação da saúde entre espécies
+
+Analisamos a proporção de cada métrica de saúde para cada uma das três espécies de pinguins.
+
+```{r eda_especies}
+ggplot(dados, aes(x = species, fill = health_metrics)) +
+  geom_bar(position = "fill",  alpha = 0.8) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c("#d6ccc2", "cyan4", "darkorange", "gray50")) +
+  labs(y = "Proporção", x = "Espécie", fill = "Métrica de Saúde") +
+  theme_minimal(base_size = 15)
+```
+
+## 3.2. Variação da saúde entre sexos
+
+Avaliamos a saúde por sexo, mas facetamos (dividimos) o gráfico por espécie, pois a relação pode ser diferente entre elas.
+
+```{r eda_sexo}
+ggplot(dados, aes(x = sex, fill = health_metrics)) +
+  geom_bar(position = "fill",  alpha = 0.8) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c("#d6ccc2", "cyan4", "darkorange", "gray50")) +
+  labs(y = "Proporção", x = "Sexo", fill = "Métrica de Saúde") +
+  facet_wrap(species ~ .) +
+  theme_minimal(base_size = 15)
+```
+
+## 3.3. Variação da saúde por estágio de vida
+
+Finalmente, exploramos a relação entre o estágio de vida (ex: "Adult", "Juvenile") e a saúde, também facetado por espécie.
+
+```{r eda_estagio_vida}
+ggplot(dados, aes(x = life_stage, fill = health_metrics)) +
+  geom_bar(position = "fill",  alpha = 0.8) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c("#d6ccc2", "cyan4", "darkorange", "gray50")) +
+  labs(y = "Proporção", x = "Estágio de Vida", fill = "Métrica de Saúde") +
+  facet_wrap(species ~ .) +
+  theme_minimal(base_size = 15)
+```
+
+# 4. Modelagem Multinomial
+
+Ajustamos os modelos multinomiais usando a função `vglm` do pacote `VGAM`.
+
+## 4.1. Definição do nível de referência
+
+A regressão multinomial (assim como a logística) compara a probabilidade de cada categoria contra uma **categoria de referência**. Primeiro, verificamos os níveis da nossa variável resposta.
+
+```{r niveis_referencia}
+levels(dados$health_metrics)
+```
+
+Vamos definir o primeiro nível, `"Healthy"`, como a categoria de referência usando o argumento `family = multinomial(refLevel = 1)`.
+
+## 4.2. Modelo 1: `health_metrics ~ life_stage`
+
+O primeiro modelo avalia como o estágio de vida (`life_stage`) afeta a probabilidade de um pinguim estar em uma determinada categoria de saúde.
+
+```{r modelo1_fit}
+modelo1 <- vglm(health_metrics ~ life_stage, 
+                family = multinomial(refLevel = 1),  # Define "Healthy" como referência
+                data = dados)
+
+summary(modelo1)
+```
+
+O `summary` do `vglm` mostra os coeficientes (logits) para cada categoria de resposta (exceto a referência) em comparação com a referência ("Healthy").
+
+## 4.3. Visualização dos resultados (Modelo 1)
+
+Os coeficientes (logits) são difíceis de interpretar diretamente. É mais intuitivo converter os resultados em **probabilidades previstas**.
+
+Primeiro, criamos um *dataframe* com os níveis do preditor (`life_stage`) e usamos a função `predict` com `type = "response"` para obter as probabilidades.
+
+```{r modelo1_preds}
+# 1. Criar dados para predição
+dados_pred1 <- data.frame(life_stage = levels(dados$life_stage))
+
+# 2. Prever as probabilidades
+preds1 <- predict(modelo1,
+                  newdata = dados_pred1,
+                  type = "response") %>% data.frame()
+
+# 3. Formatar os resultados para o ggplot2
+preds1$life_stage <- dados_pred1$life_stage
+# (Nota: Os nomes das colunas de preds1 vêm dos níveis da resposta)
+colnames(preds1) <- c("Healthy", "Overweight", "Underweight", "life_stage") 
+
+# 4. Transformar dados para o formato longo (ideal para ggplot2)
+preds1l <- preds1 %>%
+  tidyr::pivot_longer(cols = c("Healthy", "Overweight", "Underweight"),
+                      names_to = "Health",
+                      values_to = "Probability")
+```
+
+Agora, plotamos as probabilidades previstas pelo Modelo 1.
+
+```{r modelo1_plot}
+ggplot(preds1l, aes(x = life_stage, y = Probability, fill = Health)) +
+  geom_bar(stat = "identity", position = "stack",  alpha = 0.8) +
+  scale_fill_manual(values = c("Healthy" = "darkorange", "Overweight" = "#d6ccc2", "Underweight" = "cyan4")) +
+  labs(y = "Probabilidade Prevista",
+       x = "Estágio de Vida",
+       fill = "Métrica de Saúde",
+       title = "Modelo 1: Probabilidade de Saúde por Estágio de Vida") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+## 4.4. Modelo 2: `health_metrics ~ species`
+
+O segundo modelo avalia o efeito da `species` sobre a métrica de saúde, seguindo os mesmos passos.
+
+```{r modelo2_fit}
+modelo2 <- vglm(health_metrics ~ species, 
+                family = multinomial(refLevel = 1),  # "Healthy" como referência
+                data = dados)
+
+summary(modelo2)
+```
+
+## 4.5. Visualização dos resultados (Modelo 2)
+
+Calculamos e plotamos as probabilidades previstas para o Modelo 2.
+
+```{r modelo2_preds_plot}
+# 1. Criar dados para predição
+dados_pred2 <- data.frame(species = levels(dados$species))
+
+# 2. Prever probabilidades
+preds2 <- predict(modelo2,
+                  newdata = dados_pred2,
+                  type = "response") %>% data.frame()
+
+# 3. Formatar os resultados
+preds2$species <- dados_pred2$species
+colnames(preds2) <- c("Healthy", "Overweight", "Underweight", "Species") 
+
+# 4. Transformar para formato longo
+preds2l <- preds2 %>%
+  tidyr::pivot_longer(cols = c("Healthy", "Overweight", "Underweight"),
+                      names_to = "Health",
+                      values_to = "Probability")
+
+# 5. Plotar
+ggplot(preds2l, aes(x = Species, y = Probability, fill = Health)) +
+  geom_bar(stat = "identity", position = "stack",  alpha = 0.8) +
+  scale_fill_manual(values = c("Healthy" = "darkorange", "Overweight" = "#d6ccc2", "Underweight" = "cyan4")) +
+  labs(y = "Probabilidade Prevista",
+       x = "Espécie",
+       fill = "Métrica de Saúde",
+       title = "Modelo 2: Probabilidade de Saúde por Espécie") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+
+# 5. Conclusões
+
+Este relatório demonstrou o processo de ajuste e interpretação de um **Modelo Linear Generalizado multinomial** em R.
+
+1.  Os dados dos pinguins foram explorados para identificar padrões entre `health_metrics` e preditores como `species` e `life_stage`.
+2.  Dois modelos multinomiais foram ajustados usando `vglm()`, definindo "Healthy" como a categoria de referência.
+3.  Os resultados dos modelos foram convertidos de logit para probabilidades previstas, permitindo uma interpretação visual de como os preditores influenciam a chance de um pinguim se enquadrar em cada categoria de saúde.

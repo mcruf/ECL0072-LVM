@@ -1,0 +1,50 @@
+---
+title: "GLM Multinomial"
+author: "Victor Rocha di Cavalcanti"
+#date: "`r format (Sys.time(), '%d %B, %Y')`"
+output:
+   html_document: #Salvar como html
+      theme: journal #cerulean,flatly,united,cosmo,simplex
+      number_sections: yes
+      toc: true               # Gera sumário (Table of Contents)
+      toc_float:              # Faz o sumário “flutuar” ao lado
+        collapsed: false      # Não inicia “fechado”
+        smooth_scroll: false  # Desativa rolagem suave (opcional)
+        position: left        # Posiciona o sumário à esquerda
+        width: 250px          # Define a largura do sumário
+---
+
+```{r echo = T, message = F, warning = F}
+#~~~~~~~~~~~~~~~~~~~~~~~
+# Carregando os pacotes
+#~~~~~~~~~~~~~~~~~~~~~~~
+library(VGAM) #Modelo multinomial
+library(nnet) #Modelo multinomial (pacote alternativo)
+library(ggplot2)
+library(dplyr)
+library(DHARMa)
+```
+## Análise exploratória e entrada dos dados
+```{r echo = T}
+setwd("C:/Users/victo/Documents/ECL0072-GLM_GAM-gh-pages/ECL0072-GLM_GAM-gh-pages/")
+
+dados <- readRDS("Dados/palmerpenguins_extended.rds")
+
+str(dados)
+
+cols <- c("species", "island", "sex", "diet", "life_stage", "health_metrics", "year")
+
+dados[, cols] <- lapply(dados[, cols], factor)
+
+table(dados$health_metrics)
+```
+
+## Modelagem multinomial
+```{r echo = T}
+#modelo multinomial
+mod_multinom <- vglm(health_metrics ~ species + sex + diet,
+                     data = dados,
+                     family = multinomial)
+                     
+summary(mod_multinom)
+```

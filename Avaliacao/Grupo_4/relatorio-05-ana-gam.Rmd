@@ -1,0 +1,171 @@
+---
+title: "Modelo GAM"
+author: "Ana Karolina Silva"
+#date: "`r format (Sys.time(), '%d %B, %Y')`"
+output:
+   html_document: #Salvar como html
+      theme: journal #cerulean,flatly,united,cosmo,simplex
+      number_sections: yes
+      toc: true             # Gera sumário (Table of Contents)
+      toc_float: true       # Faz o sumário “flutuar” ao lado
+      collapsed: false      # Não inicia “fechado”
+      smooth_scroll: false  # Desativa rolagem suave (opcional)
+      position: left        # Posiciona o sumário à esquerda
+      width: 250px          # Define a largura do sumário
+---
+
+## Introdução
+
+- Os modelos "GAMs" permitem que cada variável explicativa tenha uma relação não linear e suave com a variável resposta, sem que precise escolher a forma exata da curva (como quadrática, cúbica, etc.).
+
+O GAM é uma extensão dos modelos lineares generalizados (GLM), adicionando funções suaves aos termos explicativos.
+
+- Para o relatório, Vou testar a influência do fósforo na razão entre a biomassa do zooplâncton pelo fitoplâncton que suspeito que não seja linear. 
+
+- Adicionei os dados da minha dissertação com um aquivo .csv no diretório `/Dados` da disciplina.
+
+```{r echo=T}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 1. Importando o banco de dados
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+dados <- read.table(file="../Dados/RELACAO_VAR_ABIOTICAS_RAZAO.csv", sep =";", header = T)
+
+```
+
+Visualizando informações contidas no banco de dados:
+
+```{r, echo=T}
+## Explorando a relação razão zoo/fito vs.fósforo total
+library(ggplot2)
+ggplot(dados, aes(x = fosforo_total, y = razao_zoo_fito)) +
+  geom_point(pch = 19, alpha =0.5, size = 3,
+             col = 'cyan4') +
+  #geom_smooth(method = "gam",col = 'darkorange', fill = '#b6ad90') +
+  theme_minimal(base_size = 14) +
+  #facet_wrap(Station ~ .) +
+  theme(legend.position = "none",
+        panel.grid.major = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = 'bold'))
+```
+<br>
+- Não há uma tendência clara para a razão com relação ao fósforo total nem com o tempo.
+
+- Há valores de menor razão em torno de valores menores de fósforo, mas há valores menores em torno de níveis altos de fósforo também. 
+
+```{r, echo=T}
+## Explorando a relação razão zoo/fito vs.fósforo total
+library(ggplot2)
+ggplot(dados, aes(x = tempo_num, y = razao_zoo_fito)) +
+  geom_point(pch = 19, alpha =0.5, size = 3,
+             col = 'cyan4') +
+  #geom_smooth(method = "gam",col = 'darkorange', fill = '#b6ad90') +
+  theme_minimal(base_size = 14) +
+  #facet_wrap(Station ~ .) +
+  theme(legend.position = "none",
+        panel.grid.major = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = 'bold'))
+```
+<br>
+
+- No tempo não muita variação, exceto em 3 observações que o valor da razão foi bem alto.
+
+## Testando modelos
+
+```{r, echo=T, warning=FALSE}
+## Modelo com relação puramente linear
+library(DHARMa) #avaliação dos residuos
+library(performance) #avaliação dos residuos
+library(ggeffects) #para plotar os resultados
+
+m_glm <- glm(razao_zoo_fito ~ fosforo_total,
+             data = dados,
+             family = Gamma(link="log"))
+
+
+## Modelo normal com termo quadrático
+m_glm2 <- glm(razao_zoo_fito ~ poly(fosforo_total, 2),
+              data = dados,
+              family = gaussian)
+
+
+## Modelo normal com termo cúbico
+m_glm3 <- glm(razao_zoo_fito ~ poly(fosforo_total, 3),
+              data = dados,
+              family = gaussian)
+
+
+## Modelo normal com termo à quarta
+m_glm4 <- glm(razao_zoo_fito ~ poly(fosforo_total, 4),
+              data = dados,
+              family = gaussian)
+
+
+AIC(m_glm, m_glm2, m_glm3, m_glm4)
+
+
+## Análise dos pressupostos
+simres1 <- simulateResiduals(m_glm, n=1000) #modelo mais simples
+simres4 <- simulateResiduals(m_glm4, n=1000) #modelo mais complexo
+
+
+check_model(simres1) #Modelo mais simples
+check_model(simres4) #Modelo mais complexp
+
+```
+<br>
+
+O modelo linear com familia Gamma apresentou menor AIC que os outros modelos mais complexos.
+Isso é um indicativo de que a relação entre a razão zoo/fito pode ser avaliada com
+ajustes num modelo glm mesmo, incluindo outras variáveis para explicar melhor os dados.
+
+- observações:
+
+No GLM há algus problemas com os valores preditos que não acompanham bem os dados observados e com a homogeneidade da variância.
+
+*Mesmo assim vou testar um modelo GAM com esses dados para ver o resultado*.
+
+## Testando o modelo GAM
+
+```{r, echo=T}
+### GAM com distribuição Gama
+library(mgcv) #rodar gam
+m_gam <- gam(razao_zoo_fito ~ s(fosforo_total, bs = "cr"),
+              data = dados,
+              family = Gamma(link = "log"))
+summary(m_gam)
+
+## Avaliando os pressupostos
+par(mfrow = c(2,2))
+gam.check(m_gam) #versão com pacote mgcv
+par(mfrow = c(1,1))
+
+check_model(m_gam)
+
+```
+<br>
+
+Observações:
+
+- edf > 1 para o fósforo total, suavização significativa;
+- A homogeneidade, por outro lado, piorou com relação ao modelo glm.
+
+Além disso, há uma tendência de muitos resíduos em torno de valores altos do preditor linear.
+
+```{r, echo=T}
+### Comparando AIC do GLM e do GAM
+
+AIC(m_gam, m_glm)
+```
+
+- Observações:
+O modelo GAM possui menor AIC, no entanto o ajuste não parece melhor que o GLM.
+
+## Conclusão
+Embora, a suavização do fósforo total tenha sido significativa, o modelo GAM com apenas essa variável não se mostrou melhor que o modelo GLM com a família Gamma para os dados da razão zoo/fito.
+
+- Seguir com um modelo GLM mais simples incluindo mais variáveis ou até incluindo efeitos mistos pode ser melhor que usar com a modelagem GAM.
+
+- Por outro lado, incluir mais variáveis no modelo GAM e trabalhar com fatores fixos e suavizados
+pode até melhorar o ajuste. São coisas que pretendo testar. O GAM precisa de um número considerável de observações talvez os meus dados não se enquadrem também.
+

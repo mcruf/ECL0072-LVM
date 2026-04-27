@@ -1,0 +1,181 @@
+---
+title: "GLM Poisson e Binomial Negativo"
+subtitle: "Modelagem da riqueza de espécies bentônicas em função de gradientes ambientais"
+author: "Fabricio Albuquerque"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: readable
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+# Relatório Didático - Disciplina de Modelagem Ecológica
+
+# 1. Introdução
+
+Este relatório ilustra o uso de **Modelos Lineares Generalizados (GLM)** com distribuições de **Poisson** e **Binomial Negativa** aplicados a dados ecológicos de **riqueza de espécies bentônicas**.  
+Tais modelos são amplamente utilizados para variáveis de **contagem**, que assumem valores inteiros e não negativos.  
+
+Os objetivos principais são:
+- Modelar a variação da riqueza de espécies (`Richness`) em função de fatores ambientais (`NAP` e `Exposure`);
+- Diagnosticar sobredispersão e ajustar o modelo apropriado;
+- Visualizar os efeitos marginais das variáveis explicativas.  
+
+# 2. Carregando pacotes e dados
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(GGally)
+library(MASS)
+library(corrplot)
+library(DHARMa)
+library(ggeffects)
+library(performance)
+library(patchwork)
+
+#dados <- readRDS("../Dados/benthos_exposure.rds")
+dados <- readRDS("/Users/mcruf/Library/CloudStorage/OneDrive-Personal/Arbeit/Lectures_and_Talks/UFRN/Lectures/ECL0072-GLM_GAM/Avaliacao/Grupo_10/Dados/benthos_exposure.rds")
+
+summary(dados)
+```
+
+# 3. Exploração inicial dos dados
+
+```{r}
+hist(dados$Richness)
+boxplot(dados$Richness, main = "Distribuição da riqueza de espécies")
+dotchart(dados$Richness, main = "Riqueza por amostra")
+plot(dados$Richness ~ dados$NAP, main = "Riqueza vs NAP", xlab = "NAP", ylab = "Riqueza")
+```
+
+# 4. Ajuste do modelo Poisson
+
+```{r}
+mod_1 <- glm(Richness ~ NAP,
+             data = dados,
+             family = "poisson")
+
+summary(mod_1)
+```
+
+Verificação da **sobredispersão** (phi > 1 indica sobredispersão):
+
+```{r}
+mod_1$deviance / mod_1$df.residual
+sum(residuals(mod_1, type = "pearson")^2) / df.residual(mod_1)
+```
+
+# 5. Adicionando variável explicativa (Exposição)
+
+```{r}
+mod_2 <- glm(Richness ~ NAP + Exposure,
+             data = dados,
+             family = "poisson")
+
+AIC(mod_1, mod_2)
+```
+
+# 6. Ajuste do modelo Binomial Negativo
+
+Quando há sobredispersão, o modelo **Binomial Negativo** (glm.nb) é mais apropriado:
+
+```{r}
+mod_3 <- glm.nb(Richness ~ NAP + Exposure,
+                data = dados)
+
+AIC(mod_2, mod_3)
+summary(mod_3)
+```
+
+# 7. Diagnóstico dos resíduos
+
+```{r}
+simres2 <- simulateResiduals(mod_3, n = 1000)
+plot(simres2)
+
+check_model(mod_1)
+check_zeroinflation(mod_1)
+```
+
+# 8. Interpretação dos coeficientes
+
+```{r}
+exp(coef(mod_3))
+```
+
+# 9. Visualização dos efeitos marginais
+
+## Efeito de NAP
+
+```{r}
+newdat_NAP <- expand.grid(
+  NAP = seq(min(dados$NAP), max(dados$NAP), length.out = 100),
+  Exposure = mean(dados$Exposure)
+)
+
+pred <- predict(mod_3, newdata = newdat_NAP, type = "link", se.fit = TRUE)
+
+newdat_NAP <- newdat_NAP %>%
+  mutate(
+    fit = exp(pred$fit),
+    lwr = exp(pred$fit - 1.96 * pred$se.fit),
+    upr = exp(pred$fit + 1.96 * pred$se.fit)
+  )
+
+p1 <- ggplot() +
+  geom_point(data = dados, aes(x = NAP, y = Richness), alpha = 0.5) +
+  geom_line(data = newdat_NAP, aes(x = NAP, y = fit), color = "steelblue", size = 1.2) +
+  geom_ribbon(data = newdat_NAP, aes(x = NAP, ymin = lwr, ymax = upr), fill = "steelblue", alpha = 0.2) +
+  labs(x = "NAP (altura relativa ao nível do mar)",
+       y = "Riqueza de espécies",
+       title = "A) Efeito de NAP sobre a riqueza") +
+  theme_classic(base_size = 13)
+p1
+```
+
+## Efeito de Exposição
+
+```{r}
+newdat_Exp <- expand.grid(
+  Exposure = seq(min(dados$Exposure), max(dados$Exposure), length.out = 100),
+  NAP = mean(dados$NAP)
+)
+
+pred <- predict(mod_3, newdata = newdat_Exp, type = "link", se.fit = TRUE)
+
+newdat_Exp <- newdat_Exp %>%
+  mutate(
+    fit = exp(pred$fit),
+    lwr = exp(pred$fit - 1.96 * pred$se.fit),
+    upr = exp(pred$fit + 1.96 * pred$se.fit)
+  )
+
+p2 <- ggplot() +
+  geom_point(data = dados, aes(x = Exposure, y = Richness), alpha = 0.5) +
+  geom_line(data = newdat_Exp, aes(x = Exposure, y = fit), color = "darkorange3", size = 1.2) +
+  geom_ribbon(data = newdat_Exp, aes(x = Exposure, ymin = lwr, ymax = upr), fill = "darkorange3", alpha = 0.2) +
+  labs(x = "Exposição (índice composto)",
+       y = "Riqueza de espécies",
+       title = "B) Efeito da Exposição sobre a riqueza") +
+  theme_classic(base_size = 13)
+p2
+```
+
+## Gráficos combinados
+
+```{r}
+p1 + p2
+```
+
+# 10. Conclusão
+
+O modelo Binomial Negativo apresentou melhor ajuste em relação ao modelo de Poisson, sugerindo **sobredispersão nos dados de riqueza**.  
+Tanto a **NAP** quanto a **Exposição** influenciaram a riqueza de espécies, reforçando a importância de gradientes físicos e de exposição nas comunidades bentônicas.  
+
+---

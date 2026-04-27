@@ -1,0 +1,151 @@
+---
+title: "Relatório: GLM Binário (Presença-Ausência)"
+author: "Fabricio Albuquerque"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output:
+   html_document: #Salvar como html
+      theme: journal #cerulean,flatly,united,cosmo,simplex
+      number_sections: yes
+      toc: true               # Gera sumário (Table of Contents)
+      toc_float:              # Faz o sumário “flutuar” ao lado
+        collapsed: false      # Não inicia “fechado”
+        smooth_scroll: false  # Desativa rolagem suave (opcional)
+        position: left        # Posiciona o sumário à esquerda
+        width: 250px          # Define a largura do sumário
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(ggplot2)
+library(dplyr)
+library(GGally)
+library(MASS)
+library(corrplot)
+library(DHARMa)
+library(ggeffects)
+library(performance)
+```
+
+# Introdução
+
+Breve contextualização sobre quando utilizar modelos lineares generalizados com família binomial (presença/ausência) na ecologia. Explique o significado do *link* logit e as suposições básicas.
+
+# Objetivos
+
+- Demonstrar a construção e interpretação de um GLM binário com link logit;
+- Apresentar procedimentos diagnósticos (resíduos simulados, autocorrelação);
+- Fornecer interpretação didática dos coeficientes e plots de predição;
+- Produzir um relatório em HTML pronto para avaliação.
+
+# Dados
+
+Descrição curta do conjunto de dados usado (`koalas.rds`). Informe formato esperado (cada linha = ponto/amostra; `presence` codificada 0/1; variáveis explanatórias contínuas ou percentuais).
+
+```{r echo=TRUE}
+# Carregar dados
+dados <- readRDS("../Dados/koalas.rds")
+# Usar primeira linha como cabeçalho (quando necessário)
+colnames(dados) <- dados[1, ]
+dados <- dados[-1, ]
+
+dados <- dados |> mutate(across(where(is.character), as.numeric))
+
+# Visualização rápida
+summary(dados)
+```
+
+**Comentário didático:** Verifique sempre se a primeira linha realmente contém nomes de colunas. Caso não, esse bloco deve ser ajustado.
+
+# Exploração Inicial
+
+```{r explore-data, fig.height=4}
+# Distribuição da variável resposta
+ggplot(dados, aes(x = factor(presence))) +
+  geom_bar() +
+  labs(x = "Presence (0 = ausente; 1 = presente)", y = "Contagem") +
+  theme_minimal()
+```
+
+**Comentário didático:** Gráficos simples ajudam a entender balanceamento da variável resposta e orientar decisões sobre modelagem (ex.: curva logit, necessidade de ponderação, etc.).
+
+# Especificação de modelos
+
+Explique o conceito de modelo nulo, modelos com uma e mais covariáveis e uso de AIC para seleção.
+
+```{r fit-models}
+# Modelo nulo
+mod0 <- glm(presence ~ 1,
+            family = binomial(link = "logit"),
+            data = dados)
+
+# Modelo com uma covariável (exemplo: pprim_ssite)
+mod1 <- glm(presence ~ pprim_ssite,
+            family = binomial(link = "logit"),
+            data = dados)
+
+# Modelo com duas covariáveis
+mod2 <- glm(presence ~ pprim_ssite + psec_ssite,
+            family = binomial(link = "logit"),
+            data = dados)
+
+# Comparação por AIC
+aic <- AIC(mod0, mod1, mod2)
+aic |> arrange(AIC)
+```
+
+**Comentário didático:** AIC penaliza complexidade do modelo; modelos com menor AIC são preferíveis, mas considere também plausibilidade biológica e diagnóstico de resíduos.
+
+# Diagnósticos do modelo escolhido
+
+Escolhemos `mod1` como exemplo (substitua conforme necessidade). Aqui usamos DHARMa e performance para avaliar ajuste e autocorrelação.
+
+```{r diagnostics, fig.height=4}
+# Simular resíduos
+resid_sim <- simulateResiduals(mod1, n = 1000)
+plot(resid_sim)
+
+# Avaliações adicionais
+check_model(mod1)
+check_autocorrelation(mod1)
+
+# ACF dos resíduos brutos (para inspeção)
+acf(residuals(mod1))
+```
+
+**Comentário didático:** Resíduos simulados (DHARMa) transformam resíduos em uma escala uniforme facilitando testes de dispersão, zero-inflation e tendência.
+
+# Sumário do modelo e interpretação
+
+```{r summary-model}
+summary(mod1)
+```
+
+**Interpretação didática:**
+
+- Coeficiente (`Estimate`) para `pprim_ssite` indica mudança no logit da probabilidade de presença por unidade da variável. Para interpretar em termos de razão de chances (odds ratio), calcule `exp(coef)`.
+
+```{r odds-ratio}
+exp(coef(mod1))
+confint_mod1 <- exp(confint.default(mod1))
+confint_mod1
+```
+
+# Visualização da relação e predições
+
+```{r plot-prediction, fig.height=4}
+# Scatter e curva ajustada
+ggplot(dados, aes(x = pprim_ssite, y = presence)) +
+  geom_jitter(height = 0.02, width = 0, alpha = 0.6) +
+  stat_smooth(method = "glm", method.args = list(family = binomial), se = TRUE) +
+  labs(x = "Porcentagem de árvores primárias", y = "Probabilidade de presença") +
+  theme_minimal()
+
+```
+
+**Comentário didático:** Use `ggeffects` para obter predições marginais e intervalos de confiança facilmente interpretáveis.
+
+# Conclusões
+
+Resuma os principais achados (por ex.: relação positiva/negativa entre `pprim_ssite` e probabilidade de presença), limitações (amostragem, independência espacial, variáveis omitidas) e sugestões para análises futuras (incluir efeitos espaciais, GAMs para não-linearidade, validação cruzada).
+
+

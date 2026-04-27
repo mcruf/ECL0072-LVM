@@ -1,0 +1,182 @@
+---
+title: "GLM para dados Categóricos"
+author: "Ana Karolina Silva"
+#date: "`r format (Sys.time(), '%d %B, %Y')`"
+output:
+   html_document: #Salvar como html
+      theme: journal #cerulean,flatly,united,cosmo,simplex
+      number_sections: yes
+      toc: true             # Gera sumário (Table of Contents)
+      toc_float: true       # Faz o sumário “flutuar” ao lado
+      collapsed: false      # Não inicia “fechado”
+      smooth_scroll: false  # Desativa rolagem suave (opcional)
+      position: left        # Posiciona o sumário à esquerda
+      width: 250px          # Define a largura do sumário
+---
+
+## Introdução
+
+- São dados que representam categorias ou grupos, e não números contínuos.Cada observação pertence a uma categoria discreta — como “espécie”, “sexo”, “período”, “tratamento”, “presente/ausente”, etc.
+
+Para exercitar a família de distribuição Multinomial, usei os dados da minha dissertação referente
+à classificação dos períodos hidrológicos.
+
+- A intenção é testar apenas a relação dos períodos hidrológicos com a profundidade máxima e o volume de água, para avaliar se essas variáveis numéricas podem ser usadas para predizer/classificar o período. 
+
+- Adicionei os dados com um aquivo .csv no diretório `/Dados` da disciplina.
+
+```{r echo=T}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 1. Importando o banco de dados
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+dados <- read.table(file="../Dados/RELACAO_VAR_ABIOTICAS_RAZAO.csv", sep =";", header = T)
+
+```
+
+Visualizando informações contidas no banco de dados:
+
+```{r, echo=T}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 2. Análise exploratória 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+str(dados)
+
+```
+
+<br>
+
+- Explorando dados:
+
+```{r, echo=T}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Volume de água ao longo dos períodos
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+library(ggplot2)
+ggplot(dados, aes(x = classif_volume, y = volume_porc)) +
+  geom_boxplot(fill = "lightblue", alpha = 0.6) +
+  geom_jitter(width = 0.15, alpha = 0.5, color = "tomato") +
+  labs(
+    x = "Período Hidrológico",
+    y = "Volume (m³)",
+    title = "Variação do volume entre períodos hidrológicos"
+  ) +
+  theme_classic()
+
+
+```
+
+
+```{r, echo=T}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Profundidade máxima ao longo dos períodos
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+library(ggplot2)
+ggplot(dados, aes(x = classif_volume, y = zmax)) +
+  geom_boxplot(fill = "lightblue", alpha = 0.6) +
+  geom_jitter(width = 0.15, alpha = 0.5, color = "tomato") +
+  labs(
+    x = "Período Hidrológico",
+    y = "Volume (m³)",
+    title = "Variação do volume entre períodos hidrológicos"
+  ) +
+  theme_classic()
+
+```
+<br>
+
+
+- Tanto o volume de água quanto a profundidade máxima variou ao longo do períodos com consideráveis diferenças entre os 3 (cheia, seca e transição).
+
+```{r, echo=T}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Teste de correlação
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+summary(aov(volume_porc ~ classif_volume, data = dados))
+summary(aov(zmax ~ classif_volume, data = dados))
+
+```
+- como os valores de p<0,05, observa-se que há alta colinearidade entre zmax e volume com os períodos.
+
+
+## Testando modelo Multinomial com os períodos hidrológicos como resposta
+
+- Como foi observado que há grande diferença com relação ao zmax e volume (%) entre os períodos, vou
+testar se a razão entre a biomassa de zooplâncton pelo fitoplâncton ajudam a predizer o período hidrológico.
+
+```{r, echo=T}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Carregando funções auxiliares
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+source("C:/Users/karol/Desktop/DISCIPLINA-MODELAGEM-2025/ECL0072-GLM_GAM-gh-pages/ECL0072-GLM_GAM-gh-pages/Scripts/funcoes_auxiliares.R")
+```
+
+
+```{r, echo=T, warning=FALSE}
+library(VGAM) #Modelo multinomial
+library(nnet)
+
+# definir o nível de referência
+levels(dados$classif_volume) #cheia = 1
+
+#vglm roda o modelo multinomial
+modelo1 <- vglm(classif_volume ~ volume_porc, 
+                family = multinomial(refLevel = 1),  # define a categoria de referência
+                data = dados)
+
+summary(modelo1)
+
+```
+<br>
+
+Observações, o modelo não pode ser considerado:
+
+- há separação quase perfeita entre a variável resposta e o preditor.
+
+- O modelo não consegue estimar os coeficientes de forma confiável;
+
+- Os erro-padrão ficam com NA (como no seu resultado);
+
+- Os coeficientes ficam enormes ou instáveis e a significância estatística não é confiável;
+
+
+Mas, o que podemos interpretar. Os coeficientes negativos de volume_porc:1 e volume_porc:2 indicam que, quanto maior o volume, menor a chance relativa de o período pertencer às classes 2 (seca) e 3 (transição) em comparação com a classe 1 (cheia).
+
+## Tentando modelo multinomial com período e razão zoo/fito
+
+```{r, echo=T}
+library(VGAM) #Modelo multinomial
+
+# definir o nível de referência
+levels(dados$classif_volume) #cheia = 1
+
+#vglm roda o modelo multinomial
+modelo1 <- vglm(classif_volume ~ razao_zoo_fito, 
+                family = multinomial(refLevel = 1),  # define a categoria de referência
+                data = dados)
+
+summary(modelo1)
+
+```
+
+<br>
+
+Observações: 
+
+- A razão zooplâncton/fitoplâncton (razao_zoo_fito) tem uma associação fraca a moderada com a variável classif_volume:
+
+Apenas um dos coeficientes, classe 2 (seca) vs 1 (cheia) chega perto da significância estatística (p ≈ 0.062);
+
+O coeficiente positivo sugere que, quanto maior a razão zoo/fito, maior a chance relativa de a observação estar na classe 2 (seca) comparada à 1 (cheia).
+
+Ajuste do modelo é muito mais fraco do que com volume_porc:
+
+Residual deviance: agora é 79.60 (vs 6.77 com volume_porc);
+
+Log-likelihood: -39.80 (vs -3.39 com volume_porc), modelo menos informativo.
+
+
+## Conclusão
+
+- Os 2 modelos realizados acima foram apenas testes com o modelo multinomial aprendido em sala, achei interessante e pensei em testar com essa linha de raciocionío apresentada, de modo que aproveitasse meus dados :)
+

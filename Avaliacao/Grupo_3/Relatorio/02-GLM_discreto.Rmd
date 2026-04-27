@@ -1,0 +1,312 @@
+---
+title: "GLM para dados discretos"
+author: "Samuel Lima & Niege Félix"
+#date: "`r format (Sys.time(), '%d %B, %Y')`"
+output:
+   html_document: #Salvar como html
+      theme: cosmo #cerulean,flatly,united,cosmo,simplex
+      number_sections: yes
+      toc: true               # Gera sumário (Table of Contents)
+      toc_float:              # Faz o sumário “flutuar” ao lado
+        collapsed: false      # Não inicia “fechado”
+        smooth_scroll: false  # Desativa rolagem suave (opcional)
+        position: left        # Posiciona o sumário à esquerda
+        width: 200px          # Define a largura do sumário
+---
+
+# Introdução
+
+
+Carregando pacotes a serem utilizados e importando o banco de dados
+
+```{r echo=T, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(ggeffects)
+library(GGally) #pairsplot
+library(dplyr) 
+library(DHARMa) 
+library(performance)
+library(MASS) #Para rodar modelo Binomial Negativo
+library(sp) #Para a visualização dos resíduos no espaço
+
+bd <- read.csv("../Dados/bd_analises2.csv")
+```
+
+Para exercitar o GLM para dados discretos vamos utilizar os dados coletados como parte da pesquisa de mestrado do Samuel Lima (UFRN).
+
+O bando de dados trata-se de insetos coletados em árvores plantadas de um experimento de biodiversidade e funcionamento de ecossistemas focado na restauração da Caatinga. A coleta foi realizada manualmente, por busca ativa, no final da estação chuvosa de 2023.
+
+Saiba mais do experimento [aqui](https://brazildry.wixsite.com/treediv).
+
+Objetivo: testar se a riqueza de espécies e o potencial de facilitação de árvores afetam a abundância de insetos no semiárido brasileiro.
+
+Hipótese: a riqueza de espécies e o potencial de facilitação de árvores influenciam positivamente e de forma interativa a abundância de insetos
+
+# Análise exploratória
+
+Vamos iniciar cOnhecendo nossos dados:
+
+```{r echo=TRUE}
+head(bd)
+```
+
+Visualizando a natureza em que as variáveis foram importadas e transformando as variáveis `plot` e `composition` em fator
+
+```{r echo=TRUE}
+str(bd)
+
+bd$plot<-as.factor(bd$plot)
+```
+
+Abundância e riqueza insetos
+
+```{r echo=TRUE}
+bd %>% 
+  summarise(Abundancia = sum(insect_abundance),
+            Riqueza = sum(insect_richness))
+
+```
+
+## Observando tendências para nossa variável resposta
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+##Abundância de insetos por riqueza de espécies de árvores
+
+# Valores brutos
+ggplot(bd, aes(x=factor(plant_richness),y=insect_abundance)) +
+  geom_bar(stat = "identity")+
+  scale_y_discrete(name = "Abundância de insetos")+
+  scale_x_discrete(name = "Riqueza de espécies de árvores")
+
+# Valores médios
+ggplot(bd, aes(x=factor(plant_richness),y=insect_abundance)) +
+  stat_summary(geom = "bar", fun = "mean") +
+  stat_summary(geom = "errorbar", width = .2, fun.data = mean_se) +
+  scale_y_discrete(name = "Abundância de insetos")+
+  scale_x_discrete(name = "Riqueza de espécies de árvores")
+
+# Riqueza de espécies como variável contínua
+ggplot(bd,aes(x=plant_richness,y=insect_abundance))+
+  geom_point(size = 3, col = 'gray50',alpha = 0.7)+
+  scale_y_discrete(name = "Abundância de insetos")+
+  scale_x_continuous(name = "Riqueza de espécies de árvores")
+
+## Abundância de insetos por potencial de facilitação de árvores
+ggplot(bd,aes(x=facilitation,y=insect_abundance)) +
+  geom_point(size = 3, col = 'gray50',alpha = 0.7) +
+  scale_y_discrete(name = "Abundância de insetos") +
+  scale_x_continuous(name = "potencial de facilitação de árvores")
+
+## Mesma relação, mas observando separadamente pelo nível de riqueza de espécies de árvores
+ggplot(bd,aes(x=facilitation,y=insect_abundance))+
+  geom_point(size = 3, col = 'gray50',alpha = 0.7) +
+  scale_y_discrete(name = "Abundância de insetos") +
+  scale_x_continuous(name = "Potencial de facilitação de árvores") +
+  facet_wrap(factor(plant_richness) ~ .) 
+
+```
+
+Os pontos estão estruturados na vertical na última figura porque o potencial de facilitação é calculado como uma média das espécies presentes na parcela. As parcelas de 16 espécies tem o mesmo potencial de facilitação por todas as suas réplicas consistirem nas mesmas espécies (o número máximo plantado no experimento)
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+##Abundância de insetos por latitude e longitude
+ggplot(bd,aes(x=lat,y=insect_abundance))+
+  geom_point(size = 3, col = 'gray50',alpha = 0.7)+
+  scale_y_discrete(name = "Abundância de insetos")+
+  scale_x_continuous(name = "Latitude")
+
+ggplot(bd,aes(x=long,y=insect_abundance))+
+  geom_point(size = 3, col = 'gray50',alpha = 0.7)+
+  scale_y_discrete(name = "Abundância de insetos")+
+  scale_x_continuous(name = "Longitude")
+```
+
+Aparentemente não há tendências para latitude e longitude, mas há uma pequena concentração de pontos nos seus menores valores
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# Verificando outliers
+dotchart(bd$insect_abundance)
+```
+
+Sem outliers aparentes
+
+## Escalando as variáveis preditoras e verificando correlação
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+cols<-c("plant_richness", "facilitation")
+bd[,cols] <- scale(bd[,cols], scale=T, center=F)
+
+ggpairs(bd,         
+        columns = c(9,5,7),
+        lower = list(continuous = "smooth"))
+```
+
+> Sem correlação! Vamos iniciar a modelagem da abundância de insetos
+
+# Metodologia
+
+Para testar se a riqueza de espécies e o potencial de facilitação de árvores afetam a abundância de insetos, vamos utilizar modelos de regressão com as distribuições de erro de poisson e binomial negativa, visto que a variável resposta (*insect_abundance*) é discreta (contagem de indivíduos).
+
+Podemos resumir os modelos conforme:
+
+$$\large y_i \sim Poisson(\lambda_i)$$ 
+
+Onde $\large \lambda_i$ é numéro médio de eventos (no nosso caso, a abundância média de insetos por parcela)
+
+$$\large E[y_i] = \lambda_i, ~~~~~Var(y_i) = \lambda_i$$ 
+
+Aqui a variância é igual a média.
+
+$$\large y_i \sim BN(\mu_i, k_i)$$
+
+$$E[y_i] = \mu_i, ~~~~~Var(y_i) = \mu_i + \frac{\mu_i^2}{k_i}$$ 
+
+
+Onde: - $\mu$: média da distribuição BN - $k$: parâmetro de dispersão (*forma/shape*) - dado como *theta* no output do modelo
+
+Em ambas distrbuições, a função de ligação é a função logarítmica. Para que o dado de contagem fique sempre na escala de positivo.
+
+## Selecionando o modelo
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# Iniciando apenas com as variáveis fixas do experimento BrazilDry e com a 
+#distribuição de probabilidade poisson
+mod_1<- glm(insect_abundance ~ plant_richness + facilitation,
+            data = bd,
+            family = "poisson")
+
+# testando a interação da riqueza de espécies e a facilitação de árvores
+mod_1b<- glm(insect_abundance ~ plant_richness * facilitation,
+             data = bd,
+             family = "poisson")
+
+AIC(mod_1, mod_1b) #Comparando
+
+#Testando se há sobredispersão 
+mod_1$deviance/mod_1$df.residual
+mod_1b$deviance/mod_1b$df.residual
+```
+
+O modelo com a interação entre as variáveis se mostrou bem melhor. Porém, ambos apresentaram uma forte sobredispersão (phi \> 1).
+
+Vamos ponderar pela diferença de esforço (plantas vivas) e comparar novamente. O esforço entra no modelo como `offset`, uma variável preditora especial que não tem parâmetro para ser estimado.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+mod_2<- glm(insect_abundance ~ plant_richness * facilitation + 
+              offset(log(live_plants)),
+              data = bd,
+              family = "poisson")
+
+AIC(mod_1b, mod_2) 
+```
+
+> Funcionou! Seguimos com o modelo 2
+
+O próximo passo é verificar se está tudo ok com os resíduos do modelo..
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+## Inspecção residual
+simulateResiduals(mod_2, n=1000,plot = T)
+```
+
+Péssimo ajuste! Os resíduos estão bem diferentes do esperado pelo modelo. Vamos testar o mesmo modelo com uma distribuição diferente
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+#Mesmas variáveis, mas agora utilizando a função `glm.nb`, que considerada a
+#distribuição de erro binomial negativa
+mod_3<- glm.nb(insect_abundance ~ plant_richness * facilitation + 
+                 offset(log(live_plants)),
+                 data = bd)
+
+AIC(mod_2, mod_3) 
+```
+
+> Funcionou! Seguimos com a distribuição binomial negativa
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+## Inspecção residual
+simulateResiduals(mod_3, n=1000, plot = T) 
+check_overdispersion(mod_3)
+```
+
+Agora sim. Resíduos bem ajustados e sem sobredispersão.
+
+Como previamente observamos uma tendência de agregação dos dados no espaço, vamos testar o efeito aditivo e interativo do componente espacial
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+mod_4 <- glm.nb(insect_abundance ~ plant_richness * facilitation + 
+                  lat + long +
+                  offset(log(live_plants)),
+                  data = bd)
+
+mod_5 <- glm.nb(insect_abundance ~ plant_richness * facilitation + 
+                  lat * long +
+                  offset(log(live_plants)),
+                data = bd)
+
+AIC(mod_3,mod_4,mod_5) 
+```
+
+Não há diferença expressiva entre os modelos 3 e 4.
+
+Vamos verificar pelo teste da razão de verossimilhança:
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+anova(mod_3,mod_4)
+```
+
+
+Ainda sem diferenças expressivas. Porém, vamos fazer uma análise gráfica dos resíduos espaciais com e sem as variáveis de latitude e longitude:
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+##Modelo sem a lat e long
+dados_sp1 <- data.frame(bd[, c("long", "lat")], mod_3$residuals) 
+colnames(dados_sp1)[3] <- "residuos"
+
+coordinates(dados_sp1) <- c("long", "lat")
+bubble(dados_sp1, "residuos")
+
+##Modelo com lat e long
+dados_sp2 <- data.frame(bd[, c("long", "lat")], mod_4$residuals) 
+colnames(dados_sp2)[3] <- "residuos"
+
+coordinates(dados_sp2) <- c("long", "lat")
+bubble(dados_sp2, "residuos")
+```
+
+Adicionando as variáveis de latitude e longitude os resíduos diminuiram
+bastante, especialmente os negativos. Como não houve diferença expressiva nas
+análises de AIC e verossimilhança, podemos seguir com o modelo 4
+
+A aparente concentração dos dados nas menores longitudes observado na análise exploratória aparenta ser devido ao formato espacial da área experimental (com mais parcelas do lado direito do que no esquerdo).
+
+
+# Resultados
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+summary(mod_4)
+```
+
+Avaliando nosso modelo final, temos que a interação da riqueza de espécies e o potencial de facilitação de árvores afetou positivamente e de forma interativa a abundância de insetos. Em outras palavras, a associação positiva entre o potencial de facilitação de árvores e a abundância de insetos depende da riqueza de espécies de árvores (e vice-versa).
+
+
+Importante notar que o intercepto não foi significativamente diferente de zero, o que pode ser um problema devido a incerteza. Mas vamos seguir dessa forma no momento..
+
+
+A equação do nosso modelo final é:
+
+$$log(\mu_i) = \beta_0 + \beta_1RiquezaSp + \beta_2Facilitacao +  \beta_3RiquezaSpFacilitacao + \beta_4Lat + \beta_5Long + log(offset(liveplants))$$
+
+
+**Para melhor interpretação, vamos exponencializar nossos coeficientes por estarmos usando a distribuição de erro binomial negativa, que tem a função de ligação logarítimica**
+
+ 
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+exp(mod_4$coefficients)
+```
+
+> Podemos dizer que quando a riqueza de espécies e o potencial de facilitação de árvores aumentam em uma unidade, há um aumento médio de 2 insetos!
+
