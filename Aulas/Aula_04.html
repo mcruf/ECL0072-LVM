@@ -5,497 +5,1155 @@
     <meta charset="utf-8" />
     <meta name="author" content="Marie-Christine Rufener" />
     <script src="libs/header-attrs-2.29/header-attrs.js"></script>
-    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
-    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
-    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
-    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+    <script src="libs/kePrint-0.0.1/kePrint.js"></script>
+    <link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
   <body>
     <textarea id="source">
-class: center, middle, inverse, title-slide
-
-.title[
-# Modelos Lineares Generalizados e Aditivos para Dados Ecológicos (ECL0072)
-]
-.subtitle[
-## Aula 04: GLM para dados discretos
-]
-.author[
-### Marie-Christine Rufener
-]
-
----
-
-
-## &lt;span style="color: #ee6c4d;"&gt;Conteúdo programático &lt;/span&gt; 
-
-&lt;br&gt;
-
-
-**1. O que é um dado discreto?**  
-
-
-**2. Distribuição Poisson**  
-
-
-**3. Distribuição Binomial Negativa**  
-
-  &gt; Prática 
-
-
----
-
-## &lt;span style="color: #ee6c4d;"&gt;Leitura sugerida &lt;/span&gt; 
 
 
 
-**Livros**
-- **Cap. 9:** Zuur et al. (2009)
-- **Cap. 5 :** Faraway (2016)
-- **Cap. 4 (seção 4.6):** Bolker (2008)
-- **Cap. 7:** Agresti (2015)*
 
-
-.footnote[*Leitura mais técnica]
-
----
 class: inverse, center, middle
+background-image: url(figs/image.png)
+background-size: cover
 
-# O que é um dado discreto?
+Hello there
 
 ---
-## &lt;span style="color: #ee6c4d;"&gt;Dados discretos &lt;/span&gt;
+# PPGECO | ECL0072 | out. 2026
+
+### OUTLINE
 
 
-Tipo de informação que assume apenas valores inteiros e contáveis (e.g., 12, 35, 283, ....)
-  - Número de ocorrência que um determinado evento ocorre no tempo  
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Ruido vs. sinal em dados ecológicos
+
 
 &lt;br&gt;
 
 
-&lt;img src="../Figuras/Exemplo_dado_contagem.png" width="100%" style="display: block; margin: auto;" /&gt;
-
----
-## &lt;span style="color: #ee6c4d;"&gt;Dados discretos &lt;/span&gt;
-
-Distribuições de probabilidade discretas:
-
-- Bernoulli/Binomial
-- Multinomial
-- Poisson 
-- Binomial Negativa 
-- Poisson/ Binomial Negativa zero-inflacionado
-- Geométrica
-- Hipergeométrica*
-
-
-.footnote[*Não pertence à família exponencial de distribuições]
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-1-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
 
 
 
 ---
-## &lt;span style="color: #ee6c4d;"&gt;Exemplo prático &lt;/span&gt;
+# PPGECO | ECL0072 | out. 2026
 
-A pesca de espinhel costuma ser utilizada para capturar grandes espécies pelágicas, com destaque para os atuns.
-  - Em cada evento de pesca (pescaria) são registradas as espécies que foram capturadas, sejam estas alvo ou não-alvo, além de muitas outras informações auxiliares.  
+### Dados ecológicos são estruturados
+
+Processos ecológicos atuam em múltiplas escalas: 
+
+- **Espacial**
+
+&lt;br&gt;
+
+
+&lt;img src="../Figuras/spatial_structure.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Dados ecológicos são estruturados
+
+Processos ecológicos atuam em múltiplas escalas: 
+
+- **Temporal**
+
+&lt;br&gt;
+&lt;br&gt;
+
+&lt;img src="../Figuras/temporal_structure.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### Dados ecológicos são estruturados
+
+Processos ecológicos atuam em múltiplas escalas: 
+
+- **Espaço-Tempo**
+
+&lt;br&gt;
+
+
+
+&lt;img src="../Figuras/spatial-temporal_structure.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### Dados ecológicos são estruturados
+
+Processos ecológicos atuam em múltiplas escalas: 
+
+- **Ontogenêtica**
+
+&lt;br&gt;
+
+&lt;img src="../Figuras/age_structure.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Dados ecológicos são estruturados
+
+
+
+Um dado é *estruturado* quando as observações (`\(y_i\)`) estão organizadas em grupos/níveis hierárquicos (`\(k\)`)
+
+- cada grupo de observações (`\(y_{ik}\)`) campartilha diversas características que geram dependência entre elas
+
+
+
+
+&lt;img src="../Figuras/dependency.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+
+
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### Dados ecológicos são estruturados
+
+A forma que coletamos dados muitas vezes induzem dependência em `\(y_i\)`
+
+
+
+
+
+- Influencia nos processos ecológicos observados
+  - logo, na generalização das hipóteses previstas
+
+
+
+
+
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Dados ecológicos são estruturados
+
+Essas estruturações violam o principal pressuposto dos modelos lineares (generalizados)&lt;sup&gt;1&lt;/sup&gt; 
+
+- *Independência*
+
+
+
+&lt;br&gt;
+
+`$$\Large y_i = \beta_0 + \beta x_i + \varepsilon_i \\ \varepsilon_i \overset{\text{iid}}{\sim}  N(0,\sigma^2)$$`
+
+
+&lt;br&gt;
+
+.small-text2[
+
+**Pressupostos**
+
+- **Linearidade:** tendência de `\(y\)` é descrita por um modelo linear
+
+- **Normalidade:** resíduos `\(\varepsilon_i\)` seguem uma distribuição normal
+
+- **Homocedasticidade:** variância residual é constante ao longo de `\(x\)`
+
+- **Independência:** resíduos não são correlacionados
+  ]
   
-    &gt; **Pergunta:** há uma época do ano em que se captura mais atuns?
 
 
-&lt;img src="../Figuras/Longline_fisheries.png" width="90%" style="display: block; margin: auto;" /&gt;
 
----
-class: inverse, center, middle
-
-# Distribuição Poisson
+.footnote[
+&lt;sup&gt;1&lt;/sup&gt; e suas versões aditivas (GLM/GAM)
+]
 
 ---
-## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;
+class:center, middle
+# PPGECO | ECL0072 | out. 2026
 
 
-Definida sob variáveis discretas positivas 
-  - `\(Y \in \text{{0, 1, 2, 3, ...}}\)`
-
-
-`$$\large f(y; \lambda) = \frac{\lambda^y e^{-\lambda}}{y!}$$`
-
-&lt;img src="../Figuras/Distribuicao_Poisson.png" width="100%" style="display: block; margin: auto;" /&gt;
-
-
+## Como solucionar a violação da independência? 
 
 ---
-## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;
-
-&lt;br&gt;
-
-`$$\large y_i \sim Poisson(\lambda_i) ~~~ (\lambda_i  \geq 0)$$`
-
-&lt;br&gt;
-
-`$$\large E(Y) = \lambda, ~~~~~Var(Y) = \lambda$$`
-
-&lt;br&gt;
-
-`\(\large \lambda_i\)`: número médio de eventos (e.g., abundância média de uma espécie ou número médio de espécies não-alvo por pescaria)
+class: center, middle
+# PPGECO | ECL0072 | out. 2026
 
 
+## Como solucionar a violação da independência? 
 
---
-
-&lt;p class="comment"&gt;
-&lt;b&gt;ATENÇÃO&lt;/b&gt;
-&lt;br&gt;
-
-Assume que a média = variância! 
-&lt;/p&gt;
-
+### - Particionado a variância -
 
 ---
-
-## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;
-
-Podemos relacionar a média de eventos `\(\lambda_i\)` a um conjunto de covariáveis conforme a relação:
+class: center, middle, inverse
 
 
+## &lt;span style="color: #6b705c;"&gt;EXEMPLO INTUITIVO&lt;/span&gt;
+
+---
+class: center, inverse
+
+# &lt;span style="color: #6b705c;"&gt;PPGECO | ECL0072 | out. 2026&lt;/span&gt;
+### &lt;span style="color: #6b705c;"&gt;Monitoramento da biomassa da ictiofauna recifal&lt;/span&gt;
+
+&lt;br&gt;
 .pull-left[
-&lt;br&gt;
-
-`$$\large y_i \sim Poisson(\lambda_i)$$`
-
-`$$\large log(\lambda_i) = \eta_i$$`
-`$$\large \eta_i = \beta_0 + \beta_1x_{i_1} + \beta_2x_{i_2} + \dots + \beta_px_{i_p}$$`
+&lt;img src="../Figuras/reef_sampling_design.png" width="100%" style="display: block; margin: auto 0 auto auto;" /&gt;
 ]
-.pull-right[
-
-
-&lt;p class="comment"&gt;
-&lt;b&gt;ATENÇÃO&lt;/b&gt;
-&lt;br&gt;
-
-Usamos a &lt;i&gt;função logarítmica&lt;/i&gt; como função de ligação de forma que `\(\lambda \geq 0\)`
-
-&lt;/p&gt;
-
-]
-
-
----
-
-## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Offset &lt;/span&gt; 
-
-Dados de contagem muitas vezes são medidos em relação a uma referência, como uma área ou um período de tempo
-
-
-&lt;img src="../Figuras/Offset.png" width="100%" style="display: block; margin: auto;" /&gt;
-
----
-## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Offset &lt;/span&gt; 
-
-Se a referência não for padronizada ao longo do estudo, teremos conclusões equivocadas 
-
-
-&lt;img src="../Figuras/Offset_2.png" width="80%" style="display: block; margin: auto;" /&gt;
-
-
-
----
-
-## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Offset &lt;/span&gt; 
-
-
-
-É necessário padronizar a variável resposta
-
---
-
-- Dividindo Y pelo *esforço amostral* (densidade)
-  - E.g.: `\(\text{No. de plântulas}/m^2\)`
-      - Variável contínua -&gt; distribuição Normal, Gama, ....
-
-
---
-
-&lt;br&gt;
-
-- Contabilizando diretamente no modelo
-  - **Offset**
-
----
-## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Offset &lt;/span&gt; 
-
-
-O offset é uma variável preditora especial que entra no componente sistemático do modelo, porém não tem parâmetro para ser estimado
-
-&lt;br&gt;
-
-`$$\large y_i \sim Poisson(\lambda_i\color{Tomato}{E_i})$$`
-
---
-
-
-`$$\large log(\lambda_i\color{Tomato}{E_i}) = log(\lambda_i) + log(\color{Tomato}{E_i})$$`
-
---
-
-`$$\large \beta_0 + \beta_1x_{i_1} + \beta_2x_{i_2} + \dots + \beta_px_{i_p}+ log(\color{Tomato}{E})$$`
-&lt;br&gt;
-
-- Lembrando que `\(log(\lambda) = \eta\)`
-- `\(E_i\)` é a exposição (esforço amostral)
-
-
----
-
-## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Sobredispersão &lt;/span&gt; 
-
-Dados discretos frequentemente apresentam sobredispersão
-- `\(\text{Var(dados)} &gt; \text{Var(modelo)}\)`
-
-
-&lt;img src="../Figuras/Overdispersion.png" width="70%" style="display: block; margin: auto;" /&gt;
-
----
-
-
-## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Sobredispersão &lt;/span&gt; 
-
-
-.pull-left[
-**Causa:**
-  - Omissão de variáveis preditoras importantes
-  
-  - Dados zero-inflacionados
-  
-  - Dependência entre as observações
-
-]
-
-
-
-
----
-## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Sobredispersão &lt;/span&gt; 
-
-
-.pull-left[
-**Causa:**
-  - Omissão de variáveis preditoras importantes
-  
-  - Dados zero-inflacionados
-  
-  - Dependência entre as observações
-
-
--------
-
-**Consequência:**
-  - Erros padrão inflacionados (subestimação da variabilidade)
-  
-  - Significância estatística equivocada
-
-]
-
-
----
-## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Sobredispersão &lt;/span&gt; 
-
-
-.pull-left[
-**Causa:**
-  - Omissão de variáveis preditoras importantes
-  
-  - Dados zero-inflacionados
-  
-  - Dependência entre as observações
-
-
--------
-
-**Consequência:**
-  - Erros padrões inflacionados (subestimação da variabilidade)
-  
-  - Significância estatística equivocada
-
-]
-
-
-.pull-right[
-&lt;br&gt;
-
-**Solução:**
-  - Incluir novas variáveis preditoras
-  
-  - Modelo quasi-Poisson (desuso)
-  
-  - Modelo Poisson com efeito(s) aleatório(s)
-  
-  - Modelo Binomial Negativo
-  
-  - Modelo Poisson/BN zero-inflacionado
-]
-
-
----
-## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Sobredispersão &lt;/span&gt; 
-
-**Detectando sobredispersão**
-
-
-- Análise gráfica dos resíduos:
-
-.pull-left[
-&lt;img src="../Figuras/Overdispersion_residuals.png" width="100%" style="display: block; margin: auto;" /&gt;
-
-]
-
 
 .pull-right[
 
-Em GLMs, passamos a analisar os resíduos padronizados
+.center[**Desenho amostral**]
 
-- E.g.: **Resíduos de Pearson**
+&lt;br&gt;
 
-    `\(r_i = \frac{y_i-\hat{\lambda_i}}{\sqrt{\hat{\lambda_i}}}\)`
+**Escala espaço-temporal:** amostragens mensais de diferentes recifes (n=5) ao longo de 3 anos
 
+**Unidade amostral:** transecto (esforço constante)
 
-Espera-se que a média dos resíduos seja próxima de 0 e a variância próxima de 1!
+**Pseudo-réplicas:** 5 tansectos / recife / mes
+
+**Efeito do mergulhador:** amostragens realizdas por 3 mergulhadores
+
 
 ]
 
 ---
+class: center, inverse
 
-## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Sobredispersão &lt;/span&gt; 
-
-**Detectando sobredispersão**
-
-
-- Teste de razão de dispersão:
-  - Calcula o fator de dispersão (`\(\phi\)`) - o quanto a variância residual desvia do modelo Poisson 
-
-
-$$\large \phi = \frac{\chi^2}{df}= \frac{\sum_{i=1}^{n} \frac{(y_i-\hat{\lambda_i)^2}}{\hat{\lambda_i}}}{n-p} $$
-- onde:
-  - `\(y_i\)` = valores observados
-  - `\(\hat{\lambda_i}\)` = valores preditos
-  - `\(n\)` = número de observações
-  - `\(p\)` = número de parâmetros no modelo
-  - `\(\chi^2\)` = qui-quadrado (soma dos resíduos de Pearson ao quadrado)
-  
----
-## &lt;span style="color: #ee6c4d;"&gt;Distribuição Poisson &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Sobredispersão &lt;/span&gt; 
-
-**Detectando sobredispersão**
-
-
-- Teste de razão de dispersão:
-  - Calcula o fator de dispersão (`\(\phi\)`) - o quanto a variância residual desvia do modelo Poisson 
-  &lt;br&gt;
-  
-      - `\(\mathbf{\phi \approx 1}\)`: não há evidência de sobredispersão
-      - `\(\mathbf{\phi &gt; 1}\)`: sobredispersão (o modelo subestima a variância)
-      - `\(\mathbf{\phi &lt; 1}\)`: subdispersão (raro!)
-
-
----
-class: inverse, center, middle
-
-# Distribuição Binomial Negativa
-
----
-
-## &lt;span style="color: #ee6c4d;"&gt;Distribuição Binomial Negativa &lt;/span&gt;
-
-Alternativa quando os dados apresentam sobredispersão
-- É uma extensão da distribuição Poisson
-
-
-`$$\large Y \sim Poisson(\color{Tomato}\lambda)$$`
-
-`$$\large \color{Tomato}\lambda \sim Gama(k, \beta)$$`
+# &lt;span style="color: #6b705c;"&gt;PPGECO | ECL0072 | out. 2026&lt;/span&gt;
+### &lt;span style="color: #6b705c;"&gt;Monitoramento da biomassa da ictiofauna recifal&lt;/span&gt;
 
 
 
-A média da distribuição Poisson (`\(\lambda\)`) não é mais assumida como fixa
-  - variável aleatória que segue uma distribuição Gama
-
---
+``` r
+df &lt;- readRDS("/Dados/biomass_reef.rds")
+```
 
 &lt;br&gt;
 
 
-&gt; &lt;span style="color: #ee6c4d;"&gt;A distribuição Binomial Negativa é uma distribuição composta (Poisson + Gama). &lt;/span&gt;
+&lt;table class="table" style="font-size: 16px; color: black; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:center;background-color: white;border-bottom: 2px solid #333333; background-color: white;"&gt; id_transecto &lt;/th&gt;
+   &lt;th style="text-align:center;background-color: white;border-bottom: 2px solid #333333; background-color: white;"&gt; recife &lt;/th&gt;
+   &lt;th style="text-align:center;background-color: white;border-bottom: 2px solid #333333; background-color: white;"&gt; ano &lt;/th&gt;
+   &lt;th style="text-align:center;background-color: white;border-bottom: 2px solid #333333; background-color: white;"&gt; mes &lt;/th&gt;
+   &lt;th style="text-align:center;background-color: white;border-bottom: 2px solid #333333; background-color: white;"&gt; transecto &lt;/th&gt;
+   &lt;th style="text-align:center;background-color: white;border-bottom: 2px solid #333333; background-color: white;"&gt; mergulhador &lt;/th&gt;
+   &lt;th style="text-align:center;background-color: white;border-bottom: 2px solid #333333; background-color: white;"&gt; sst &lt;/th&gt;
+   &lt;th style="text-align:center;background-color: white;border-bottom: 2px solid #333333; background-color: white;"&gt; biomassa_kg &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Recife_A &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 2021 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_2 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 29.82 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 113.34 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Recife_A &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 2021 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_2 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 28.34 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 135.16 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Recife_A &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 2021 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_2 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 28.52 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 151.36 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 4 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Recife_A &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 2021 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 4 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_3 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 29.12 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 99.39 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Recife_A &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 2021 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_2 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 28.77 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 165.53 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 6 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Recife_A &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 2021 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_3 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 28.42 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 107.03 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 7 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Recife_A &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 2021 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_2 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 28.10 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 139.66 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 8 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Recife_A &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 2021 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_2 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 27.38 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 119.03 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 9 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Recife_A &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 2021 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 4 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_3 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 28.08 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 107.14 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 10 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Recife_A &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 2021 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_2 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 27.42 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 77.28 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+.left[.footnote[Cada linha representa uma amostra]]
+
+---
+class: center, inverse
+# &lt;span style="color: #6b705c;"&gt;PPGECO | ECL0072 | out. 2026&lt;/span&gt;
+### &lt;span style="color: #6b705c;"&gt;Monitoramento da biomassa da ictiofauna recifal&lt;/span&gt;
+
+
+&lt;br&gt;
+
+&lt;span style="color: #6b705c;"&gt;Há diferença na produtividade entre os diferentes recifes?&lt;/span&gt;
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-10-1.svg" width="60%" style="display: block; margin: auto;" /&gt;
+
+
 
 
 ---
-## &lt;span style="color: #ee6c4d;"&gt;Distribuição Binomial Negativa &lt;/span&gt;
+# PPGECO | ECL0072 | out. 2026
 
-Assim como a distribuição Poisson, a distribuição BN apresenta forte assimetria à direita
-
-
-`$$\large f(y; \mu, k) = \frac{\Gamma(y+k)}{\Gamma(k)\times\Gamma(y+1)} \times \left (\frac{k}{\mu + k}\right)^k \times \left(1 - \frac{k}{\mu + k}\right)^y$$`
+### Abordando a (in)dependência | .small-text[&lt;span style="color: #e07a5f;"&gt;Agregando os dados&lt;/span&gt;]
 
 
 
-&lt;img src="../Figuras/Distribuicao_BN.png" width="100%" style="display: block; margin: auto;" /&gt;
+Parte da variabilidade dos dados pode ser reduzida, agregando as observações ente os grupos (espaciais, temporais, taxonômicos, unidade amostral,...)
+
+- No exemplo, réplicas de transectos em cada recife
 
 
+
+&lt;br&gt;
+
+.pull-left[
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-11-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+
+.pull-right[
+
+.small-text2[
+**Consequências**
+
+&lt;br&gt;
+
+- Útil em algumas poucas situações
+  - Mascara a variabilidade natural dos dados (informação!) 
+
+- Reduz o número de observações (logo, poder estatístico)
+
+- Falácia ecológica
+  - Inferir relações individuais a partir de dados agregados
+
+  ]
+]
 
 
 ---
-## &lt;span style="color: #ee6c4d;"&gt;Distribuição Binomial Negativa &lt;/span&gt;
+# PPGECO | ECL0072 | out. 2026
 
-Podemos resumir o modelo conforme
+### Abordando a (in)dependência | .small-text[&lt;span style="color: #e07a5f;"&gt;Modelo linear&lt;/span&gt;]
+
+#### Considerando os recifes (grupo) como *efeito fixo* &lt;sup&gt;1&lt;/sup&gt;
 
 
-`$$\large Y \sim BN(\mu, k)$$`
 
-`$$E(Y) = \mu, ~~~~~Var(Y) = \mu + \frac{\mu^2}{k}$$`
+.pull-left[
 
+.gray-box-big[ 
+`$$\large y_{ij} = a_j + \varepsilon_{ij}$$`
+`$$\varepsilon_{ij} \overset{\text{iid}}{\sim}  N(0,\sigma^2), ~~i = 1,...,N$$`
+]
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+.small-text[
 onde:
-- `\(\mu\)`: média da distribuição BN
-- `\(k\)`: parâmetro de dispersão (forma/*shape*)
-
---
-
-
-&lt;p class="comment"&gt;
-&lt;b&gt;ATENÇÃO&lt;/b&gt;
-&lt;br&gt;
-
-O que significa quando `\(k \rightarrow \infty\)`?
-
-&lt;/p&gt;
-
----
-
-## &lt;span style="color: #ee6c4d;"&gt;Prática no R &lt;/span&gt;
-
-
-&lt;br&gt;
-&lt;br&gt;
-
-&lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="../Figuras/Rlogo.png" alt="Pratica_aula_04.R &amp;lt;br&amp;gt;" width="25%" /&gt;
-&lt;p class="caption"&gt;Pratica_aula_04.R &lt;br&gt;&lt;/p&gt;
-&lt;/div&gt;
-
----
-## &lt;span style="color: #ee6c4d;"&gt;Prática no R &lt;/span&gt;&lt;span style="color: #3e5c76;"&gt;| Relatório:  &lt;/span&gt;  
-
-
-**fisheries.rds**
-
-- Abundância de diversas espécies alvos e não-alvos da pesca
-  - Associar a abundância de uma espécie a fatores oceanográficos, espaciais, sazonais e pesqueiros
-    - Alternativamente, pode-se calcular a riqueza de espécies avaliar sua relação com os demais fatores 
-
+- `\(\mathbf{a_j}\)`: efeito do grupo `\(j\)` (`\(j = 1,...,K=5\)`)
+  - efeito fixo
+  
+- `\(\mathbf{\varepsilon_{ij}}\)`: erro residual
+]
 
 ----
 
-**benthos_exposure.rds**
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
 
-- Riqueza de macrofauna bentônica registrada em diferentes praias
-  - Associar a riqueza à fatores de exposição a estresse ambiental e altura em relação a maré
+.small-text[
+- Cada grupo possui seu próprio intercepto `\(a_1 ...a_K\)` (i.e., média)
+
+- Não há compartilhamento de informação entre grupos (*no pooling*)
+  - Observações independentes dentro de cada grupo
+
+  ]
+
+]
+
+
+
+.pull-right[
+
+
+.center[
+
+``` r
+lm(biomassa_kg ~ recife, data = df)
+```
+]
+
+
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-13-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+.right[.footnote[&lt;sup&gt;1&lt;/sup&gt; Equivalente a ANOVA]]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Abordando a (in)dependência | .small-text[&lt;span style="color: #e07a5f;"&gt;Modelo linear&lt;/span&gt;]
+
+#### Considerando os recifes (grupo) como *efeito aleatório*
+
+
+
+
+.pull-left[
+
+.gray-box-big[ 
+`\(\large y_{ij} = \underbrace{\mu_a + \delta_j}_{a_j} + \varepsilon_{ij}\)`
+
+`$$\delta_j \sim N(0, \sigma^2_a)\\
+\varepsilon_{ij} \sim N(0, \sigma^2)$$`
+
+]
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+.small-text[
+onde:
+
+- `\(\mathbf\mu_a:\)` média global 
+
+- `\(\mathbf\varepsilon_{ij}:\)` erro residual 
+
+- `\(\delta_j:\)` efeito aleatório do grupo
+  - descreve os desvios de cada grupo em relação a média global
+
+]
+
+-----
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+.small-text[
+
+- Grupos compartilham parcialmente informação (*partial pooling*)
+  - Observações são dependentes dentro de cada grupo
+
+  ]
+
+
+]
+
+.pull-right[
+
+.center[
+
+``` r
+glmmTMB(y ~ 1 + (1|grupo), data = df)
+```
+]
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-15-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto
+
+Modelos (lineares) mistos incorporam simultaneamente efeitos fixos e aleatórios em sua estrutura
+
+&lt;br&gt;
+
+
+`$$\Large
+Y =
+\underset{
+\substack{
+\rule{3.8cm}{0.3pt}\\[0.8em]
+{\text{Efeito fixo}}
+}
+}{\color{#81b29a}{X\beta}}
++
+\underset{
+\substack{
+\rule{3.8cm}{0.3pt}\\[1em]
+{\text{Efeito aleatório}}
+}
+}{\color{#e07a5f}{Zb}}
++
+\varepsilon$$`
+
+&lt;br&gt;
+
+
+&lt;img src="../Figuras/fixed_vs_random_effect.png" width="85%" style="display: block; margin: auto;" /&gt;
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto
+
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-17-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto
+
+
+A variância total dos dados é estimada em diferentes níveis
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+.center[**Decomposição da variância:**]
+
+.center[
+.gray-box-big[
+`$$\sigma^2_{Total} = \sigma^2_{dentro} + \sigma^2_{entre}$$`]
+]
+
+&lt;div style="height: 50px;"&gt;&lt;/div&gt;
+
+.pull-left[
+
+&lt;img src="../Figuras/variance_partitioning.png" width="85%" style="display: block; margin: auto 0 auto auto;" /&gt;
+
+]
+
+.pull-right[
+
+&lt;br&gt;
+
+.small-text[
+**Variância dentro do grupo** (`\(\sigma^2\)`)
+
+Explica o desvio de cada observação em relação à média do grupo em que ocorre (i.e., erro residual)
+]
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+----
+
+.small-text[
+**Variância entre grupos** (`\(\sigma_a^2\)`)
+
+Explica o desvio do grupo em relação à média geral
+]
+
+]
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto
+
+O cerne dos modelos mistos está na estruturação de `\(\sigma_a^2\)`
+
+- i.e., como descrever a dependência entre observações pertencentes ao mesmo grupo
+  - Na prática, isso significa definir uma matriz de variância-covarância (`\(\mathbf \Sigma\)`) 
+
+&lt;br&gt;
+&lt;br&gt;
+
+.salmon-box[ 
+
+.center[&lt;span style="color: white;"&gt;**ATENÇÃO!**&lt;/span&gt;]
+
+&lt;span style="color: white;"&gt;Para compreender plenamente os modelos lineares mistos, é essencial interpretá-los sob a ótica matricial ]&lt;/span&gt;
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
+
+**Modelo linear**
+
+Considere a biomassa de peixes `\(y\)` observada no *i-ésimo* transecto como função da temperatura `\(x_i = SST\)`
+
+&lt;div style="height: 15px;"&gt;&lt;/div&gt;
+
+.pull-left[
+
+&lt;br&gt;
+&lt;br&gt;
+
+.gray-box-big[
+`$$\large y = {X\beta} + \varepsilon$$`
+
+`$$\large \varepsilon \sim  \text{MVN}(0, \sigma^2I)$$`
+
+
+`$$\Large y_i = \beta_0 + \beta_1x_i + \varepsilon_i$$`
+]
+
+]
+
+
+.pull-right[
+
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-19-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
+
+**Modelo linear - representação matricial**
+
+&lt;br&gt;
+&lt;br&gt;
+
+`$$\large \underbrace{\begin{bmatrix} y_1 \\ y_2 \\ y_3 \\ \vdots \\ y_n \end{bmatrix}}_{\mathbf{y}} = \underbrace{\begin{bmatrix} 1 &amp; x_1 \\ 1 &amp; x_2 \\ 1 &amp; x_3 \\ \vdots &amp; \vdots \\ 1 &amp; x_n \end{bmatrix}}_{\mathbf{X}} \underbrace{\begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix}}_{\boldsymbol{\beta}} + \underbrace{\begin{bmatrix} \varepsilon_1 \\ \varepsilon_2 \\ \varepsilon_3 \\ \vdots \\ \varepsilon_n \end{bmatrix}}_{\boldsymbol{\varepsilon}}$$` 
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
+
+
+**Modelo linear**
+
+A variância de um vetor `\(\varepsilon = (\varepsilon_1, \varepsilon_2, \varepsilon_3, ..., \varepsilon_n)\)` é uma matriz:
+
+&lt;br&gt;
+
+$$
+\text{Var}(\varepsilon)
+= \Sigma =
+`\begin{bmatrix}
+\sigma^2 &amp; \text{Cov}(\varepsilon_1, \varepsilon_2) &amp; \text{Cov}(\varepsilon_1, \varepsilon_2) &amp; \cdots &amp; \text{Cov}(\varepsilon_1, \varepsilon_n)\\
+\text{Cov}(\varepsilon_2, \varepsilon_1) &amp; \sigma^2  &amp;  \text{Cov}(\varepsilon_2, \varepsilon_3) &amp; \cdots &amp; \text{Cov}(\varepsilon_2, \varepsilon_n)\\
+\text{Cov}(\varepsilon_3, \varepsilon_1)  &amp; \text{Cov}(\varepsilon_3, \varepsilon_2) &amp; \sigma^2  &amp; \cdots &amp; \text{Cov}(\varepsilon_3, \varepsilon_n)\\
+\vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots\\
+\text{Cov}(\varepsilon_n, \varepsilon_1) &amp; \text{Cov}(\varepsilon_n, \varepsilon_2) &amp; \text{Cov}(\varepsilon_n, \varepsilon_3) &amp; \cdots &amp; \sigma^2  
+\end{bmatrix}`
+$$ 
+&lt;br&gt;
+&lt;br&gt;
+
+.small-text[
+- **Elementos da diagonal principal:** variância (constante)
+
+- **Demais elementos:** co-variância
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
+
+
+**Modelo linear**
+
+Dado que o modelo pressupõe *independência* entre as observações, isso emplica em:
+
+
+
+`$$\large \text{Cov}(\varepsilon_i, \varepsilon_j) = 0 ~~~~~~~ (i \neq j)$$`
+&lt;br&gt;
+
+Portanto:
+
+$$
+\large
+\Sigma
+=
+`\begin{bmatrix}
+\sigma^2 &amp; 0 &amp; 0 &amp; \cdots &amp; 0\\
+0 &amp; \sigma^2  &amp;  0 &amp; \cdots &amp; 0\\
+0 &amp; 0 &amp; \sigma^2  &amp; \cdots &amp; 0\\
+\vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots\\
+0 &amp; 0 &amp; 0 &amp; \cdots &amp; \sigma^2  
+\end{bmatrix}`
+$$ 
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
+
+
+**Modelo linear**
+
+Além disso, o pressuposto de *homocedasticidade* implica em `\(\sigma^2 = \text{cte.}\)`
+
+Logo:
+
+&lt;br&gt;
+
+
+.pull-left[
+
+$$
+\large
+\Sigma
+=
+\sigma^2
+\underbrace{
+`\begin{bmatrix}
+1 &amp; 0 &amp; 0 &amp; \cdots &amp; 0\\
+0 &amp; 1  &amp;  0 &amp; \cdots &amp; 0\\
+0 &amp; 0 &amp; 1  &amp; \cdots &amp; 0\\
+\vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots\\
+0 &amp; 0 &amp; 0 &amp; \cdots &amp; 1  
+\end{bmatrix}`
+}_\text{Mariz identidade}
+$$ 
+]
+
+&lt;br&gt;
+
+.pull-right[
+$$
+\Large
+\Sigma
+=
+\sigma^2 I_n
+$$
+&lt;br&gt;
+
+.salmon-box[
+
+A matriz `\(\Sigma\)` possui dimensão `\(n \times n\)`
+]
+
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
+
+
+**Modelo linear misto**
+
+`$$\Large y = X\beta + Zb + \varepsilon$$`
+
+`$$\large b \sim  \text{MVN}(0, \sigma_a^2I)$$`
+`$$\large \varepsilon \sim  \text{MVN}(0, \sigma^2I)$$`
+
+------
+
+&lt;br&gt;
+
+.pull-left[
+Lembrando que:
+
+- `\(\sigma_a^2\)`: variância entre grupos
+- `\(\sigma^2\)`: variância dentro do grupo
+]
+
+.pull-right[
+
+.gray-box[
+
+.ceter[**Particionamento de variância em ação!**]
+
+Há 2 matrizes de variância-covariância (`\(b\)` e `\(\varepsilon\)`)!
+
+]
+
+
+
+
+]
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
+
+
+**Modelo linear misto**
+
+&lt;br&gt;
+
+.gray-box-big[
+
+`$$\Large y_{ij} = \beta_0 + \beta_1x_{ij} + b_j + \varepsilon_{ij}$$`
+&lt;br&gt;
+
+`$$\underbrace{\begin{bmatrix} y_1 \\ y_2 \\ y_3 \\ \vdots \\ y_n \end{bmatrix}}_{\mathbf{y}} = \underbrace{\begin{bmatrix} 1 &amp; x_1 \\ 1 &amp; x_2 \\ 1 &amp; x_3 \\ \vdots &amp; \vdots \\ 1 &amp; x_n \end{bmatrix}}_{\mathbf{X}} \underbrace{\begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix}}_{\boldsymbol{\beta}} + \underbrace{\begin{bmatrix} 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\ 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\ 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0\\ \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots \\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 \end{bmatrix}}_{\mathbf{Z}} \underbrace{\begin{bmatrix} b_a \\ b_b \\ b_c \\ b_d \\ b_e \end{bmatrix}}_{\mathbf{b}} + \underbrace{\begin{bmatrix} \varepsilon_1 \\ \varepsilon_2 \\ \varepsilon_3 \\ \vdots \\ \varepsilon_n \end{bmatrix}}_{\boldsymbol{\varepsilon}}$$` ]
+
+&lt;br&gt;
+
+- A matriz `\(Z\)` (indicadora) associa cada observação ao seu efeito aleatório correspondente
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
+
+**Modelo linear misto**
+
+As premissas para constução da matriz de variância-covariância para `\(b\)` são as mesmas de `\(\varepsilon\)`
+
+
+&lt;br&gt;
+
+.pull-left[
+
+$$
+\large
+\text{Var}(b)
+= \Sigma_a =
+`\begin{bmatrix}
+\sigma_a^2 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
+0 &amp; \sigma_a^2  &amp;  0 &amp; 0 &amp; 0\\
+0 &amp; 0 &amp; \sigma_a^2 &amp; 0 &amp; 0\\
+0 &amp; 0 &amp; 0 &amp; \sigma_a^2 &amp; 0\\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; \sigma_a^2
+\end{bmatrix}`
+$$ 
+]
+
+.pull-right[
+
+&lt;br&gt;
+
+`$$\Large \Sigma_a = \sigma_a^2 I_K$$`
+.salmon-box[
+
+A matriz `\(\Sigma_a\)` possui dimensão `\(K \times K\)`
+
+  ]
+
+]
+
+.footnote[K = número de grupos; no exemplo, K = 5 (recifes)]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
+
+**Modelo linear misto**
+
+É a diferença na construção das matrizes de variância-covariância que garante, efetivamente, a decomposição das variâncias:
+
+
+&lt;br&gt;
+
+.pull-left[
+
+.center[**Variância dentro do grupo**]
+
+$$
+\large
+\Sigma
+=
+`\begin{bmatrix}
+\sigma^2 &amp; 0 &amp; 0 &amp; \cdots &amp; 0\\
+0 &amp; \sigma^2  &amp;  0 &amp; \cdots &amp; 0\\
+0 &amp; 0 &amp; \sigma^2  &amp; \cdots &amp; 0\\
+\vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots\\
+0 &amp; 0 &amp; 0 &amp; \cdots &amp; \sigma^2  
+\end{bmatrix}`
+$$ 
+
+]
+
+
+.pull-right[
+
+.center[**Variância entre grupos**]
+
+$$
+\large
+\Sigma_a
+=
+`\begin{bmatrix}
+\sigma_a^2 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
+0 &amp; \sigma_a^2  &amp;  0 &amp; 0 &amp; 0\\
+0 &amp; 0 &amp; \sigma_a^2 &amp; 0 &amp; 0\\
+0 &amp; 0 &amp; 0 &amp; \sigma_a^2 &amp; 0\\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; \sigma_a^2
+\end{bmatrix}`
+$$ 
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
+
+**Modelo linear misto**
+
+Como 
+
+`$$\large \sigma^2_{Total} = \sigma^2_{dentro} + \sigma^2_{entre}$$`
+
+temos:
+
+
+`$$\large V = \underbrace{\Sigma}_\text{dentro} + \underbrace{Z \times \Sigma_a \times Z'}_\text{entre}$$`
+
+portanto:
+
+
+$$
+\large
+V
+=
+\underbrace{
+`\begin{bmatrix}
+V_a &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
+0 &amp; V_b  &amp;  0 &amp; 0 &amp; 0\\
+0 &amp; 0 &amp; V_c &amp; 0 &amp; 0\\
+0 &amp; 0 &amp; 0 &amp; V_d &amp; 0\\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; V_e
+\end{bmatrix}`
+}_{\text{n} \times \text{n}}
+$$ 
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
+
+**Modelo linear misto**
+
+
+A matriz `\(\mathbf{V}\)` representa a matriz de variância-covariância de todo o conjunto de dados
+
+- Os elementos na digaonal (`\(\mathbf{V}_j\)`) representam a matrizes de variância-covariância para cada grupo `\(j\)` e são estruturados conforme
+
+&lt;br&gt;
+
+$$
+\large
+\mathbf{V_j} =
+`\begin{bmatrix}
+\sigma_a^2 + \sigma^2 &amp; \sigma_a^2 &amp; \sigma_a^2 &amp; \cdots &amp; \sigma_a^2 \\
+\sigma_a^2 &amp; \sigma_a^2 + \sigma^2 &amp; \sigma_a^2 &amp; \cdots &amp; \sigma_a^2 \\
+\sigma_a^2 &amp; \sigma_a^2 &amp; \sigma_a^2 + \sigma^2 &amp; \cdots &amp; \sigma_a^2 \\
+\vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+\sigma_a^2 &amp; \sigma_a^2 &amp; \sigma_a^2 &amp; \cdots &amp; \sigma_a^2 + \sigma^2
+\end{bmatrix}`
+$$ 
+
+&lt;br&gt;
+
+  - A covariância entre duas observações dentro do mesmo grupo é `\(\sigma_a^2\)`
+  - A variância entre grupos é `\(\sigma_a^2 + \sigma^2\)`
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
+
+**Modelo linear misto**
+
+A estrutura da matriz `\(\mathbf{V}_j\)` implica que observações pertencentes ao mesmo grupo estão correlacionados entre si (correlação intra-classe)
+  - **Correlação induzida**
+
+&lt;br&gt;
+
+
+.center[
+.gray-box-big[
+
+`$$\large \text{Corr}(y_{ij}, y_{kj}) = \frac{\sigma_a^2}{\sigma_a^2 + \sigma^2}$$`
+  ]
+]
+
+
+- Fenômeno também con
+
+
+---
+
+`$$b \overset{\text{iid}}{\sim}  N(0, \boldsymbol{\text D})$$`
+
+`$$\color{#81b29a}{\boldsymbol{\varepsilon}_i} \overset{\text{iid}}{\sim}  \text{N}(\mathbf{0}, \boldsymbol{\Sigma}_i)$$`
+
+---
+
+Relação peso-comprimento do ariocó (*Lutjanus synagris*) no Brasil
+
+&lt;br&gt;
+
+
+.pull-left[
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-20-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+.pull-right[
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-21-1.svg" width="60%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+
+
+
+
+
+
+
+
+# Modelos Mistos (MM)
+
+### Estrutura do modelo
+
+&lt;br&gt;
+&lt;br&gt;
+
+
+
+`$$\Large
+Y =
+\underset{
+\substack{
+\rule{3.8cm}{0.3pt}\\
+\color{#81b29a}{\text{Covariáveis ambientais}}\\
+\color{#81b29a}{\text{Tratamentos}}
+}
+}{\text{Efeitos fixos}}
++
+\underset{
+\substack{
+\rule{3.8cm}{0.3pt}\\ 
+\\
+\color{#e07a5f}{\text{Estrutura aninhada}}\\
+\color{#e07a5f}{\text{Correlação temporal}}\\
+\color{#e07a5f}{\text{Correlação espacial}}\\
+\color{#e07a5f}{\text{Ruído aleatório}}
+}
+}{\text{Efeitos aleatórios}}$$`
+
+
+
+&lt;br&gt;
+
+Também conhecidos por:
+
+- modelos multiníveis
+- modelos hiearárquicos
+
+
+
+
+
+
+
+---
+
+# Modelos Lineares Mistos (LMM)
+
+&lt;br&gt;
+&lt;br&gt;
+
+`$$\Large y_i = \underbrace{\beta_0 + {\sum_{p=1}^{P} \beta_p x_{ip}}}_\color{#81b29a} {\text{Efeitos fixos}} \ \ \ \ +\underbrace{\varepsilon_i}_\color{#e07a5f}{\text{Efeitos aleatórios}}$$`
+
+
+$$\Large \varepsilon \sim N(0, \sigma^2) $$
+
+---
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
