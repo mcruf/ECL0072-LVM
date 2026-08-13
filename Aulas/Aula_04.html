@@ -370,7 +370,7 @@ class: center, inverse
 
 &lt;br&gt;
 
-&lt;span style="color: #6b705c;"&gt;Há diferença na produtividade entre os diferentes recifes?&lt;/span&gt;
+&lt;span style="color: #6b705c;"&gt;Os recifes diferem quanto a sua produtividade?&lt;/span&gt;
 
 &lt;img src="Aula_04_files/figure-html/unnamed-chunk-10-1.svg" width="60%" style="display: block; margin: auto;" /&gt;
 
@@ -535,7 +535,7 @@ onde:
 .center[
 
 ``` r
-glmmTMB(y ~ 1 + (1|grupo), data = df)
+f(y ~ 1 + (1|grupo), data = df)
 ```
 ]
 
@@ -583,7 +583,25 @@ Y =
 ### Modelo Linear Misto
 
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-17-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+Os efeitos aleatórios podem ser a nível do intercepto e/ou inclinação da reta
+
+&lt;br&gt;
+
+.pull-left[
+
+.center[**Intercepto aleatório**]
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-17-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+.center[**Intercepto &amp; inclinação aleatórios**]
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-18-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
 
 
 ---
@@ -592,7 +610,7 @@ Y =
 ### Modelo Linear Misto
 
 
-A variância total dos dados é estimada em diferentes níveis
+A flexibilidade dos modelos mistos está na sua abordagem para o parâmetro `\(\sigma^2\)`
 
 &lt;div style="height: 7px;"&gt;&lt;/div&gt;
 
@@ -604,7 +622,7 @@ A variância total dos dados é estimada em diferentes níveis
 `$$\sigma^2_{Total} = \sigma^2_{dentro} + \sigma^2_{entre}$$`]
 ]
 
-&lt;div style="height: 50px;"&gt;&lt;/div&gt;
+&lt;div style="height: 30px;"&gt;&lt;/div&gt;
 
 .pull-left[
 
@@ -648,6 +666,10 @@ O cerne dos modelos mistos está na estruturação de `\(\sigma_a^2\)`
 
 &lt;br&gt;
 &lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+--
 
 .salmon-box[ 
 
@@ -662,7 +684,7 @@ O cerne dos modelos mistos está na estruturação de `\(\sigma_a^2\)`
 
 **Modelo linear**
 
-Considere a biomassa de peixes `\(y\)` observada no *i-ésimo* transecto como função da temperatura `\(x_i = SST\)`
+Considere a biomassa de peixes `\(y\)` no *i-ésimo* transecto como descrita em função da temperatura `\(x_i = SST\)`
 
 &lt;div style="height: 15px;"&gt;&lt;/div&gt;
 
@@ -676,6 +698,8 @@ Considere a biomassa de peixes `\(y\)` observada no *i-ésimo* transecto como fu
 
 `$$\large \varepsilon \sim  \text{MVN}(0, \sigma^2I)$$`
 
+----
+
 
 `$$\Large y_i = \beta_0 + \beta_1x_i + \varepsilon_i$$`
 ]
@@ -686,7 +710,11 @@ Considere a biomassa de peixes `\(y\)` observada no *i-ésimo* transecto como fu
 .pull-right[
 
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-19-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
+``` r
+f(biomassa_kg ~ 1 + sst, data = df)
+```
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-21-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -695,13 +723,17 @@ Considere a biomassa de peixes `\(y\)` observada no *i-ésimo* transecto como fu
 
 ### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
 
-**Modelo linear - representação matricial**
+**Modelo linear**
+
+&lt;div style="height: 15px;"&gt;&lt;/div&gt;
+
+
+.center[**Representação matricial**]
 
 &lt;br&gt;
 &lt;br&gt;
 
 `$$\large \underbrace{\begin{bmatrix} y_1 \\ y_2 \\ y_3 \\ \vdots \\ y_n \end{bmatrix}}_{\mathbf{y}} = \underbrace{\begin{bmatrix} 1 &amp; x_1 \\ 1 &amp; x_2 \\ 1 &amp; x_3 \\ \vdots &amp; \vdots \\ 1 &amp; x_n \end{bmatrix}}_{\mathbf{X}} \underbrace{\begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix}}_{\boldsymbol{\beta}} + \underbrace{\begin{bmatrix} \varepsilon_1 \\ \varepsilon_2 \\ \varepsilon_3 \\ \vdots \\ \varepsilon_n \end{bmatrix}}_{\boldsymbol{\varepsilon}}$$` 
-
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -827,34 +859,52 @@ A matriz `\(\Sigma\)` possui dimensão `\(n \times n\)`
 ### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
 
 
-**Modelo linear misto**
+**Modelo linear misto: intercepto aleatório**
 
-`$$\Large y = X\beta + Zb + \varepsilon$$`
+Agora, considere que a biomassa de peixes `\((y)\)` no *i-ésimo* transecto também varia em função do recife em que foi amostrado `\((j = {1, 2, ..., K=5})\)` 
 
-`$$\large b \sim  \text{MVN}(0, \sigma_a^2I)$$`
-`$$\large \varepsilon \sim  \text{MVN}(0, \sigma^2I)$$`
+&lt;div style="height: 15px;"&gt;&lt;/div&gt;
 
-------
+.pull-left[
 
 &lt;br&gt;
 
-.pull-left[
+.gray-box-small[
+
+`$$\Large y = X\beta + Zb + \varepsilon$$`
+
+
+`$$\large b \sim  \text{MVN}(0, \sigma_a^2I)$$`
+
+`$$\large \varepsilon \sim  \text{MVN}(0, \sigma^2I)$$`
+
+
+----
+
+
+`$$\Large y_{ij} = \beta_0 + \beta_1x_{ij} + b_j + \varepsilon_{ij}$$`
+
+]
+
+
+.small-text[
+
 Lembrando que:
 
 - `\(\sigma_a^2\)`: variância entre grupos
 - `\(\sigma^2\)`: variância dentro do grupo
 ]
 
+]
+
 .pull-right[
 
-.gray-box[
 
-.ceter[**Particionamento de variância em ação!**]
+``` r
+f(biomassa_kg ~ 1 + (1 | recife), data = df)
+```
 
-Há 2 matrizes de variância-covariância (`\(b\)` e `\(\varepsilon\)`)!
-
-]
-
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-23-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
 
 
 
@@ -867,28 +917,32 @@ Há 2 matrizes de variância-covariância (`\(b\)` e `\(\varepsilon\)`)!
 ### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
 
 
-**Modelo linear misto**
+**Modelo linear misto: intercepto aleatório**
+
+&lt;div style="height: 15px;"&gt;&lt;/div&gt;
+
+
+.center[**Representação matricial**]
+
+&lt;br&gt;
+&lt;br&gt;
+
+`$$\large \underbrace{\begin{bmatrix} y_1 \\ y_2 \\ y_3 \\ \vdots \\ y_n \end{bmatrix}}_{\mathbf{y}} = \underbrace{\begin{bmatrix} 1 &amp; x_1 \\ 1 &amp; x_2 \\ 1 &amp; x_3 \\ \vdots &amp; \vdots \\ 1 &amp; x_n \end{bmatrix}}_{\mathbf{X}} \underbrace{\begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix}}_{\boldsymbol{\beta}} + \underbrace{\begin{bmatrix} 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\ 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\ 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0\\ \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots \\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 \end{bmatrix}}_{\mathbf{Z}} \underbrace{\begin{bmatrix} b_a \\ b_b \\ b_c \\ b_d \\ b_e \end{bmatrix}}_{\mathbf{b}} + \underbrace{\begin{bmatrix} \varepsilon_1 \\ \varepsilon_2 \\ \varepsilon_3 \\ \vdots \\ \varepsilon_n \end{bmatrix}}_{\boldsymbol{\varepsilon}}$$` 
 
 &lt;br&gt;
 
-.gray-box-big[
+.small-text2[ A matriz ] `\(Z\)` .small-text2[(indicadora) associa cada observação ao seu efeito aleatório correspondente] (`\(b_j\)`)
+- Há um total de `\(K\)` colunas
 
-`$$\Large y_{ij} = \beta_0 + \beta_1x_{ij} + b_j + \varepsilon_{ij}$$`
-&lt;br&gt;
-
-`$$\underbrace{\begin{bmatrix} y_1 \\ y_2 \\ y_3 \\ \vdots \\ y_n \end{bmatrix}}_{\mathbf{y}} = \underbrace{\begin{bmatrix} 1 &amp; x_1 \\ 1 &amp; x_2 \\ 1 &amp; x_3 \\ \vdots &amp; \vdots \\ 1 &amp; x_n \end{bmatrix}}_{\mathbf{X}} \underbrace{\begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix}}_{\boldsymbol{\beta}} + \underbrace{\begin{bmatrix} 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\ 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\ 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0\\ \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots \\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 \end{bmatrix}}_{\mathbf{Z}} \underbrace{\begin{bmatrix} b_a \\ b_b \\ b_c \\ b_d \\ b_e \end{bmatrix}}_{\mathbf{b}} + \underbrace{\begin{bmatrix} \varepsilon_1 \\ \varepsilon_2 \\ \varepsilon_3 \\ \vdots \\ \varepsilon_n \end{bmatrix}}_{\boldsymbol{\varepsilon}}$$` ]
-
-&lt;br&gt;
-
-- A matriz `\(Z\)` (indicadora) associa cada observação ao seu efeito aleatório correspondente
-
+.footnote[K = número de grupos; no exemplo, K = 5 (recifes)]
 
 
 ---
 # PPGECO | ECL0072 | out. 2026
 ### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
 
-**Modelo linear misto**
+**Modelo linear misto: intercepto aleatório**
+
 
 As premissas para constução da matriz de variância-covariância para `\(b\)` são as mesmas de `\(\varepsilon\)`
 
@@ -924,13 +978,12 @@ A matriz `\(\Sigma_a\)` possui dimensão `\(K \times K\)`
 
 ]
 
-.footnote[K = número de grupos; no exemplo, K = 5 (recifes)]
 
 ---
 # PPGECO | ECL0072 | out. 2026
 ### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
 
-**Modelo linear misto**
+**Modelo linear misto: intercepto aleatório**
 
 É a diferença na construção das matrizes de variância-covariância que garante, efetivamente, a decomposição das variâncias:
 
@@ -980,7 +1033,7 @@ $$
 # PPGECO | ECL0072 | out. 2026
 ### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
 
-**Modelo linear misto**
+**Modelo linear misto: intercepto aleatório**
 
 Como 
 
@@ -1013,12 +1066,12 @@ $$
 # PPGECO | ECL0072 | out. 2026
 ### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
 
-**Modelo linear misto**
+**Modelo linear misto: intercepto aleatório**
 
 
 A matriz `\(\mathbf{V}\)` representa a matriz de variância-covariância de todo o conjunto de dados
 
-- Os elementos na digaonal (`\(\mathbf{V}_j\)`) representam a matrizes de variância-covariância para cada grupo `\(j\)` e são estruturados conforme
+- Os elementos na digaonal (`\(\mathbf{V}_j\)`) representam as matrizes de variância-covariância para cada grupo `\(j\)` e são estruturados conforme
 
 &lt;br&gt;
 
@@ -1043,13 +1096,15 @@ $$
 # PPGECO | ECL0072 | out. 2026
 ### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
 
-**Modelo linear misto**
+**Modelo linear misto: intercepto aleatório**
 
 A estrutura da matriz `\(\mathbf{V}_j\)` implica que observações pertencentes ao mesmo grupo estão correlacionados entre si (correlação intra-classe)
-  - **Correlação induzida**
+
 
 &lt;br&gt;
+.center[**Correlação induzida**]
 
+&lt;br&gt;
 
 .center[
 .gray-box-big[
@@ -1058,32 +1113,100 @@ A estrutura da matriz `\(\mathbf{V}_j\)` implica que observações pertencentes 
   ]
 ]
 
-
-- Fenômeno também con
-
-
----
-
-`$$b \overset{\text{iid}}{\sim}  N(0, \boldsymbol{\text D})$$`
-
-`$$\color{#81b29a}{\boldsymbol{\varepsilon}_i} \overset{\text{iid}}{\sim}  \text{N}(\mathbf{0}, \boldsymbol{\Sigma}_i)$$`
-
----
-
-Relação peso-comprimento do ariocó (*Lutjanus synagris*) no Brasil
-
 &lt;br&gt;
+
+.small-text2[
+
+Modelos mistos representam, portanto, uma escolha natural para acomodar a dependência entre observações
+- A correlação induzida pelo efeito aleatório é uma correlação *não estruturada* 
+    - Todas as observações dentro do mesmo grupo compartilham exatamente a mesma correlação
+    - A distância geográfica, temporal ou hierárquica entre os pontos dentro do grupo não altera a força dessa correlação
+    
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
+
+
+**Modelo linear misto: intercepto &amp; inclinação aleatórios**
+
+
+O modelo anterior é também conhecido por modelo linear misto com intercepto aleatório
+- Assume que os grupos possuem médias distintas (desvios no intercepto), mas reagem com a mesma intensidade à covariável (inclinação constante)
+
+&lt;div style="height: 05px;"&gt;&lt;/div&gt;
+
+- Em muitos casos, o efeito da covariável raramente é homogêneo entre todos os grupos
+  - O modelo misto de intercepto e inclinação aleatórios permite que cada grupo tenha sua própria média e sua própria taxa de variação
+
+
 
 
 .pull-left[
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-20-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-24-1.svg" width="70%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-25-1.svg" width="70%" style="display: block; margin: auto;" /&gt;
+]
+  
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
+
+
+**Modelo linear misto - intercepto &amp; inclinação aleatórios**
+
+.small-text2[Podemos flexibilizar o modelo de modo a capturar como o efeito da covariável (sst) sobre a biomassa de peixes] (`\(y\)`) .small-text2[varia de acordo com cada recife] (`\(j = 1, 2, \dots, K=5\)`)
+
+&lt;div style="height: 15px;"&gt;&lt;/div&gt;
+
+.pull-left[
+
+&lt;br&gt;
+
+.gray-box[
+`$$\large \mathbf{y} = \mathbf{X}\boldsymbol{\beta} + \mathbf{Z}\mathbf{b} + \boldsymbol{\varepsilon}$$`
+
+`$$\large \mathbf{b} \sim \text{MVN}\left(\mathbf{0}, \boldsymbol{\Sigma}_a\right)$$`
+
+`$$\large \boldsymbol{\varepsilon} \sim \text{MVN}\left(\mathbf{0}, \sigma^2 \mathbf{I}\right)$$`
+
+---
+
+`$$\large y_{ij} = \beta_0 + \beta_1x_{ij} + b_{0j} + b_{1j}x_{ij}+ \varepsilon_{ij}$$`
+
 
 ]
+
+
+.small-text[
+
+Onde:
+
+- `\(b_{0j}\)`: efeito aleatório do intercepto para o recife `\(j\)`
+- `\(b_{1j}\)`: efeito aleatório da inclinação para o recife `\(j\)`
+]
+
+
+]
+
 
 
 .pull-right[
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-21-1.svg" width="60%" style="display: block; margin: auto;" /&gt;
+
+
+``` r
+f(biomassa_kg ~ 1 + sst + (1 + sst | recife), data = df)
+```
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-27-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+
 
 ]
 
@@ -1092,7 +1215,53 @@ Relação peso-comprimento do ariocó (*Lutjanus synagris*) no Brasil
 
 
 
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
 
+**Modelo linear misto - intercepto &amp; inclinação aleatórios**
+
+&lt;div style="height: 15px;"&gt;&lt;/div&gt;
+
+
+.center[**Representação matricial**]
+
+
+`$$\underbrace{\begin{bmatrix} y_1 \\ y_2 \\ y_3 \\ y_4 \\ y_5 \\ \vdots \\ y_n \end{bmatrix}}_{\mathbf{y}} = \underbrace{\begin{bmatrix} 1 &amp; x_1 \\ 1 &amp; x_2 \\ 1 &amp; x_3 \\ 1 &amp; x_4 \\ 1 &amp; x_5 \\ \vdots &amp; \vdots \\ 1 &amp; x_n \end{bmatrix}}_{\mathbf{X}} \underbrace{\begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix}}_{\boldsymbol{\beta}} + \underbrace{\begin{bmatrix} 1 &amp; x_1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\ 1 &amp; x_2 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; 1 &amp; x_3 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; 1 &amp; x_4 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; x_5 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\ \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots \\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; x_n \end{bmatrix}}_{\mathbf{Z}} \underbrace{\begin{bmatrix} b_{0A} \\ b_{1A} \\ b_{0B} \\ b_{1B} \\ b_{0C} \\ b_{1C} \\ b_{0D} \\ b_{1D} \\ b_{0E} \\ b_{1E} \end{bmatrix}}_{\mathbf{b}} + \underbrace{\begin{bmatrix} \varepsilon_1 \\ \varepsilon_2 \\ \varepsilon_3 \\ \varepsilon_4 \\ \varepsilon_5 \\ \vdots \\ \varepsilon_n \end{bmatrix}}_{\boldsymbol{\varepsilon}}$$`
+
+
+.small-text2[
+
+A matriz `\(Z\)` possui agora o dobro de colunas
+
+- Cada grupo está associado a 2 colunas: uma coluna referente ao intercepto (`\(1\)`s) e uma coluna com os valores da covariável `\(x_i\)` (inclinação)
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
+
+**Modelo linear misto - intercepto &amp; inclinação aleatórios**
+
+&lt;div style="height: 15px;"&gt;&lt;/div&gt;
+
+Para um determinado recife `\(j\)`, o vetor de efeitos aleatórios é composto por 2 parâmetros: `\(\mathbf{b}_j = [ b_{0j}, b_{1j} ]\)` (intercepto e inclinação do recife)
+
+- Assim, para cada recife pode-se descrever a matriz de variância-covarância conforme:
+
+`$$\boldsymbol{\Sigma}_a = \text{Var}\begin{bmatrix} b_{0j} \\ b_{1j} \end{bmatrix} = \begin{bmatrix} \sigma_{b0}^2 &amp; \sigma_{b0,b1} \\ \sigma_{b0,b1} &amp; \sigma_{b1}^2 \end{bmatrix}$$`
+
+&lt;br&gt;
+
+Onde:
+- `\(\sigma_{b0}^2\)`: variância dos interceptos de todos os recifes
+- `\(\sigma_{b1}^2\)`: variância das inclinações de todos os recifes
+- `\(\sigma_{b0,b1}\)`: covariância global entre intercepto e inclinação
+
+
+
+---
 
 
 
