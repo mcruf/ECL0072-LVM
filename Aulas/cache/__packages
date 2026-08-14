@@ -1,0 +1,10 @@
+xaringan
+xaringanthemer
+kableExtra
+dplyr
+ggplot2
+broom.mixed
+Matrix
+lme4
+knitr
+emmeans

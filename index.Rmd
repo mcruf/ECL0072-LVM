@@ -8,7 +8,7 @@ output:
 
 
 ```{r setup, include=FALSE}
-source("setup_knitr.R")
+source("Scripts/Setup/setup_knitr.R")
 ```
 
 

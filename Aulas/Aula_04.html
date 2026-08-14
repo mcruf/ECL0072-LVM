@@ -34,7 +34,7 @@ class: title-slide
 ---
 # PPGECO | ECL0072 | out. 2026
 
-### OUTLINE
+### Agenda
 
 
 ---
@@ -538,7 +538,7 @@ f(biomassa_kg ~ 1 + (1|recife), data = df)
 
 ### Modelo Linear Misto
 
-Modelos (lineares) mistos incorporam simultaneamente efeitos fixos e aleatórios em sua estrutura
+Modelos mistos incorporam simultaneamente efeitos fixos e aleatórios em sua estrutura
 
 &lt;br&gt;
 
@@ -566,6 +566,86 @@ Y =
 
 &lt;img src="../Figuras/fixed_vs_random_effect.png" width="85%" style="display: block; margin: auto;" /&gt;
 
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto
+
+Modelos mistos são conhecidos por muitos nomes:
+
+- Modelos de efeitos aleatórios (*random effect models*)
+- Modelos multiníveis (*multilevel models*)
+- Modelos hierárquicos (*hierarchical models*)
+
+
+Na prática, o termo *efeito aleatório* implica em atribuir uma distribuição de probabilidade para os parâmetros desses efeitos
+- modelos em estagio
+
+&lt;br&gt;
+
+
+`$$\large y_i = \beta_0 + \beta x_i + \alpha_{j[i]} + \varepsilon_i$$`
+
+`$$\large \alpha_j \sim N(0, \sigma_\alpha^2)$$`
+
+
+
+`$$\large \varepsilon_i \sim N(0, \sigma^2)$$`
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto 
+
+Parâmetro vs. hiperparâmetros
+
+
+`$$\large y_i = \beta_0 + \beta x_i + \alpha_{j[i]} + \varepsilon_i$$`
+
+`$$\large \alpha_j \sim N(0, \sigma_\alpha^2)$$`
+
+`$$\large \varepsilon_i \sim N(0, \sigma^2)$$`
+
+.pull-left[
+
+**Parâmetros**
+
+- Descrevem o processo gerador dos dados (i.e., as observações)
+  - `\({\beta_0, \beta, \alpha_j, \sigma^2}\)`
+
+]
+
+
+.pull-right[
+
+**Hiperparâmetros**
+
+- Descrevem como os parâmetros variam.
+  - `\({\sigma_{\alpha}^2}\)`
+
+
+
+]
+
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto
+
+A estrutura hierárquica força o compartilhamento de informações entre a população e os grupos
+- *shrinkage*
+
+&lt;br&gt;
+
+&lt;img src="../Figuras/shrinkage_example.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+
+
+
 ---
 # PPGECO | ECL0072 | out. 2026
 
@@ -580,7 +660,7 @@ Os efeitos aleatórios podem ser a nível do intercepto e/ou inclinação da ret
 
 .center[.small-text2[**Intercepto aleatório**]]
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-17-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-18-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -588,7 +668,7 @@ Os efeitos aleatórios podem ser a nível do intercepto e/ou inclinação da ret
 
 .center[.small-text2[**Intercepto &amp; inclinação aleatórios**]]
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-18-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-19-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -703,7 +783,7 @@ Considere a biomassa de peixes `\(y\)` no *i-ésimo* transecto como descrita em 
 f(biomassa_kg ~ 1 + sst, data = df)
 ```
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-21-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-22-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
 
 
 ]
@@ -894,7 +974,7 @@ Lembrando que:
 f(biomassa_kg ~ 1 + (1 | recife), data = df)
 ```
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-23-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-24-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
 
 
 
@@ -1135,12 +1215,12 @@ O modelo anterior é também conhecido por modelo linear misto com intercepto al
 
 .pull-left[
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-24-1.svg" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-25-1.svg" width="70%" style="display: block; margin: auto;" /&gt;
 ]
 
 .pull-right[
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-25-1.svg" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-26-1.svg" width="70%" style="display: block; margin: auto;" /&gt;
 ]
   
 ---
@@ -1194,7 +1274,7 @@ Onde:
 f(biomassa_kg ~ 1 + sst + (1 + sst | recife), data = df)
 ```
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-27-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-28-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
 
 
 
@@ -1339,7 +1419,7 @@ A variabilidade entre grupos (recifes) é incorporada na incerteza da média pop
 
 .pull-left[
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-29-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-30-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
 
 
 
@@ -1356,7 +1436,7 @@ Assume que todas as observações são independentes
 
 .pull-right[
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-30-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-31-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
 
 
 &lt;div style="height: 15px;"&gt;&lt;/div&gt;
