@@ -19,7 +19,7 @@
  *
  * ------------------------------------------------------- */
 @import url(https://fonts.googleapis.com/css?family=Josefin+Sans:350,350i,300&display=swap);
-@import url(https://fonts.googleapis.com/css?family=Inter:400&display=swap);
+@import url(https://fonts.googleapis.com/css?family=Josefin+Sans:400&display=swap);
 @import url(https://fonts.googleapis.com/css?family=Fira+Mono&display=swap);
 
 
@@ -29,7 +29,7 @@
   --text-font-is-google: 1;
   --text-font-family-fallback: -apple-system, BlinkMacSystemFont, avenir next, avenir, helvetica neue, helvetica, Ubuntu, roboto, noto, segoe ui, arial;
   --text-font-base: sans-serif;
-  --header-font-family: Inter;
+  --header-font-family: 'Josefin Sans';
   --header-font-is-google: 1;
   --header-font-family-fallback: Georgia, serif;
   --code-font-family: 'Fira Mono';
@@ -361,6 +361,64 @@ p {
   color: #FFFFFF;
 }
 .title-slide {
-  background-image: none;
-  padding-top: 100px;
+  background-color: #FFFFFF !important;
+  background-image: url('../Figuras/Logo_course.png') !important;
+  background-position: left bottom !important;
+  background-size: 70% auto !important;
+  padding: 40px 60px 40px 60px !important;
+}
+.title-block {
+  border-bottom: 2px solid #333333;
+  padding-bottom: 8px;
+  margin-top: 100px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+.title-block h1 {
+  font-family: 'Josefin Sans', sans-serif !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: #111111 !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+  position: static !important;
+  text-align: left;
+  max-width: 75%;
+}
+.title-block .date-text {
+  font-size: 1.0rem !important;
+  color: #555555 !important;
+  font-weight: 400;
+}
+.subtitle-block {
+  text-align: right;
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+.subtitle-block h2 {
+  font-family: 'Josefin Sans', sans-serif !important;
+  font-size: 1.3rem !important;
+  font-weight: 600 !important;
+  color: #111111 !important;
+  margin: 0 0 10px 0 !important;
+  text-transform: uppercase;
+}
+.subtitle-block .author-name {
+  font-size: 1.0rem !important;
+  color: #333333 !important;
+  margin: 3px 0;
+}
+.subtitle-block .author-email {
+  font-size: 0.9rem !important;
+  color: #846267 !important;
+  margin: 0;
+}
+.cover-logo {
+  position: absolute !important;
+  bottom: 30px !important;
+  right: 50px !important;
+  height: 35px !important;
+  width: auto !important;
 }
