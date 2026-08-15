@@ -1,6 +1,6 @@
 ---
 title: "MODELOS ESPAÇO-TEMPORAIS PARA DADOS ECOLÓGICOS (ECL0072)"
-subtitle: "AULA 04: MODELOS MISTOS"
+subtitle: "AULA 04: MODELOS MISTOS I"
 author: "Marie-Christine Rufener"
 institute: "macrufener@gmail.com"
 date: "Out / 2026"
@@ -35,7 +35,6 @@ source("../Scripts/Setup/setup_slides.R")
 ```
 
 class: title-slide
-
 <div class="title-block">
   <h1>`r rmarkdown::metadata$title`</h1>
   <div class="date-text">`r rmarkdown::metadata$date`</div>
@@ -52,7 +51,27 @@ class: title-slide
 ---
 # PPGECO | ECL0072 | out. 2026
 
+<br>
+
 ### Agenda
+
+- **Introdução geral**
+
+<br>
+
+- **Abordando a dependência dos dados**
+
+<br>
+
+- **Modelos (lineares) mistos**
+  - Conceitos gerias
+  - Um olhar matemático
+
+<br>
+
+- **Exemplo prático no R**
+
+<span style="color: red;">TODO: ajustar seguintes slides:(i) parâmetros vs. hiperparâmetros; (ii) Ajustar a parte das matrizes, em especifico as de intercepto/slope aleatóiro, também verificar a dimensão de cada matriz;(iii) melhorar último slide conclusivo</span>
 
 
 ---
@@ -232,7 +251,7 @@ class: center, middle
 class: center, middle, inverse
 
 
-## <span style="color: #6b705c;">EXEMPLO INTUITIVO</span>
+## <span style="color: #6b705c;">ESTUDO DE CASO</span>
 
 ---
 class: center, inverse
@@ -666,7 +685,6 @@ Modelos mistos são conhecidos por muitos nomes:
 
 
 Na prática, o termo *efeito aleatório* implica em atribuir uma distribuição de probabilidade para os parâmetros desses efeitos
-- modelos em estagio
 
 <br>
 
@@ -733,6 +751,82 @@ knitr::include_graphics("../Figuras/shrinkage_example.png")
 
 
 
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto
+
+
+A flexibilidade dos modelos mistos está na sua abordagem para o parâmetro $\sigma^2$
+
+<div style="height: 7px;"></div>
+
+
+.center[**Decomposição da variância:**]
+
+.center[
+.gray-box-big[
+$$\sigma^2_{Total} = \sigma^2_{dentro} + \sigma^2_{entre}$$]
+]
+
+<div style="height: 30px;"></div>
+
+.pull-left[
+
+```{r, out.width ="85%", fig.align='right'}
+knitr::include_graphics("../Figuras/variance_partitioning.png")
+```
+
+]
+
+.pull-right[
+
+<br>
+
+.small-text[
+**Variância dentro do grupo** ($\sigma^2$)
+
+Explica o desvio de cada observação em relação à média do grupo em que ocorre (i.e., erro residual)
+]
+
+<div style="height: 7px;"></div>
+
+----
+
+.small-text[
+**Variância entre grupos** ($\sigma_a^2$)
+
+Explica o desvio do grupo em relação à média geral
+]
+
+]
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto
+
+O cerne dos modelos mistos está na estruturação de $\sigma_a^2$
+
+- i.e., como descrever a dependência entre observações pertencentes ao mesmo grupo
+  - Na prática, isso significa definir uma matriz de variância-covarância ($\mathbf \Sigma$) 
+
+<br>
+<br>
+<br>
+<br>
+
+--
+
+.salmon-box[ 
+
+.center[<span style="color: white;">**ATENÇÃO!**</span>]
+
+<span style="color: white;">Para compreender plenamente os modelos lineares mistos, é essencial interpretá-los sob a ótica matricial ]</span>
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -904,81 +998,6 @@ ggplot(df, aes(sst, biomassa_kg)) +
 
 ]
 
-
----
-# PPGECO | ECL0072 | out. 2026
-
-### Modelo Linear Misto
-
-
-A flexibilidade dos modelos mistos está na sua abordagem para o parâmetro $\sigma^2$
-
-<div style="height: 7px;"></div>
-
-
-.center[**Decomposição da variância:**]
-
-.center[
-.gray-box-big[
-$$\sigma^2_{Total} = \sigma^2_{dentro} + \sigma^2_{entre}$$]
-]
-
-<div style="height: 30px;"></div>
-
-.pull-left[
-
-```{r, out.width ="85%", fig.align='right'}
-knitr::include_graphics("../Figuras/variance_partitioning.png")
-```
-
-]
-
-.pull-right[
-
-<br>
-
-.small-text[
-**Variância dentro do grupo** ($\sigma^2$)
-
-Explica o desvio de cada observação em relação à média do grupo em que ocorre (i.e., erro residual)
-]
-
-<div style="height: 7px;"></div>
-
-----
-
-.small-text[
-**Variância entre grupos** ($\sigma_a^2$)
-
-Explica o desvio do grupo em relação à média geral
-]
-
-]
-
-
-
----
-# PPGECO | ECL0072 | out. 2026
-
-### Modelo Linear Misto
-
-O cerne dos modelos mistos está na estruturação de $\sigma_a^2$
-
-- i.e., como descrever a dependência entre observações pertencentes ao mesmo grupo
-  - Na prática, isso significa definir uma matriz de variância-covarância ($\mathbf \Sigma$) 
-
-<br>
-<br>
-<br>
-<br>
-
---
-
-.salmon-box[ 
-
-.center[<span style="color: white;">**ATENÇÃO!**</span>]
-
-<span style="color: white;">Para compreender plenamente os modelos lineares mistos, é essencial interpretá-los sob a ótica matricial ]</span>
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -1576,15 +1595,16 @@ f(biomassa_kg ~ 1 + sst + (1 + sst | recife), data = df)
 ```{r, fig.asp = 0.9, out.width="80%"}
 
 df %>%
-    ggplot(aes(x = recife, y = biomassa_kg)) +
-    geom_jitter(aes(col = recife), size = 4, alpha = 0.5) +
-    geom_boxplot(size = 1, alpha = 0.3) +
-    labs(x = "Recifes",y = "Biomassa (Kg)") +
+    ggplot(aes(x = sst, y = biomassa_kg)) +
+    geom_point(col = '#d5bdaf', size = 4, alpha = 0.4) +
+    geom_smooth(aes(col = recife, fill = recife),method = 'lm',size = 1, alpha = 0.3) +
+    labs(x = "Recifes",y = "Biomassa (kg)") +
     scale_color_manual(values = c("#846267", "#588157","#e07a5f", "#457b9d", "#f6bd60")) +
+    scale_fill_manual(values = c("#846267", "#588157","#e07a5f", "#457b9d", "#f6bd60")) +
     theme_minimal(base_size = 14) +
     my_theme +
     theme(axis.text.x = element_text(colour = "grey20",  margin = margin(t = 25)),
-        axis.text.y = element_text(colour = "grey20", margin = margin(r = 20)))
+          axis.text.y = element_text(colour = "grey20", margin = margin(r = 20)))
 
 ```
 
@@ -2032,11 +2052,4 @@ Também conhecidos por:
 - modelos multiníveis
 - modelos hiearárquicos
 
-
-
-
-
-
-
----
 

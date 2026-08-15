@@ -17,14 +17,13 @@
 
 
 class: title-slide
-
 &lt;div class="title-block"&gt;
   &lt;h1&gt;MODELOS ESPAÇO-TEMPORAIS PARA DADOS ECOLÓGICOS (ECL0072)&lt;/h1&gt;
   &lt;div class="date-text"&gt;Out / 2026&lt;/div&gt;
 &lt;/div&gt;
 
 &lt;div class="subtitle-block"&gt;
-  &lt;h2&gt;AULA 04: MODELOS MISTOS&lt;/h2&gt;
+  &lt;h2&gt;AULA 04: MODELOS MISTOS I&lt;/h2&gt;
   &lt;p class="author-name"&gt;Marie-Christine Rufener&lt;/p&gt;
   &lt;p class="author-email"&gt;&lt;u&gt;macrufener@gmail.com&lt;/u&gt;&lt;/p&gt;
 &lt;/div&gt;
@@ -34,7 +33,27 @@ class: title-slide
 ---
 # PPGECO | ECL0072 | out. 2026
 
+&lt;br&gt;
+
 ### Agenda
+
+- **Introdução geral**
+
+&lt;br&gt;
+
+- **Abordando a dependência dos dados**
+
+&lt;br&gt;
+
+- **Modelos (lineares) mistos**
+  - Conceitos gerias
+  - Um olhar matemático
+
+&lt;br&gt;
+
+- **Exemplo prático no R**
+
+&lt;span style="color: red;"&gt;TODO: ajustar seguintes slides:(i) parâmetros vs. hiperparâmetros; (ii) Ajustar a parte das matrizes, em especifico as de intercepto/slope aleatóiro, também verificar a dimensão de cada matriz;(iii) melhorar último slide conclusivo&lt;/span&gt;
 
 
 ---
@@ -186,7 +205,7 @@ class: center, middle
 class: center, middle, inverse
 
 
-## &lt;span style="color: #6b705c;"&gt;EXEMPLO INTUITIVO&lt;/span&gt;
+## &lt;span style="color: #6b705c;"&gt;ESTUDO DE CASO&lt;/span&gt;
 
 ---
 class: center, inverse
@@ -580,7 +599,6 @@ Modelos mistos são conhecidos por muitos nomes:
 
 
 Na prática, o termo *efeito aleatório* implica em atribuir uma distribuição de probabilidade para os parâmetros desses efeitos
-- modelos em estagio
 
 &lt;br&gt;
 
@@ -645,32 +663,6 @@ A estrutura hierárquica força o compartilhamento de informações entre a popu
 
 
 
-
----
-# PPGECO | ECL0072 | out. 2026
-
-### Modelo Linear Misto
-
-
-Os efeitos aleatórios podem ser a nível do intercepto e/ou inclinação da reta
-
-&lt;br&gt;
-
-.pull-left[
-
-.center[.small-text2[**Intercepto aleatório**]]
-
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-18-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
-
-]
-
-.pull-right[
-
-.center[.small-text2[**Intercepto &amp; inclinação aleatórios**]]
-
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-19-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
-
-]
 
 
 ---
@@ -745,6 +737,33 @@ O cerne dos modelos mistos está na estruturação de `\(\sigma_a^2\)`
 .center[&lt;span style="color: white;"&gt;**ATENÇÃO!**&lt;/span&gt;]
 
 &lt;span style="color: white;"&gt;Para compreender plenamente os modelos lineares mistos, é essencial interpretá-los sob a ótica matricial ]&lt;/span&gt;
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto
+
+
+Os efeitos aleatórios podem ser a nível do intercepto e/ou inclinação da reta
+
+&lt;br&gt;
+
+.pull-left[
+
+.center[.small-text2[**Intercepto aleatório**]]
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-19-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+.center[.small-text2[**Intercepto &amp; inclinação aleatórios**]]
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-20-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -1657,13 +1676,6 @@ Também conhecidos por:
 - modelos multiníveis
 - modelos hiearárquicos
 
-
-
-
-
-
-
----
 
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
