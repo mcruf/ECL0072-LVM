@@ -34,6 +34,8 @@ class: title-slide
 ### Agenda
 
 
+- Introdução geral
+
 
 - Estimando parâmetros em MM
   - ML, REML, Bayesiano...
@@ -43,9 +45,61 @@ class: title-slide
 
 
 ---
+# PPGECO | ECL0072 | out. 2026
+### Estimação de parâmetros
 
+Estimar os parâmetros de modelos mistos requer cuidados adicionais
+
+
+&lt;br&gt;
+
+`$$\large
+Y =
+\underset{
+\substack{
+\rule{3.8cm}{0.3pt}\\
+\color{#81b29a}{\text{Covariáveis ambientais}}\\
+\color{#81b29a}{\text{Tratamentos}}
+}
+}{\text{Efeitos fixos}}
++
+\underset{
+\substack{
+\rule{3.8cm}{0.3pt}\\ 
+\\
+\color{#e07a5f}{\text{Estrutura aninhada}}\\
+\color{#e07a5f}{\text{Correlação temporal}}\\
+\color{#e07a5f}{\text{Correlação espacial}}\\
+\color{#e07a5f}{\text{Ruído aleatório}}
+}
+}{\text{Efeitos aleatórios}}$$`
+
+&lt;br&gt;
+
+
+------
+
+.pull-left[
+
+`$$\large y_i \sim N(\mu_i, \sigma^2)$$`
+
+`$$\large \mu_i = \beta_0 + \beta x_i + \alpha_{j[i]}$$`
+
+`$$\large \alpha_j \sim N(0, \sigma_{\alpha}^2)$$`
+
+]
+
+.pull-right[
+
+.small-text2[**Parâmetros a serem estimados**]
+
+`\(\large \theta = \{ \beta_0, \beta, \sigma^2, \sigma_{\alpha}^2 \}\)`
+
+]
+
+---
 Classical regression and generalized linear models represent a special case of multilevel modeling in which there is no group-level model-in Bayesian terms, no prior information.
-- For the classical regression model, `\(y_i = X_i\beta + \varepsilon_i\)` , with independent errors `\(\varepsilon_i \sim N(0, \sigma^2)\)`, the corresponding prior distribution is a uniform distribution on the entire range `\(\infty, -\infty\)`
+- For the classical regression model, `\(y_i = X_i\beta + \varepsilon_i\)` , with independent errors `\(\varepsilon_i \sim N(0, \sigma^2)\)`, the corresponding prior distribution is a uniform distribution on the entire range `\(\infty, -\infty\)` for each of the components of `\(\beta\)`, and uniform on (`\((0, \infty\)`) for `\(\sigma^2\)` as well.
 
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>

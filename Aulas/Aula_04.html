@@ -1591,7 +1591,161 @@ f(biomassa_kg ~ 1 + (1 | ano) + (1 | recife))
 
 
 ---
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Inferência&lt;/span&gt;]
 
+A abordagem *frequentista* para estimação dos parâmetros de modelos mistos exige algumas cautelas:
+
+- Dado o conjunto de parâmetros `\(\large \theta = \{ \beta_0, \beta, \sigma^2, \sigma_{\alpha}^2 \}\)`&lt;sup&gt;1&lt;/sup&gt;, objetiva-se `\(\hat{\theta} := argmin ~ L(\theta)\)`
+
+&lt;br&gt;
+  
+.pull-left[
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-39-1.svg" width="85%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+.pull-right[
+
+.small-text2[
+
+No estimador de máxima verossimilhança, todos os parâmetros são estimados conjuntamente
+- **Problema:** estimativas enviesadas para os parâmetros de variância (`\(\sigma^2, \sigma_{\alpha}^2\)`)
+
+
+&lt;br&gt;
+
+`$$\hat{\sigma}_{MLE}^2 = \frac{\sum_{i=1}^{n} (y_i - \hat{\mu_i})^2}{\color{#e07a5f}{n}}$$`
+&lt;br&gt;
+
+`$$\hat{\sigma}_{OLS}^2 = \frac{\sum_{i=1}^{n} (y_i - \hat{\mu_i})^2}{\color{#e07a5f}{n-p}}$$`
+
+
+  ]
+]
+
+.footnote[
+&lt;sup&gt;1&lt;/sup&gt; Considerando um modelo com intercepto aleatório
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Inferência&lt;/span&gt;]
+
+A abordagem *frequentista* para estimação dos parâmetros de modelos mistos exige algumas cautelas:
+
+- Dado o conjunto de parâmetros `\(\large \theta = \{ \beta_0, \beta, \sigma^2, \sigma_{\alpha}^2 \}\)`&lt;sup&gt;1&lt;/sup&gt;, objetiva-se `\(\hat{\theta} := argmin ~ L(\theta)\)`
+
+&lt;br&gt;
+  
+.pull-left[
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-40-1.svg" width="85%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+.small-text2[
+
+No estimador de máxima verossimilhança, todos os parâmetros são estimados conjuntamente
+- **Problema:** estimativas enviesadas para os parâmetros de variância (`\(\sigma^2, \sigma_{\alpha}^2\)`)
+
+
+&lt;br&gt;
+
+.gray-box-small[
+**Consequências**
+
+Erros padrões subestimados
+- ICs muito estreitos
+  - Aumento do erro tipo I 
+
+]
+
+
+  ]
+]
+
+
+.footnote[
+&lt;sup&gt;1&lt;/sup&gt; Considerando um modelo com intercepto aleatório
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Inferência&lt;/span&gt;]
+
+Uma forma de contornar esse problema consiste em aplicar a verossimilhança restrita (REML&lt;sup&gt;1&lt;/sup&gt;)
+
+- Separa previamente os efeitos fixos (`\(\boldsymbol{\beta}\)`) e efeitos aleatórios (`\(\sigma^2\)`) e estima separadamente cada conjunto de parâmetros
+
+&lt;br&gt;
+
+Para isolar os efeitos fixos (`\(\boldsymbol{\beta}\)`), o REML multiplica a matriz de design (`\(\mathbf{X}\)`) por uma matriz ortogonal (`\(\mathbf{A}\)`), tal que `\(\mathbf{A}^T\mathbf{X} = 0\)`
+
+
+&lt;br&gt;
+
+`$$\mathbf{Y} = \mathbf{X}\boldsymbol{\beta} + \mathbf{Z}\mathbf{b} + \boldsymbol{\varepsilon}$$`
+
+`$$\mathbf{\color{#e07a5f}{A^{'}}}\mathbf{Y} = \mathbf{\color{#e07a5f}{A^{'}}}(\mathbf{X}\boldsymbol{\beta} + \mathbf{Z}\mathbf{b} + \boldsymbol{\varepsilon})$$`
+
+`$$\mathbf{\color{#e07a5f}{A^{'}}}\mathbf{Y} = \underbrace{\mathbf{\color{#e07a5f}{A}}^{'}\mathbf{X}}_{= \mathbf{0}}\boldsymbol{\beta} + \mathbf{\color{#e07a5f}{A^{'}}}\mathbf{Z}\mathbf{b} + \mathbf{\color{#e07a5f}{A^{'}}}\boldsymbol{\varepsilon}$$`
+
+`$$\mathbf{\color{#e07a5f}{A^{'}}}\mathbf{Y} = \mathbf{\color{#e07a5f}{A^{'}}}\mathbf{Z}\mathbf{b} + \mathbf{\color{#e07a5f}{A^{'}}}\boldsymbol{\varepsilon}$$`
+
+.footnote[
+&lt;sup&gt;1&lt;/sup&gt; *Restricted Maximum Likelihood*; aplicável apenas no contexto de modelos lineares (mistos)
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Inferência&lt;/span&gt;]
+
+
+Uma vez eliminada a dependência dos efeitos fixos na função de verossimilhança, tem-se a etapa de estimação:
+
+&lt;br&gt;
+
+**1º Passo | Estimação das variâncias (REML):**
+- O método REML opera sobre os dados transformados (`\(\mathbf{A}^T\mathbf{Y} = \mathbf{A}^T\mathbf{Z}\mathbf{b} + \mathbf{A}^T\boldsymbol{\varepsilon}\)`)
+- Estima-se a matriz de covariância `\(\hat{\mathbf{V}}\)` sem a interferência dos efeitos fixos (logo, não enviesado)
+
+&lt;div style="height: 20px;"&gt;&lt;/div&gt;
+
+
+----
+
+&lt;div style="height: 20px;"&gt;&lt;/div&gt;
+
+
+**2º Passo | Estimação dos efeitos fixos (GLS):**
+- Dado a matriz `\(\hat{\mathbf{V}}\)`, aplica-se a solução do mínimos quadrados generalizados (GLS) para estimar o vetor `\(\boldsymbol{\beta}\)`
+  
+.center[$$\hat{\boldsymbol{\beta}} = (\mathbf{X}^T \hat{\mathbf{V}}^{-1} \mathbf{X})^{-1} \mathbf{X}^T \hat{\mathbf{V}}^{-1} \mathbf{Y}$$]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Inferência&lt;/span&gt;]
+
+
+&lt;br&gt;
+
+.gray-box-small[**ATENÇÃO:** 
+
+Diante do estimador REML, não se pode comparar modelos com diferentes estruturas de efeitos fixos (via AIC, teste de razão de verossimilhança (LRT), ...).
+- A matriz ortogonal `\(\mathbf{A}\)` é construída em função da matriz de design `\(\mathbf{X}\)` (`\(\mathbf{A}^T\mathbf{X} = \mathbf{0}\)`)
+- Ao alterar os efeitos fixos (logo, `\(\mathbf{X}\)`), altera-se também a matriz `\(\mathbf{A}\)`
+- Portanto, o vetor de dados transformados `\(\mathbf{A}^T\mathbf{Y}\)` torna-se diferente entre os modelos uma vez que isso resulta em funcões de verossimilhanças distintas.
+
+]
+
+
+
+---
 
 # PPGECO | ECL0072 | out. 2026
 ### Modelo Linear Misto 

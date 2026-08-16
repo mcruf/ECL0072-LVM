@@ -1,0 +1,63 @@
+---
+title: "MODELOS ESPAÇO-TEMPORAIS PARA DADOS ECOLÓGICOS (ECL0072)"
+subtitle: "AULA 06: ESPACIAIS I"
+author: "Marie-Christine Rufener"
+institute: "macrufener@gmail.com"
+date: "Out / 2026"
+output:
+  xaringan::moon_reader:
+    seal: false
+    css: xaringan-themer.css
+    lib_dir: libs
+    nature:
+      #seal: false #disable title slide
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~
+# Default knitr iputs
+#~~~~~~~~~~~~~~~~~~~~~~
+
+source("../Scripts/Setup/setup_knitr.R")
+
+#~~~~~~~~~~~~~~~~~~~~~~
+# Slide customization
+#~~~~~~~~~~~~~~~~~~~~~~
+source("../Scripts/Setup/setup_slides.R")
+
+
+```
+
+class: title-slide
+<div class="title-block">
+  <h1>`r rmarkdown::metadata$title`</h1>
+  <div class="date-text">`r rmarkdown::metadata$date`</div>
+</div>
+
+<div class="subtitle-block">
+  <h2>`r rmarkdown::metadata$subtitle`</h2>
+  <p class="author-name">`r rmarkdown::metadata$author`</p>
+  <p class="author-email"><u>`r rmarkdown::metadata$institute`</u></p>
+</div>
+
+<img src="../Figuras/logo_ppgeco2.svg" class="cover-logo">
+
+---
+
+Estruturas de Dependência nos Dados Ecológicos
+│
+├── 1. Estrutura Discreta / Hierárquica (Grupos / Níveis)
+│   ├── Exemplo: Peixes dentro de Recifes, Plantas dentro de Parcelas.
+│   ├── Abordagem: Modelos Misto Padrão (Efeitos Aleatórios por grupo: 1 | grupo).
+│   └── A dependência é assumida IGUAL para todos os membros do mesmo grupo.
+│
+└── 2. Estrutura Contínua (Espaço / Tempo / Filogenia)
+    ├── Exemplo: Coordenadas (X, Y) no mar/oceano, Séries temporais de CPUE (anos/meses).
+    ├── Abordagem: Matrizes de autocorrelação espacial/temporal (ex: Matern, CAR, AR1, INLA/SPDE).
+    └── A dependência diminui conforme a DISTÂNCIA no espaço ou tempo aumenta.

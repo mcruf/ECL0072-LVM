@@ -835,25 +835,25 @@
 <text x='485.19' y='377.21' text-anchor='middle' style='font-size: 11.20px;fill: #333333; font-family: "Arial";' textLength='12.44px' lengthAdjust='spacingAndGlyphs'>30</text>
 <text x='271.25' y='394.68' text-anchor='middle' style='font-size: 16.00px; font-weight: bold; font-family: "Arial";' textLength='64.17px' lengthAdjust='spacingAndGlyphs'>SST (°C)</text>
 <text transform='translate(16.49,183.94) rotate(-90)' text-anchor='middle' style='font-size: 16.00px; font-weight: bold; font-family: "Arial";' textLength='109.36px' lengthAdjust='spacingAndGlyphs'>Biomassa (kg)</text>
-<rect x='140.59' y='-10.22' width='100.90' height='137.77' style='stroke-width: 0.75; stroke: none;' />
-<rect x='140.59' y='-10.22' width='100.90' height='137.77' style='stroke-width: 0.64; stroke: #CCCCCC; fill: #FFFFFF;' />
-<text x='147.57' y='8.38' style='font-size: 14.00px; font-weight: bold; font-family: "Arial";' textLength='49.79px' lengthAdjust='spacingAndGlyphs'>Recifes</text>
-<circle cx='156.21' cy='25.54' r='3.65' style='stroke-width: 0.90; stroke: #846267; fill: #846267;' />
-<line x1='149.29' y1='25.54' x2='163.12' y2='25.54' style='stroke-width: 2.77; stroke: #846267; stroke-linecap: butt;' />
-<circle cx='156.21' cy='42.82' r='3.65' style='stroke-width: 0.90; stroke: #588157; fill: #588157;' />
-<line x1='149.29' y1='42.82' x2='163.12' y2='42.82' style='stroke-width: 2.77; stroke: #588157; stroke-linecap: butt;' />
-<circle cx='156.21' cy='60.10' r='3.65' style='stroke-width: 0.90; stroke: #E07A5F; fill: #E07A5F;' />
-<line x1='149.29' y1='60.10' x2='163.12' y2='60.10' style='stroke-width: 2.77; stroke: #E07A5F; stroke-linecap: butt;' />
-<circle cx='156.21' cy='77.38' r='3.65' style='stroke-width: 0.90; stroke: #457B9D; fill: #457B9D;' />
-<line x1='149.29' y1='77.38' x2='163.12' y2='77.38' style='stroke-width: 2.77; stroke: #457B9D; stroke-linecap: butt;' />
-<circle cx='156.21' cy='94.66' r='3.65' style='stroke-width: 0.90; stroke: #F6BD60; fill: #F6BD60;' />
-<line x1='149.29' y1='94.66' x2='163.12' y2='94.66' style='stroke-width: 2.77; stroke: #F6BD60; stroke-linecap: butt;' />
-<line x1='149.29' y1='111.94' x2='163.12' y2='111.94' style='stroke-width: 3.20; stroke-dasharray: 17.07,17.07; stroke-linecap: butt;' />
-<text x='171.82' y='29.85' style='font-size: 12.00px; font-family: "Arial";' textLength='8.01px' lengthAdjust='spacingAndGlyphs'>A</text>
-<text x='171.82' y='47.13' style='font-size: 12.00px; font-family: "Arial";' textLength='8.01px' lengthAdjust='spacingAndGlyphs'>B</text>
-<text x='171.82' y='64.41' style='font-size: 12.00px; font-family: "Arial";' textLength='8.67px' lengthAdjust='spacingAndGlyphs'>C</text>
-<text x='171.82' y='81.69' style='font-size: 12.00px; font-family: "Arial";' textLength='8.67px' lengthAdjust='spacingAndGlyphs'>D</text>
-<text x='171.82' y='98.97' style='font-size: 12.00px; font-family: "Arial";' textLength='8.01px' lengthAdjust='spacingAndGlyphs'>E</text>
-<text x='171.82' y='116.25' style='font-size: 12.00px; font-family: "Arial";' textLength='62.70px' lengthAdjust='spacingAndGlyphs'>Média geral</text>
+<rect x='51.48' y='4.10' width='100.90' height='137.77' style='stroke-width: 0.75; stroke: none;' />
+<rect x='51.48' y='4.10' width='100.90' height='137.77' style='stroke-width: 0.64; stroke: #CCCCCC; fill: #FFFFFF;' />
+<text x='58.45' y='22.70' style='font-size: 14.00px; font-weight: bold; font-family: "Arial";' textLength='49.79px' lengthAdjust='spacingAndGlyphs'>Recifes</text>
+<circle cx='67.09' cy='39.86' r='3.65' style='stroke-width: 0.90; stroke: #846267; fill: #846267;' />
+<line x1='60.18' y1='39.86' x2='74.00' y2='39.86' style='stroke-width: 2.77; stroke: #846267; stroke-linecap: butt;' />
+<circle cx='67.09' cy='57.14' r='3.65' style='stroke-width: 0.90; stroke: #588157; fill: #588157;' />
+<line x1='60.18' y1='57.14' x2='74.00' y2='57.14' style='stroke-width: 2.77; stroke: #588157; stroke-linecap: butt;' />
+<circle cx='67.09' cy='74.42' r='3.65' style='stroke-width: 0.90; stroke: #E07A5F; fill: #E07A5F;' />
+<line x1='60.18' y1='74.42' x2='74.00' y2='74.42' style='stroke-width: 2.77; stroke: #E07A5F; stroke-linecap: butt;' />
+<circle cx='67.09' cy='91.70' r='3.65' style='stroke-width: 0.90; stroke: #457B9D; fill: #457B9D;' />
+<line x1='60.18' y1='91.70' x2='74.00' y2='91.70' style='stroke-width: 2.77; stroke: #457B9D; stroke-linecap: butt;' />
+<circle cx='67.09' cy='108.98' r='3.65' style='stroke-width: 0.90; stroke: #F6BD60; fill: #F6BD60;' />
+<line x1='60.18' y1='108.98' x2='74.00' y2='108.98' style='stroke-width: 2.77; stroke: #F6BD60; stroke-linecap: butt;' />
+<line x1='60.18' y1='126.26' x2='74.00' y2='126.26' style='stroke-width: 3.20; stroke-dasharray: 17.07,17.07; stroke-linecap: butt;' />
+<text x='82.70' y='44.16' style='font-size: 12.00px; font-family: "Arial";' textLength='8.01px' lengthAdjust='spacingAndGlyphs'>A</text>
+<text x='82.70' y='61.44' style='font-size: 12.00px; font-family: "Arial";' textLength='8.01px' lengthAdjust='spacingAndGlyphs'>B</text>
+<text x='82.70' y='78.72' style='font-size: 12.00px; font-family: "Arial";' textLength='8.67px' lengthAdjust='spacingAndGlyphs'>C</text>
+<text x='82.70' y='96.00' style='font-size: 12.00px; font-family: "Arial";' textLength='8.67px' lengthAdjust='spacingAndGlyphs'>D</text>
+<text x='82.70' y='113.28' style='font-size: 12.00px; font-family: "Arial";' textLength='8.01px' lengthAdjust='spacingAndGlyphs'>E</text>
+<text x='82.70' y='130.56' style='font-size: 12.00px; font-family: "Arial";' textLength='62.70px' lengthAdjust='spacingAndGlyphs'>Média geral</text>
 </g>
 </svg>
