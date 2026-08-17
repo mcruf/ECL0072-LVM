@@ -334,11 +334,18 @@ p {
   padding: 5px 50px;
   margin: 0px 50px;
 }
-.green-box {
-  background-color: #81b29a;
-  border-radius: 15px;
-  padding: 20px 5px;
-  margin: 15px 0px;
+.pull-three-left {
+  float: left;
+  width: 31%;
+}
+.pull-three-center {
+  float: left;
+  width: 31%;
+  margin-left: 3.5%;
+}
+.pull-three-right {
+  float: right;
+  width: 31%;
 }
 .remark-slide-content {
   padding-top: 40px;

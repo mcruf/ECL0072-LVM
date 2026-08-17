@@ -106,12 +106,20 @@ style_xaringan(
                          "margin"           = "0px 50px"),
     
     
-    ### Green box
-    ".green-box" = list("background-color" = "#81b29a",
-                        "border-radius"    = "15px",
-                        "padding"          = "20px 5px",
-                        "margin"           = "15px 0px"),
-    
+    ### Three column display
+    ".pull-three-left" = list(
+      "float" = "left",
+      "width" = "31%"
+    ),
+    ".pull-three-center" = list(
+      "float"       = "left",
+      "width"       = "31%",
+      "margin-left" = "3.5%"
+    ),
+    ".pull-three-right" = list(
+      "float" = "right",
+      "width" = "31%"
+    ),
     
     
     
