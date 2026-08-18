@@ -34,36 +34,71 @@ class: title-slide
 ### Agenda
 
 
-- Introdução geral
+- Contextualização
 
 
-- Estimando parâmetros em MM
-  - ML, REML, Bayesiano...
+- Revisão de GLM/GAM
 
 
-- Pressupostos &amp; ajuste dos modelos
+- Inferência em modelos mistos 
 
 
----
-
-# PPGECO | ECL0072 | out. 2026
-### GLMs
-
-De perto, ninguém é normal....
-
-
-[Mostrar uma imagem de ecosistema marinho e suas interações ecológicas]
+- &lt;span style="color: red;"&gt;Validação (Maybe; vai depender se foi explorado na aula de Bayesiana)&lt;/span&gt;
 
 
 ---
 # PPGECO | ECL0072 | out. 2026
-### GLMs
+### Contexto
+
+De perto, ninguém é Normal....
+
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+
+
+[**Mostrar uma imagem de ecosistema marinho e suas interações ecológicas**]
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Contexto
+
 
 A maioria dos processos ecológicos resulta em dados assimétricos, discretos e que violam um ou mais dos pressupostos do modelo linear
-- Os modelos lineares generalizados (GLMs) estendem o modelo linear ao acomodar variáveis de resposta que seguem outras distribuições de probabilidade além da Normal (Gaussiana)
+
+&lt;div style="height: 15px;"&gt;&lt;/div&gt;
+
+  - Modelos lineares generalizados (GLMs) e modelos aditivos generalizados (GAMs) são extensões naturais de LMs&lt;sup&gt;1&lt;/sup&gt;
+&lt;div style="height: 20px;"&gt;&lt;/div&gt;
+
+      - **Acomodam a natureza dos dados:** a variável resposta `\(y_i\)` segue uma distribuição de probabilidade
+      &lt;div style="height: 15px;"&gt;&lt;/div&gt;
+
+      - **Acomodam a heterocedasticidade estrutural:** a média `\(\mu_i\)` é descrita em função do parâmetro de sobredispersão `\(\phi\)`
+      &lt;div style="height: 15px;"&gt;&lt;/div&gt;
+
+      - **Acomdam relações complexas e não-lineares:** via funções suavizadoras não paramétricas (exclusivo de GAMs)
+
+
+
+
+.footnote[&lt;sup&gt;1&lt;/sup&gt; *Linear Model*]
+---
+# PPGECO | ECL0072 | out. 2026
+### GLMs
+
+Os modelos lineares generalizados (GLMs) estendem o modelo linear ao permitir que a variável resposta siga distribuições de probabilidade diferentes da Normal (Gaussiana)
 
 
 &lt;br&gt;
+&lt;br&gt;
+
 
 .pull-left[
 
@@ -106,6 +141,8 @@ Os GLMs evitam o velho hábito de transformar os dados
 &lt;br&gt;
 &lt;br&gt;
 &lt;br&gt;
+&lt;br&gt;
+
 
 &gt; &lt;font size="6.5"&gt;&lt;center&gt; &lt;span style="color: #e07a5f;"&gt;If you torture the data long enough, it will confess to anything&lt;/center&gt;&lt;/font&gt;&lt;/span&gt; 
 
@@ -130,7 +167,7 @@ Os GLMs são compostos por 3 componentes:
 
 `$$\large y_i \sim  {\color{#e07a5f}F}(\mu_i,  \phi)$$`
 
-`$$\large \color{#e07a5f}{g(\mu_i)} = \color{#e07a5f}{\eta_i} = \beta_0 + \sum_{j=1}^{p} \beta_j x_{ij} + \varepsilon_i$$`
+`$$\large \color{#e07a5f}{g(\mu_i)} = \color{#e07a5f}{\eta_i} = \beta_0 + \sum_{j=1}^{p} \beta_j x_{ij}$$`
 
 ----
 
@@ -152,9 +189,10 @@ Os GLMs são compostos por 3 componentes:
 
 ---
 # PPGECO | ECL0072 | out. 2026
-### GLMs
+### GLMs | .small-text[&lt;span style="color: #e07a5f;"&gt;1º componente&lt;/span&gt;]
 
-**Distribuição de probabilidade para variável resposta (1º componente)**
+**Distribuição de probabilidade para variável resposta**
+
 
 Representa o componente aleatório do modelo estatístico
 
@@ -176,9 +214,11 @@ Representa o componente aleatório do modelo estatístico
 ---
 
 # PPGECO | ECL0072 | out. 2026
-### GLMs
+### GLMs | .small-text[&lt;span style="color: #e07a5f;"&gt;1º componente&lt;/span&gt;]
 
-**Distribuição de probabilidade para variável resposta (1º componente)**
+**Distribuição de probabilidade para variável resposta**
+
+
 
 A família exponencial de distribuições cobre uma diversidade de distribuições de probabilidade
 - Específicas à natureza da variável resposta `\(y_i\)`
@@ -186,17 +226,373 @@ A família exponencial de distribuições cobre uma diversidade de distribuiçõ
 
 &lt;br&gt;
 
-&lt;img src="../Figuras/tipos_de_distribuicoes.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="../Figuras/tipos_de_distribuicoes.png" width="90%" style="display: block; margin: auto;" /&gt;
+
 
 ---
-
-
 # PPGECO | ECL0072 | out. 2026
-### Estimação de parâmetros
+### GLMs | .small-text[&lt;span style="color: #e07a5f;"&gt;1º componente&lt;/span&gt;]
 
-Estimar os parâmetros de modelos mistos requer cuidados adicionais
+**Distribuição de probabilidade para variável resposta**
 
 
+ 
+.pull-left[
+
+.small-text2[
+ Há muitas outras distribuições que fazem parte da família exponencial
+
+&lt;br&gt;
+
+  - **Dados contínuos**
+      - log-Normal
+      - Gama
+      - Exponencial
+      - Qui-quadrado
+
+      
+&lt;br&gt;
+  
+  - **Dados discretos**
+    - Bernoulli / Binomial
+    - Poisson
+    - Binomial Negativa
+    - Multionomial
+
+  ]
+]
+
+.pull-right[
+
+&lt;img src="../Figuras/exponential_fam_distributions.png" width="95%" style="display: block; margin: auto;" /&gt;
+
+
+.center[ .small-text2[[Outros exemplos](https://www.math.wm.edu/~leemis/chart/UDR/UDR.html)
+  ]
+]
+
+
+]
+
+&lt;br&gt;
+
+---
+# PPGECO | ECL0072 | out. 2026
+### GLMs | .small-text[&lt;span style="color: #e07a5f;"&gt;2º componente&lt;/span&gt;]
+
+**Preditor linear**
+
+
+Represeta o componente *sistemático* do modelo
+
+
+`$$\large \color{#e07a5f}{\eta_i} = \beta_0 + \sum_{j=1}^{p} \beta_j x_{ij}$$`
+
+- Modelo que estabelece a relação entre `\(y \sim x\)`
+  - i.e., relações ecológicas, hipóteses, ...
+  
+
+---
+# PPGECO | ECL0072 | out. 2026
+### GLMs | .small-text[&lt;span style="color: #e07a5f;"&gt;3º componente&lt;/span&gt;]
+
+
+**Função de ligação**
+
+
+Estabelece a ligação entre o preditor linear `\(\eta_i\)` e a média da distribuição `\(\mu_i\)` (variável resposta) 
+- liga o *componente aleatório* ao sistemático
+
+
+`$$\large \color{#e07a5f}{g(\mu_i)} = \eta_i \quad \iff \quad \mu_i = g^{-1}(\eta_i)$$`
+&lt;br&gt;
+
+Garante que os valores de `\(\eta_i\)` estejam dentro dos valores de `\(\mu_i\)`
+
+- não há restrições sobre os valores de `\(\eta_i\)`: `\(~~ -\infty &lt; \eta_i &lt; +\infty\)`
+
+- há restrições sobre os valores de `\(\mu_i\)`:
+    - `\(\mu &gt; 0\)`: contagem de espécies (distribução Poisson)
+    - `\(0 &lt; \mu &lt; 1\)`: presença/ausência de espécies (distribução Binomial)
+    - `\(\mu &gt; 0\)`: biomassa (distribuição Gama)
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### GAMs 
+
+Os GAMs estendem os GLMs ao substituir termos lineares por funções suavizadoras não paramétricas (`\(f\)`)       
+  - Permitem capturar relações ecológicas complexas sem assumir uma forma funcional rígida (i.e., linear)
+
+
+&lt;br&gt;
+
+.pull-left[
+
+.center[**Modelo linear generalizado (GLM)**]
+
+&lt;br&gt;
+
+`$$\large y_i \sim F(\mu_i, \phi)$$`
+
+`$$\large g(\mu_i) = \beta_0 + \sum_{j=1}^{p} {\color{#e07a5f}{\beta_j x_{ij}}}$$`
+
+&lt;br&gt;
+
+
+]
+
+.pull-right[
+
+.center[**Modelo aditivo generalizado (GAM)**]
+
+&lt;br&gt;
+
+`$$\large y_i \sim F(\mu_i, \phi)$$`
+
+`$$\large g(\mu_i) = \beta_0 + \sum_{j=1}^{p} {\color{#e07a5f}{f_j(x_{ij})}}$$`
+
+&lt;br&gt;
+
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### GAMs 
+
+&lt;br&gt;
+&lt;br&gt;
+
+
+.pull-left[
+&lt;img src="Aula_05_files/figure-html/unnamed-chunk-4-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+
+.pull-right[
+
+&lt;img src="Aula_05_files/figure-html/unnamed-chunk-5-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### GLMMs / GAMMs 
+
+Unificando a não normalidade, não linearidade e dependência estrutural entre as observações
+
+&lt;br&gt;
+&lt;br&gt;
+
+.pull-left[
+
+.center[**GLMM**]
+
+&lt;br&gt;
+
+`$$\large y_{ij} \sim F(\mu_{ij}, \phi)$$`
+
+`$$\large g(\mu_{ij}) = \beta_0 + \sum_{k=1}^{p} \beta_k x_{ijk} + \mathbf{Z}_{ij}\mathbf{b}_j$$`
+
+]
+
+.pull-right[
+
+.center[**GAMM**]
+
+&lt;br&gt;
+
+`$$\large y_{ij} \sim F(\mu_{ij}, \phi)$$`
+
+`$$\large g(\mu_{ij}) = \beta_0 + \sum_{k=1}^{p} f_k(x_{ijk}) + \mathbf{Z}_{ij}\mathbf{b}_j$$`
+
+]
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Inferência 
+
+Estimar os parâmetros de modelos mistos requer cuidados adicionais, especialmente na abordagem *frequentista*
+&lt;div style="height: 20px;"&gt;&lt;/div&gt;
+
+- Além dos efeitos fixos (`\(\boldsymbol{\beta}\)`), o modelo deve estimar simultaneamente os componentes de variância dos efeitos aleatórios (`\(\sigma_{\alpha}^2\)`, `\(\sigma_{\delta}^2\)`, ...)
+
+&lt;div style="height: 15px;"&gt;&lt;/div&gt;
+
+
+- Como os efeitos aleatórios não são observados, eles precisam ser integrados (marginalizados) durante o processo de estimação da verossimilhança
+
+  - A inegração depende classe de modelos (LMMs vs. GLMMs/GAMMs)
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Inferência | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs&lt;/span&gt;]
+
+Dado o conjunto de parâmetros `\(\large \theta = \{ \beta_0, \beta, \sigma^2, \sigma_{\alpha}^2 \}\)`&lt;sup&gt;1&lt;/sup&gt;, objetiva-se `\(\hat{\theta} := argmin ~ L(\theta)\)`
+
+&lt;br&gt;
+  
+.pull-left[
+
+&lt;img src="Aula_05_files/figure-html/unnamed-chunk-6-1.svg" width="85%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+.pull-right[
+
+.small-text2[
+
+No estimador de máxima verossimilhança, todos os parâmetros são estimados conjuntamente
+- **Problema:** estimativas enviesadas para os parâmetros de variância (`\(\sigma^2, \sigma_{\alpha}^2\)`)
+
+
+&lt;br&gt;
+
+`$$\hat{\sigma}_{MLE}^2 = \frac{\sum_{i=1}^{n} (y_i - \hat{\mu_i})^2}{\color{#e07a5f}{n}}$$`
+&lt;br&gt;
+
+`$$\hat{\sigma}_{OLS}^2 = \frac{\sum_{i=1}^{n} (y_i - \hat{\mu_i})^2}{\color{#e07a5f}{n-p}}$$`
+
+
+  ]
+]
+
+.footnote[
+&lt;sup&gt;1&lt;/sup&gt; Considerando um modelo com intercepto aleatório
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Inferência | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs&lt;/span&gt;]
+
+Dado o conjunto de parâmetros `\(\large \theta = \{ \beta_0, \beta, \sigma^2, \sigma_{\alpha}^2 \}\)`&lt;sup&gt;1&lt;/sup&gt;, objetiva-se `\(\hat{\theta} := argmin ~ L(\theta)\)`
+
+&lt;br&gt;
+  
+.pull-left[
+
+&lt;img src="Aula_05_files/figure-html/unnamed-chunk-7-1.svg" width="85%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+.small-text2[
+
+No estimador de máxima verossimilhança, todos os parâmetros são estimados conjuntamente
+- **Problema:** estimativas enviesadas para os parâmetros de variância (`\(\sigma^2, \sigma_{\alpha}^2\)`)
+
+
+&lt;br&gt;
+
+.gray-box-small[
+**Consequências**
+
+Erros padrões subestimados
+- ICs muito estreitos
+  - Aumento do erro tipo I 
+
+]
+
+
+  ]
+]
+
+
+.footnote[
+&lt;sup&gt;1&lt;/sup&gt; Considerando um modelo com intercepto aleatório
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Inferência | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs&lt;/span&gt;]
+
+Uma forma de contornar esse problema consiste em aplicar a verossimilhança restrita (REML&lt;sup&gt;1&lt;/sup&gt;)
+
+- Separa previamente os efeitos fixos (`\(\boldsymbol{\beta}\)`) e efeitos aleatórios (`\(\sigma^2\)`) e estima separadamente cada conjunto de parâmetros
+
+&lt;br&gt;
+
+Para isolar os efeitos fixos (`\(\boldsymbol{\beta}\)`), o REML multiplica a matriz de design (`\(\mathbf{X}\)`) por uma matriz ortogonal (`\(\mathbf{A}\)`), tal que `\(\mathbf{A}^T\mathbf{X} = 0\)`
+
+
+&lt;br&gt;
+
+`$$\mathbf{Y} = \mathbf{X}\boldsymbol{\beta} + \mathbf{Z}\mathbf{b} + \boldsymbol{\varepsilon}$$`
+
+`$$\mathbf{\color{#e07a5f}{A^{'}}}\mathbf{Y} = \mathbf{\color{#e07a5f}{A^{'}}}(\mathbf{X}\boldsymbol{\beta} + \mathbf{Z}\mathbf{b} + \boldsymbol{\varepsilon})$$`
+
+`$$\mathbf{\color{#e07a5f}{A^{'}}}\mathbf{Y} = \underbrace{\mathbf{\color{#e07a5f}{A}}^{'}\mathbf{X}}_{= \mathbf{0}}\boldsymbol{\beta} + \mathbf{\color{#e07a5f}{A^{'}}}\mathbf{Z}\mathbf{b} + \mathbf{\color{#e07a5f}{A^{'}}}\boldsymbol{\varepsilon}$$`
+
+`$$\mathbf{\color{#e07a5f}{A^{'}}}\mathbf{Y} = \mathbf{\color{#e07a5f}{A^{'}}}\mathbf{Z}\mathbf{b} + \mathbf{\color{#e07a5f}{A^{'}}}\boldsymbol{\varepsilon}$$`
+
+.footnote[
+&lt;sup&gt;1&lt;/sup&gt; *Restricted Maximum Likelihood*; aplicável apenas no contexto de modelos lineares (mistos)
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Inferência | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs&lt;/span&gt;]
+
+
+Uma vez eliminada a dependência dos efeitos fixos na função de verossimilhança, tem-se a etapa de estimação:
+
+&lt;br&gt;
+
+**1º Passo | Estimação das variâncias (REML):**
+- O método REML opera sobre os dados transformados (`\(\mathbf{A}^T\mathbf{Y} = \mathbf{A}^T\mathbf{Z}\mathbf{b} + \mathbf{A}^T\boldsymbol{\varepsilon}\)`)
+- Estima-se a matriz de covariância `\(\hat{\mathbf{V}}\)` sem a interferência dos efeitos fixos (logo, não enviesado)
+
+&lt;div style="height: 20px;"&gt;&lt;/div&gt;
+
+
+----
+
+&lt;div style="height: 20px;"&gt;&lt;/div&gt;
+
+
+**2º Passo | Estimação dos efeitos fixos (GLS):**
+- Dado a matriz `\(\hat{\mathbf{V}}\)`, aplica-se a solução do mínimos quadrados generalizados (GLS) para estimar o vetor `\(\boldsymbol{\beta}\)`
+  
+.center[$$\hat{\boldsymbol{\beta}} = (\mathbf{X}^T \hat{\mathbf{V}}^{-1} \mathbf{X})^{-1} \mathbf{X}^T \hat{\mathbf{V}}^{-1} \mathbf{Y}$$]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Inferência | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs&lt;/span&gt;]
+
+&lt;br&gt;
+
+.gray-box-small[**ATENÇÃO:** 
+
+Diante do estimador REML, não se pode comparar modelos com diferentes estruturas de efeitos fixos (via AIC, teste de razão de verossimilhança (LRT), ...).
+- A matriz ortogonal `\(\mathbf{A}\)` é construída em função da matriz de design `\(\mathbf{X}\)` (`\(\mathbf{A}^T\mathbf{X} = \mathbf{0}\)`)
+- Ao alterar os efeitos fixos (logo, `\(\mathbf{X}\)`), altera-se também a matriz `\(\mathbf{A}\)`
+- Portanto, o vetor de dados transformados `\(\mathbf{A}^T\mathbf{Y}\)` torna-se diferente entre os modelos uma vez que isso resulta em funcões de verossimilhanças distintas.
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Inferência | .small-text[&lt;span style="color: #e07a5f;"&gt;GLMMs/GAMMs&lt;/span&gt;]
+
+
+Em GLMMs e GAMMs, como os dados não seguem uma distribuição Normal, a função de verossimilhança inclui uma integral sobre os efeitos aleatórios que não possui solução analítica fechada
+&lt;div style="height: 20px;"&gt;&lt;/div&gt;
+
+  - Ao invés de aplicar o método REML dos LMMs, recorre-se a métodos de aproximação numérica e integração
+    - Aproximação de Laplace
+    - Quadratura Adaptativa de Gauss-Hermite (AGHQ)
+    - PQL-REML (Penalized Quasi-Likelihood REML)
+
+
+---
 &lt;br&gt;
 
 `$$\large
@@ -247,6 +643,7 @@ Y =
 Classical regression and generalized linear models represent a special case of multilevel modeling in which there is no group-level model-in Bayesian terms, no prior information.
 - For the classical regression model, `\(y_i = X_i\beta + \varepsilon_i\)` , with independent errors `\(\varepsilon_i \sim N(0, \sigma^2)\)`, the corresponding prior distribution is a uniform distribution on the entire range `\(\infty, -\infty\)` for each of the components of `\(\beta\)`, and uniform on (`\((0, \infty\)`) for `\(\sigma^2\)` as well.
 
+---
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
