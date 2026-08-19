@@ -74,16 +74,16 @@ A maioria dos processos ecológicos resulta em dados assimétricos, discretos e 
 
 &lt;div style="height: 15px;"&gt;&lt;/div&gt;
 
-  - Modelos lineares generalizados (GLMs) e modelos aditivos generalizados (GAMs) são extensões naturais de LMs&lt;sup&gt;1&lt;/sup&gt;
+  - Modelos lineares generalizados (GLMs) e modelos aditivos generalizados (GAMs) são extensões naturais de LMs&lt;sup&gt;1&lt;/sup&gt;, uma vez que permitem acomodar
 &lt;div style="height: 20px;"&gt;&lt;/div&gt;
 
-      - **Acomodam a natureza dos dados:** a variável resposta `\(y_i\)` segue uma distribuição de probabilidade
+      - **Natureza dos dados:** a variável resposta `\(y_i\)` segue uma distribuição de probabilidade
       &lt;div style="height: 15px;"&gt;&lt;/div&gt;
 
-      - **Acomodam a heterocedasticidade estrutural:** a média `\(\mu_i\)` é descrita em função do parâmetro de sobredispersão `\(\phi\)`
+      - **Heterocedasticidade estrutural:** a média `\(\mu_i\)` é descrita em função do parâmetro de sobredispersão `\(\phi\)`
       &lt;div style="height: 15px;"&gt;&lt;/div&gt;
 
-      - **Acomdam relações complexas e não-lineares:** via funções suavizadoras não paramétricas (exclusivo de GAMs)
+      - **Relações complexas e não-lineares:** via funções suavizadoras não paramétricas (exclusivo de GAMs)
 
 
 
@@ -283,7 +283,7 @@ A família exponencial de distribuições cobre uma diversidade de distribuiçõ
 **Preditor linear**
 
 
-Represeta o componente *sistemático* do modelo
+Representa o componente *sistemático* do modelo
 
 
 `$$\large \color{#e07a5f}{\eta_i} = \beta_0 + \sum_{j=1}^{p} \beta_j x_{ij}$$`
@@ -431,7 +431,7 @@ Estimar os parâmetros de modelos mistos requer cuidados adicionais, especialmen
 
 ---
 # PPGECO | ECL0072 | out. 2026
-### Inferência | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs&lt;/span&gt;]
+### Inferência frequentista | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs&lt;/span&gt;]
 
 Dado o conjunto de parâmetros `\(\large \theta = \{ \beta_0, \beta, \sigma^2, \sigma_{\alpha}^2 \}\)`&lt;sup&gt;1&lt;/sup&gt;, objetiva-se `\(\hat{\theta} := argmin ~ L(\theta)\)`
 
@@ -469,7 +469,7 @@ No estimador de máxima verossimilhança, todos os parâmetros são estimados co
 
 ---
 # PPGECO | ECL0072 | out. 2026
-### Inferência | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs&lt;/span&gt;]
+### Inferência frequentista | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs&lt;/span&gt;]
 
 Dado o conjunto de parâmetros `\(\large \theta = \{ \beta_0, \beta, \sigma^2, \sigma_{\alpha}^2 \}\)`&lt;sup&gt;1&lt;/sup&gt;, objetiva-se `\(\hat{\theta} := argmin ~ L(\theta)\)`
 
@@ -512,7 +512,7 @@ Erros padrões subestimados
 
 ---
 # PPGECO | ECL0072 | out. 2026
-### Inferência | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs&lt;/span&gt;]
+### Inferência frequentista | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs&lt;/span&gt;]
 
 Uma forma de contornar esse problema consiste em aplicar a verossimilhança restrita (REML&lt;sup&gt;1&lt;/sup&gt;)
 
@@ -539,7 +539,7 @@ Para isolar os efeitos fixos (`\(\boldsymbol{\beta}\)`), o REML multiplica a mat
 
 ---
 # PPGECO | ECL0072 | out. 2026
-### Inferência | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs&lt;/span&gt;]
+### Inferência frequentista | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs&lt;/span&gt;]
 
 
 Uma vez eliminada a dependência dos efeitos fixos na função de verossimilhança, tem-se a etapa de estimação:
@@ -565,7 +565,7 @@ Uma vez eliminada a dependência dos efeitos fixos na função de verossimilhan�
 
 ---
 # PPGECO | ECL0072 | out. 2026
-### Inferência | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs&lt;/span&gt;]
+### Inferência frequentista | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs&lt;/span&gt;]
 
 &lt;br&gt;
 
@@ -580,17 +580,164 @@ Diante do estimador REML, não se pode comparar modelos com diferentes estrutura
 
 ---
 # PPGECO | ECL0072 | out. 2026
-### Inferência | .small-text[&lt;span style="color: #e07a5f;"&gt;GLMMs/GAMMs&lt;/span&gt;]
+### Inferência frequentista | .small-text[&lt;span style="color: #e07a5f;"&gt;GLMMs/GAMMs&lt;/span&gt;]
 
 
 Em GLMMs e GAMMs, como os dados não seguem uma distribuição Normal, a função de verossimilhança inclui uma integral sobre os efeitos aleatórios que não possui solução analítica fechada
-&lt;div style="height: 20px;"&gt;&lt;/div&gt;
+&lt;div style="height: 15px;"&gt;&lt;/div&gt;
 
   - Ao invés de aplicar o método REML dos LMMs, recorre-se a métodos de aproximação numérica e integração
     - Aproximação de Laplace
     - Quadratura Adaptativa de Gauss-Hermite (AGHQ)
     - PQL-REML (Penalized Quasi-Likelihood REML)
 
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Inferência bayesiana | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs/GLMMs/GAMMs&lt;/span&gt;]
+
+A abordagem frequentista enfrenta um conjunto de gargalos que tornam a abordagem bayesiana uma escolha natural para ajustar modelos mistos
+
+&lt;div style="height: 15px;"&gt;&lt;/div&gt;
+
+.center[**Integração da função de verossimilhança**]
+
+&lt;br&gt;
+
+**Abordagem Frequentista**
+&lt;br&gt;
+
+.small-text2[
+Depende da teoria assintótica para aproximar a integral da função de verossimilhança (eg.,*Laplace*, *AGHQ* ou *PQL*).
+  - Falho em dados esparsos, com estimativas enviesadas para os componentes de variância
+]
+
+&lt;div style="height: 5px;"&gt;&lt;/div&gt;
+
+----
+&lt;div style="height: 5px;"&gt;&lt;/div&gt;
+
+
+**Abordagem Bayesiana**
+&lt;br&gt;
+
+.small-text2[
+Não há aproximação assintótica da verossimilhança. Avalia-se a distribuição conjunta dos efeitos fixos e aleatórios via amostragem MCMC ou aproximações numéricas (INLA)
+- Não há limitação quanto ao `\(N\)` amostral
+
+]
+---
+# PPGECO | ECL0072 | out. 2026
+### Inferência bayesiana | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs/GLMMs/GAMMs&lt;/span&gt;]
+
+A abordagem frequentista enfrenta um conjunto de gargalos que tornam a abordagem bayesiana uma escolha natural para ajustar modelos mistos
+
+&lt;div style="height: 15px;"&gt;&lt;/div&gt;
+
+.center[**Teste de fronteira (*boundary effect*)**]
+
+&lt;br&gt;
+
+**Abordagem Frequentista**
+&lt;br&gt;
+
+.small-text2[
+
+Ao testar a significância de uma variância `\(H_0: \sigma_a^2 = 0\)` via Teste de Razão de Verossimilhança (LRT), a hipótese nula está na fronteira do espaço paramétrico (variâncias não podem ser negativas)
+- Viola a distribuição Qui-quadrado (`\(\chi^2\)`) e infla os p-valores 
+
+]
+
+&lt;div style="height: 5px;"&gt;&lt;/div&gt;
+
+----
+
+&lt;div style="height: 5px;"&gt;&lt;/div&gt;
+
+**Abordagem Bayesiana**
+&lt;br&gt;
+
+.small-text2[
+Todas as análises são retiradas diretamente da distribuição posterior dos parâmetros, sem dependender de testes paramétricos.
+  - Nese caso, avalia-se a relevância do efeito aleatório via critérios de seleção de modelos baseados na distribuição posterior (e.g., WAIC, LOO-CV,...)
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Inferência bayesiana | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs/GLMMs/GAMMs&lt;/span&gt;]
+
+A abordagem frequentista enfrenta um conjunto de gargalos que tornam a abordagem bayesiana uma escolha natural para ajustar modelos mistos
+
+&lt;div style="height: 15px;"&gt;&lt;/div&gt;
+
+
+.center[**Regularização dos componentes de variância**]
+&lt;br&gt;
+
+
+**Abordagem Frequentista**
+&lt;br&gt;
+
+.small-text2[
+A estimação dos componentes de variância (`\(\sigma_a^2\)`, `\(\sigma_b^2\)`, ...) pode tornar-se instável em modelos com estruturas hierárquicas complexas, resultando em falhas de convergência
+  - A recomendação consiste em simplificar a estrutura do efeito aleatório
+
+]
+
+&lt;div style="height: 5px;"&gt;&lt;/div&gt;
+
+----
+
+&lt;div style="height: 5px;"&gt;&lt;/div&gt;
+
+**Abordagem Bayesiana**
+&lt;br&gt;
+
+.small-text2[
+
+A inclusão de prioris pouco informativas (*weakly informative priors*) atua como uma regularização natural. 
+- Impede que a variância colapse em zero ou exploda para o infinito, permitindo ajustar modelos estruturalmente ricos sem falhas de otimização numérica
+
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Inferência bayesiana | .small-text[&lt;span style="color: #e07a5f;"&gt;LMMs/GLMMs/GAMMs&lt;/span&gt;]
+
+A abordagem frequentista enfrenta um conjunto de gargalos que tornam a abordagem bayesiana uma escolha natural para ajustar modelos mistos
+
+&lt;div style="height: 15px;"&gt;&lt;/div&gt;
+
+
+.center[**Propagação integral da incerteza**]
+&lt;br&gt;
+
+
+**Abordagem Frequentista**
+&lt;br&gt;
+
+.small-text2[
+As incertezas dos efeitos fixos `\(\boldsymbol{\beta}\)` e dos componentes de variância `\(\sigma_b^2\)` são calculadas separadamente
+  - Ao fazer predições na escala original da resposta (via `\(g^{-1}\)`), a incerteza da estimativa do efeito aleatório é frequentemente ignorada 
+
+]
+
+&lt;div style="height: 5px;"&gt;&lt;/div&gt;
+
+----
+
+&lt;div style="height: 5px;"&gt;&lt;/div&gt;
+
+**Abordagem Bayesiana**
+&lt;br&gt;
+
+.small-text2[
+
+Todos os parâmetros são tratados simultaneamente como variáveis aleatórias na distribuiçõ posterior 
+  - A incerteza do efeito aleatório propaga-se de forma automática  para os efeitos fixos, intervalos de credibilidade e predições espaciais/temporais.
+]
 
 ---
 &lt;br&gt;
