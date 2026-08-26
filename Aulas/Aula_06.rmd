@@ -1,6 +1,6 @@
 ---
 title: "MODELOS ESPAÇO-TEMPORAIS PARA DADOS ECOLÓGICOS (ECL0072)"
-subtitle: "AULA 06: ESPACIAIS I"
+subtitle: "AULA 06: ESTATÍSTICA ESPACIAL"
 author: "Marie-Christine Rufener"
 institute: "macrufener@gmail.com"
 date: "Out / 2026"
@@ -49,6 +49,77 @@ class: title-slide
 <img src="../Figuras/logo_ppgeco2.svg" class="cover-logo">
 
 ---
+
+
+
+- The analysis of spatial patterns is of prime interest to ecologists because most ecological phenomena investigated by sampling geographic space are structured by forces that have spatial components. 
+
+- The distribution of species result from the combined action of external and internal forces. Both types of forces generate spatial patterns within species or communities.
+  - External forces: environmental characteristics
+  - Internal forces: population dynamics and/or top-down/bottom-up biotic interactions
+
+
+- Scale is a key concept in both sampling design and the analysis of spatial (or temporal) patterns. 
+  - In sampling theory (Fig. 13.1), spatial scale encompasses three elements of the sampling design:
+    - Grain size is the size of the elementary sampling units. It may be expressed as the diameter, surface or volume of matter supporting the measurements. In time series analysis, it is the duration over which measurements are integrated. The resolution of a study (Schneider, 1994) is equal to the grain size of its sampling design.
+    - Sampling interval is the average distance between neighbouring sampling units. It is called lag in time series analysis. For fixed extent, the sampling interval is a function of n, the number of sampling units. In turn, n is determined by the total effort that can be allocated to sampling.
+    - Extent is the total length, area or volume included in the study, or the total duration of the time series. It is called range by Schneider (1994) who also defines the scope as the ratio of the extent to the grain size.
+
+- The scale of the sampling design should follow from what is known (e.g. from a pilot study) about the scale of the pattern or process, and from the ecological question being addressed.
+
+- The extent and grain define the observation window in spatial pattern analysis. No structure can be detected which is smaller than the grain or larger than the extent of a study.
+
+---
+### Objetivos de mapear a distribuição
+
+
+
+
+---
+
+### Autocorrelação espacial
+
+Spatial structures may be described through structure functions, which allow one to quantify the spatial dependency and partition it amongst distance classes.
+- The most commonly used structure functions are correlograms, and variograms
+
+- A correlogram is a graph in which autocorrelation values are plotted, on the ordinate, against distance classes among sites on the abscissa. Correlograms (Cliff & Ord 1981) can be computed for single variables (Moran’s I or Geary’s c autocorrelation coefficients, Subsection1) or for multivariate data (Mantel correlogram, Subsection 5); 
+
+- Similarly, a variogram is a graph in which semi-variance is plotted, on the ordinate, against distance classes among sites on the abscissa (Subsection3). Statistical models may be fitted to variograms (linear, exponential, spherical, Gaussian, etc.); they allow the investigator to relate the observed structure to hypothesized generating processes or to produce interpolated maps by kriging
+
+Because they measure the relationship between pairs of observation points located a certain distance apart, correlograms and variograms may be computed either for preferred geographic directions or, when the phenomenon is assumed to be isotropic in space, in an all-directional way.
+
+---
+
+### Correlogram
+
+- Apresentar o Moran's I statistics
+
+Moran’s I formula is related to Pearson’s correlation coefficient; its numerator is a covariance, comparing the values found at all pairs of points in turn, while its denominator is the maximum-likelihood estimator of the variance (i.e. division by n instead of n – 1); in Pearson’s r, the denominator is the product of the standard deviations of the two variables (eq. 4.7), whereas in Moran’s I there is only one variable involved. Moran’s I mainly differs from Pearson’s r in that the sums in the numerator and denominator of eq. 13.1 do not involve the same number of terms; only the terms corresponding to distances within the given class are considered in the numerator whereas all pairs are taken into account in the denominator. Moran’s I usually takes values in the interval [–1, +1] although values lower than –1 or higher than +1 may occasionally be obtained. Positive autocorrelation in the data translates into positive values of I; negative autocorrelation produces negative values.
+
+Readers who are familiar with correlograms in time series analysis will be reassured to know that, when a problem involves equispaced observations along a single physical dimension, as in Fig. 13.3, calculating Moran’s I for the different distance classes is nearly the same as computing the autocorrelation coefficient of time series analysis (Fig. 12.5, eq. 12.6); a small numeric difference results from the divisions by (n – k – 1) and (n – 1), respectively, in the numerator and denominator of eq. 12.6, whereas division is by (n – k ) and (n ), respectively, in the numerator and denominator of Moran’s I formula (eq. 13.1).
+
+
+Spatial autocorrelation coefficients can be tested for significance and confidence intervals can be computed. Tests of significance require, however, that certain conditions specified below be fulfilled.
+
+
+Moran’s I and Geary’s c are sensitive to extreme values and, in general, to asymmetry in the data distributions, as are the related Pearson’s r and Euclidean distance coefficients. Asymmetry increases the variance of the data.
+The tests require that the condition of second-order stationarity be satisfied. This rather strong condition states that the expected value (mean) and spatial covariance (numerator of eq. 13.1) of the variable is the same all over the study area, and the variance (denominator of eq. 13.1) is finite. 
+
+---
+
+### Interpretation of all-directional correlograms
+
+When the autocorrelation function is the same for all geographic directions considered, the phenomenon is said to be isotropic. Its opposite is anisotropy. When a variable is isotropic, a single correlogram may be computed over all directions of the study area.
+
+---
+
+```{r, out.width= "100%"}
+knitr::include_graphics("../Figuras/Correlograms.png")
+```
+
+
+---
+
 
 Estruturas de Dependência nos Dados Ecológicos
 │

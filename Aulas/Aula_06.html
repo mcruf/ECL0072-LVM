@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>MODELOS ESPAÇO-TEMPORAIS PARA DADOS ECOLÓGICOS (ECL0072)</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Marie-Christine Rufener" />
+    <script src="libs/header-attrs-2.29/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+
+
+
+class: title-slide
+&lt;div class="title-block"&gt;
+  &lt;h1&gt;MODELOS ESPAÇO-TEMPORAIS PARA DADOS ECOLÓGICOS (ECL0072)&lt;/h1&gt;
+  &lt;div class="date-text"&gt;Out / 2026&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class="subtitle-block"&gt;
+  &lt;h2&gt;AULA 06: ESTATÍSTICA ESPACIAL&lt;/h2&gt;
+  &lt;p class="author-name"&gt;Marie-Christine Rufener&lt;/p&gt;
+  &lt;p class="author-email"&gt;&lt;u&gt;macrufener@gmail.com&lt;/u&gt;&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;img src="../Figuras/logo_ppgeco2.svg" class="cover-logo"&gt;
+
+---
+
+
+
+- The analysis of spatial patterns is of prime interest to ecologists because most ecological phenomena investigated by sampling geographic space are structured by forces that have spatial components. 
+
+- The distribution of species result from the combined action of external and internal forces. Both types of forces generate spatial patterns within species or communities.
+  - External forces: environmental characteristics
+  - Internal forces: population dynamics and/or top-down/bottom-up biotic interactions
+
+
+- Scale is a key concept in both sampling design and the analysis of spatial (or temporal) patterns. 
+  - In sampling theory (Fig. 13.1), spatial scale encompasses three elements of the sampling design:
+    - Grain size is the size of the elementary sampling units. It may be expressed as the diameter, surface or volume of matter supporting the measurements. In time series analysis, it is the duration over which measurements are integrated. The resolution of a study (Schneider, 1994) is equal to the grain size of its sampling design.
+    - Sampling interval is the average distance between neighbouring sampling units. It is called lag in time series analysis. For fixed extent, the sampling interval is a function of n, the number of sampling units. In turn, n is determined by the total effort that can be allocated to sampling.
+    - Extent is the total length, area or volume included in the study, or the total duration of the time series. It is called range by Schneider (1994) who also defines the scope as the ratio of the extent to the grain size.
+
+- The scale of the sampling design should follow from what is known (e.g. from a pilot study) about the scale of the pattern or process, and from the ecological question being addressed.
+
+- The extent and grain define the observation window in spatial pattern analysis. No structure can be detected which is smaller than the grain or larger than the extent of a study.
+
+---
+### Objetivos de mapear a distribuição
+
+
+
+
+---
+
+### Autocorrelação espacial
+
+Spatial structures may be described through structure functions, which allow one to quantify the spatial dependency and partition it amongst distance classes.
+- The most commonly used structure functions are correlograms, and variograms
+
+- A correlogram is a graph in which autocorrelation values are plotted, on the ordinate, against distance classes among sites on the abscissa. Correlograms (Cliff &amp; Ord 1981) can be computed for single variables (Moran’s I or Geary’s c autocorrelation coefficients, Subsection1) or for multivariate data (Mantel correlogram, Subsection 5); 
+
+- Similarly, a variogram is a graph in which semi-variance is plotted, on the ordinate, against distance classes among sites on the abscissa (Subsection3). Statistical models may be fitted to variograms (linear, exponential, spherical, Gaussian, etc.); they allow the investigator to relate the observed structure to hypothesized generating processes or to produce interpolated maps by kriging
+
+Because they measure the relationship between pairs of observation points located a certain distance apart, correlograms and variograms may be computed either for preferred geographic directions or, when the phenomenon is assumed to be isotropic in space, in an all-directional way.
+
+---
+
+### Correlogram
+
+- Apresentar o Moran's I statistics
+
+Moran’s I formula is related to Pearson’s correlation coefficient; its numerator is a covariance, comparing the values found at all pairs of points in turn, while its denominator is the maximum-likelihood estimator of the variance (i.e. division by n instead of n – 1); in Pearson’s r, the denominator is the product of the standard deviations of the two variables (eq. 4.7), whereas in Moran’s I there is only one variable involved. Moran’s I mainly differs from Pearson’s r in that the sums in the numerator and denominator of eq. 13.1 do not involve the same number of terms; only the terms corresponding to distances within the given class are considered in the numerator whereas all pairs are taken into account in the denominator. Moran’s I usually takes values in the interval [–1, +1] although values lower than –1 or higher than +1 may occasionally be obtained. Positive autocorrelation in the data translates into positive values of I; negative autocorrelation produces negative values.
+
+Readers who are familiar with correlograms in time series analysis will be reassured to know that, when a problem involves equispaced observations along a single physical dimension, as in Fig. 13.3, calculating Moran’s I for the different distance classes is nearly the same as computing the autocorrelation coefficient of time series analysis (Fig. 12.5, eq. 12.6); a small numeric difference results from the divisions by (n – k – 1) and (n – 1), respectively, in the numerator and denominator of eq. 12.6, whereas division is by (n – k ) and (n ), respectively, in the numerator and denominator of Moran’s I formula (eq. 13.1).
+
+
+Spatial autocorrelation coefficients can be tested for significance and confidence intervals can be computed. Tests of significance require, however, that certain conditions specified below be fulfilled.
+
+
+Moran’s I and Geary’s c are sensitive to extreme values and, in general, to asymmetry in the data distributions, as are the related Pearson’s r and Euclidean distance coefficients. Asymmetry increases the variance of the data.
+The tests require that the condition of second-order stationarity be satisfied. This rather strong condition states that the expected value (mean) and spatial covariance (numerator of eq. 13.1) of the variable is the same all over the study area, and the variance (denominator of eq. 13.1) is finite. 
+
+---
+
+### Interpretation of all-directional correlograms
+
+When the autocorrelation function is the same for all geographic directions considered, the phenomenon is said to be isotropic. Its opposite is anisotropy. When a variable is isotropic, a single correlogram may be computed over all directions of the study area.
+
+---
+
+&lt;img src="../Figuras/Correlograms.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+
+Estruturas de Dependência nos Dados Ecológicos
+│
+├── 1. Estrutura Discreta / Hierárquica (Grupos / Níveis)
+│   ├── Exemplo: Peixes dentro de Recifes, Plantas dentro de Parcelas.
+│   ├── Abordagem: Modelos Misto Padrão (Efeitos Aleatórios por grupo: 1 | grupo).
+│   └── A dependência é assumida IGUAL para todos os membros do mesmo grupo.
+│
+└── 2. Estrutura Contínua (Espaço / Tempo / Filogenia)
+    ├── Exemplo: Coordenadas (X, Y) no mar/oceano, Séries temporais de CPUE (anos/meses).
+    ├── Abordagem: Matrizes de autocorrelação espacial/temporal (ex: Matern, CAR, AR1, INLA/SPDE).
+    └── A dependência diminui conforme a DISTÂNCIA no espaço ou tempo aumenta.
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+  "highlightStyle": "github",
+  "highlightLines": true,
+  "countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

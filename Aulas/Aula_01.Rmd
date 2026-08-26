@@ -131,3 +131,16 @@ Entrega de projeto & apresentação de trabalho (grupos de 3-4 pessoas)
 
 ]
 
+---
+
+# Filosofia da aula
+
+### Índice HBC
+
+<br>
+<br>
+
+
+```{r, out.width = "100%", echo=F, fig.align='center'}
+knitr::include_graphics("../Figuras/Indice_HBC.png")
+```
