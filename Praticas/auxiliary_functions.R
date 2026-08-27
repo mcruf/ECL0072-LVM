@@ -18,19 +18,23 @@
 required_pkgs <- c("terra", "sf", "dplyr", "lubridate" )
 
 ## Missing packages
-missing_packages <- required_packages[ !required_packages %in% installed.packages()[, "Package"]]
+missing_pkgs <- required_pkgs[ !required_pkgs %in% installed.packages()[, "Package"]]
 
 ## Install missing packages
-if(length(missing_packages) > 0){
+if(length(missing_pkgs) > 0){
   
   message("Installing missing packages...")
   
-  install.packages(missing_packages)
+  install.packages(missing_pkgs)
   
 }
 
 ## Load packages
-invisible(lapply(required_packages, library, character.only = TRUE))
+invisible(lapply(required_pkgs, library, character.only = TRUE))
+
+
+## Removing obsolete objects
+rm(list = c("missing_pkgs", "required_pkgs"))
 
 
 #><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
@@ -132,11 +136,3 @@ extract_env_dynamic <- function(points_sf, env_raster, var_name, year_map = NULL
 }
 
 
-year_mapping <- c("1" = 2000, "2" = 2001)
-
-
-# Extract SST (thetao)
-dfs_f2 <- extract_env_dynamic(points_sf = dfs_f, 
-                              env_raster = vfisicas2r, 
-                              var_name = "thetao", 
-                              year_map = year_mapping)

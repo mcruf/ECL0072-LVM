@@ -24,7 +24,9 @@ atsw <- filter(subarea, CODE == "AT-SW")
 
 
 ## Subset 2 years
-dfs <- filter(df, Year %in% c(2001, 2002), Flag %in% c("BRA", "ESP", "HND", "TAI", "VCT"))
+#dfs <- filter(df, Year %in% c(2001, 2002), Flag %in% c("BRA", "ESP", "HND", "TAI", "VCT"))
+dfs <- filter(df, Year %in% c(2004, 2005), Flag %in% c("BRA", "ESP", "HND", "TAI", "VCT"))
+
 table(dfs$Year, dfs$Month)
 
 dados_sp <- st_as_sf(dfs, coords = c('Long','Lat'), crs = 4326) #As coordenadas estão originalmente em LAT/LONG; portanto, usar primeiro o CRS padrão (WGS84)
@@ -113,11 +115,14 @@ plot(data_sim$Thunnus_alalunga~data$Thunnus_alalunga)
 
 
 ## Add perturbation to location
+# data_sim <- data_sim %>%
+#  dplyr::mutate(Long = Long + rnorm(n(), 0, 1.5), Lat  = Lat  + rnorm(n(), 0, 0.5))
+
 data_sim <- data_sim %>%
-  dplyr::mutate(Long = Long + rnorm(n(), 0, 1.5), Lat  = Lat  + rnorm(n(), 0, 1))
+  dplyr::mutate(Long = Long + rnorm(n(), -1, 1.5))
 
 
-plot(data_sim$Thunnus_alalunga~data_sim$Lat)
+plot(data_sim$Prionace_glauca~data_sim$Lat)
 
 
 ## Add perturbation to fishing effort

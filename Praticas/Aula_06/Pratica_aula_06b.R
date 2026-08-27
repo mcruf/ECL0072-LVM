@@ -1,18 +1,23 @@
-#################################################
-#                                               #
-#             Prática da aula 06                #
-#      - Processando dados ambientais -         #
-#                                               #
-#################################################
+###################################################################################
+#                                                                                 #
+#                                 Prática da aula 06                              #
+#      - Processando dados ambientais para estimação e predição espacial -        #
+#                                                                                 #
+####################################################################################
 
 
-# Dados ambientais correspondem a uma mistura de variáveis dinâmicas e estáticas.
+# Script dividido em duas partes principais:
+# 1) Extrair dados ambientais para os pontos amostrais (necessário para a etapa de estimação)
+# 2) Extrair dados ambientais para o grid espacial (necessário para a etapa de predição)
 
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# FIXME: Definindo o diretório de trabalho 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#setwd("~/OneDrive/Arbeit/Lectures_and_Talks/UFRN/Lectures/Graduation/ECL0072-LVM/")
+# Dados ambientais foram baixados do Copernicus Marine Service via API no python.
+# Para detalhes técnicos, vide script: Praticas/Aula_06/Copernicus_data_download_practical.ipynb
+
+# Foram baixadas um total de 5 variáveis ambientais, provenientes de 2 produtos distintos do Copernicus:
+# i) Global Ocean Physics Reanalysis: sea water tempertaure (sst), sea surface height (ssh), mixed layer thickness (mlt), bathymetry (bathy)
+# ii) Global Ocean Biogeochemistry Hindcast: net primary productivity (nppv)
+# Há 4 variáveis dinâmicas (i.e., variáveis baixadas para a mesma resolução temporal dos dados pesqueiros) e 1 variável estática (batimetira).
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~
@@ -22,8 +27,18 @@ library(terra) #Processamento de rasters
 library(sf) #Processamento de dados vetorizados 
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Carregando funções auxiliares
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+source("Praticas/auxiliary_functions.R")
+
+
 
 #><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+##############################################################################
+###      PARTE 1: Extraindo dados ambientais para os pontos amostrais      ###
+##############################################################################
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -39,8 +54,8 @@ library(sf) #Processamento de dados vetorizados
 
 
 ## Variáveis físicas
-vfisicas <- rast("Dados/GIS/Environmental/Global_Ocean_Physics_Reanalysis_2000_2001_monthly_surface_layers.nc") 
-#sst <- rast("Dados/GIS/Environmental/Global_Ocean_Physics_Reanalysis_2000_2001_monthly_surface_layers.nc", subds = "thetao") #Carregando cada variável separadamente
+vfisicas <- rast("Dados/GIS/Environmental/Global_Ocean_Physics_Reanalysis_2004_2005_monthly_surface_layers.nc") 
+#sst <- rast("Dados/GIS/Environmental/Global_Ocean_Physics_Reanalysis_2004_2005_monthly_surface_layers.nc", subds = "thetao") #Carregando cada variável separadamente
 
 
 ## Batimetria
@@ -48,8 +63,8 @@ batimetria <- rast("Dados/GIS/Environmental/bathymetry.nc")
 
 
 ## Explorando a estrutura dos dados
-dim(vifisicas)
-nlyr(vifisicas)
+dim(vfisicas)
+nlyr(vfisicas)
 names(vfisicas) 
 head(vfisicas)
 vfisicas
@@ -81,7 +96,7 @@ par(mfrow=c(1,1))
 
 # 1.2) Global Ocean Biogeochemistry Hindcast (raster)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-vbio <- rast("Dados/GIS/Environmental/Global_Ocean_Biogeochemistry_Hindcast_2000_2001_monthly.nc") 
+vbio <- rast("Dados/GIS/Environmental/Global_Ocean_Biogeochemistry_Hindcast_2004_2005_monthly.nc") 
 head(vbio)
 plot(vbio[[1]])
 
@@ -227,16 +242,62 @@ plot(st_geometry(dfs_f), pch = 19, cex = 0.7, col = 1, add = T) #Sucesso!
 
 # 3.2) Extraindo os dados ambientais para cada pescaria
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 # Os dados pesqueiros possuem uma resolução mensal, tal como as variáveis ambientais.
 # Cada pescaria está associada a um mês de um determinado ano (mes_ano). 
 # Portanto, precisamos assegurar que a covariável a ser extraída corresponda ao mesmo mês_ano.
 # ATENÇÃO: Isso se aplica apenas para as variáveis dinâmicas (nppv, sst, ssh, mlt)
+# Usaremos a função 'extract_env_dynamic()' para extrair os valores das variáveis dinâmicas
+# para cada pescaria. Para maiores detalhamento da função, vide script: /Praticas/auxiliary_functions.R
+
+
+## Mapeando os anos dos dados pesqueiros aos dados ambientais (workaround solution - 'gambiarra')
+### Os anos nos dados pesqueiros estão identificados apenas como '1' e '2'. Os dados ambientais
+### foram baixados (arbitrariamente) para os anos 2004-2005
+
+year_mapping <- c("1" = 2004, "2" = 2005) 
+
+## Acessando o nome das variáveis
+unique(word(names(vfisicas2r), 1, sep = "_"))
+unique(word(names(vbio2), 1, sep = "_"))
+unique(word(names(batimetria2r), 1, sep = "_"))
+
+
+### Extraindo dados para thetao (sst - temperatura superficial do mar); variável dinâmica
+dfs_f <- extract_env_dynamic(points_sf = dfs_f, #dados pesqueiros espacializados
+                             env_raster = vfisicas2r, #camada ambiental (raster)
+                             var_name = "thetao",#nome da variável dentro da camada ambiental
+                             year_map = year_mapping)
+
+
+### Extraindo dados para zos (ssh - altura da superfície do mar); variável dinâmica
+dfs_f <- extract_env_dynamic(points_sf = dfs_f, #dados pesqueiros espacializados
+                             env_raster = vfisicas2r, #camada ambiental (raster)
+                             var_name = "zos",#nome da variável dentro da camada ambiental
+                             year_map = year_mapping)
+
+
+### Extraindo dados para mlotst (mlt - espessura da camada de mistura); variável dinâmica
+dfs_f <- extract_env_dynamic(points_sf = dfs_f, #dados pesqueiros espacializados
+                             env_raster = vfisicas2r, #camada ambiental (raster)
+                             var_name = "mlotst",#nome da variável dentro da camada ambiental
+                             year_map = year_mapping)
 
 
 
+### Extraindo dados para nppv (produtividade primária); variável dinâmica
+dfs_f <- extract_env_dynamic(points_sf = dfs_f, #dados pesqueiros espacializados
+                             env_raster = vbio2, #camada ambiental (raster)
+                             var_name = "nppv",#nome da variável dentro da camada ambiental
+                             year_map = year_mapping)
 
 
 
+### Extraindo dados para deptho (bathy - batimetria); variável estática
+dfs_f$bathy  <- extract(batimetria2r, dfs_f)[, 2]
 
+
+
+##########################################################################
+###      PARTE 2: Extraindo dados ambientais para o grid espacial      ###
+##########################################################################
 
