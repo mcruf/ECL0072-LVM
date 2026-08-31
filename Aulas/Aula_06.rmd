@@ -49,8 +49,198 @@ class: title-slide
 <img src="../Figuras/logo_ppgeco2.svg" class="cover-logo">
 
 ---
+# PPGECO | ECL0072 | out. 2026
+
+<br>
+
+### Agenda
 
 
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+Leitura:
+- Cap. 13 - Legendre & Legendre. Numerical ecology
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+<br>
+
+A maioria dos dados ecológicos apresenta algum grau de estrutura espacial
+
+- .small-text2[**Primeira lei da Geografia:** *Tudo está relacionado a todas as outras coisas, mas coisas próximas estão mais relacionadas do que coisas distantes*]
+
+
+
+```{r, out.width ="100%"}
+knitr::include_graphics("../Figuras/spatial_dependency.png")
+```
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Padrões espaciais
+
+Muitos padrões ecológicos podem ser descritos como manchas (*patches*) ou gradientes (lineares ou não)
+
+- Examinar os padrões espaciais de espécies (ou comunidades) permite compreender os mecanismos que controlam suas distribuições
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Padrões espaciais
+
+Muitos padrões ecológicos podem ser descritos como manchas (*patches*) ou gradientes (lineares ou não)
+
+- Examinar os padrões espaciais de espécies (ou comunidades) permite compreender os mecanismos que controlam suas distribuições
+
+----
+
+Padrões espaciais podem ser encontrados em todas as escalas espaciais 
+
+--
+
+<div style="height: 7px;"></div>
+
+
+.center[.small-text2[**ESCALA LOCAL**]]
+
+
+```{r, out.width ="65%"}
+knitr::include_graphics("../Figuras/spatial_dependency_small-scale.png")
+```
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Padrões espaciais
+
+Muitos padrões ecológicos podem ser descritos como manchas (*patches*) ou gradientes (lineares ou não)
+
+- Examinar os padrões espaciais de espécies (ou comunidades) permite compreender os mecanismos que controlam suas distribuições
+
+----
+
+Padrões espaciais podem ser encontrados em todas as escalas espaciais 
+
+
+
+<div style="height: 7px;"></div>
+
+
+.center[.small-text2[**ESCALA REGIONAL**]]
+
+
+```{r, out.width ="65%"}
+knitr::include_graphics("../Figuras/spatial_dependency_regional-scale.png")
+```
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Padrões espaciais
+
+Muitos padrões ecológicos podem ser descritos como manchas (*patches*) ou gradientes (lineares ou não)
+
+- Examinar os padrões espaciais de espécies (ou comunidades) permite compreender os mecanismos que controlam suas distribuições
+
+----
+
+Padrões espaciais podem ser encontrados em todas as escalas espaciais 
+
+
+
+<div style="height: 7px;"></div>
+
+
+.center[.small-text2[**ESCALA GLOBAL**]]
+
+
+```{r, out.width ="65%"}
+knitr::include_graphics("../Figuras/spatial_dependency_large-scale.png")
+```
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Padrões espaciais
+
+Dados ecológicos resultam naturalmente de processos espaciais aninhados e mutuamente confundidos
+
+- É necessário desembaraçar as diferentes escalas espaciais que atuam sobre o processo ecológico 
+  - **Estatística espacial!**
+
+
+
+```{r, out.width ="85%"}
+knitr::include_graphics("../Figuras/spatial_dependency_all-scales.png")
+```
+
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Padrões espaciais
+
+
+“Spatial patterns usually result from a mixture of both exogenous (‘induced’) and endogenous (‘inherent’) processes, resulting in spatial dependence among organisms. ”
+
+
+---
+
+- “Ecological data usually include several spatial scale patterns which are confounded (Figure 1.4): (1) trends at larger scales, (2) patchiness at intermediate and local scales, and (3) random fluctuations or noise at the smallest scale. Therefore, ecological data are the result of embedded and confounded processes; hence, as ecologists, we try to disentangle the spatial scales of these processes using spatial analysis.”
+
+- “The components that affect our ability to identify spatial patterns and their underlying processes accurately are numerous, but they can be organized into three categories (Figure 1.8; Dungan et al. 2002): (1) the extent of spatial expression of the processes themselves; (2) the sampling design used to measure ecological data (sample versus population data; local versus global level); and (3) the statistical tools used to characterize the spatial pattern of either the entire sampling area (i.e. global spatial statistics) or each sampling location (i.e. local spatial statistics).”
+
+
+
+Excerpt From
+Spatial Analysis: A Guide For Ecologists
+Mark R. T. Dale
+This material may be protected by copyright.
+
+---
+
+# Sampling design
+
+“determination of the appropriate spatial and temporal domains of the study is one of the most important steps in data analysis from which all subsequent statistical and ecological interpretations will be either meaningful or meaningless. The spatial and temporal scales are therefore important in the definition and testing of ecological hypotheses and we comment about the key components to consider while testing statistically ecological hypotheses given inherent and induced spatial dependency in the data.”
+
+“Any sampling design for studying ecological processes imposes a template, or filter, with its own specific temporal and spatial units. To be efficient, a sampling design needs to be thought out and crafted carefully by a series of steps to obtain meaningful insights about the ecological processes (see Figures 1.1 and 1.4):”
+- “(1) define explicitly the spatial and temporal domains of expression of the process(es) under study;
+-  (2) determine that the spatial and temporal resolution of the sampling design is able to capture the process under study;
+- (3) ensure that the spatial and statistical analyses are appropriate for the data type. These three steps interact with each other and must be considered together before conducting any sampling of ecological data in a spatial context (Fortin et al. 1989; Dungan et al. 2002). In essence, design of an optimal spatial sampling scheme requires a careful balance between samples that are too close to one another, thus not providing enough new information (data highly autocorrelated), and samples that are too sparse, so that processes at other spatial scales introduce too much variability (Haining 1990).”
+
+
+
+Excerpt From
+Spatial Analysis: A Guide For Ecologists
+Mark R. T. Dale
+This material may be protected by copyright.
+
+---
+
+# Sampling design
+
+- Sample size: “In any ecological study, the choice of the sample size ‘n’ is one of the most important decisions. In the context of spatial analysis, this choice needs to be guided by the minimum requirement for subsequent spatial statistics and analysis ”
+
+- Spatial resolution: “The detection of spatial pattern is also directly related to the spatial scale at which ecological data are measured (Figures 1.3 and 1.9). Spatial scale has at least two aspects: the size of the study area, or ‘extent’, and the size of the sampling unit used to collect the data, the ‘sampling grain’. The extent is the total area under consideration and aims to capture the domain of the “ecological process under study, while grain refers to the minimum spatial resolution at which information is measured. Several studies have showed that spatial statistics are very sensitive to both of these resolution aspects”
+
+
+Excerpt From
+Spatial Analysis: A Guide For Ecologists
+Mark R. T. Dale
+This material may be protected by copyright.
+
+
+
+---
 
 - The analysis of spatial patterns is of prime interest to ecologists because most ecological phenomena investigated by sampling geographic space are structured by forces that have spatial components. 
 
@@ -111,16 +301,45 @@ The tests require that the condition of second-order stationarity be satisfied. 
 
 When the autocorrelation function is the same for all geographic directions considered, the phenomenon is said to be isotropic. Its opposite is anisotropy. When a variable is isotropic, a single correlogram may be computed over all directions of the study area.
 
----
 
 ```{r, out.width= "100%"}
 knitr::include_graphics("../Figuras/Correlograms.png")
 ```
 
 
+
 ---
 
+The absence of significant coefficients in a correlogram must be interpreted with caution, however:
+- It may indicate that the surface under study is free of spatial autocorrelation at the study scale. Beware: this conclusion is subject to type II (or β) error. 
+- It may indicate that the sampling design is inadequate to detect the spatial autocorrelation that may exist in the system. Are the grain size, extent and sampling interval (Section13.0) adequate to detect the type of autocorrelation one can hypothesize from knowledge about the biological or ecological process under study?
 
+---
+
+### Variograma
+
+Like correlograms, semi-variograms (called variograms for simplicity) decompose the spatial (or temporal) variability of observed variables among distance classes. 
+- This provides the sample variogram, which is a plot of the empirical values of variance γ(d) as a function of distance d.
+
+
+```{r, out.width= "100%"}
+knitr::include_graphics("../Figuras/variogram_schema.png")
+```
+
+
+- Although a sample variogram is a good descriptive summary of the spatial contiguity of a variable, it does not provide all the semi-variance values needed for kriging 
+
+---
+
+Spatial structures are a major source of false correlations, which are not indicative of causal relationships. Spatial autocorrelation may cause correlations to appear between autocorrelated variables, due to spatial structures that are generated by the autocorrelation in the data; examples of such structures are the “false gradients” described in Subsection 13.1.2. The question is the following: is there a significant amount of correlation between the response and explanatory variables, besides some common spatial structure which may be non-causal? The interest here is in fraction [a] of Figs. 10.10 and 13.27, which corresponds to the “explanation” (in the sense of Subsection10.2.1) of the response data (Y) by the explanatory environmental variables (X) after the common spatial structure (fraction [b]) has been controlled for. If the analysis of the spatial structure of Y is also of interest, it should be carried out independently of that of X. If fraction [b] is large, the hypothesis that it indicates false correlations between autocorrelated variables in matrices Y and X is supported if new data, obtained by sampling at a different spatial scale, fail to produce a large fraction[b]. Nested sampling designs, as used for instance in Ecological application 13.1b, are a way of obtaining data sets for modelling at more than one spatial scale.
+
+If both the spatial and non-spatial structures of the explanatory variables are assumed to be causal to the spatial variation of Y, fraction [a + b] (instead of fraction [a] alone, as above) empirically measures the support to the hypothesis of causal relationship between the response and explanatory variables. One may or may not be interested in breaking it down into a purely environmental fraction ([a] in Fig. 10.10 and 13.27) and a spatially-structured environmental effect (fraction [b]). One may be interested, however, in determining whether the response data (Y) have some spatial structure of their own (fraction [c]) which is not explained by the explanatory variables in the model. If such a structure is found, reasons for its existence are worth investigating. It may be caused by environmental variables that have not been included in the analysis, by historical events, or by population or community dynamic processes that may be masked by some dominant environmental effect (Borcard & Legendre, 1994). In this approach, any spatial structure identified in the response data set is considered an indication of the presence of some process generating it. Mapping fraction [c] of the variation may help generate hypotheses about the processes responsible for the observed residual spatial pattern.
+
+```{r, out.width= "100%"}
+knitr::include_graphics("../Figuras/Env_vs_spatial_variance.png")
+```
+
+---
 Estruturas de Dependência nos Dados Ecológicos
 │
 ├── 1. Estrutura Discreta / Hierárquica (Grupos / Níveis)
@@ -132,3 +351,10 @@ Estruturas de Dependência nos Dados Ecológicos
     ├── Exemplo: Coordenadas (X, Y) no mar/oceano, Séries temporais de CPUE (anos/meses).
     ├── Abordagem: Matrizes de autocorrelação espacial/temporal (ex: Matern, CAR, AR1, INLA/SPDE).
     └── A dependência diminui conforme a DISTÂNCIA no espaço ou tempo aumenta.
+
+
+---
+
+# Leitura
+
+- Cap. 13 - Legendre & Legendre (1998). Numerical ecology. 2nd ed.
