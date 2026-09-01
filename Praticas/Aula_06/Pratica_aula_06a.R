@@ -17,21 +17,25 @@ library(dplyr) #Processamento doas dados
 library(sf) #Processamento de dados (espaciais) vetorizados - ie., shapefiles
 library(rnaturalearth) #Baixar mapas do Natural Earth (https://www.naturalearthdata.com/)
 library(ggplot2) #Visualização dos dados
-library(patchwork) #Visualização de dados
+library(viridis) #paleta de cores
+library(patchwork) #Confecção de figuras compostas
+library(mapview) #Visualização de dados espacializados
+library(gganimate) #Para gerar gráficos animados (gifs)
+
 
 
 #~~~~~~~~~~~~~~~~~~~~~~
 # Definindo tema ggplot
 #~~~~~~~~~~~~~~~~~~~~~~
-my_theme <- theme(legend.position = "none",
-                  plot.title = element_text(hjust = 0.5, face = 'bold'),
-                  legend.title = element_blank(),
+my_theme <- theme(plot.title = element_text(hjust = 0.5, face = 'bold'),
                   axis.text.x = element_text(colour = "grey20", margin = margin(t = 10)),
                   axis.text.y = element_text(colour = "grey20", margin = margin(r = 10)),
                   axis.title = element_text(face = "bold", colour = "black", size = 16),
                   strip.background = element_rect(fill = 'white'),
                   legend.background = element_rect(fill = "transparent", colour = NA),
                   legend.box.background = element_rect(fill = "transparent", colour = NA),
+                  panel.grid.major.y = element_line(linetype = 'dotted'),
+                  panel.grid.major.x = element_line(linetype = 'dotted'),
                   axis.line = element_line(color = "black"),
                   plot.margin = margin(5, 10, 5, 5))
 
@@ -40,7 +44,8 @@ my_theme <- theme(legend.position = "none",
 #~~~~~~~~~~~~~~~~~
 # Input padrão
 #~~~~~~~~~~~~~~~~~
-CRS <- 4326 #Coordenada padrão (WGS84 - long/lat)
+CRS_wgs <- 4326 #Coordenada padrão (WGS84 - long/lat)
+CRS_lea <- "+proj=laea +lat_0=-25 +lon_0=-20 +datum=WGS84 +units=m +no_defs" #Projeção LEA centrada no AS
 
   
 
@@ -78,7 +83,7 @@ ggplot(data = world) +
 
 ## Recortando mapa mundi para área de estudo (South Atlantic Ocean - SAO)
 extent_bbox <- st_bbox(c(xmin = -70, xmax = -12,  ymin = -50, ymax = 5), 
-                       crs = st_crs(4326)) #Definindo área de recorte
+                       crs = CRS_wgs) #Definindo área de recorte
 
 sao <- st_crop(world, extent_bbox) #Recortando para SAO 
 
@@ -134,7 +139,7 @@ levels(df$MonthYear) #Sanity check
 # CUIDADO: a função st_as_sf NÃO reprojeta dados; apenas informa a projeção original na qual as coordenadas dos dados foram coletadas.
 dfsp <- st_as_sf(df, 
                  coords = c('Long','Lat'), 
-                 crs = CRS) #As coordenadas estão originalmente em LAT/LONG; portanto, usar primeiro o CRS padrão (WGS84)
+                 crs = CRS_wgs) #As coordenadas estão originalmente em LAT/LONG; portanto, usar primeiro o CRS padrão (WGS84)
 
 class(dfsp)
 head(as.data.frame(dfsp))
@@ -151,8 +156,9 @@ ggplot(dfsp) +
 # 2.6) Removendo registros em terra
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #dfsp2 <- st_filter(dfsp , sao, .predicate = st_disjoint)
-dfsp2 <- dfsp2[lengths(st_intersects(dfsp2, sao)) == 0,] 
-#rmvd <- dfsp2[lengths(st_intersects(dfsp2, sao)) == 1,] #Points em terra
+dfsp2 <- dfsp[lengths(st_intersects(dfsp, sao)) == 0,] 
+#rmvd <- dfsp[lengths(st_intersects(dfsp, sao)) == 1,] #Points em terra
+
 
 ## Visualizando
 ggplot(dfsp2) +
@@ -203,25 +209,114 @@ mean(dfsp2$Prionace_glauca == 0) #Proporção de zeros; ok
 
 
 
-# 3.1) Dinâmica espacial
+# 3.2) Dinâmica espacial
 #~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Bubbleplot
 ggplot() +
-  geom_sf(data = dfsp2, aes(size = Prionace_glauca, color = Prionace_glauca), alpha = 0.5) +
+  geom_sf(data = dfsp2, aes(size = Prionace_glauca, color = Prionace_glauca), alpha = 0.5) + #Thunnus_albacares, Istiophorus_albicans
   geom_sf(data = sao, fill = "gray40", color = "white") +
+  scale_color_viridis_c(option = "D") +
+  guides(size = "none") +
+  theme_light() 
+
+### Bubbleplot interativo
+mapview(dfsp2,
+        zcol = "Prionace_glauca",
+        cex = "Prionace_glauca",
+        layer.name = "Abundância do tubarão azul")
+
+
+
+
+## Gridplot
+# O último gráfico, embora útil para explorar espacialmente os dados, é pouco prático
+# em contextos cujos dados possuem muitas amostragens! 
+# Nesses casos, pode-se agregar as amostras em um grid espacial:
+
+### Reprojetando os dados 
+dfsp2_r <- st_transform(dfsp2, crs = CRS_lea) 
+
+### Definindo os limites do grid com base nos valores min/max das coordenadas
+coords <- st_coordinates(dfsp2_r) #Extraindo as coordenadas do objeto sf
+head(coords) #X=longitude, Y=latitude
+
+xmin <- floor(min(coords[, 1]))
+xmax <- ceiling(max(coords[, 1]))
+ymin <- floor(min(coords[, 2]))
+ymax <- ceiling(max(coords[, 2]))
+
+### Definindo resolução do grid (medido na mesma unidade do CRS - ie., metros)
+RES <- 200*10^3 #Grid de 200 x 200 km
+
+
+grid <- st_make_grid(st_bbox(c(xmin = xmin, ymin = ymin, xmax = xmax, ymax = ymax), crs = CRS_lea),
+                     cellsize = c(RES, RES), #Resolução do grid
+                     what = "polygons",
+                     square = T) %>% #square=F -> grid hexagonal
+         st_sf() %>% 
+         mutate(grid_id = 1:nrow(.)) #Preservando
+
+class(grid)
+head(grid)
+
+### Curiando...
+ggplot() +
+  geom_sf(data = grid, fill = NA) + 
+  geom_sf(data = st_transform(sao, crs = CRS_lea), fill = "gray40", color = "white") +
   scale_color_viridis_c(option = "D") +
   guides(size = "none") +
   theme_light() 
 
 
 
+### Juntando o grid ao banco de dados
+dfgr <- st_join(dfsp2_r, grid)
+dim(dfgr)[1] == dim(dfsp2_r)[1] #Sanity check
+head(as.data.frame(dfgr))
+plot(table(dfgr$grid_id))
+
+dp <- length(unique(dfgr$grid_id))
+gp <- length(unique(grid$grid_id))
+
+print(paste("Os pontos amostrais interceptam", dp, "células de um total de", gp, "células"))
+
+
+### Agregando os dados a nível de grid
+dfgr$grid_id <- as.factor(dfgr$grid_id) #Obrigatório!
+grid$grid_id <- as.factor(grid$grid_id) #Obrigatório!
+
+aggregated <- dfgr %>% 
+              st_drop_geometry() %>% #Remove temporariamente a geometria dos dados - processamento mais rápido!
+              group_by(grid_id) %>% 
+              summarize(Ntot = sum(Prionace_glauca),
+                        Navg = median(Prionace_glauca)) %>% #Caso processo demore: aplicar st_drop_geometry()
+              full_join(., grid, by = "grid_id") %>%  #Recuperando a geometria dos dados
+              st_as_sf()
+
+
+head(aggregated)
+
+### Visualizando 
+ggplot() +
+  geom_sf(data = aggregated, aes(fill = Navg), color = "gray90") +
+  #geom_sf(data = aggregated, aes(fill = log1p(Navg)), color = "gray90") + #Plotando na escala log
+  geom_sf(data = st_transform(sao, crs = CRS_lea), fill = "gray40", color = "white") +
+  scale_fill_viridis_c(na.value="white") +
+  theme_minimal()
+
+
+### Visualização dinâmica
+mapview(st_transform(aggregated, crs = CRS_wgs),
+        zcol = "Navg")
 
 
 
+# 3.3) Dinâmica temporal
+#~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# 2.3) Distribuição temporal das amostras 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Distribuição temporal das amostras (amostra = pescaria)
 # Importante para correlação temporal
-# amostra = pescaria
 table(df$Year)
 table(df$Month)
 table(df$Year, df$Month)
@@ -244,21 +339,20 @@ df %>%
 
 
 
-# 2.4) Distribuição temporal das capturas
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Dinâmica temporal do tubarão-azul
 
-## 2.4.1) Dinâmica anual
+#### Dinâmica anual
 p3 <- ggplot(df, aes(x = Year, y = Prionace_glauca)) +
-  geom_boxplot(fill = "#e07a5f", alpha =.7) +
-  theme_bw(base_size = 14) +
-  labs(x = "Ano",y = "Abundância total (N)")  
+      geom_boxplot(fill = "#e07a5f", alpha =.7) +
+      theme_bw(base_size = 14) +
+      labs(x = "Ano",y = "Abundância total (N)")  
 
 
-## 2.4.2) Dinâmica mensal (há sazonalidade?)
+#### Dinâmica mensal (há sazonalidade?)
 p4 <- ggplot(df, aes(x = Month, y = Prionace_glauca)) +
-  geom_boxplot(fill = "#e07a5f", alpha =.7) +
-  theme_bw(base_size = 14) +
-  labs(x = "Mês",y = "Abundância total (N)")  
+      geom_boxplot(fill = "#e07a5f", alpha =.7) +
+      theme_bw(base_size = 14) +
+      labs(x = "Mês",y = "Abundância total (N)")  
 
 
 ### Visualizando...
@@ -266,7 +360,7 @@ p3 + p4
 
 
 
-## 2.4.3) Dinâmica mensal (há sazonalidade?)
+### Dinâmica temporal da série histórica
 p5 <- df %>% 
       group_by(MonthYear) %>% 
       dplyr::summarize(Ntot = sum(Prionace_glauca)) %>% 
@@ -301,6 +395,22 @@ p5 / p6
 
 
 
-# 2.5) Distribuição espacial das capturas
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+# 3.4) Dinâmica espaço-temporal
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Bubbleplot
+ggplot() +
+  geom_sf(data = dfsp2, aes(size = Prionace_glauca, color = Prionace_glauca), alpha = 0.5) + #Thunnus_albacares, Istiophorus_albicans
+  geom_sf(data = sao, fill = "gray40", color = "white") +
+  #facet_wrap(Year ~ .) +
+  #facet_wrap(Month ~ .) +
+  facet_wrap(Year ~ Month) +
+  scale_color_viridis_c(option = "D") +
+  guides(size = "none") +
+  theme_bw() +
+  my_theme
+
+
+gganimate::transition_time(Date) +
+  
