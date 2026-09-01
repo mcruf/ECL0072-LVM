@@ -71,7 +71,7 @@ Leitura:
 
 A maioria dos dados ecológicos apresenta algum grau de estrutura espacial
 
-- .small-text2[**Primeira lei da Geografia:** *Tudo está relacionado a todas as outras coisas, mas coisas próximas estão mais relacionadas do que coisas distantes*]
+- .small-text2[**Primeira lei da Geografia:** *Tudo está relacionado a todas as outras coisas, mas coisas próximas estão mais relacionadas do que coisas distantes (Tobler, 1970)*]
 
 
 
@@ -84,25 +84,41 @@ knitr::include_graphics("../Figuras/spatial_dependency.png")
 
 ### Padrões espaciais
 
+
+.pull-left[
+
+<br>
+<br>
+
 Muitos padrões ecológicos podem ser descritos como manchas (*patches*) ou gradientes (lineares ou não)
 
-- Examinar os padrões espaciais de espécies (ou comunidades) permite compreender os mecanismos que controlam suas distribuições
 
+- Examinar os padrões espaciais de espécies (ou comunidades) permite compreender os mecanismos que controlam suas distribuições
+  
+  - Determinado por forçantes externos (abióticos) e/ou internos (bióticos) 
+
+
+]
+
+.pull-right[
+
+```{r, out.width ="85%"}
+knitr::include_graphics("../Figuras/biotic_vs_abiotic_factors.png")
+```
+
+]
 
 ---
 # PPGECO | ECL0072 | out. 2026
 
-### Padrões espaciais
+### Padrões espaciais | .small-text[<span style="color: #e07a5f;">Escalas</span>]
 
-Muitos padrões ecológicos podem ser descritos como manchas (*patches*) ou gradientes (lineares ou não)
-
-- Examinar os padrões espaciais de espécies (ou comunidades) permite compreender os mecanismos que controlam suas distribuições
-
-----
 
 Padrões espaciais podem ser encontrados em todas as escalas espaciais 
 
 --
+
+<br>
 
 <div style="height: 7px;"></div>
 
@@ -118,17 +134,14 @@ knitr::include_graphics("../Figuras/spatial_dependency_small-scale.png")
 ---
 # PPGECO | ECL0072 | out. 2026
 
-### Padrões espaciais
+### Padrões espaciais | .small-text[<span style="color: #e07a5f;">Escalas</span>]
 
-Muitos padrões ecológicos podem ser descritos como manchas (*patches*) ou gradientes (lineares ou não)
 
-- Examinar os padrões espaciais de espécies (ou comunidades) permite compreender os mecanismos que controlam suas distribuições
-
-----
 
 Padrões espaciais podem ser encontrados em todas as escalas espaciais 
 
 
+<br>
 
 <div style="height: 7px;"></div>
 
@@ -143,17 +156,12 @@ knitr::include_graphics("../Figuras/spatial_dependency_regional-scale.png")
 ---
 # PPGECO | ECL0072 | out. 2026
 
-### Padrões espaciais
+### Padrões espaciais | .small-text[<span style="color: #e07a5f;">Escalas</span>]
 
-Muitos padrões ecológicos podem ser descritos como manchas (*patches*) ou gradientes (lineares ou não)
-
-- Examinar os padrões espaciais de espécies (ou comunidades) permite compreender os mecanismos que controlam suas distribuições
-
-----
 
 Padrões espaciais podem ser encontrados em todas as escalas espaciais 
 
-
+<br>
 
 <div style="height: 7px;"></div>
 
@@ -161,9 +169,96 @@ Padrões espaciais podem ser encontrados em todas as escalas espaciais
 .center[.small-text2[**ESCALA GLOBAL**]]
 
 
-```{r, out.width ="65%"}
+```{r, out.width ="70%"}
 knitr::include_graphics("../Figuras/spatial_dependency_large-scale.png")
 ```
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Padrões espaciais | .small-text[<span style="color: #e07a5f;">Desenho amostral</span>]
+
+A identificação de padrões espaciais também depende fortemente da forma como os dados são coletados, i.e., *desenho amostral*
+
+
+.pull-left[
+
+<br>
+
+.small-text[
+
+**Extensão (*extent*)**
+
+- Área total coberta pelo estudo
+- Deve ser suficientemente grande para abranger o processo ecológico de interesse
+
+  ]
+  
+----
+
+.small-text[
+
+**Resolução espacial (*grain*)**
+- Tamanho da unidade amostral (quadrante, parcela, pixel, transecto, etc.)
+- Determina o nível de detalhe observado
+
+]
+
+----
+
+.small-text[
+**Intervalo amostral**
+- Distância média entre unidades amostrais (espacial ou temporal)
+- Define quais escalas de dependência espacial (e temporal) poderão ser detectadas
+
+]
+  
+  
+]
+
+.pull-right[
+
+```{r, out.width ="45%"}
+knitr::include_graphics("../Figuras/sampling_scheme.png")
+```
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Padrões espaciais | .small-text[<span style="color: #e07a5f;">Desenho amostral</span>]
+
+<br>
+
+
+
+.pull-left[
+
+```{r, out.width ="90%"}
+knitr::include_graphics("../Figuras/sampling_local_vs_regional.png")
+```
+
+
+]
+
+
+.pull-right[
+..gray-box-small[
+
+.center[ **Todo desenho amostral impõe um "filtro" ao processo ecológico** ]
+
+<br>
+A forma como os dados são coletados determina quais padrões poderão ser detectados e, por consequência, quais hipóteses ecológicas poderão ser avaliadas
+
+<br>
+<br>
+
+]
+
+]
+
+
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -181,16 +276,6 @@ Dados ecológicos resultam naturalmente de processos espaciais aninhados e mutua
 knitr::include_graphics("../Figuras/spatial_dependency_all-scales.png")
 ```
 
-
-
-
----
-# PPGECO | ECL0072 | out. 2026
-
-### Padrões espaciais
-
-
-“Spatial patterns usually result from a mixture of both exogenous (‘induced’) and endogenous (‘inherent’) processes, resulting in spatial dependence among organisms. ”
 
 
 ---
