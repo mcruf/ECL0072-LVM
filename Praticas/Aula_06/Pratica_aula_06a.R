@@ -346,8 +346,10 @@ moran.plot(dfsp2_r$Prionace_glauca, listw)
 # LISA: local indicatiors of spatial association
 # Decompõe o índice global em índices locais (i.e., para cada ponto amostral).
 # Permite identificar onde ocorrem clusters significativos de alta captura (hotspots), de baixa captura (coldspots) ou discrepâncias espaciais (outliers espaciais)
+#  alternative = "greater": Testando  H_0 (autocorrelação espacial nula ou negativa) vs. H_1 (autocorrelação espacial positiva)
 
-local_moran <- localmoran(dfsp2_r$Prionace_glauca, listw) # Caclulando os índices locais
+
+local_moran <- localmoran(dfsp2_r$Prionace_glauca, listw, alternative = "greater") # Calculando os índices locais;
 dim(local_moran)
 head(local_moran)
 

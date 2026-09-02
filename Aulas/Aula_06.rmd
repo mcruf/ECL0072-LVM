@@ -208,10 +208,11 @@ A identificação de padrões espaciais também depende fortemente da forma como
 
 .small-text[
 **Intervalo amostral**
-- Distância média entre unidades amostrais (espacial ou temporal)
-- Define quais escalas de dependência espacial (e temporal) poderão ser detectadas
+- Distância entre unidades amostrais (espacial ou temporal)
+- Determina as menores escalas espaciais (ou temporais) que podem ser detectadas
 
 ]
+
   
   
 ]
@@ -223,6 +224,9 @@ knitr::include_graphics("../Figuras/sampling_scheme.png")
 ```
 
 ]
+
+
+.footnote[ O tamanho amostral $N$ influencia o poder estatístico e a precisão na estimativa da estrutura de dependência espacial]
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -243,15 +247,20 @@ knitr::include_graphics("../Figuras/sampling_local_vs_regional.png")
 ]
 
 
+<br>
+<br>
+
 .pull-right[
-..gray-box-small[
+.gray-box-small[
 
 .center[ **Todo desenho amostral impõe um "filtro" ao processo ecológico** ]
 
 <br>
-A forma como os dados são coletados determina quais padrões poderão ser detectados e, por consequência, quais hipóteses ecológicas poderão ser avaliadas
 
-<br>
+<div style="text-align: justify;">
+A forma como os dados são coletados determina quais padrões poderão ser detectados e, por consequência, quais hipóteses ecológicas poderão ser avaliadas!
+</div>
+
 <br>
 
 ]
@@ -275,6 +284,184 @@ Dados ecológicos resultam naturalmente de processos espaciais aninhados e mutua
 ```{r, out.width ="85%"}
 knitr::include_graphics("../Figuras/spatial_dependency_all-scales.png")
 ```
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Autocorrelação espacial
+
+O termo *autocorrelação espacial* é usado para descrever o grau que uma variável está correlacionada consigo mesma ao longo do espaço
+
+
+<br>
+<br>
+
+
+```{r, out.width ="80%"}
+knitr::include_graphics("../Figuras/spatial_autocorrelation_types.png")
+```
+
+--
+
+<br>
+
+> <span style="color: #e07a5f;">Permite avaliar como o processo ecológico está estruturado espacialmente</span>
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Autocorrelação espacial
+
+
+- Falar sobre 1a e 2a ordem
+
+- Falar sobre isotropia e anisotropia
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Autocorrelação espacial
+
+A autocorrelação espacial pode ser avaliada por meio de funções que quantificam a dependência espacial 
+  - Correlogramas
+  - Variogramas
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Autocorrelação espacial | .small-text[<span style="color: #e07a5f;">Correlograma</span>]
+
+
+Um correlograma espacial é um gráfico que descreve como a correlação entre observações varia em função da distância (e, eventualmente, da direção) que as separa. 
+
+<br>
+
+  - Pode ser calculado para um dado univariado
+    - **Índice de Moran I**
+    - Índice de Geary C
+
+<br>
+
+  - Também pode ser calculado para dados multivariados
+    - Mantel 
+
+--
+
+<br>
+
+> <span style="color: #e07a5f;">Permite identificar a estrutura, intensidade e escala da autocorrelação espacial presente nos dados</span>
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Autocorrelação espacial | .small-text[<span style="color: #e07a5f;">Correlograma</span>]
+
+#### Global Moran's I
+
+Avalia se locais próximos tendem a apresentar valores semelhantes (ou diferentes) em relação ao que seria esperado ao acaso
+- Quantifica o grau de autocorrelação espacial de uma variável
+
+<br>
+
+$$\large I = \frac{n \sum\limits_{i=1}^{n} \sum\limits_{j=1}^{n} w_{ij}(Y_i - \bar Y)(Y_j - \bar Y)}
+{(\sum_{i \neq j} w_{ij}) \sum_i (Y_i - \bar Y)^2}$$
+
+
+onde:
+- $n$: número de pontos (i.e., amostras)
+- $Y_i, Y_j$: valor da variável resposta nos pares de ponto $i$ e $j$
+- $\bar Y$: média da variável resposta
+- $w_{i,j}$: pesos que quantificam a proximidade espacial entre os pontos $i$ e $j$ 
+  - $i,j = 1, ...n$
+  - $w_{i,i} = 0$
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Autocorrelação espacial | .small-text[<span style="color: #e07a5f;">Correlograma</span>]
+
+#### Global Moran's I
+
+Avalia se locais próximos tendem a apresentar valores semelhantes (ou diferentes) em relação ao que seria esperado ao acaso
+- Quantifica o grau de autocorrelação espacial de uma variável
+
+<br>
+
+
+.pull-left[
+
+```{r, out.width ="100%", fig.align='right'}
+knitr::include_graphics("../Figuras/spatial_autocorrelation_MoranI.png")
+```
+
+]
+
+
+.pull-right[
+
+<br>
+
+
+Normalmente, $-1 < \text{Moran's I} < +1$ 
+
+- .small-text[**Autocorrelação positiva:**] $\small I > 0$
+- .small-text[**Autocorrelação negativa:**] $\small I < 0$
+- .small-text[**Sem autocorrelação:**] $\small I = 0$
+
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Autocorrelação espacial | .small-text[<span style="color: #e07a5f;">Correlograma</span>]
+
+#### Global Moran's I
+
+Os correlogramas são analisados principalmente pelos seus formatos
+  - Indicativo da estrutura espacial dos dados
+
+
+
+```{r, out.width= "100%"}
+knitr::include_graphics("../Figuras/Correlograms.png")
+```
+
+
+
+
+.footnote[Figuras: Legendre and Legendre (1998)]
+
+---
+
+### Autocorrelação espacial | .small-text[<span style="color: #e07a5f;">Correlograma</span>]
+
+#### Local Moran's I
+
+
+Representa a decomposição do global Moran's I para cada ponto amostral
+- Permite mapear aonde a autocorrelação espacial está concentrada
+  - Identificar *hotspots* e *coldspots*
+
+
+<br>
+
+
+$$\large I_i = \frac{n (Y_i - \bar Y)}{\sum (Y_j - \bar Y)^2} \sum\limits_{j=1}^{n} w_{ij}(Y_j - \bar Y).$$
+
+
+
+
+---
+- Similarly, a variogram is a graph in which semi-variance is plotted, on the ordinate, against distance classes among sites on the abscissa (Subsection3). Statistical models may be fitted to variograms (linear, exponential, spherical, Gaussian, etc.); they allow the investigator to relate the observed structure to hypothesized generating processes or to produce interpolated maps by kriging
+
+Because they measure the relationship between pairs of observation points located a certain distance apart, correlograms and variograms may be computed either for preferred geographic directions or, when the phenomenon is assumed to be isotropic in space, in an all-directional way.
 
 
 
@@ -334,34 +521,7 @@ This material may be protected by copyright.
   - Internal forces: population dynamics and/or top-down/bottom-up biotic interactions
 
 
-- Scale is a key concept in both sampling design and the analysis of spatial (or temporal) patterns. 
-  - In sampling theory (Fig. 13.1), spatial scale encompasses three elements of the sampling design:
-    - Grain size is the size of the elementary sampling units. It may be expressed as the diameter, surface or volume of matter supporting the measurements. In time series analysis, it is the duration over which measurements are integrated. The resolution of a study (Schneider, 1994) is equal to the grain size of its sampling design.
-    - Sampling interval is the average distance between neighbouring sampling units. It is called lag in time series analysis. For fixed extent, the sampling interval is a function of n, the number of sampling units. In turn, n is determined by the total effort that can be allocated to sampling.
-    - Extent is the total length, area or volume included in the study, or the total duration of the time series. It is called range by Schneider (1994) who also defines the scope as the ratio of the extent to the grain size.
 
-- The scale of the sampling design should follow from what is known (e.g. from a pilot study) about the scale of the pattern or process, and from the ecological question being addressed.
-
-- The extent and grain define the observation window in spatial pattern analysis. No structure can be detected which is smaller than the grain or larger than the extent of a study.
-
----
-### Objetivos de mapear a distribuição
-
-
-
-
----
-
-### Autocorrelação espacial
-
-Spatial structures may be described through structure functions, which allow one to quantify the spatial dependency and partition it amongst distance classes.
-- The most commonly used structure functions are correlograms, and variograms
-
-- A correlogram is a graph in which autocorrelation values are plotted, on the ordinate, against distance classes among sites on the abscissa. Correlograms (Cliff & Ord 1981) can be computed for single variables (Moran’s I or Geary’s c autocorrelation coefficients, Subsection1) or for multivariate data (Mantel correlogram, Subsection 5); 
-
-- Similarly, a variogram is a graph in which semi-variance is plotted, on the ordinate, against distance classes among sites on the abscissa (Subsection3). Statistical models may be fitted to variograms (linear, exponential, spherical, Gaussian, etc.); they allow the investigator to relate the observed structure to hypothesized generating processes or to produce interpolated maps by kriging
-
-Because they measure the relationship between pairs of observation points located a certain distance apart, correlograms and variograms may be computed either for preferred geographic directions or, when the phenomenon is assumed to be isotropic in space, in an all-directional way.
 
 ---
 
@@ -379,18 +539,6 @@ Spatial autocorrelation coefficients can be tested for significance and confiden
 
 Moran’s I and Geary’s c are sensitive to extreme values and, in general, to asymmetry in the data distributions, as are the related Pearson’s r and Euclidean distance coefficients. Asymmetry increases the variance of the data.
 The tests require that the condition of second-order stationarity be satisfied. This rather strong condition states that the expected value (mean) and spatial covariance (numerator of eq. 13.1) of the variable is the same all over the study area, and the variance (denominator of eq. 13.1) is finite. 
-
----
-
-### Interpretation of all-directional correlograms
-
-When the autocorrelation function is the same for all geographic directions considered, the phenomenon is said to be isotropic. Its opposite is anisotropy. When a variable is isotropic, a single correlogram may be computed over all directions of the study area.
-
-
-```{r, out.width= "100%"}
-knitr::include_graphics("../Figuras/Correlograms.png")
-```
-
 
 
 ---
@@ -439,7 +587,3 @@ Estruturas de Dependência nos Dados Ecológicos
 
 
 ---
-
-# Leitura
-
-- Cap. 13 - Legendre & Legendre (1998). Numerical ecology. 2nd ed.
