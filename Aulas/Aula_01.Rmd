@@ -1,9 +1,9 @@
 ---
-title: "Modelos espaço-temporais dados ecológicos (ECL0072)"
-subtitle: "Aula 01: LM & RMarkdown"
+title: "MODELOS ESPAÇO-TEMPORAIS PARA DADOS ECOLÓGICOS (ECL0072)"
+subtitle: "AULA 01: MODELOS LINEARES"
 author: "Marie-Christine Rufener"
-#institute: "macrufener@gmail.com"
-#date: "2016/12/12 (updated: `r Sys.Date()`)"
+institute: "macrufener@gmail.com"
+date: "Out / 2026"
 output:
   xaringan::moon_reader:
     seal: false
@@ -19,128 +19,114 @@ output:
 
 ```{r xaringan-themer, include=FALSE, warning=FALSE}
 
-#~~~~~~~~~~~~~~~~~
-# Load packages
-#~~~~~~~~~~~~~~~~~
-library(xaringanthemer)
-library(kableExtra)
-library(dplyr)
 
+#~~~~~~~~~~~~~~~~~~~~~~
+# Default knitr iputs
+#~~~~~~~~~~~~~~~~~~~~~~
 
-# Define Metropolis colors
-inverse_slide <- "#dedbd2" #e3d5ca, dedbd2
-metropolis_dark  <- "#242423" 
-metropolis_accent <- "#d5bdaf" #d4a373, d5bdaf, 778da9, 415a77
+source("../Scripts/Setup/setup_knitr.R")
 
-style_xaringan(
-  # Base settings
-  background_color = "#FAFAFA",
-  text_color       = metropolis_dark,
-  header_color     = "#846267", #6b705c
-  
-  # Typography matching Metropolis
-  header_font_google = google_font("Josefin Sans", "500"),
-  
-  text_font_google   = google_font("Josefin Sans", "350", "350i", "300"),
-  code_font_google   = google_font("Fira Mono"),
-  
-  # Inject explicit CSS rules for the top Metropolis header bar
-  extra_css = list(
-    # Create the horizontal top banner box on every standard slide
-    ".remark-slide-content" = list(
-      "padding-top" = "80px", # Keeps text from hitting the banner
-      "background-image" = paste0("linear-gradient(to bottom, ", metropolis_accent, " 60px, transparent 60px)")
-    ),
-    # Ensure titles render in white text sitting perfectly on top of the banner
-    ".remark-slide-content h1" = list(
-      "position" = "absolute",
-      "top" = "15px",
-      "left" = "40px",
-      "color" = "#FFFFFF",
-      "margin" = "0",
-      "font-size" = "35px"
-    ),
-    
-    # Styled block for inverse/dark divider slides
-    ".inverse" = list(
-      "background-color" = inverse_slide,
-      "background-image" = "none", # Overwrite top bar style for dark slides
-      "color" = "#FFFFFF"
-    ),
-    # Keep title slides clean of the standard top bar
-    ".title-slide" = list(
-      "background-image" = "none",
-      "padding-top" = "100px"
-    )
-  )
-)
+#~~~~~~~~~~~~~~~~~~~~~~
+# Slide customization
+#~~~~~~~~~~~~~~~~~~~~~~
+source("../Scripts/Setup/setup_slides.R")
 
 
 ```
 
+class: title-slide
+<div class="title-block">
+  <h1>`r rmarkdown::metadata$title`</h1>
+  <div class="date-text">`r rmarkdown::metadata$date`</div>
+</div>
 
-class: inverse, center, middle
-background-image: url(figs/image.png)
-background-size: cover
+<div class="subtitle-block">
+  <h2>`r rmarkdown::metadata$subtitle`</h2>
+  <p class="author-name">`r rmarkdown::metadata$author`</p>
+  <p class="author-email"><u>`r rmarkdown::metadata$institute`</u></p>
+</div>
 
-Title slide
-
-### using xaringan
-
-.large[Marie-Christine Rufener | PPGECO-UFRN | 9 July 2020]
+<img src="../Figuras/logo_ppgeco2.svg" class="cover-logo">
 
 ---
-
-# Estrutura do curso
-
+# PPGECO | ECL0072 | out. 2026
 
 
-.pull-left[
-### Ementa
+### Estrutura do curso
 
-**Semana 1**
-- **19/10 -** Modelos lineares e suas extensões
-- **20/10 -** Inferência Bayesiana: conceitos básicos
-- **21/10 -** Inferência Bayesiana: XYZ
+#### Ementa
+
+
+.small-text2[
+
+.center[**SEMANA 1**]
+<br>
+
+- **19/10 -** Modelos lineares 
+- **20/10 -** Fundamentos de inferência estatística: frequentista vs. bayesiana
+- **21/10 -** Modelagem bayesiana 
 - **22/10 -** Modelos lineares mistos (LMM)
 - **23/10 -** Modelos lineares/aditivos generalizados mistos (GLMM/GAMM)
 
+]
+
+
+
 ------
 
-**Semana 2**
-- **26/10 -** Modelos espaciais
-- **27/10 -** Modelos espaciais
-- **28/10 -** Modelos temporais & espaço-temporais
-- **29/10 -** Mapas no R & dúvidas projeto
-- **30/10 -** Apresentação de posters
-]
+<br>
 
+.small-text[
 
-.pull-right[
+.center[**SEMANA 2**]
 
-### Horário
-**8h00 - 12h00** (20 min de intervalo)
-- 1h30-2h: aula teórica
-- 1h30: prática guiada
-
-
--------
-
-### Avaliação
-Entrega de projeto & apresentação de trabalho (grupos de 3-4 pessoas)
+<br>
+- **26/10 -** Fundamentos de estatística espacial & GIS
+- **27/10 -** Modelos espaciais (via R-INLA)
+- **28/10 -** Modelos espaço-temporais (via R-INLA)
+- **29/10 -** Trabalho dos projetos em sala de aula; 
+- **30/10 -** Apresentação dos projetos
 
 ]
+
 
 ---
+# PPGECO | ECL0072 | out. 2026
 
-# Filosofia da aula
 
-### Índice HBC
+### Estrutura do curso
+
+#### Avaliação
+Entrega de projeto & apresentação de trabalho (grupos de 3-4 pessoas)
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Filosofia da aula
 
 <br>
+
+#### .center[Índice HBC]
+
 <br>
 
+--
 
-```{r, out.width = "100%", echo=F, fig.align='center'}
+```{r, out.width = "70%"}
 knitr::include_graphics("../Figuras/Indice_HBC.png")
 ```
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Uma jornada estatística
+
+```{r, out.width = "70%"}
+knitr::include_graphics("../Figuras/stat_and_rock.png")
+```
+
+
+---
