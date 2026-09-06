@@ -1,6 +1,6 @@
 ---
 title: "MODELOS ESPAÇO-TEMPORAIS PARA DADOS ECOLÓGICOS (ECL0072)"
-subtitle: "AULA 06: ESTATÍSTICA ESPACIAL"
+subtitle: "AULA 06: FUNDAMENTOS DE ESTATÍSTICA ESPACIAL & GIS"
 author: "Marie-Christine Rufener"
 institute: "macrufener@gmail.com"
 date: "Out / 2026"
@@ -62,6 +62,12 @@ class: title-slide
 
 Leitura:
 - Cap. 13 - Legendre & Legendre. Numerical ecology
+
+
+```{r, out.width ="70%"}
+knitr::include_graphics("../Figuras/spatial_stat_books.png")
+```
+
 
 
 ---
@@ -337,7 +343,7 @@ A autocorrelação espacial pode ser avaliada por meio de funções que quantifi
 ### Autocorrelação espacial | .small-text[<span style="color: #e07a5f;">Correlograma</span>]
 
 
-Um correlograma espacial é um gráfico que descreve como a correlação entre observações varia em função da distância (e, eventualmente, da direção) que as separa. 
+Um correlograma espacial é um gráfico que descreve como a correlação entre observações varia em função da distância (e, eventualmente, da direção) que as separa
 
 <br>
 
@@ -369,10 +375,12 @@ Avalia se locais próximos tendem a apresentar valores semelhantes (ou diferente
 
 <br>
 
+.gray-box-small[
 $$\large I = \frac{n \sum\limits_{i=1}^{n} \sum\limits_{j=1}^{n} w_{ij}(Y_i - \bar Y)(Y_j - \bar Y)}
 {(\sum_{i \neq j} w_{ij}) \sum_i (Y_i - \bar Y)^2}$$
+]
 
-
+.small-text[
 onde:
 - $n$: número de pontos (i.e., amostras)
 - $Y_i, Y_j$: valor da variável resposta nos pares de ponto $i$ e $j$
@@ -381,6 +389,7 @@ onde:
   - $i,j = 1, ...n$
   - $w_{i,i} = 0$
 
+]
 ---
 # PPGECO | ECL0072 | out. 2026
 
@@ -439,128 +448,645 @@ knitr::include_graphics("../Figuras/Correlograms.png")
 .footnote[Figuras: Legendre and Legendre (1998)]
 
 ---
+# PPGECO | ECL0072 | out. 2026
 
 ### Autocorrelação espacial | .small-text[<span style="color: #e07a5f;">Correlograma</span>]
 
 #### Local Moran's I
 
 
-Representa a decomposição do global Moran's I para cada ponto amostral
+Representa a decomposição global do Moran's I para cada ponto amostral
+- Também conhecido por *Local Indicators of Spatial Association* (LISA)
 - Permite mapear aonde a autocorrelação espacial está concentrada
-  - Identificar *hotspots* e *coldspots*
+    - Identificar *hotspots* e *coldspots*
+
+
+
+<br>
+
+.gray-box-small[
+$$\large I_i = \frac{n (Y_i - \bar Y)}{\sum (Y_j - \bar Y)^2} \sum\limits_{j=1}^{n} w_{ij}(Y_j - \bar Y).$$
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Autocorrelação espacial | .small-text[<span style="color: #e07a5f;">Correlograma</span>]
+
+#### Local Moran's I
+
+<br>
+
+```{r, out.width= "100%"}
+knitr::include_graphics("../Figuras/moran_scatterplot.png")
+```
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Autocorrelação espacial | .small-text[<span style="color: #e07a5f;">Variograma</span>]
+
+
+O variograma é um gráfico que descreve como a diferença entre observações aumenta com a distância espacial
+.small-text2[  
+- **Correlograma:** mede a *similaridade* entre observações vizinhas
+- **Variograma:** mede a *dissimilaridade* entre observações vizinhas
+]
+
+
+.pull-left[
+
+<br>
+
+.gray-box-small[ 
+$$\gamma(h) = \frac{1}{2N(h)} \sum\limits_{i=1}^{N(h)} (y_i-y_{i+h})^2$$
+]
+<br>
+
+.small-text[
+onde:
+- $h$: distância entre os pares de ponto $(i, ~ i+h)$ (*lag*)
+- $N(h)$: número de pares de pontos separados pela distância $h$
+- $\gamma(h)$: variância descrita em função da distância
+]
+
+]
+
+.pull-right[
+
+
+```{r, out.width= "100%"}
+knitr::include_graphics("../Figuras/variogram.png")
+```
+
+.center[<span style="font-size: 50%;">**Modelo esférico**</span>]
+
+
+
+$$\scriptsize \gamma(h) = 
+\begin{cases} 
+C_0 + C \left[ \frac{3}{2}\left(\frac{h}{a}\right) - \frac{1}{2}\left(\frac{h}{a}\right)^3 \right], & \text{se } h \le a \\ 
+C_0 + C, & \text{se } h > a 
+\end{cases}$$
+
+
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Autocorrelação espacial | .small-text[<span style="color: #e07a5f;">Variograma</span>]
+
+
+A estrutura de dependência espacial dos dados pode ser descrita por diferentes modelos de variograma
+- Função é posteriromente incorporada ao modelo estatístico (espacial) 
+  - Fornece os pesos estatísticos para a interpolação (i.e., krigagem)
+
+
+
+<br>
+
+```{r, out.width="70%"}
+knitr::include_graphics("../Figuras/variogram_models.png")
+```
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Estatística espacial 
+
+
+```{r, out.width="70%"}
+knitr::include_graphics("../Figuras/grf2.png")
+```
+
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### Estatística espacial | .small-text[<span style="color: #e07a5f;">Tipos de dados</span>]
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Sistema de Informação Geográfica (SIG<sup>1</sup> )
+
+Trabalhar com dados espacializados exige domínio (mínimo) de SIG
 
 
 <br>
 
 
-$$\large I_i = \frac{n (Y_i - \bar Y)}{\sum (Y_j - \bar Y)^2} \sum\limits_{j=1}^{n} w_{ij}(Y_j - \bar Y).$$
+
+
+```{r, out.width="55%"}
+knitr::include_graphics("../Figuras/GIS.png")
+```
+
+
+
+
+.footnote[<sup>1</sup> GIS: *Geographic Information System*]
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### SIG | .small-text[<span style="color: #e07a5f;">*Softwares*</span>]
+
+Há muitos softwares disponíveis para o tratamento e análise de dados espaciais
+
+<br>
+
+```{r, out.width="70%"}
+knitr::include_graphics("../Figuras/GIS_sofwares.png")
+```
+
+<br>
+<br>
+
+--
+
+> <span style="color: #e07a5f;">Sempre que possível, deve-se optar por softwares livres!</span>
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### SIG | .small-text[<span style="color: #e07a5f;">Tipos de dados</span>]
+
+Dados espaciais podem ser armazenados como *dados vetoriais* ou *dados matriciais* (i.e., *rasters*)
+
+--
+
+------
+
+#### Dados vetoriais
+
+.small-text2[
+
+Representam dados cuja informação está armazenada em formas geométricas
+- **Pontos**: representam pares de coordenadas (x,y)
+- **Linhas**: definidas por dois ou mais pontos conectados
+- **Polígono**: constituídos por múltiplos pontos conectados por linhas e que formam uma figura fechada 
+
+]
+
+
+```{r, out.width="90%"}
+knitr::include_graphics("../Figuras/spatial_data_types.png")
+```
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### SIG | .small-text[<span style="color: #e07a5f;">Tipos de dados</span>]
+
+Dados espaciais podem ser armazenados como *dados vetoriais* ou *dados matriciais* (i.e., *rasters*)
+
+
+------
+
+#### Dados vetoriais
+
+.small-text2[
+
+Armazenados principalmente no formato *shapefile* (shp)
+- Compostos por um conjunto de arquivos
+  - `.shp:` contém a geometria dos dados  
+  - `.dbf:` contém os atributos (informações) associados aos dados
+  - `.shx:` índice espacial associada a geometria 
+  - `.prj:` contém informação sobre a projeção e sistema de coordenadas 
+
+]
+
+--
+
+
+.pull-left[
+
+```{r, out.width="45%"}
+knitr::include_graphics("../Figuras/sf_package.png")
+```
+
+]
+
+
+.pull-right[
+
+<br>
+<br>
+
+.gray-box-small[
+
+O pacote **sf** é o principal pacote para o manuseio de *shapefiles*
+]
+
+
+]
+
+.footnote[https://r-spatial.github.io/sf/]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### SIG | .small-text[<span style="color: #e07a5f;">Tipos de dados</span>]
+
+Dados espaciais podem ser armazenados como *dados vetoriais* ou *dados matriciais* (i.e., *rasters*)
+
+
+------
+#### *Rasters*
+
+
+São dados que representam uma área geográfica como uma grade regular de células (i.e., *pixels*)
+- Cada pixel pode armazenar um ou mais valores de alguma variável ambiental (e.g., temperatura, batimetria, pluviometria, ...)
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### SIG | .small-text[<span style="color: #e07a5f;">Tipos de dados</span>]
+
+Dados espaciais podem ser armazenados como *dados vetoriais* ou *dados matriciais* (i.e., *rasters*)
+
+-----
+
+#### *Rasters*
+
+
+
+
+
+
+```{r, out.width="70%"}
+knitr::include_graphics("../Figuras/raster_example.png")
+```
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### SIG | .small-text[<span style="color: #e07a5f;">Tipos de dados</span>]
+
+Dados espaciais podem ser armazenados como *dados vetoriais* ou *dados matriciais* (i.e., *rasters*)
+
+-----
+
+#### *Rasters*
+
+<br>
+
+.small-text2[
+
+Armazenados principalmente nos formatos *GeoTIFF* e *NetCDF*
+
+
+]
+
+
+.pull-left[
+
+<br>
+<br>
+
+.gray-box-small[
+
+O pacote **terra** é o principal pacote para o manuseio de *rasters*
+]
+
+
+]
+
+.pull-right[
+
+```{r, out.width="45%"}
+knitr::include_graphics("../Figuras/terra_package.png")
+```
+
+]
+
+
+
+
+
+.footnote[https://rspatial.github.io/terra/]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### SIG | .small-text[<span style="color: #e07a5f;">Sistema de Coordenadas Geográficas</span>]
+
+O sistema de coordenadas geográficas<sup>1</sup>  define a origem e a unidade das coordenadas espaciais 
+
+- A definição do CRS é muito importante para manipular, analisar e visualisar dados espaciais
+  - Especialmente quando dados espaciais de diferentes fontes são usados!
+
+<br>
+
+.footnote[<sup>1</sup>Coordinate Reference System (CRS)]
+
+
+--
+
+- Os locais na terra podem ser referenciados de acorco com CRS:
+  - referenciados
+  - não referenciados
 
 
 
 
 ---
-- Similarly, a variogram is a graph in which semi-variance is plotted, on the ordinate, against distance classes among sites on the abscissa (Subsection3). Statistical models may be fitted to variograms (linear, exponential, spherical, Gaussian, etc.); they allow the investigator to relate the observed structure to hypothesized generating processes or to produce interpolated maps by kriging
+# PPGECO | ECL0072 | out. 2026
 
-Because they measure the relationship between pairs of observation points located a certain distance apart, correlograms and variograms may be computed either for preferred geographic directions or, when the phenomenon is assumed to be isotropic in space, in an all-directional way.
+### SIG | .small-text[<span style="color: #e07a5f;">Sistema de Coordenadas Geográficas</span>]
+
+#### CRS não referenciado
+
+Também conhecido por **sistema de coordenada geográfica/angular**
+
+- Define os locais na superfície elipsoidal tridimensional da Terra com base nos valores de latitude/longitude
+
+
+
+
+```{r, out.width="80%"}
+knitr::include_graphics("../Figuras/globo_terrestre2.png")
+```
+
+
+
+
+
+
+
+.footnote[https://svs.gsfc.nasa.gov/5660/]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### SIG | .small-text[<span style="color: #e07a5f;">Sistema de Coordenadas Geográficas</span>]
+
+#### CRS não referenciado
+
+
+.small-text[
+- **Latitude:** mede o ângulo ao norte ou ao sul do equador (0 graus) 
+  - Varia de -90<sup>∘</sup> (sul) a 90<sup>∘</sup> (norte)
+
+
+- **Longitude:** mede os ângulos a oeste ou leste do meridiano principal (greenwhich) 
+  - Varia de -180<sup>∘</sup> (oeste) a 180<sup>∘</sup> (leste)
+
+]
+
+
+
+.pull-left[
+```{r, out.width="85%"}
+knitr::include_graphics("../Figuras/latitude_paralels.png")
+```
+]
+
+.pull-right[
+
+```{r, out.width="85%"}
+knitr::include_graphics("../Figuras/longitude_meridians.png")
+```
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### SIG | .small-text[<span style="color: #e07a5f;">Sistema de Coordenadas Geográficas</span>]
+
+#### CRS não referenciado
+
+
+.pull-left[
+
+
+As coordenadas precisam ser calculadas em relação a um elipsoide de referência, cuja posição, tamanho e orientação são definidas pelo datum
+
+- **Elipsoide**: modelo matemático da Terra
+
+- **Datum**: posiciona o elipsóide em relação à Terra
+
+<br>
+<br>
+
+.small-text2[
+.center[**Exemplos:**]
+<br>
+.gray-box[WGS84, SIGRAS 2000, SAD69, NAD83, ...]
+
+]
+
+]
+
+.pull-right[
+
+```{r, out.width="85%"}
+knitr::include_graphics("../Figuras/datum.png")
+```
+
+]
+
 
 
 
 ---
 
-- “Ecological data usually include several spatial scale patterns which are confounded (Figure 1.4): (1) trends at larger scales, (2) patchiness at intermediate and local scales, and (3) random fluctuations or noise at the smallest scale. Therefore, ecological data are the result of embedded and confounded processes; hence, as ecologists, we try to disentangle the spatial scales of these processes using spatial analysis.”
 
-- “The components that affect our ability to identify spatial patterns and their underlying processes accurately are numerous, but they can be organized into three categories (Figure 1.8; Dungan et al. 2002): (1) the extent of spatial expression of the processes themselves; (2) the sampling design used to measure ecological data (sample versus population data; local versus global level); and (3) the statistical tools used to characterize the spatial pattern of either the entire sampling area (i.e. global spatial statistics) or each sampling location (i.e. local spatial statistics).”
+# PPGECO | ECL0072 | out. 2026
 
+### SIG | .small-text[<span style="color: #e07a5f;">Sistema de Coordenadas Geográficas</span>]
 
+#### CRS referenciado
 
-Excerpt From
-Spatial Analysis: A Guide For Ecologists
-Mark R. T. Dale
-This material may be protected by copyright.
+Um *CRS referenciado* usa coordenadas cartesianas para referenciar uma localização em uma representação bidimensional da Terra.
 
----
-
-# Sampling design
-
-“determination of the appropriate spatial and temporal domains of the study is one of the most important steps in data analysis from which all subsequent statistical and ecological interpretations will be either meaningful or meaningless. The spatial and temporal scales are therefore important in the definition and testing of ecological hypotheses and we comment about the key components to consider while testing statistically ecological hypotheses given inherent and induced spatial dependency in the data.”
-
-“Any sampling design for studying ecological processes imposes a template, or filter, with its own specific temporal and spatial units. To be efficient, a sampling design needs to be thought out and crafted carefully by a series of steps to obtain meaningful insights about the ecological processes (see Figures 1.1 and 1.4):”
-- “(1) define explicitly the spatial and temporal domains of expression of the process(es) under study;
--  (2) determine that the spatial and temporal resolution of the sampling design is able to capture the process under study;
-- (3) ensure that the spatial and statistical analyses are appropriate for the data type. These three steps interact with each other and must be considered together before conducting any sampling of ecological data in a spatial context (Fortin et al. 1989; Dungan et al. 2002). In essence, design of an optimal spatial sampling scheme requires a careful balance between samples that are too close to one another, thus not providing enough new information (data highly autocorrelated), and samples that are too sparse, so that processes at other spatial scales introduce too much variability (Haining 1990).”
+<br>
 
 
 
-Excerpt From
-Spatial Analysis: A Guide For Ecologists
-Mark R. T. Dale
-This material may be protected by copyright.
+.pull-left[
 
----
+```{r, out.width="90%"}
+knitr::include_graphics("../Figuras/CRS_projetado.png")
+```
 
-# Sampling design
-
-- Sample size: “In any ecological study, the choice of the sample size ‘n’ is one of the most important decisions. In the context of spatial analysis, this choice needs to be guided by the minimum requirement for subsequent spatial statistics and analysis ”
-
-- Spatial resolution: “The detection of spatial pattern is also directly related to the spatial scale at which ecological data are measured (Figures 1.3 and 1.9). Spatial scale has at least two aspects: the size of the study area, or ‘extent’, and the size of the sampling unit used to collect the data, the ‘sampling grain’. The extent is the total area under consideration and aims to capture the domain of the “ecological process under study, while grain refers to the minimum spatial resolution at which information is measured. Several studies have showed that spatial statistics are very sensitive to both of these resolution aspects”
+]
 
 
-Excerpt From
-Spatial Analysis: A Guide For Ecologists
-Mark R. T. Dale
-This material may be protected by copyright.
+.pull-right[
+```{r, out.width="90%", fig.align='left'}
+knitr::include_graphics("../Figuras/CRS_projetado_cartesiano.png")
+```
+
+]
 
 
 
 ---
+# PPGECO | ECL0072 | out. 2026
 
+### SIG | .small-text[<span style="color: #e07a5f;">Sistema de Coordenadas Geográficas</span>]
+
+#### CRS referenciado
+
+Todas as projeções produzem alguma distorção da superfície terrestre e, por consequência, não podem preservar simultaneamente as propriedades de área, distância ou direção
+
+<div style="height: 7px;"></div>
+
+
+##### Tipos de projeções
+
+<div style="height: 7px;"></div>
+
+
+```{r, out.width="70%"}
+knitr::include_graphics("../Figuras/projection_types.png")
+```
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### SIG | .small-text[<span style="color: #e07a5f;">Sistema de Coordenadas Geográficas</span>]
+
+#### CRS referenciado
+
+##### Tipos de projeções | Projeção cilíndrica
+
+
+
+.center[**Exemplo: projeção de Mercator**]
+
+
+
+```{r, out.width="80%"}
+knitr::include_graphics("../Figuras/Projecao_Mercator.png")
+```
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### SIG | .small-text[<span style="color: #e07a5f;">Sistema de Coordenadas Geográficas</span>]
+
+#### CRS referenciado
+
+##### Tipos de projeções | Projeção cilíndrica
+
+
+
+.center[**Exemplo: projeção Universal Transversa de Mercator**]
+
+
+
+```{r, out.width="80%"}
+knitr::include_graphics("../Figuras/Projecao_UTM.png")
+```
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### SIG | .small-text[<span style="color: #e07a5f;">Sistema de Coordenadas Geográficas</span>]
+
+#### CRS referenciado
+
+##### Tipos de projeções | Projeção cônica
+
+
+
+.center[**Exemplo: projeção cônica equidistante**]
+
+
+```{r, out.width="45%"}
+knitr::include_graphics("../Figuras/Projecao_Conica.png")
+```
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### SIG | .small-text[<span style="color: #e07a5f;">Sistema de Coordenadas Geográficas</span>]
+
+#### CRS referenciado
+
+##### Tipos de projeções | Projeção planar
+
+
+
+.center[**Exemplo: projeção Azimutal**]
+
+
+```{r, out.width="45%"}
+knitr::include_graphics("../Figuras/Projecao_Planar.png")
+```
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### SIG | .small-text[<span style="color: #e07a5f;">Sistema de Coordenadas Geográficas</span>]
+
+#### Adendo: cartografia é geopolítica!
+
+
+<br>
+
+
+```{r, out.width="90%"}
+knitr::include_graphics("../Figuras/equal_earth_projection.png")
+```
+
+
+.footnote[Fonte: https://www.bbc.com/portuguese/articles/c3058301rl8o]
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### SIG | .small-text[<span style="color: #e07a5f;">Sistema de Coordenadas Geográficas</span>]
+
+#### CRS 
+
+Na prática, a maioria dos CRS podem ser especificados de acordo com o código **EPGS**<sup>1</sup> ou *Proj4* (desuso)
+
+- EPSG é um identificador numérico único que representa o CRS, incluindo o datum, o sistema de coordenadas e, quando aplicável, a projeção cartográfica
+
+  - Exemplos:
+    - EPSG 4326 (WGS 84)
+    - EPSG 4674 (SIRGAS 2000)
+    - [Outros exemplos](https://spatialreference.org/ref/?search=wgs84)
+
+
+.footnote[<sup>1</sup>*European Petroleum Survey Group*]
+
+
+
+---
 - The analysis of spatial patterns is of prime interest to ecologists because most ecological phenomena investigated by sampling geographic space are structured by forces that have spatial components. 
 
 - The distribution of species result from the combined action of external and internal forces. Both types of forces generate spatial patterns within species or communities.
   - External forces: environmental characteristics
   - Internal forces: population dynamics and/or top-down/bottom-up biotic interactions
 
-
-
-
----
-
-### Correlogram
-
-- Apresentar o Moran's I statistics
-
-Moran’s I formula is related to Pearson’s correlation coefficient; its numerator is a covariance, comparing the values found at all pairs of points in turn, while its denominator is the maximum-likelihood estimator of the variance (i.e. division by n instead of n – 1); in Pearson’s r, the denominator is the product of the standard deviations of the two variables (eq. 4.7), whereas in Moran’s I there is only one variable involved. Moran’s I mainly differs from Pearson’s r in that the sums in the numerator and denominator of eq. 13.1 do not involve the same number of terms; only the terms corresponding to distances within the given class are considered in the numerator whereas all pairs are taken into account in the denominator. Moran’s I usually takes values in the interval [–1, +1] although values lower than –1 or higher than +1 may occasionally be obtained. Positive autocorrelation in the data translates into positive values of I; negative autocorrelation produces negative values.
-
-Readers who are familiar with correlograms in time series analysis will be reassured to know that, when a problem involves equispaced observations along a single physical dimension, as in Fig. 13.3, calculating Moran’s I for the different distance classes is nearly the same as computing the autocorrelation coefficient of time series analysis (Fig. 12.5, eq. 12.6); a small numeric difference results from the divisions by (n – k – 1) and (n – 1), respectively, in the numerator and denominator of eq. 12.6, whereas division is by (n – k ) and (n ), respectively, in the numerator and denominator of Moran’s I formula (eq. 13.1).
-
-
-Spatial autocorrelation coefficients can be tested for significance and confidence intervals can be computed. Tests of significance require, however, that certain conditions specified below be fulfilled.
-
-
-Moran’s I and Geary’s c are sensitive to extreme values and, in general, to asymmetry in the data distributions, as are the related Pearson’s r and Euclidean distance coefficients. Asymmetry increases the variance of the data.
-The tests require that the condition of second-order stationarity be satisfied. This rather strong condition states that the expected value (mean) and spatial covariance (numerator of eq. 13.1) of the variable is the same all over the study area, and the variance (denominator of eq. 13.1) is finite. 
-
-
 ---
 
 The absence of significant coefficients in a correlogram must be interpreted with caution, however:
 - It may indicate that the surface under study is free of spatial autocorrelation at the study scale. Beware: this conclusion is subject to type II (or β) error. 
 - It may indicate that the sampling design is inadequate to detect the spatial autocorrelation that may exist in the system. Are the grain size, extent and sampling interval (Section13.0) adequate to detect the type of autocorrelation one can hypothesize from knowledge about the biological or ecological process under study?
-
----
-
-### Variograma
-
-Like correlograms, semi-variograms (called variograms for simplicity) decompose the spatial (or temporal) variability of observed variables among distance classes. 
-- This provides the sample variogram, which is a plot of the empirical values of variance γ(d) as a function of distance d.
-
-
-```{r, out.width= "100%"}
-knitr::include_graphics("../Figuras/variogram_schema.png")
-```
-
-
-- Although a sample variogram is a good descriptive summary of the spatial contiguity of a variable, it does not provide all the semi-variance values needed for kriging 
 
 ---
 
