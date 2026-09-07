@@ -43,8 +43,9 @@ class: title-slide
 Leitura:
 - Cap. 13 - Legendre &amp; Legendre. Numerical ecology
 
+&lt;br&gt;
 
-&lt;img src="../Figuras/spatial_stat_books.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="../Figuras/spatial_stat_books.png" width="85%" style="display: block; margin: auto;" /&gt;
 
 
 
@@ -509,7 +510,216 @@ A estrutura de dependência espacial dos dados pode ser descrita por diferentes 
 ### Estatística espacial 
 
 
-&lt;img src="../Figuras/grf2.png" width="70%" style="display: block; margin: auto;" /&gt;
+Dados espaciais são definidos por um *processo estocástico* que é indexado pelo espaço `\((s)\)`, sendo descrito por dois componentes:
+
+.pull-left[
+
+&lt;br&gt;
+
+.small-text2[
+.center[**Domínio**:]
+
+Representa a extensão espacial aonde os dados foram coletados (`\(\mathcal{D}^1\)`)
+
+]
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+-------
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+
+.small-text2[
+.center[**Variável aleatória**:]
+
+Vetor representando a variável resposta coletada em `\(n\)` locais em `\(s\)`, conforme `\({Y(s_1), Y(s_2), \ldots, Y(s_n)}\)`  
+  
+  
+  ]
+    
+]
+
+
+.pull-right[
+
+
+&lt;img src="../Figuras/grf2.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+&lt;br&gt;
+
+.footnote[.small-text2[&lt;sup&gt;1&lt;/sup&gt; Campo espacial/latente (*spatial*/*latent field*)]]
+
+
+--
+
+.small-text2[Diz-se, portanto, que as observações são uma *realização parcial* do campo aleatório, tal que]
+`$$\{ ~Y(s) : s \in \mathcal{D} \subseteq \mathbb{R}^d~\}$$`
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Estatística espacial | .small-text[&lt;span style="color: #e07a5f;"&gt;Tipos de dados&lt;/span&gt;]
+
+
+Dependendo de como `\(\mathcal{D}\)` e `\(Y(s)\)` são definidos, pode-se classificar os dados espaciais em três categorias:
+
+
+--
+
+
+.pull-left[
+
+.center[**Dados geoestatísticos**]
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+.small-text2[
+
+`\(Y(s)\)` consiste em uma variável aleatória coletada ao longo de um conjunto fixo de localizações `\(s \in \mathbb{R}^2\)`, em que `\(s\)` varia continuamente sobre  `\(\mathcal{D}\)`
+
+- A continuidade refere-se apenas ao domínio `\(\mathcal{D}\)`; a variável resposta `\(Y(s)\)` pode ser de natureza qualitativa ou quantitativa (contínua ou discreta).
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+----
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+**Foco da análise:** Interpolação espacial (predição de valores em locais não amostrados)
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+----
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+**Exemplos:** Dados de presença/ausência, abundância, índices de diversidade, ....
+
+
+  ]
+] 
+
+
+
+
+
+.pull-right[
+
+&lt;img src="../Figuras/Dado_geoestatistico.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### Estatística espacial | .small-text[&lt;span style="color: #e07a5f;"&gt;Tipos de dados&lt;/span&gt;]
+
+
+Dependendo de como `\(\mathcal{D}\)` e `\(Y(s)\)` são definidos, pode-se classificar os dados espaciais em três categorias:
+
+
+
+
+.pull-left[
+
+.center[**Dados de área**]
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+.small-text2[
+
+O domínio `\(\mathcal{D}\)` é fixo (de forma regular ou irregular) e particionado em um número finito de polígonos com limites bem definidos
+  - `\(Y(s)\)` consiste em uma variável aleatória cujos valores estão agregados a nível dos polígonos
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+----
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+**Foco da análise:** Avaliar padrões espaciais entre áreas vizinhas
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+----
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+**Exemplos:** Dados censitários, epidemiológicos,  senoriamento remoto, ...
+
+
+  ]
+] 
+
+
+
+
+
+.pull-right[
+
+&lt;img src="../Figuras/Dado_areal.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Estatística espacial | .small-text[&lt;span style="color: #e07a5f;"&gt;Tipos de dados&lt;/span&gt;]
+
+
+Dependendo de como `\(\mathcal{D}\)` e `\(Y(s)\)` são definidos, pode-se classificar os dados espaciais em três categorias:
+
+
+
+
+.pull-left[
+
+.center[**Dados de processos pontuais**]
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+.small-text2[
+
+Diferentemente dos dados geoestatísticos e de área, `\(\mathcal{D}\)` é aleatório de modo que a própria localização `\(s\)` da variável resposta é estocástica
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+----
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+**Foco da análise:** o interesse principal são as localizações espaciais das observações (os pontos), i.e, no seu padrão de agrupamento
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+----
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+**Exemplos:** Locais de encalhe de mamíferos marinhos, distribuição de ninhos, ocorrência de foco de doenças, ...
+
+  ]
+] 
+
+
+
+
+
+.pull-right[
+
+&lt;img src="../Figuras/Dado_pointpattern.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
 
 
 ---
@@ -985,7 +1195,12 @@ Na prática, a maioria dos CRS podem ser especificados de acordo com o código *
 
 .footnote[&lt;sup&gt;1&lt;/sup&gt;*European Petroleum Survey Group*]
 
+---
 
+**Ebooks recomendados**
+https://rspatial.org/index.html (cap. 2)
+https://bookdown.org/tep/gis/index.html (cap. 4)
+https://tmap.geocompx.org/
 
 ---
 - The analysis of spatial patterns is of prime interest to ecologists because most ecological phenomena investigated by sampling geographic space are structured by forces that have spatial components. 

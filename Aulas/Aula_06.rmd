@@ -63,8 +63,9 @@ class: title-slide
 Leitura:
 - Cap. 13 - Legendre & Legendre. Numerical ecology
 
+<br>
 
-```{r, out.width ="70%"}
+```{r, out.width ="85%"}
 knitr::include_graphics("../Figuras/spatial_stat_books.png")
 ```
 
@@ -559,9 +560,224 @@ knitr::include_graphics("../Figuras/variogram_models.png")
 ### Estatística espacial 
 
 
-```{r, out.width="70%"}
+Dados espaciais são definidos por um *processo estocástico* que é indexado pelo espaço $(s)$, sendo descrito por dois componentes:
+
+.pull-left[
+
+<br>
+
+.small-text2[
+.center[**Domínio**:]
+
+Representa a extensão espacial aonde os dados foram coletados ($\mathcal{D}^1$)
+
+]
+
+<div style="height: 7px;"></div>
+
+
+-------
+
+<div style="height: 7px;"></div>
+
+
+
+.small-text2[
+.center[**Variável aleatória**:]
+
+Vetor representando a variável resposta coletada em $n$ locais em $s$, conforme ${Y(s_1), Y(s_2), \ldots, Y(s_n)}$  
+  
+  
+  ]
+    
+]
+
+
+.pull-right[
+
+
+```{r, out.width="100%"}
 knitr::include_graphics("../Figuras/grf2.png")
 ```
+
+]
+
+<br>
+
+.footnote[.small-text2[<sup>1</sup> Campo espacial/latente (*spatial*/*latent field*)]]
+
+
+--
+
+.small-text2[Diz-se, portanto, que as observações são uma *realização parcial* do campo aleatório, tal que]
+$$\{ ~Y(s) : s \in \mathcal{D} \subseteq \mathbb{R}^d~\}$$
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Estatística espacial | .small-text[<span style="color: #e07a5f;">Tipos de dados</span>]
+
+
+Dependendo de como $\mathcal{D}$ e $Y(s)$ são definidos, pode-se classificar os dados espaciais em três categorias:
+
+
+--
+
+
+.pull-left[
+
+.center[**Dados geoestatísticos**]
+
+<div style="height: 7px;"></div>
+
+
+.small-text2[
+
+$Y(s)$ consiste em uma variável aleatória coletada ao longo de um conjunto fixo de localizações $s \in \mathbb{R}^2$, em que $s$ varia continuamente sobre  $\mathcal{D}$
+
+- A continuidade refere-se apenas ao domínio $\mathcal{D}$; a variável resposta $Y(s)$ pode ser de natureza qualitativa ou quantitativa (contínua ou discreta).
+
+<div style="height: 7px;"></div>
+
+
+----
+<div style="height: 7px;"></div>
+
+**Foco da análise:** Interpolação espacial (predição de valores em locais não amostrados)
+
+<div style="height: 7px;"></div>
+
+----
+<div style="height: 7px;"></div>
+
+**Exemplos:** Dados de presença/ausência, abundância, índices de diversidade, ....
+
+
+  ]
+] 
+
+
+
+
+
+.pull-right[
+
+```{r, out.width="100%"}
+knitr::include_graphics("../Figuras/Dado_geoestatistico.png")
+```
+
+]
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### Estatística espacial | .small-text[<span style="color: #e07a5f;">Tipos de dados</span>]
+
+
+Dependendo de como $\mathcal{D}$ e $Y(s)$ são definidos, pode-se classificar os dados espaciais em três categorias:
+
+
+
+
+.pull-left[
+
+.center[**Dados de área**]
+
+<div style="height: 7px;"></div>
+
+
+.small-text2[
+
+O domínio $\mathcal{D}$ é fixo (de forma regular ou irregular) e particionado em um número finito de polígonos com limites bem definidos
+  - $Y(s)$ consiste em uma variável aleatória cujos valores estão agregados a nível dos polígonos
+
+<div style="height: 7px;"></div>
+
+----
+<div style="height: 7px;"></div>
+
+**Foco da análise:** Avaliar padrões espaciais entre áreas vizinhas
+
+<div style="height: 7px;"></div>
+
+----
+<div style="height: 7px;"></div>
+
+**Exemplos:** Dados censitários, epidemiológicos,  senoriamento remoto, ...
+
+
+  ]
+] 
+
+
+
+
+
+.pull-right[
+
+```{r, out.width="100%"}
+knitr::include_graphics("../Figuras/Dado_areal.png")
+```
+
+]
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Estatística espacial | .small-text[<span style="color: #e07a5f;">Tipos de dados</span>]
+
+
+Dependendo de como $\mathcal{D}$ e $Y(s)$ são definidos, pode-se classificar os dados espaciais em três categorias:
+
+
+
+
+.pull-left[
+
+.center[**Dados de processos pontuais**]
+
+<div style="height: 7px;"></div>
+
+
+.small-text2[
+
+Diferentemente dos dados geoestatísticos e de área, $\mathcal{D}$ é aleatório de modo que a própria localização $s$ da variável resposta é estocástica
+
+<div style="height: 7px;"></div>
+
+----
+<div style="height: 7px;"></div>
+
+**Foco da análise:** o interesse principal são as localizações espaciais das observações (os pontos), i.e, no seu padrão de agrupamento
+
+<div style="height: 7px;"></div>
+
+----
+<div style="height: 7px;"></div>
+
+**Exemplos:** Locais de encalhe de mamíferos marinhos, distribuição de ninhos, ocorrência de foco de doenças, ...
+
+  ]
+] 
+
+
+
+
+
+.pull-right[
+
+```{r, out.width="100%"}
+knitr::include_graphics("../Figuras/Dado_pointpattern.png")
+```
+
+]
+
+
 
 
 ---
@@ -1073,7 +1289,12 @@ Na prática, a maioria dos CRS podem ser especificados de acordo com o código *
 
 .footnote[<sup>1</sup>*European Petroleum Survey Group*]
 
+---
 
+**Ebooks recomendados**
+https://rspatial.org/index.html (cap. 2)
+https://bookdown.org/tep/gis/index.html (cap. 4)
+https://tmap.geocompx.org/
 
 ---
 - The analysis of spatial patterns is of prime interest to ecologists because most ecological phenomena investigated by sampling geographic space are structured by forces that have spatial components. 
