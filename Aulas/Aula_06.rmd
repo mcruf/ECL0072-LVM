@@ -322,17 +322,6 @@ knitr::include_graphics("../Figuras/spatial_autocorrelation_types.png")
 
 ### Autocorrelação espacial
 
-
-- Falar sobre 1a e 2a ordem
-
-- Falar sobre isotropia e anisotropia
-
-
----
-# PPGECO | ECL0072 | out. 2026
-
-### Autocorrelação espacial
-
 A autocorrelação espacial pode ser avaliada por meio de funções que quantificam a dependência espacial 
   - Correlogramas
   - Variogramas
@@ -652,7 +641,7 @@ $Y(s)$ consiste em uma variável aleatória coletada ao longo de um conjunto fix
 ----
 <div style="height: 7px;"></div>
 
-**Exemplos:** Dados de presença/ausência, abundância, índices de diversidade, ....
+**Exemplos:** Distribuição de espécies, poluentes, variáveis ambientais, ...
 
 
   ]
@@ -753,7 +742,7 @@ Diferentemente dos dados geoestatísticos e de área, $\mathcal{D}$ é aleatóri
 ----
 <div style="height: 7px;"></div>
 
-**Foco da análise:** o interesse principal são as localizações espaciais das observações (os pontos), i.e, no seu padrão de agrupamento
+**Foco da análise:** o interesse principal são as localizações espaciais das observações (os pontos), i.e, no seu padrão de agrupamento (aleatório, agrupado, uniforme)
 
 <div style="height: 7px;"></div>
 
@@ -764,9 +753,6 @@ Diferentemente dos dados geoestatísticos e de área, $\mathcal{D}$ é aleatóri
 
   ]
 ] 
-
-
-
 
 
 .pull-right[
@@ -784,11 +770,131 @@ knitr::include_graphics("../Figuras/Dado_pointpattern.png")
 
 # PPGECO | ECL0072 | out. 2026
 
-### Estatística espacial | .small-text[<span style="color: #e07a5f;">Tipos de dados</span>]
+### Estatística espacial 
 
+Modelos espaciais são extensões de modelos mistos
+
+<br>
+
+--
+
+$$\large y(s_i) \sim  F(\mu(s_i),  \phi)$$
+--
+
+$$\large g(\mu(s_i)) = 
+ \eta(s_i) =  X(s_i)\beta + W(s_i) + \varepsilon(s_i)$$
+
+--
+
+$$W(s_i) \sim GRF(0, \Sigma)$$
+
+$$\varepsilon(s_i) \sim N(0, \sigma^2)$$
+
+<br>
+
+.small-text2[
+onde:
+- $s_i:$ localização da *i*-ésima observação
+- $\mathbf{X}(s_i)\boldsymbol{\beta}:$ efeitos fixos (componente determinístico)
+- $W(s):$ efeito espacial aleatório (campo aleatório espacial; *Gaussian Random Field*, GRF)
+- $\varepsilon(s):$ erro residual *iid* (efeito pepita; *nugget effect*)
+
+]
 
 
 ---
+# PPGECO | ECL0072 | out. 2026
+
+### Estatística espacial 
+
+A principal diferença entre um modelo misto 'clássico' e um modelo espacial reside na construção da matriz de variância-covariância ($\boldsymbol{\Sigma}$)
+
+<div style="height: 7px;"></div>
+
+
+.pull-left[
+
+
+.center[**Modelo Misto (intercepto aleatório)**]
+
+<div style="height: 7px;"></div>
+
+
+.center[
+
+<div style="height: 7px;"></div>
+
+.gray-box-small[
+
+$$\eta(s_i) = \mathbf{X}(s_i)\boldsymbol{\beta} + \color{#e07a5f}{\mathbf{Z}b} + \varepsilon(s_i)$$
+
+$$b \sim MVN(0, \mathbf{\Sigma}_a)$$
+
+$$\mathbf{\Sigma}_a = \sigma_a^2 \mathbf{I}$$
+
+]
+
+]
+
+<div style="height: 4px;"></div>
+
+-----
+
+
+.small-text[Observações do mesmo grupo estão correlacionados entre si pela relação ]
+
+$$\scriptsize \text{Cor}(y\_{ij}, y\_{kj}) = \frac{\sigma_a^2}{\sigma_a^2 + \sigma^2}$$
+.small-text[Como a correlação é *induzida*, diz-se que o **efeito aleatório é não estruturado**]
+
+]
+
+
+
+--
+
+
+.pull-right[
+
+
+.center[**Modelo Espacial**]
+
+<div style="height: 7px;"></div>
+
+
+.center[
+
+<div style="height: 7px;"></div>
+
+.gray-box-small[
+
+
+
+$$\eta(s_i) = \mathbf{X}(s_i)\boldsymbol{\beta} + \color{#e07a5f}{W(s_i)} + \varepsilon(s_i)$$
+
+$$W(s) \sim \text{GRF}(0, \mathbf{\Sigma}_w)$$
+
+$$\mathbf{\Sigma}_{w} = C(h_{ij})$$
+  ]
+]
+
+
+<div style="height: 4px;"></div>
+
+-----
+
+
+.small-text[A correlação entre observações é uma função da distância euclidiana, conforme relação]  
+
+$$\scriptsize C(h_{ij}) = \Vert s_i - s_j\Vert$$
+
+
+.small-text[Como a correlação é explicitamente definida, diz-se que o **efeito aleatório é estruturado**]
+
+]
+
+
+---
+
 # PPGECO | ECL0072 | out. 2026
 
 ### Sistema de Informação Geográfica (SIG<sup>1</sup> )
@@ -1092,9 +1198,9 @@ knitr::include_graphics("../Figuras/longitude_meridians.png")
 
 As coordenadas precisam ser calculadas em relação a um elipsoide de referência, cuja posição, tamanho e orientação são definidas pelo datum
 
-- **Elipsoide**: modelo matemático da Terra
+- .small-text[**Elipsoide**: modelo matemático da Terra]
 
-- **Datum**: posiciona o elipsóide em relação à Terra
+- .small-text[**Datum**: posiciona o elipsóide em relação à Terra]
 
 <br>
 <br>
@@ -1270,7 +1376,41 @@ knitr::include_graphics("../Figuras/equal_earth_projection.png")
 .footnote[Fonte: https://www.bbc.com/portuguese/articles/c3058301rl8o]
 
 ---
+# PPGECO | ECL0072 | out. 2026
 
+### SIG | .small-text[<span style="color: #e07a5f;">Sistema de Coordenadas Geográficas</span>]
+
+#### Adendo: cartografia é geopolítica!
+
+Projeção já disponível no R
+
+
+
+
+
+
+```{r, eval=F,echo=T}
+world <- rnaturalearth::ne_countries(scale = 10, returnclass = "sf")
+
+ggplot() +
+  geom_sf(data = world, fill = "#e59c82", color = "white", size = 0.2) +
+  coord_sf(crs = 8857) +
+  theme_minimal() +
+  theme(axis.text = element_blank())
+```
+
+
+
+```{r, out.width="55%"}
+knitr::include_graphics("../Figuras/projecao_equal_earth.png")
+```
+
+
+
+
+
+
+---
 # PPGECO | ECL0072 | out. 2026
 
 ### SIG | .small-text[<span style="color: #e07a5f;">Sistema de Coordenadas Geográficas</span>]
@@ -1292,45 +1432,6 @@ Na prática, a maioria dos CRS podem ser especificados de acordo com o código *
 ---
 
 **Ebooks recomendados**
-https://rspatial.org/index.html (cap. 2)
-https://bookdown.org/tep/gis/index.html (cap. 4)
-https://tmap.geocompx.org/
-
----
-- The analysis of spatial patterns is of prime interest to ecologists because most ecological phenomena investigated by sampling geographic space are structured by forces that have spatial components. 
-
-- The distribution of species result from the combined action of external and internal forces. Both types of forces generate spatial patterns within species or communities.
-  - External forces: environmental characteristics
-  - Internal forces: population dynamics and/or top-down/bottom-up biotic interactions
-
----
-
-The absence of significant coefficients in a correlogram must be interpreted with caution, however:
-- It may indicate that the surface under study is free of spatial autocorrelation at the study scale. Beware: this conclusion is subject to type II (or β) error. 
-- It may indicate that the sampling design is inadequate to detect the spatial autocorrelation that may exist in the system. Are the grain size, extent and sampling interval (Section13.0) adequate to detect the type of autocorrelation one can hypothesize from knowledge about the biological or ecological process under study?
-
----
-
-Spatial structures are a major source of false correlations, which are not indicative of causal relationships. Spatial autocorrelation may cause correlations to appear between autocorrelated variables, due to spatial structures that are generated by the autocorrelation in the data; examples of such structures are the “false gradients” described in Subsection 13.1.2. The question is the following: is there a significant amount of correlation between the response and explanatory variables, besides some common spatial structure which may be non-causal? The interest here is in fraction [a] of Figs. 10.10 and 13.27, which corresponds to the “explanation” (in the sense of Subsection10.2.1) of the response data (Y) by the explanatory environmental variables (X) after the common spatial structure (fraction [b]) has been controlled for. If the analysis of the spatial structure of Y is also of interest, it should be carried out independently of that of X. If fraction [b] is large, the hypothesis that it indicates false correlations between autocorrelated variables in matrices Y and X is supported if new data, obtained by sampling at a different spatial scale, fail to produce a large fraction[b]. Nested sampling designs, as used for instance in Ecological application 13.1b, are a way of obtaining data sets for modelling at more than one spatial scale.
-
-If both the spatial and non-spatial structures of the explanatory variables are assumed to be causal to the spatial variation of Y, fraction [a + b] (instead of fraction [a] alone, as above) empirically measures the support to the hypothesis of causal relationship between the response and explanatory variables. One may or may not be interested in breaking it down into a purely environmental fraction ([a] in Fig. 10.10 and 13.27) and a spatially-structured environmental effect (fraction [b]). One may be interested, however, in determining whether the response data (Y) have some spatial structure of their own (fraction [c]) which is not explained by the explanatory variables in the model. If such a structure is found, reasons for its existence are worth investigating. It may be caused by environmental variables that have not been included in the analysis, by historical events, or by population or community dynamic processes that may be masked by some dominant environmental effect (Borcard & Legendre, 1994). In this approach, any spatial structure identified in the response data set is considered an indication of the presence of some process generating it. Mapping fraction [c] of the variation may help generate hypotheses about the processes responsible for the observed residual spatial pattern.
-
-```{r, out.width= "100%"}
-knitr::include_graphics("../Figuras/Env_vs_spatial_variance.png")
-```
-
----
-Estruturas de Dependência nos Dados Ecológicos
-│
-├── 1. Estrutura Discreta / Hierárquica (Grupos / Níveis)
-│   ├── Exemplo: Peixes dentro de Recifes, Plantas dentro de Parcelas.
-│   ├── Abordagem: Modelos Misto Padrão (Efeitos Aleatórios por grupo: 1 | grupo).
-│   └── A dependência é assumida IGUAL para todos os membros do mesmo grupo.
-│
-└── 2. Estrutura Contínua (Espaço / Tempo / Filogenia)
-    ├── Exemplo: Coordenadas (X, Y) no mar/oceano, Séries temporais de CPUE (anos/meses).
-    ├── Abordagem: Matrizes de autocorrelação espacial/temporal (ex: Matern, CAR, AR1, INLA/SPDE).
-    └── A dependência diminui conforme a DISTÂNCIA no espaço ou tempo aumenta.
-
-
----
+- https://rspatial.org/index.html (cap. 2)
+- https://bookdown.org/tep/gis/index.html (cap. 4)
+- https://tmap.geocompx.org/
