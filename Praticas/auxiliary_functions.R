@@ -5,7 +5,7 @@
 ####################################
 
 # This script contains a collection of auxiliary functions used throughout the practical lessons of the course.
-# Last update: August 2026
+# Last update: September 2026
 
 
 
@@ -48,7 +48,7 @@ rm(list = c("missing_pkgs", "required_pkgs"))
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Extract dynamic raster values
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ATENTION: Function currenlty applies only to dynamic oceanographic layers extracted from Copernicus (https://data.marine.copernicus.eu/products)
+# ATENTION: Function currently applies only to dynamic oceanographic layers extracted from Copernicus (https://data.marine.copernicus.eu/products)
 # FIXME: Function needs to be extended for time resolutions other than monthly (e.g, daily)
 # FIXME: Adapt functions for datasets with actual year information 
 
@@ -136,3 +136,28 @@ extract_env_dynamic <- function(points_sf, env_raster, var_name, year_map = NULL
 }
 
 
+#-----------------------------------------------------------------------------------------
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~
+#  INLA model diagnostics 
+#~~~~~~~~~~~~~~~~~~~~~~~~~
+# This function computes three main information criterias:
+# - DIC
+# - WAIC
+# - LCPO
+
+mdiagnostic <- function(model){
+  
+  dic  <- if(!is.null(model$dic))  model$dic$dic   else NA
+  waic <- if(!is.null(model$waic)) model$waic$waic else NA
+  
+  lcpo <- if(!is.null(model$cpo)){
+    -mean(log(model$cpo$cpo), na.rm = TRUE)
+  } else {
+    NA
+  }
+  
+  round(data.frame(DIC  = dic, WAIC = waic, LCPO = lcpo), 2)
+
+}
