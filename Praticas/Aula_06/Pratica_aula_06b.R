@@ -1,30 +1,41 @@
-###################################################################################
-#                                                                                 #
-#                                 Prática da aula 06                              #
-#      - Processando dados ambientais para estimação e predição espacial -        #
-#                                                                                 #
-####################################################################################
+#######################################################################################
+#                                                                                     #
+#                                 Prática da aula 06                                  #
+#        - Processamento dados ambientais para estimação e predição espacial -        #
+#                                                                                     #
+#######################################################################################
 
 
-# Script dividido em duas partes principais:
-# 1) Extrair dados ambientais para os pontos amostrais (necessário para a etapa de estimação)
-# 2) Extrair dados ambientais para o grid espacial (necessário para a etapa de predição)
+# O presente script é uma continuação do script 'Pratica_aula_06a.R' e tem como objetivo preparar e extrair covariáveis ambientais
+# para cada pescaria. Essas informações serão abordadas posteriormente no script da próxima aula ('Pratica_aula_07.R').
 
+# Os dados ambientais (i.e., produtos de sensoriamento remoto) foram obtidos por meio do Copernicus Marine Service,
+# via API utilizando python. Para detalhes sobre o download e a organização dos arquivos, consulte o script:
+# Praticas/Aula_06/Copernicus_data_download_practical.ipynb
 
-# Dados ambientais foram baixados do Copernicus Marine Service via API no python.
-# Para detalhes técnicos, vide script: Praticas/Aula_06/Copernicus_data_download_practical.ipynb
+# Ao todo, foram baixadas cinco variáveis ambientais, provenientes de dois produtos distintos do Copernicus Marine Service:
+# 1) Variáveis físicas (Global Ocean Physics Reanalysis)
+#    - Sea surface temperature (SST)
+#    - Sea surface height (SSH)
+#    - Mixed layer thickness (MLT)
+#    - Bathymetry (BATHY)
+#
+# 2) Variáveis biogeoquímicas (Global Ocean Biogeochemistry Hindcast)
+#     - Net primary productivity (NPPV)
 
-# Foram baixadas um total de 5 variáveis ambientais, provenientes de 2 produtos distintos do Copernicus:
-# i) Global Ocean Physics Reanalysis: sea water tempertaure (sst), sea surface height (ssh), mixed layer thickness (mlt), bathymetry (bathy)
-# ii) Global Ocean Biogeochemistry Hindcast: net primary productivity (nppv)
-# Há 4 variáveis dinâmicas (i.e., variáveis baixadas para a mesma resolução temporal dos dados pesqueiros) e 1 variável estática (batimetira).
+# Há um total de 4 variáveis dinâmicas (SST, SSH, MLT e NPPV), i.e., que possuem uma série temporal e foram baixadas na mesma 
+# resolução temporal dos dados pesqueiros (mensal). Já a batimetria é uma variável estática, permanecendo constante ao longo do tempo.
+
+# Ao longo desta prática, as diferentes camadas ambientais serão padronizadas quanto à extensão espacial, sistema de referência de coordenadas (CRS) e
+# resolução espacial. Em seguida, os valores de cada variável ambiental serão extraídos para a localização e o período de cada pescaria.
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~
 # Carregando os pacotes
 #~~~~~~~~~~~~~~~~~~~~~~~~
-library(terra) #Processamento de rasters
-library(sf) #Processamento de dados vetorizados 
+library(terra) # Processamento de rasters
+library(sf) # Processamento de dados vetorizados 
+library(stringr) # Manipulação de strings
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -35,6 +46,8 @@ source("Praticas/auxiliary_functions.R")
 
 
 #><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+
 
 ##############################################################################
 ###      PARTE 1: Extraindo dados ambientais para os pontos amostrais      ###
@@ -142,7 +155,7 @@ vbio2 <- crop(vbio, sw_ocean)
 batimetria2 <- crop(batimetria, sw_ocean) #mantém a extensão
 
 
-## EXTRA: Em alguns casos, é preciso recortar o raster de forma a matner os mesmos pixels dentro do polígono.
+## EXTRA: Em alguns casos, é preciso recortar o raster de forma a manter os mesmos pixels dentro do polígono.
 ## Nestes casos, usa-se a função 'mask()' no objeto criado pela função 'crop()':
 
 #batimetria3 <- mask(batimetria2, sw_ocean) 
@@ -193,7 +206,7 @@ crs(vbio2) == crs(vfisicas2)
 res(vfisicas2)
 res(batimetria2)
 res(vbio2) #vbio possui resolução menor (0.25) do que as demais camadas.
- 
+
 
 ## Padronizando batimetria
 batimetria2r <- resample(batimetria2, vbio2, method = "bilinear")
@@ -205,12 +218,12 @@ plot(batimetria2r, main = "Reamostrado")
 par(mfrow=c(1,1))
 
 
-## Padronizando variáveis físticas
+## Padronizando variáveis físicas
 vfisicas2r <- resample(vfisicas2, vbio2, method = "bilinear")
 res(vfisicas2r) #ok!
 
 
-  
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 3) Extraindo os dados ambientais para os pontos amostrais
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -219,20 +232,14 @@ res(vfisicas2r) #ok!
 # 3.1) Filtrando os dados (pesqueiros) para a extensão da área de estudo
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## Tornando os dados como objeto espacial
-dfs <- st_as_sf(df, coords = c('Long','Lat'), crs = crs(sw_ocean))
-class(dfs)
-head(dfs)
-
-
 ## Visualizando no mapa
 plot(st_geometry(sw_ocean), col = '#ccdbdc')
-plot(st_geometry(dfs), pch = 19, cex = 0.7, col = "#e29578", add = T) #Eita! Há pontos em ambiente teresstre e fora da área de estudo.
+plot(st_geometry(dfsp), pch = 19, cex = 0.7, col = "#e29578", add = T) #Eita! Há pontos em ambiente teresstre e fora da área de estudo.
 
 
 ## Filtrando pescarias (pontos amostrais) fora da área de estudo
-dfs_f <- dfs %>% 
-         st_filter(sw_ocean, .predicate = st_intersects)
+dfs_f <- dfsp %>% 
+          st_filter(sw_ocean, .predicate = st_intersects)
 
 dim(dfs)[1] - dim(dfs_f)[1] #No. de pontos removidos
 
@@ -252,7 +259,7 @@ plot(st_geometry(dfs_f), pch = 19, cex = 0.7, col = 1, add = T) #Sucesso!
 
 ## Mapeando os anos dos dados pesqueiros aos dados ambientais (workaround solution - 'gambiarra')
 ### Os anos nos dados pesqueiros estão identificados apenas como '1' e '2'. Os dados ambientais
-### foram baixados (arbitrariamente) para os anos 2004-2005
+### foram baixados arbitrariamente para os anos 2004-2005
 
 year_mapping <- c("1" = 2004, "2" = 2005) 
 
@@ -297,7 +304,5 @@ dfs_f$bathy  <- extract(batimetria2r, dfs_f)[, 2]
 
 
 
-##########################################################################
-###      PARTE 2: Extraindo dados ambientais para o grid espacial      ###
-##########################################################################
+head(as.data.frame(dfs_f)) # Cenas para o próximo capítulo...
 

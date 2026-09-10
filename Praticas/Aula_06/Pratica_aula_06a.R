@@ -1,18 +1,25 @@
 ###################################################################################
 #                                                                                 #
 #                                 Prática da aula 06                              #
-#                       - Explorando dados espaço-temporais -                      #
+#               - Análise exploratória de dados espaço-temporais -                #
 #                                                                                 #
-####################################################################################
+###################################################################################
 
+# Esta prática analisará um conjunto de dados (fictícios) de capturas do tubarão-azul (Prionace glauca),
+# obtidos por meio da pesca de espinhel ao longo do Oceano Atlântico Sul durante um período de 2 anos.
+# Cada linha do banco de dados corresponde a uma pescaria (i.e., amostra) e contém informações sobre a 
+# operação pesqueira (e.g., long/lat, data, esforço, ...) e sobre as espécies capturadas (abundância).
 
+# O principal objetivo é realizar uma análise exploratória dos dados, buscando identificar padrões espaciais,
+# temporais e espaço-temporais que possam auxiliar a compreensão da distribuição da espécie, bem como servir como
+# e servir como etapa inicial para direcionar a estrutura dos modelos espaciais (aula 07) e espaço-temporais (aula 08).
 
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~
 # Carregando os pacotes
 #~~~~~~~~~~~~~~~~~~~~~~~~
-library(dplyr) # Processamento doas dados
+library(dplyr) # Processamento dos dados
 library(sf) # Processamento de dados (espaciais) vetorizados - ie., shapefiles
 library(rnaturalearth) # Baixar mapas do Natural Earth (https://www.naturalearthdata.com/)
 library(ggplot2) # Visualização dos dados
@@ -29,7 +36,8 @@ library(spdep) # Computar Morans'I
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Definindo tema geral do ggplot
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-my_theme <- theme(plot.title = element_text(hjust = 0.5, face = 'bold'),
+my_theme <- theme_bw(base_size = 14) + 
+            theme(plot.title = element_text(hjust = 0.5, face = 'bold'),
                   axis.text.x = element_text(colour = "grey20", margin = margin(t = 10)),
                   axis.text.y = element_text(colour = "grey20", margin = margin(r = 10)),
                   axis.title = element_text(face = "bold", colour = "black", size = 16),
@@ -128,9 +136,9 @@ levels(df$MonthYear) # Oops, precisamos ordenar os níveis
 # 2.4) Ordenando 'mes-ano' por ordem cronológica
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Tlvls <- df %>%
-  arrange(Year, Month) %>%
-  pull(MonthYear) %>%
-  unique()
+          arrange(Year, Month) %>%
+          pull(MonthYear) %>%
+          unique()
 
 df$MonthYear <- factor(df$MonthYear,
                        levels = Tlvls,
@@ -293,12 +301,12 @@ dfgr$grid_id <- as.factor(dfgr$grid_id) # Obrigatório!
 grid$grid_id <- as.factor(grid$grid_id) # Obrigatório!
 
 aggregated <- dfgr %>% 
-  st_drop_geometry() %>% # Remove temporariamente a geometria dos dados - processamento mais rápido!
-  group_by(grid_id) %>% 
-  summarize(Ntot = sum(Prionace_glauca),
-            Navg = median(Prionace_glauca)) %>% 
-  full_join(., grid, by = "grid_id") %>%  # Recuperando a geometria dos dados
-  st_as_sf()
+              st_drop_geometry() %>% # Remove temporariamente a geometria dos dados - processamento mais rápido!
+              group_by(grid_id) %>% 
+              summarize(Ntot = sum(Prionace_glauca),
+                        Navg = median(Prionace_glauca)) %>% 
+              full_join(., grid, by = "grid_id") %>%  # Recuperando a geometria dos dados
+              st_as_sf()
 
 
 head(aggregated)
@@ -319,11 +327,12 @@ mapview(st_transform(aggregated, crs = CRS_wgs),
 
 
 
-#============= Avlaiando correlação espacial =============#
+#======================= Avlaiando correlação espacial =======================#
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 1 - Índice de Moran (Moran's I) 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 1) Correlograma - Índice de Moran (Moran's I) 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 # 1.1 - Índice global
 #~~~~~~~~~~~~~~~~~~~~~~
@@ -357,7 +366,7 @@ head(local_moran)
 ## Associando os índices ao banco de dados (para posterior visualização)
 lisa_df <- dfsp2_r %>%
   mutate(Ii = local_moran[, "Ii"], # Estatística local
-         p_value = local_moran[, "Pr(z != E(Ii))"], # p-valor
+         p_value = local_moran[, 5], # Pr(z > E(Ii)) - p-valor
          z_var = scale(Prionace_glauca)[, 1], # Escores-z padronizados para classificar os quadrantes
          z_lag = scale(lag.listw(listw, Prionace_glauca))[, 1]) %>%
   mutate(Mquadrants = case_when(p_value >= 0.05 ~ "Not significant", # Classificando os quadrantes
@@ -375,7 +384,75 @@ ggplot(lisa_df) +
   theme_minimal() 
 
 
-#========================================================#
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 2) Variograma (empíricos)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+coords <- st_coordinates(dfsp2_r)
+loc <- cbind(coords[,1], coords[,2])
+dist_m <- dist(loc)
+hist(dist_m / 1000, freq = TRUE, main = "",
+       xlab = "Distance between sites (km)", ylab = "Frequency")
+
+
+
+# 2.1) Variograma isotrópico
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Assume que a correlação espacial depende exclusivamente da distância entre dois pontos, 
+# independentemente da direção. Isso implica que a variabilidade espacial entre dois pontos
+# separados por uma distância (e.g., 100 k)m no sentido Norte-Sul é considerada 
+# equivalente à de dois pontos separados pela mesma distância no sentido Leste-Oeste.
+
+vgi <- variogram(Prionace_glauca ~ 1,
+                locations = dfsp2_r) 
+#plot(vgi)
+
+ggplot(vgi, aes(dist/1000, gamma)) +
+  geom_point(size = 2, colour = "#e07a5f") +
+  geom_line() +
+  labs(x = "Distância (km)", y = "Semivariância") +
+  my_theme
+
+
+
+# 2.2) Variograma anisotrópico (direcional)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Avalia se a correlação espacial varia com a direção, além da distância.
+# Dados ecológicos , é comum que processos espaciais sejam anisotrópicos 
+# devido a gradientes ambientais (ex.: temperatura, correntes ou profundidade).
+
+# No pacote 'gstat', o parâmetro 'alpha' define os ângulos de azimute (medidos no sentido horário a partir do Norte = 0°):
+# - 0°  : Direção Norte-Sul
+# - 45° : Direção Nordeste-Sudeste
+# - 90° : Direção Leste-Oeste
+# - 135°: Direção Sudeste-Noroeste
+
+# Curvas semelhantes em todos os painéis indicam estrutura isotrópica, enquanto que divergências 
+# marcantes entre os ângulos confirmam a presença de anisotropia direcional.
+
+
+vga <- variogram(Prionace_glauca ~ 1,
+                 locations = dfsp2_r,
+                 alpha = c(0,45,90,135)) 
+
+#plot(vga)
+ggplot(vga, aes(dist/1000, gamma)) +
+  geom_point(size = 2, colour = "#e07a5f") +
+  geom_line() +
+  labs(x = "Distância (km)", y = "Semivariância") +
+  facet_wrap(dir.hor ~ .) +
+  my_theme
+
+# O variograma direcional revela uma clara anisotropia espacial e uma tendência de 
+# larga escala no sentido Leste-Oeste (90°), onde a variância dispara após os 1000 km (provavelmente, devido a gradientes ambientais como batimetria).
+# Em contrapartida, observa-se que as direções Norte-Sul (0°), Nordeste-Sudeste (45°) e Sudeste-Noroeste (135°) mantiveram-se estacionárias, 
+# estabilizando em um patamar próximo a 250-300. Essa divergência confirma a violação da premissa de isotropia nos dados brutos, 
+# fato este que sinaliza a necessidade de incorporar covariáveis ambientais no preditor linear do modelo para absorver a tendência espacial.
+# Idealmente, a estrutura de autocorrelação deveria ser reavalidada novamente após rodar o modelo espacial - neste caso, testaria o variograma em cima dos resíduos do modelo.
+
+
+
+#====================================================================================#
 
 
 # 3.3) Dinâmica temporal
@@ -400,8 +477,6 @@ df %>%
   coord_cartesian(expand = c(0,0)) +
   labs(x="Mês",y = "Ano",fill='No. pescarias')  +
   my_theme
-
-
 
 
 
@@ -439,27 +514,25 @@ p5 <- df %>%
 
 
 p6  <- df %>% 
-  group_by(MonthYear) %>% 
-  dplyr::summarize(N_mean = mean(Prionace_glauca),
-                   N_sd = sd(Prionace_glauca),
-                   Nsamples = n()) %>% 
-  mutate(N_se = N_sd / sqrt(Nsamples - 1), #erro padrão da média
-         CI_lower = N_mean + qt((1-0.95)/2, Nsamples - 1) * N_se, #IC da média
-         CI_upper = N_mean - qt((1-0.95)/2, Nsamples - 1) * N_se) %>% 
-  ggplot( aes(x = MonthYear, y = N_mean, group = 1)) +
-  geom_ribbon(aes(ymin = CI_lower, ymax = CI_upper), alpha = 0.2, fill = "#e07a5f", color = NA) +
-  geom_line(col = "#e07a5f") +
-  geom_point(col = "#e07a5f") +
-  coord_cartesian(expand = c(0,0)) +
-  labs(x="Mês-Ano",y = "Abundância média") +
-  theme_bw() +
-  my_theme
+      group_by(MonthYear) %>% 
+      dplyr::summarize(N_mean = mean(Prionace_glauca),
+                       N_sd = sd(Prionace_glauca),
+                       Nsamples = n()) %>% 
+      mutate(N_se = N_sd / sqrt(Nsamples - 1), #erro padrão da média
+             CI_lower = N_mean + qt((1-0.95)/2, Nsamples - 1) * N_se, #IC da média
+             CI_upper = N_mean - qt((1-0.95)/2, Nsamples - 1) * N_se) %>% 
+      ggplot( aes(x = MonthYear, y = N_mean, group = 1)) +
+      geom_ribbon(aes(ymin = CI_lower, ymax = CI_upper), alpha = 0.2, fill = "#e07a5f", color = NA) +
+      geom_line(col = "#e07a5f") +
+      geom_point(col = "#e07a5f") +
+      coord_cartesian(expand = c(0,0)) +
+      labs(x="Mês-Ano",y = "Abundância média") +
+      theme_bw() +
+      my_theme
 
 
 ### Visualizando....
 p5 / p6
-
-
 
 
 # 3.4) Dinâmica espaço-temporal
@@ -470,13 +543,36 @@ ggplot() +
   geom_sf(data = dfsp2, aes(size = Prionace_glauca, color = Prionace_glauca), alpha = 0.5) + #Thunnus_albacares, Istiophorus_albicans
   geom_sf(data = sao, fill = "gray40", color = "white") +
   #facet_wrap(Year ~ .) +
-  #facet_wrap(Month ~ .) +
-  facet_wrap(Year ~ Month) +
+  facet_wrap(Month ~ .) +
+  #facet_grid(Year ~ Month) +
   scale_color_viridis_c(option = "D") +
   guides(size = "none") +
   theme_bw() +
   my_theme
 
 
-gganimate::transition_time(Date) +
-  
+
+## Bubbleplot dinâmico (gif)
+p_anim <- ggplot() +
+          geom_sf(data = sao, fill = "gray40", color = "white") +
+          geom_sf(data = dfsp2, aes(size = Prionace_glauca, color = Prionace_glauca), alpha = 0.6) +
+          scale_color_viridis_c(option = "D", name = "Abundância") +
+          guides(size = "none") +
+          theme_void() +
+          labs(title = "Período: {closest_state}",
+               x = "Longitude", 
+               y = "Latitude") +
+          transition_states(MonthYear, 
+                            transition_length = 2, 
+                            state_length = 3) +
+          enter_fade() + 
+          exit_fade()
+
+gif_bubbleplot <- animate(p_anim, 
+                          duration = 35,
+                          fps = 10,
+                          width = 800, 
+                          height = 700) # Caso não renderize, adicionar argumento: renderer = gifski_renderer() 
+
+gif_bubbleplot                          
+
