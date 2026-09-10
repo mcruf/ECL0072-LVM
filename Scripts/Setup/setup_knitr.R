@@ -32,12 +32,13 @@ knitr::opts_chunk$set(cache = TRUE,
                       warning = FALSE,
                       message = FALSE,
                       cache = TRUE,
+                      dev = "svg",
+                      fig.retina = 3,
                       fig.align = 'center',
                       dev = "svglite",
                       #fig.path = "Figuras/",
                       cache.path = "cache/") 
                   
-
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 3) Define main ggplot theme

@@ -49,7 +49,7 @@ style_xaringan(
     # Text with different sizes 
     ".small-text" = list("font-size" = "80%"),
     ".small-text2" = list("font-size" = "90%"),
-    
+    ".small-text3" = list("font-size" = "70%"),
     
     # Decrease vertical spacing in listed items
     "li > p" = list(
