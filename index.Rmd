@@ -92,16 +92,17 @@ Pós-graduandos e pesquisadores interessados em estatística aplicada e programa
 
 **ATUALIZAR**
 
-- **Aula 1:** Modelos lineares e suas extensões
-- **Aula 2:** Fundamentos em inferência bayesiana
-- **Aula 3:** Modelos mistos I
-- **Aula 4:** Modelos mistos II
-- **Aula 5:** Aquisição, manipulação e visualização de dados espaço-temporais
-- **Aula 6:** Modelo espacial I
+- **Aula 1:** Modelos lineares 
+- **Aula 2:** Métodos de inferência
+- **Aula 3:** Princípios de modelagem bayesiana
+- **Aula 4:** Modelos lineares mistos (LMM)
+- **Aula 5:** Modelos lineares/aditivos generalizados mistos (GLMM/GAMM)
+- **Aula 6:** Modelo espacial I: intro geral, 
 - **Aula 7:** Modelo espacial II
 - **Aula 8:** Modelo espaço-temporal
 - **Aula 9:** Projetos 
 - **Aula 10:** Apesentação de projetos
+
 
 Cada dia da disciplina será dividida entre aulas teóricas e práticas, de forma que se associe a teoria estatística por meio de exercícios práticos.
 

@@ -284,6 +284,9 @@ table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
 .small-text2 {
   font-size: 90%;
 }
+.small-text3 {
+  font-size: 70%;
+}
 li > p {
   margin-top: 0px !important;
   margin-bottom: 0px !important;

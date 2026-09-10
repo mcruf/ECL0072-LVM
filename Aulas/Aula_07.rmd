@@ -1,0 +1,93 @@
+---
+title: "MODELOS ESPAÇO-TEMPORAIS PARA DADOS ECOLÓGICOS (ECL0072)"
+subtitle: "AULA 07: MODELOS ESPACIAIS VIA R-INLA"
+author: "Marie-Christine Rufener"
+institute: "macrufener@gmail.com"
+date: "Out / 2026"
+output:
+  xaringan::moon_reader:
+    seal: false
+    css: xaringan-themer.css
+    lib_dir: libs
+    nature:
+      #seal: false #disable title slide
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~
+# Default knitr iputs
+#~~~~~~~~~~~~~~~~~~~~~~
+
+source("../Scripts/Setup/setup_knitr.R")
+
+#~~~~~~~~~~~~~~~~~~~~~~
+# Slide customization
+#~~~~~~~~~~~~~~~~~~~~~~
+source("../Scripts/Setup/setup_slides.R")
+
+
+```
+
+class: title-slide
+<div class="title-block">
+  <h1>`r rmarkdown::metadata$title`</h1>
+  <div class="date-text">`r rmarkdown::metadata$date`</div>
+</div>
+
+<div class="subtitle-block">
+  <h2>`r rmarkdown::metadata$subtitle`</h2>
+  <p class="author-name">`r rmarkdown::metadata$author`</p>
+  <p class="author-email"><u>`r rmarkdown::metadata$institute`</u></p>
+</div>
+
+<img src="../Figuras/logo_ppgeco2.svg" class="cover-logo">
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+<br>
+
+### Agenda
+
+
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+
+Retomar deifinição sobre o que é um modelo geoestatístico
+- Mostrar a equação de um modelo de regressão com efeito espacial
+- Mostrar como se traduz, matematicamente, o efeito espacial (matrizes de distância)
+
+- Falar sobre a importância do método de amostragem!!
+
+- Fazer o link em relação ao número de parâmetros (todos aleatórios, já que estaão no contexto bayesiano) e problema de MCMC - > uso do INLA
+- Apresentar brevemente o INLA (teoricamente)
+
+
+- Modelos de distribuição de espécies (introdução breve)
+- enfatizar que não está restrito à dados de presença (e ausência)
+
+
+---
+
+It is now clear that three main conditions need to be met for a species to occupy a site and maintain populations
+(i) the species has to reach the site, i.e. to access the region (Barve et al., 2011) and disperse there; 
+  - this is a matter of dispersal
+(ii) the abiotic environmental conditions must be ecophysiologically suitable for the species;
+  - this is a matter of habitat suitability
+    - this is the core of habitat suitability models!
+(iii) the biotic environment (interactions) must be suitable for the species.
+ - this is a matter of biotic interactions
+ 
+ - Figura 3.1 pode ser interessante
+ 
+ This triple influence – dispersal, niche, and biotic – shaping species distributions, and their interactions, can be viewed schematically as sepa- rate ensembles defined by specific boundary conditions (Soberón, 2007). Suitable conditions for a species according to all three factors are found at the intersection of the three ensembles (Figure 3.2, case 1).
+ # Do livro habitat suitability and distribution models - Guisan & Zimmermann

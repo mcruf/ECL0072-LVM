@@ -1,0 +1,248 @@
+---
+title: " - Preparação do ambiente R - "
+subtitle: "Modelos Espaço-Temporais para Dados Ecológicos (ECL0072)"
+output:
+  html_document:
+    toc: false
+    toc_float:
+      collapsed: false
+    theme:
+      bootswatch: lux
+      primary: "#846267"
+      base_font: !expr bslib::font_google("Prompt")
+
+---
+
+<style>
+
+/* Título principal */
+h1 {
+  color: #C0392B;
+}
+
+/* Seções principais */
+h2 {
+  color: #C0392B;
+}
+
+/* Subseções */
+h3 {
+  color: #df796e;
+}
+
+/* Links normais */
+a {
+  color: #457b9d;
+}
+
+
+</style>
+
+
+
+
+```{r,  include=FALSE}
+knitr::opts_chunk$set(echo = T, eval = F, warning = FALSE, message = FALSE, cache = TRUE, fig.align = 'center') 
+
+```
+
+---------------
+
+<br>
+
+
+Durante a disciplina serão utilizados diversos pacotes do R para análise estatística,
+modelagem espacial e visualização de dados ecológicos.
+
+Antes de iniciar as aulas práticas, recomenda-se instalar os pacotes listados abaixo.
+
+
+
+
+<br>
+
+## 1. Atualização do R
+
+Recomenda-se utilizar versões atualizadas do R & Rstudio
+
+- R ≥ 4.4 
+- RStudio atualizado
+
+
+Para verificar a versão instalada, digite o seguinte código no console do R:
+
+```{r}
+R.version.string
+```
+
+
+---------------
+
+<br>
+
+
+## 2. Instalação dos pacotes principais
+
+### Instalação via CRAN
+
+```{r eval=FALSE}
+
+install.packages(c("knitr", "sf", "terra", "brms"))
+
+```
+
+
+---------------
+
+<br>
+
+## 3. Instalação do pacote R-INLA
+
+O pacote [R-INLA](https://www.r-inla.org/) não está disponível diretamente no CRAN e precisa ser instalado via repositório oficial conforme:
+
+
+<br>
+
+```{r eval=FALSE}
+
+
+install.packages("INLA", repos=c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
+
+```
+
+
+Após a instalação, certifique que o pacote esteja instalado:
+
+```{r eval=FALSE}
+
+library(INLA)
+
+```
+
+
+
+
+---------------
+
+<br>
+
+## 4. Dependências espaciais: sf e terra
+
+
+Os pacotes `sf` e `terra` utilizam bibliotecas externas:
+
+- GDAL
+- GEOS
+- PROJ
+
+
+Estas bibliotecas são responsáveis por operações como:
+
+- leitura de shapefiles;
+- transformação de sistemas de coordenadas;
+- operações geométricas;
+- manipulação de rasters.
+
+
+### Windows
+
+Normalmente não é necessário instalar GDAL manualmente.
+
+Os binários disponíveis no CRAN já incluem as dependências necessárias.
+
+
+### Linux
+
+Pode ser necessário instalar previamente:
+
+
+```bash
+sudo apt install libgdal-dev
+sudo apt install libgeos-dev
+sudo apt install libproj-dev
+```
+
+
+### macOS
+
+Usuários de macOS podem instalar as dependências via Homebrew:
+
+```bash
+brew install gdal
+brew install geos
+brew install proj
+```
+
+
+---------------
+
+<br>
+
+## 5. Instalação do Rtools (Windows)
+
+
+O Rtools é necessário para compilar alguns pacotes do R.
+
+
+Download:
+
+https://cran.r-project.org/bin/windows/Rtools/
+
+
+Instale a versão correspondente ao R instalado.
+
+
+Após a instalação, verificar:
+
+
+```{r eval=FALSE}
+
+pkgbuild::has_rtools()
+
+```
+
+
+O resultado esperado é:
+
+```
+TRUE
+```
+
+---------------
+
+<br>
+
+
+## 6. Teste final da instalação
+
+
+Após instalar todos os pacotes, execute:
+
+
+```{r}
+
+packages <- c("knitr", "sf", "terra", "brms", "INLA")
+
+
+sapply(packages, require, character.only = TRUE )
+
+```
+
+
+Caso todos retornem `TRUE`, o ambiente está preparado para a disciplina.
+
+
+---------------
+
+<br>
+
+
+## Pacotes adicionais
+
+Durante a disciplina outros pacotes poderão ser utilizados:
+
+```{r eval=FALSE}
+
+install.packages(c("tidyverse", "ggplot2", "dplyr", "spdep", "gstat", "tmap", "DHARMa", "glmmTMB", "mgcv", "gratia"))
+
+```
