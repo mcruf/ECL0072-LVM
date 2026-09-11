@@ -103,7 +103,7 @@ Pós-graduandos e pesquisadores interessados em estatística aplicada e programa
 - **Aula 9:** Projetos 
 - **Aula 10:** Apesentação de projetos
 
-
+ 
 Cada dia da disciplina será dividida entre aulas teóricas e práticas, de forma que se associe a teoria estatística por meio de exercícios práticos.
 
 <br>

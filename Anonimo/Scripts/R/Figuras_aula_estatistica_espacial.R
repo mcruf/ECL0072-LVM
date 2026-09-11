@@ -1,8 +1,8 @@
-################################################################
-#                                                              #
-#     Gráficos exibidos na aula de estatística espacial        #
-#                                                              #
-###############################################################
+######################################################################
+#                                                                    #
+#     Gráficos exibidos nas duas aula de estatística espacial        #
+#                                                                    #
+######################################################################
 
 
 # Load libraries
@@ -25,6 +25,8 @@ my_theme <- theme_minimal(base_size = 14) +
         axis.text.x = element_text(colour = "grey20", margin = margin(t = 5)),
         axis.text.y = element_text(colour = "grey20", margin = margin(r = 5)),
         axis.title = element_text(face = "bold", colour = "black"),
+        axis.title.y = element_text(margin = margin(t = 0, r = 15, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 15, r = 0, b = 0, l = 0)),
         strip.background = element_rect(fill = 'white'),
         legend.background = element_rect(fill = "transparent", colour = NA),
         legend.box.background = element_rect(fill = "transparent", colour = NA),
@@ -177,18 +179,18 @@ lisa_colors <- c(
 
 # 2. Moran Scatterplot (Usando shape = 21 e fill para ter o mesmo símbolo/tamanho do mapa)
 p_scatter <- ggplot(grid, aes(x = x, y = lag)) +
-              geom_hline(yintercept = 0, linetype = "dashed", color = "gray60") +
-              geom_vline(xintercept = 0, linetype = "dashed", color = "gray60") +
-              geom_point(aes(fill = lisa_cluster, alpha = lisa_cluster), shape = 21, size = 3.5, color = "white", alpha = 0.7, stroke = 0.2) +
-              geom_smooth(method = "lm", se = FALSE, color = "black", linewidth = 0.8) +
-              scale_fill_manual(values = lisa_colors, drop = FALSE, guide = guide_legend(title.position = "top", 
-                                                                                         title.hjust = 0.5, 
-                                                                                         nrow = 2,
-                                                                                         byrow = T,
-                                                                                         override.aes = list(size = 3.5, alpha = 1))) +
-              scale_alpha_manual(values = c("High-High" = 0.9, "High-Low" = 0.9, "Low-High" = 0.9, "Low-Low" = 0.9, "Not Significant" = 0.4), guide = "none") +
-              labs(title = "Moran scatterplot", x = "Source values", y = "Lagged values", fill = "Quadrant") +
-              my_theme
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray60") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray60") +
+  geom_point(aes(fill = lisa_cluster, alpha = lisa_cluster), shape = 21, size = 3.5, color = "white", alpha = 0.7, stroke = 0.2) +
+  geom_smooth(method = "lm", se = FALSE, color = "black", linewidth = 0.8) +
+  scale_fill_manual(values = lisa_colors, drop = FALSE, guide = guide_legend(title.position = "top", 
+                                                                             title.hjust = 0.5, 
+                                                                             nrow = 2,
+                                                                             byrow = T,
+                                                                             override.aes = list(size = 3.5, alpha = 1))) +
+  scale_alpha_manual(values = c("High-High" = 0.9, "High-Low" = 0.9, "Low-High" = 0.9, "Low-Low" = 0.9, "Not Significant" = 0.4), guide = "none") +
+  labs(title = "Moran scatterplot", x = "Source values", y = "Lagged values", fill = "Quadrant") +
+  my_theme
 
 
 # 3. Spatial Map
@@ -201,7 +203,7 @@ p_map <- ggplot(grid) +
   coord_sf(expand = c(0,0)) +
   labs(title = "LISA cluster map", fill = "Quadrant") +
   my_theme
-            
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Combined Layout Fix
@@ -442,25 +444,25 @@ grid$abundance <- scales::rescale(
 #----------------------------------------------------
 
 p_grf <- ggplot(grid, aes(x, y,fill=abundance))+
-          geom_raster(interpolate = TRUE, alpha = 0.8) +
-          scale_fill_viridis_c(option="A", name="Abundância",
-                               guide = guide_colorbar(
-                                 title.position = "top", 
-                                 title.hjust = 0.5,
-                                 barwidth = unit(4, "cm"), 
-                                 barheight = unit(0.4, "cm")
-                               )) +
-          coord_cartesian(expand = c(0, 0)) + 
-          my_theme +
-          theme(panel.grid.major.x = element_blank(),
-                panel.grid.major.y = element_blank(),
-                panel.grid.minor = element_blank(),
-                panel.border = element_rect(colour = "black", fill = NA, linewidth = 1.2),
-                axis.text.x = element_blank(),
-                axis.text.y = element_blank(),
-                axis.title = element_blank(),
-                axis.ticks = element_blank())
-        
+  geom_raster(interpolate = TRUE, alpha = 0.8) +
+  scale_fill_viridis_c(option="A", name="Abundância",
+                       guide = guide_colorbar(
+                         title.position = "top", 
+                         title.hjust = 0.5,
+                         barwidth = unit(4, "cm"), 
+                         barheight = unit(0.4, "cm")
+                       )) +
+  coord_cartesian(expand = c(0, 0)) + 
+  my_theme +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA, linewidth = 1.2),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank())
+
 
 ggsave(filename = "Figuras/GRF.png", 
        plot = p_grf, 
@@ -1286,25 +1288,25 @@ dfsp2 <- dfsp[lengths(st_intersects(dfsp, sao)) == 0,]
 
 ## Bubbleplot
 p_geostatistics <- ggplot() +
-                    geom_sf(data = dfsp2, aes(size = Prionace_glauca, color = Prionace_glauca), alpha = 0.5) + #Thunnus_albacares, Istiophorus_albicans
-                    geom_sf(data = sao, fill = "gray99", color = "gray80", size = 0.5) +
-                    scale_color_viridis_c(option = "A", guide = guide_colorbar(
-                      title.position = "top", 
-                      title.hjust = 0.5,
-                      barwidth = unit(4, "cm"), 
-                      barheight = unit(0.4, "cm")
-                    )) + # option = A-I
-                    guides(size = "none") +
-                    labs(color = "Prionace glauca") +
-                    labs(title = "Abundância do tubarão azul \nno Atlântico Sul") + 
-                    coord_sf(expand = FALSE, ylim=c(-50, 2)) +
-                    my_theme +
-                    scale_size(range = c(0.8, 7)) +
-                    theme(panel.background = element_rect(fill = '#dbe9ee', color = NA),
-                          plot.title = element_text(hjust = 0.5, size = 13, margin = margin(t = 10, b = 10)),
-                          plot.margin = margin(10, 10, 10, 10),
-                          panel.grid.major = element_blank(),
-                          panel.grid.minor = element_blank())
+  geom_sf(data = dfsp2, aes(size = Prionace_glauca, color = Prionace_glauca), alpha = 0.5) + #Thunnus_albacares, Istiophorus_albicans
+  geom_sf(data = sao, fill = "gray99", color = "gray80", size = 0.5) +
+  scale_color_viridis_c(option = "A", guide = guide_colorbar(
+    title.position = "top", 
+    title.hjust = 0.5,
+    barwidth = unit(4, "cm"), 
+    barheight = unit(0.4, "cm")
+  )) + # option = A-I
+  guides(size = "none") +
+  labs(color = "Prionace glauca") +
+  labs(title = "Abundância do tubarão azul \nno Atlântico Sul") + 
+  coord_sf(expand = FALSE, ylim=c(-50, 2)) +
+  my_theme +
+  scale_size(range = c(0.8, 7)) +
+  theme(panel.background = element_rect(fill = '#dbe9ee', color = NA),
+        plot.title = element_text(hjust = 0.5, size = 13, margin = margin(t = 10, b = 10)),
+        plot.margin = margin(10, 10, 10, 10),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
 
 p_geostatistics
 
@@ -1324,21 +1326,21 @@ library(covid19br)
 dat <- add_geo(election2018Cities)
 
 p_areal <- ggplot(dat) +
-           geom_sf(aes(fill = EDHI), col = NA) + 
-           scale_fill_viridis_c(option = "A", guide = guide_colorbar(
-              title.position = "top", 
-              title.hjust = 0.5,
-              barwidth = unit(4, "cm"), 
-              barheight = unit(0.4, "cm"))) + # option = A-I
-           guides(size = "none") +
-           coord_sf(expand = FALSE, datum = NA) +
-           labs(title = "IDH da Educação") + 
-           my_theme +
-           theme(panel.background = element_rect(fill = NA, color = NA),
-                  plot.title = element_text(hjust = 0.5, size = 13, margin = margin(t = 10, b = 10)),
-                  plot.margin = margin(10, 10, 10, 10),
-                  panel.grid.major = element_blank(),
-                  panel.grid.minor = element_blank())
+  geom_sf(aes(fill = EDHI), col = NA) + 
+  scale_fill_viridis_c(option = "A", guide = guide_colorbar(
+    title.position = "top", 
+    title.hjust = 0.5,
+    barwidth = unit(4, "cm"), 
+    barheight = unit(0.4, "cm"))) + # option = A-I
+  guides(size = "none") +
+  coord_sf(expand = FALSE, datum = NA) +
+  labs(title = "IDH da Educação") + 
+  my_theme +
+  theme(panel.background = element_rect(fill = NA, color = NA),
+        plot.title = element_text(hjust = 0.5, size = 13, margin = margin(t = 10, b = 10)),
+        plot.margin = margin(10, 10, 10, 10),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
 
 
 p_areal
@@ -1363,24 +1365,24 @@ longleaf_df <- as.data.frame(longleaf)
 
 # Create the ggplot2 plot
 p_point <- ggplot(longleaf_df, aes(x = x, y = y, size = marks, col = marks)) +
-            geom_point( alpha = 0.7) +
-            scale_color_viridis_c(option = 'A', guide = guide_colorbar(
-              title.position = "top", 
-              title.hjust = 0.5,
-              barwidth = unit(4, "cm"), 
-              barheight = unit(0.4, "cm"))) +
-        guides(size = "none") +
-        scale_size(range = c(0.8, 5)) +
+  geom_point( alpha = 0.7) +
+  scale_color_viridis_c(option = 'A', guide = guide_colorbar(
+    title.position = "top", 
+    title.hjust = 0.5,
+    barwidth = unit(4, "cm"), 
+    barheight = unit(0.4, "cm"))) +
+  guides(size = "none") +
+  scale_size(range = c(0.8, 5)) +
   
-            labs(title = "Posição & diâmetro de árvores",
-                 x = "Easting",
-                 y = "Northing") +
-           my_theme +
-        theme(panel.background = element_rect(fill = NA, color = NA),
-              plot.title = element_text(hjust = 0.5, size = 13, margin = margin(t = 10, b = 10)),
-              plot.margin = margin(10, 10, 10, 10),
-              panel.grid.major = element_blank(),
-              panel.grid.minor = element_blank())
+  labs(title = "Posição & diâmetro de árvores",
+       x = "Easting",
+       y = "Northing") +
+  my_theme +
+  theme(panel.background = element_rect(fill = NA, color = NA),
+        plot.title = element_text(hjust = 0.5, size = 13, margin = margin(t = 10, b = 10)),
+        plot.margin = margin(10, 10, 10, 10),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
 
 p_point      
 
@@ -1398,13 +1400,374 @@ ggsave("Figuras/Dado_pointpattern.png", plot = p_point, width = 6, height = 6, d
 world <- rnaturalearth::ne_countries(scale = 10, returnclass = "sf")
 
 p_equal <- ggplot() +
-              geom_sf(data = world, fill = "#e59c82", color = "white", size = 0.2) +
-              coord_sf(crs = 8857) +
-              theme_minimal() +
-              theme(axis.text = element_blank())
+  geom_sf(data = world, fill = "#e59c82", color = "white", size = 0.2) +
+  coord_sf(crs = 8857) +
+  theme_minimal() +
+  theme(axis.text = element_blank())
 
 ggsave("Figuras/projecao_equal_earth.png", plot = p_equal, width = 6, height = 4, dpi = 400, bg = "transparent")
 
 
 
+###########################
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 12) Função de covariância de Matérn
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+# 1. Função de Matérn Totalmente Vetorizada (sem usar Vectorize)
+matern_vec <- function(d, sigma2 = 1, kappa = 1, nu = 0.5) {
+  # Trata d = 0 via ifelse para permitir vetorização limpa no R
+  res <- ifelse(
+    d == 0, 
+    sigma2, 
+    sigma2 * (2^(1 - nu) / gamma(nu)) * (kappa * d)^nu * besselK(kappa * d, nu)
+  )
+  return(res)
+}
+
+# 2. Criando o Grid de Parâmetros
+d_seq <- seq(0, 2, length.out = 300)
+
+df_params <- expand.grid(
+  d = d_seq,
+  nu = c(0.5, 1.0, 1.5, 2.5),
+  kappa = c(2, 5, 10),
+  sigma2 = 1
+) %>%
+  # Rowwise + pmap garante a avaliação correta linha a linha sem conflito de dimensões
+  mutate(
+    cov = matern_vec(d = d, sigma2 = sigma2, kappa = kappa, nu = nu),
+    kappa_label = factor(paste0("kappa == ", kappa), 
+                         levels = paste0("kappa == ", c(2, 5, 10))),
+    nu_label = factor(paste0("nu == ", nu))
+  )
+
+# 3. Gráfico no ggplot2
+p_matern <- ggplot(df_params, aes(x = d, y = cov, color = nu_label, linetype = nu_label)) +
+  geom_line(linewidth = 1) +
+  facet_wrap(~ kappa_label, labeller = label_parsed, scales = 'free_x') +
+  scale_color_manual(values = c("#846267", "#e07a5f", "#457b9d", "#f6bd60"),
+                     name = expression(nu ~ "(Suavidade)"),
+                     labels = scales::label_parse(),
+                     guide = guide_legend(
+                       title.position = "top",
+                       title.hjust = 0.5
+                     )) +
+  # scale_color_viridis_d(option = "A", end = 0.85, name = expression(nu ~ "(Suavidade)"),
+  #                       labels = scales::label_parse(),
+  #                       guide = guide_legend(
+  #                         title.position = "top",
+  #                         title.hjust = 0.5
+  #                       ))+
+  scale_linetype_manual(name = expression(nu ~ "(Suavidade)"),
+                        values = c("solid", "dashed", "dotdash", "dotted"),
+                        labels = scales::label_parse()) +
+  labs(x = "Distância (d)", y = "Covariância C(d)" ) +
+  my_theme +
+  theme(strip.background = element_rect(fill = NA, color = NA),
+        strip.text = element_text(face = "bold", size = 14),
+        legend.position = "bottom")
+
+p_matern
+
+
+ggsave("Figuras/Matern_covariance.png", plot = p_matern, width = 10, height = 4, dpi = 400, bg = "transparent")
+
+###########################
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 13) Função de Matérn em 1D
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+# 1. Função de Covariância de Matérn Vetorizada (1D)
+matern_cov <- function(d, sigma2 = 1, kappa = 2, nu = 0.5) {
+  ifelse(
+    d == 0, 
+    sigma2, 
+    sigma2 * (2^(1 - nu) / gamma(nu)) * (kappa * d)^nu * besselK(kappa * d, nu)
+  )
+}
+
+# 2. Função para Simular Realizações (Trajetórias de GRF 1D)
+simular_grf <- function(x, nu, n_reals = 1, seed = 123) {
+  set.seed(seed)
+  n <- length(x)
+  
+  # Matriz de distâncias
+  D <- as.matrix(dist(x))
+  
+  # Matriz de Covariância
+  Sigma <- matern_cov(D, sigma2 = 1, kappa = 2, nu = nu)
+  
+  # Estabilização numérica (nugget fino para garantir decomposição)
+  diag(Sigma) <- diag(Sigma) + 1e-8
+  
+  # Decomposição de Cholesky: Sigma = L %*% t(L)
+  L <- t(chol(Sigma))
+  
+  # Amostras da distribuição Normal Padrão ~ N(0, I)
+  Z <- matrix(rnorm(n * n_reals), nrow = n, ncol = n_reals)
+  
+  # Transformação linear para obter y ~ N(0, Sigma)
+  Y <- L %*% Z
+  
+  df <- as.data.frame(Y)
+  colnames(df) <- paste0("sim_", 1:n_reals)
+  df$x <- x
+  
+  return(df)
+}
+
+# 3. Grid e Simulações para os 3 Valores de Nu
+x_seq <- seq(-3, 3, length.out = 250)
+
+df_nu12 <- simular_grf(x_seq, nu = 0.5, n_reals = 1, seed = 42) %>%
+  pivot_longer(cols = starts_with("sim"), names_to = "trajetoria", values_to = "y") %>%
+  mutate(panel_label = "nu == '1/2'")
+
+df_nu32 <- simular_grf(x_seq, nu = 1.5, n_reals = 1, seed = 42) %>%
+  pivot_longer(cols = starts_with("sim"), names_to = "trajetoria", values_to = "y") %>%
+  mutate(panel_label = "nu == '3/2'")
+
+df_nu52 <- simular_grf(x_seq, nu = 2.5, n_reals = 1, seed = 42) %>%
+  pivot_longer(cols = starts_with("sim"), names_to = "trajetoria", values_to = "y") %>%
+  mutate(panel_label = "nu == '5/2'")
+
+df_all <- bind_rows(df_nu12, df_nu32, df_nu52) %>%
+  mutate(panel_label = factor(panel_label, levels = c("nu == '1/2'", "nu == '3/2'", "nu == '5/2'")))
+
+# 4. Construção do Gráfico (3 Painéis Empilhados)
+p_matern2 <- ggplot(df_all, aes(x = x, y = y)) +
+  geom_line(linewidth = 0.85, color = "black") +
+  facet_wrap(~ panel_label, ncol = 1, scales = "free_y", labeller = label_parsed) +
+  scale_x_continuous(limits = c(-3.1, 3.1), breaks = seq(-3, 3, by = 1)) +
+  scale_y_continuous(limits = c(-3, 3), breaks = seq(-2, 2, by = 2)) +
+  #scale_color_brewer(palette = "Set1") + # Paleta de cores similar às linhas
+  labs(x = expression(italic(x)), y = expression(italic(y))) +
+  my_theme +
+  theme(legend.position = "none", # Sem legenda, assim como no original
+        strip.background = element_blank(),
+        strip.text = element_text(size = 20, face = 'bold'),
+        axis.title = element_text(size = 20, face = 'bold'),
+        axis.title.y = element_text(angle = 360, vjust = 0.5),
+        axis.text = element_text(size = 16, color = "black"),
+        #panel.grid = element_blank(), # Remove as grades internas
+        panel.border = element_rect(color = "gray60", fill = NA, linewidth = 0.8))
+
+
+
+ggsave("Figuras/Matern_covariance_1D.png", plot = p_matern2, width = 8, height = 12, dpi = 400, bg = "transparent")
+
+
+################################################
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 14) Influência da amostragem sobre as predicões espaciais
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+set.seed(123)
+
+# Simulate a Gaussian Random Field for fish abundance (catches in weight) using ggplot
+# 1. Define the spatial domain
+x <- seq(0, 10, length.out = 50)
+y <- seq(0, 10, length.out = 50)
+grid <- expand.grid(x = x, y = y)
+
+
+# 2. Define the covariance function (e.g., exponential covariance)
+sigma2 <- 5 # Variance
+range <- 2  # Spatial range
+nu <- 0.5    # Smoothness parameter (for Matérn, but we'll use exponential)
+
+exponential_covariance <- function(dist, sigma2, range) {
+  sigma2 * exp(-dist / range)
+}
+
+# 3. Calculate the distance matrix
+dist_matrix <- as.matrix(dist(grid))
+
+# 4. Calculate the covariance matrix
+covariance_matrix <- exponential_covariance(dist_matrix, sigma2, range)
+
+# 5. Simulate the Gaussian Random Field
+library(MASS)
+z <- mvrnorm(n = 1, mu = rep(0, nrow(grid)), Sigma = covariance_matrix)
+
+# 6. Reshape the simulated field into a data frame for ggplot
+grid$z <- as.vector(z)
+
+# 7. Plot using ggplot2
+library(ggplot2)
+library(viridis)
+
+p1 <- ggplot(grid, aes(x = x, y = y, fill = z)) +
+  geom_raster(interpolate = T) +
+  scale_fill_viridis(option = 'A',  
+                     breaks = c(min(grid$z), max(grid$z)),
+                     labels = c("Baixa", "Alta"),
+                     name = 'Abundância',
+                     guide = guide_colorbar(
+                       title.position = "top", 
+                       title.hjust = 0.5,
+                       barwidth = unit(4, "cm"), 
+                       barheight = unit(0.4, "cm"))) +
+  theme_void() +
+  coord_cartesian(expand = c(0,0)) +
+  theme(legend.position = "bottom",
+        strip.text = element_text(size = 12, face =2,  margin = margin(b = 8)),
+        panel.border = element_rect(
+          colour = "black",
+          fill = NA,
+          linewidth = 1.5))
+
+
+p1
+
+
+
+# 8. Simulate different sampling strategies 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+set.seed(123)
+
+# Number of samples
+n_samples <- 30 #
+
+# 8.1. Simple Random Sampling
+random_indices <- sample(nrow(grid), n_samples)
+simple_random_samples <- grid[random_indices, c("x", "y", "z")]
+simple_random_samples$amostragem <- "Aleatório simples"
+
+# 8.2 Stratified Random Sampling (stratify by spatial grid)
+grid$x_strat <- cut(grid$x, breaks = 4) # Divide x into 4 strata
+grid$y_strat <- cut(grid$y, breaks = 4) # Divide y into 4 strata
+grid$spatial_strat <- paste(grid$x_strat, grid$y_strat) # Combine x and y strata
+
+stratified_samples <- do.call(rbind, lapply(split(grid, grid$spatial_strat), function(strat) {
+  num_samples_strat <- ceiling(n_samples / 16) # 16 strata
+  if (nrow(strat) > num_samples_strat) {
+    strat[sample(nrow(strat), num_samples_strat), c("x", "y", "z")] # Select relevant columns
+  } else {
+    strat[sample(nrow(strat), nrow(strat)), c("x", "y", "z")] # Select relevant columns
+  }
+}))
+stratified_samples$amostragem <- "Aleatório estratificado"
+
+# 8.3 Systematic Sampling (using a grid pattern)
+side_samples <- ceiling(sqrt(n_samples)) # samples per side of the grid
+x_seq <- seq(min(grid$x), max(grid$x), length.out = side_samples)
+y_seq <- seq(min(grid$y), max(grid$y), length.out = side_samples)
+
+systematic_samples_grid <- expand.grid(x = x_seq, y = y_seq)
+
+## find the closest grid points
+systematic_samples <- apply(systematic_samples_grid, 1, function(point){
+  distances <- sqrt((grid$x - point["x"])^2 + (grid$y - point["y"])^2)
+  return(grid[which.min(distances), c("x", "y", "z")])
+})
+
+systematic_samples <- do.call(rbind, systematic_samples)
+systematic_samples$amostragem <- "Sistemático"
+
+
+# 8.4 Preferential Sampling (sampling where abundance is high)
+preferential_samples <- grid[order(as.numeric(grid$z), decreasing = TRUE)[1:n_samples], c("x", "y", "z")] # Select relevant columns
+preferential_samples$amostragem <- "Preferencial"
+
+# Combine all sampling results
+all_samples <- rbind(simple_random_samples, stratified_samples, systematic_samples, preferential_samples)
+
+
+## Go for the plots
+all_samples2 <- filter(all_samples, !(amostragem == "Aleatório estratificado"))
+
+p2 <- ggplot(grid, aes(x = x, y = y, fill = z)) +
+  geom_raster(interpolate = T) +
+  geom_point(data = all_samples2,  aes(x = x, y = y, fill = NULL), fill = "white", col = 'black',size = 3, pch = 21) +
+  scale_fill_viridis(option = 'A',  
+                     breaks = c(min(grid$z), max(grid$z)),
+                     labels = c("Baixa", "Alta"),
+                     name = 'Abundância',
+                     guide = guide_colorbar(
+                       title.position = "top", 
+                       title.hjust = 0.5,
+                       barwidth = unit(4, "cm"), 
+                       barheight = unit(0.4, "cm"))) +
+  facet_wrap(factor(amostragem, c("Aleatório simples","Preferencial", "Sistemático" )) ~.) + 
+  theme_void() +
+  coord_cartesian(expand = c(0,0)) +
+  theme(legend.position = "bottom",
+        strip.text = element_text(size = 12, face =2,  margin = margin(b = 8)),
+        panel.border = element_rect(
+          colour = "black",
+          fill = NA,
+          linewidth = 1.5))
+p2
+
+#ggsave("Figuras/tipos_de_amostragem.png", plot = p2, width = 6, height = 6, dpi = 400, bg = "transparent")
+
+
+
+### Simple IDW interpolation to see impact of sampling 
+# Convert all_samples to SpatialPointsDataFrame
+grid2 <- grid
+
+sp::coordinates(grid2) <- ~x + y
+
+
+# Convert 'all_samples' into a spatial object correctly
+all_samples_list <- split(all_samples, all_samples$amostragem) # Split by sampling type
+
+perform_idw <- function(samples_df, grid2) {
+  # Ensure the data frame has spatial coordinates
+  sp::coordinates(samples_df) <- ~x + y
+  
+  # Create the IDW model
+  idw_model <- gstat::idw(formula = z ~ 1, locations = samples_df, newdata = grid2, idp = 2.5)
+  
+  # Return a data frame with interpolated values
+  return(data.frame(grid, z_idw = idw_model$var1.pred, amostragem = unique(samples_df$amostragem)))
+}
+
+
+# Apply IDW to each sampling method separately
+idw_results <- lapply(all_samples_list, perform_idw, grid = grid2) %>%
+  bind_rows() # Combine results into a single data frame
+
+
+idw_results2 <- filter(idw_results, !amostragem == "Aleatório estratificado")
+
+p3 <- ggplot(idw_results2, aes(x = x, y = y, fill = z_idw)) +
+  geom_raster(interpolate = F) +
+  scale_fill_viridis(option = 'A', breaks = c(min(grid$z), max(grid$z)),
+                     labels = c("Baixa", "Alta"),
+                     name = 'Abundância',
+                     guide = guide_colorbar(
+                       title.position = "top", 
+                       title.hjust = 0.5,
+                       barwidth = unit(4, "cm"), 
+                       barheight = unit(0.4, "cm"))) +
+  facet_wrap(factor(amostragem, c("Aleatório simples", "Preferencial", "Sistemático")) ~.) + 
+  theme_void() +
+  coord_cartesian(expand = c(0,0)) +
+  theme(legend.position = "bottom",
+        strip.text = element_text(size = 12, face =2,  margin = margin(b = 8)),
+        panel.border = element_rect(
+          colour = "black",
+          fill = NA,
+          linewidth = 1.5))
+
+
+
+
+
+p_sampling <- (p2/ plot_spacer() /p3) + 
+  plot_layout(guides = "collect", heights = c(10, 1, 10)) & 
+  theme(legend.position = "bottom") 
+
+
+ggsave("Figuras/tipos_de_amostragem_interpolação.png", plot = p_sampling, width = 8, height = 6, dpi = 400, bg = "transparent")
