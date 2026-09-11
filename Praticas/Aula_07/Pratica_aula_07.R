@@ -21,11 +21,11 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~
 # Carregando os pacotes
 #~~~~~~~~~~~~~~~~~~~~~~~~
-library(INLA) # Ajustar modelos espaciais (bayesianos)
+library(INLA)    # Ajustar modelos espaciais (bayesianos)
 library(ggplot2) # Visualização dos dados
-library(sf)  # Processamento de dados vetorizados 
-library(raster) # Processamento de rasters
-library(terra) # Processamento de rasters
+library(sf)      # Processamento de dados vetorizados 
+library(raster)  # Processamento de rasters
+library(terra)   # Processamento de rasters
 library(stringr) # Manipulação de strings
 
 
@@ -207,31 +207,31 @@ unique(word(names(batimetria2r), 1, sep = "_"))
 
 
 ### Extraindo dados para thetao (sst - temperatura superficial do mar); variável dinâmica
-dfs_f <- extract_env_dynamic(points_sf = dfs_f, #dados pesqueiros espacializados
-                             env_raster = vfisicas2r, #camada ambiental (raster)
-                             var_name = "thetao",#nome da variável dentro da camada ambiental
+dfs_f <- extract_env_dynamic(points_sf = dfs_f, # dados pesqueiros espacializados
+                             env_raster = vfisicas2r, # camada ambiental (raster)
+                             var_name = "thetao",# nome da variável dentro da camada ambiental
                              year_map = year_mapping)
 
 
 ### Extraindo dados para zos (ssh - altura da superfície do mar); variável dinâmica
-dfs_f <- extract_env_dynamic(points_sf = dfs_f, #dados pesqueiros espacializados
-                             env_raster = vfisicas2r, #camada ambiental (raster)
-                             var_name = "zos",#nome da variável dentro da camada ambiental
+dfs_f <- extract_env_dynamic(points_sf = dfs_f, # dados pesqueiros espacializados
+                             env_raster = vfisicas2r, # camada ambiental (raster)
+                             var_name = "zos",# nome da variável dentro da camada ambiental
                              year_map = year_mapping)
 
 
 ### Extraindo dados para mlotst (mlt - espessura da camada de mistura); variável dinâmica
-dfs_f <- extract_env_dynamic(points_sf = dfs_f, #dados pesqueiros espacializados
-                             env_raster = vfisicas2r, #camada ambiental (raster)
-                             var_name = "mlotst",#nome da variável dentro da camada ambiental
+dfs_f <- extract_env_dynamic(points_sf = dfs_f, # dados pesqueiros espacializados
+                             env_raster = vfisicas2r, # camada ambiental (raster)
+                             var_name = "mlotst",# nome da variável dentro da camada ambiental
                              year_map = year_mapping)
 
 
 
 ### Extraindo dados para nppv (produtividade primária); variável dinâmica
-dfs_f <- extract_env_dynamic(points_sf = dfs_f, #dados pesqueiros espacializados
-                             env_raster = vbio2, #camada ambiental (raster)
-                             var_name = "nppv",#nome da variável dentro da camada ambiental
+dfs_f <- extract_env_dynamic(points_sf = dfs_f, # dados pesqueiros espacializados
+                             env_raster = vbio2, # camada ambiental (raster)
+                             var_name = "nppv",# nome da variável dentro da camada ambiental
                              year_map = year_mapping)
 
 
@@ -242,17 +242,27 @@ dfs_f$bathy  <- extract(batimetria2r, dfs_f)[, 2]
 
 ### To see the progress...
 head(as.data.frame(dfs_f))
+colnames(dfs_f)[23:27] <- c("temperatura","altura_mar", "camada_mistura", "prod_primaria", "batimetria") # Renomeando as variáveis
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 4) Análise exploratória dos dados ambientais
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#FIXME: Desenvolver esta seção!
+
 
 
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 4) Construindo o mesh (malha SPDE)
+# 5) Construindo o mesh (malha SPDE)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Em modelos espaciais, é prática comum converter a projeção para UTM. 
 # Contudo, como a área de estudo é ampla e abrange múltiplas zonas UTM, 
 # será usada uma projeção LEA centrada nas coordenadas lat = -25 e long = -20 e com unidades expressas em Km.
-
 
 # No R-INLA, podemos construir a malha espacial a partir das coordenadas dos dados, 
 # de um polígono espacial de contorno (domain), ou combinando ambas as abordagens.
@@ -274,18 +284,18 @@ head(as.data.frame(dfs_f))
 
 
 
-# 4.1) Transformando os dados para projeção LEA (expresso em metros)
+# 5.1) Transformando os dados para projeção LEA (expresso em metros)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 dfs_lea <- st_transform(dfs_f, CRS_lea)
 
 
 
-# 4.2) Criando matriz de coordenadas
+# 5.2) Criando matriz de coordenadas
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 coords <- as.data.frame(st_coordinates(dfs_lea))
 
 
-# 4.3) Definindo o mesh
+# 5.3) Definindo o mesh
 #~~~~~~~~~~~~~~~~~~~~~~
 # Diversos estudos, tutoriais e discussões metodológicas sugerem que o valor 
 # de 'max.edge' deva ser entre 1/3 e 1/10 do alcance espacial (spatial range) 
@@ -303,33 +313,231 @@ coords <- as.data.frame(st_coordinates(dfs_lea))
 # estimado e, se necessário, reconstruir o mesh utilizando valores mais
 # adequados para max.edge.
 
-sw_oceant <- st_transform(sw_ocean, crs = CRS_lea) 
-
-max.edge = diff(range(coords[,1]))/(3*5)
-bound.outer = diff(range(coords[,1]))/5
+max.edge <- diff(range(coords[,1]))/(3*5)
+bound.outer <- diff(range(coords[,1]))/5
 
 
-mesh1 <- inla.mesh.2d(loc = coords)
-mesh2 <- inla.mesh.2d(loc = coords, max.edge = c(2,3)*max.edge)
-
-
-mesh_final <- inla.mesh.2d(#boundary = sw_oceant,
-                     loc = coords, 
-                     max.edge = c(1,2)*max.edge, #inner and outer triangle distance
-                     #max.edge = c(5, 10),
-                     #cutoff = 0.01,
-                     cutoff = max.edge/4, #max. distance between two points
-                     offset=c(max.edge, bound.outer)) #domain extension (buffer zone)
+sw_oceant <- st_transform(sw_ocean, crs = CRS_lea) # Reprojetando o shp da área de estudo
 
 
 
-mesh <- inla.mesh.2d(boundary = sw_oceant,
-                     loc = coords, 
-                     max.edge = c(1,2)*max.edge, #inner and outer triangle distance
-                     #max.edge = c(5, 10),
-                     #cutoff = 0.01,
-                     cutoff = max.edge/4, #max. distance between two points
-                     offset=c(max.edge, bound.outer)) #domain extension (buffer zone)
+# Mesh 1: Malha padrão usando apenas os pontos amosrrais 
+mesh1 <- inla.mesh.2d(loc = coords); plot(mesh1) # Triângulos muito grandes e irregulares
 
 
+# Mesh 2: Malha com controle do tamanho máximo das arestas (max.edge = 200)
+mesh2 <- inla.mesh.2d(loc = coords, 
+                      max.edge = c(200)) ; plot(mesh2) # Homogeniza o tamanho dos triângulos na área interna (quanto menor o valor, menor os trângulos)
+
+
+# Mesh 3: Mesh com distância mínima entre vértices (cutoff = 30)
+mesh3 <- inla.mesh.2d(loc = coords, 
+                      max.edge = c(200),
+                      cutoff = 30) ; plot(mesh3) # Evita triângulos minúsculos onde os pontos são muito adensados
+
+
+# Mesh 4: Mesh com uma extensão externa (offset) 
+mesh4 <- inla.mesh.2d(loc = coords, 
+                      max.edge = c(200),
+                      cutoff = 30,
+                      offset = c(100, 300)) ; plot(mesh4) #  Cria uma zona de transição para evitar efeitos de borda (boundary effects)
+
+
+# Mesh 5: Mesh tomando por base o polígono do SAO 
+mesh5 <- inla.mesh.2d(boundary = sw_oceant,
+                      loc = coords, 
+                      max.edge = c(200),
+                      cutoff = 30,
+                      offset = c(100, 300)) ; plot(mesh5) # Moldando melhor a malha à área de estudo
+
+
+# Mesh 6: Mesh reparametrizado  
+mesh6 <- inla.mesh.2d(boundary = sw_oceant,
+                      loc = coords, 
+                      max.edge = c(1,2)*max.edge, 
+                      cutoff = max.edge/4, 
+                      offset = c(max.edge, bound.outer*1.5)) ; plot(mesh6)
+
+par(mfrow = c(2, 3))
+plot(mesh1); title("Mesh 1")
+plot(mesh2); title("Mesh 2")
+plot(mesh3); title("Mesh 3")
+plot(mesh4); title("Mesh 4")
+plot(mesh5); title("Mesh 5")
+plot(mesh6); title("Mesh 6")
+par(mfrow = c(1,1))
+
+
+# O mesh6 será escolhido como malha
+mesh <- mesh6
+
+
+## Explorando o objeto 'mesh'
+names(mesh)
+
+mesh$n # Número total de vértices (nós)
+nrow(mesh$graph$tv) # Número total de triângulos
+head(mesh$loc) # Coordenadas de cada vértice
+
+## Just for fun
 plot(mesh)
+points(mesh$loc, col=2, pch = 19, cex = 0.3)
+points(coords, col = 'blue', pch = 19, cex =0.5 )
+
+
+
+# 5.4) Definindo a matriz de projeção 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# O SPDE e todos os outros componentes do modelo são definidos para cada vértice do mesh,
+# ao passo que o conjunto de dados (i.e., a variável resposta) está definido apenas em um subconjunto desses vértices.
+# É necessário, portanto, garantir que tanto os dados quanto o SPDE estejam relacionados ao mesmo índice dos vértices do mesh.
+# Isso é feito por meio da matriz de projeção "A". 
+
+# Precisamos construir uma matriz de projeção A para projetar o GRF dos vértices da triangulação para as observações.
+# A matriz A possui o número de linhas igual ao número de observações  e o número de colunas igual ao número de vértices da triangulação.
+
+# Como a estimação do modelo e a predição espacial ocorrem em locais diferentes, é necessário construir duas matrizes "A" distintas:
+# 1) Matriz A de Estimação (Aest): conecta o mesh aos locais onde os dados foram efetivamente observados (coordenadas de amostragem).
+# 2) Matriz A de Predição (Apred): conecta o mesh aos locais não amostrados onde queremos prever o fenômeno (ex: uma grade/grid regular).
+
+
+
+# 5.4.1) Matriz de estimação 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Aest <- inla.spde.make.A(mesh = mesh, loc = as.matrix(coords))
+dim(Aest)
+
+
+
+# 5.4.2) Matriz de predição
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Para construir a matriz de projeção de predição (Apred), é necessário definir a grade (grid) sobre a qual as predições espaciais serão realizadas.
+# Essa grade pode ser gerada de duas formas:
+#   1) Manualmente (e.g., uma grade regular cobrindo a área de estudo):
+#      - Vantagem: Resolução espacial fixa e conhecida (ex: 10 km x 10 km)
+#      - Desvantagem: Maior custo computacional (se usar uma grade muito fina)
+#   2) Utilizando os próprios vértices (nós) do mesh:
+#      - Vantagem: Computacionalmente muito mais eficiente e rápido
+#      - Desvantagem: A resolução espacial torna-se heterogênea e variável no espaço (mais fina onde há alta densidade 
+#        de pontos e mais grosseira nas bordas)
+
+
+
+### Usando os vértices do mesh ###
+
+# Extraindo as coordenadas da malha
+mcoords <- data.frame(Long = mesh$loc[,1], Lat = mesh$loc[,2]) 
+mesh.points <- st_as_sf(mcoords, coords = c("Long", "Lat"), crs = CRS_lea) # Transformando as coordenadas para objeto espacial (sf)
+
+# Sanity check
+plot(mesh)
+points(mesh.points, col='red', pch=19, cex = 0.3)
+
+
+# Definindo a matriz de projeção Apred
+Apred <- inla.spde.make.A(mesh, loc = mesh.points) 
+dim(Apred)
+
+
+
+### Usando um grid com resolução definida ###
+
+# # Definindo extensão do grid 
+# xmin <- floor(min(coords$X))
+# xmax <- ceiling(max(coords$X))
+# ymin <- floor(min(coords$Y))
+# ymax <- ceiling(max(coords$Y))
+# 
+# ext <- st_bbox(sw_oceant)
+# 
+# # Construindo o grid
+# RES <- 50 # Grid de 50 x 50 km
+# 
+# grid <- st_make_grid(st_bbox(c(xmin = xmin, ymin = ymin, xmax = xmax, ymax = ymax), crs = CRS_lea),
+#                      cellsize = c(RES, RES), 
+#                      what = "polygons",
+#                      square = T)
+# 
+# plot(grid)
+# plot(st_geometry(sw_oceant), add=T, col = 'gray70')
+# dim(grid)
+# 
+# 
+# # Extraindo as coordenadas do grid
+# gcoords <- data.frame(Long = st_coordinates(grid)[,1], Lat = st_coordinates(grid)[,2]) 
+# grid.points <- st_as_sf(gcoords, coords = c("Long", "Lat"), crs = CRS_lea) # Transformando as coordenadas para objeto espacial (sf)
+# 
+# 
+# # Definindo a matriz de projeção Apred
+# Apred <- inla.spde.make.A(mesh, loc = grid.points)
+# dim(Apred)
+
+
+
+# 5.5) Definindo o SPDE
+#~~~~~~~~~~~~~~~~~~~~~~~
+spde <- inla.spde2.matern(mesh = mesh, alpha = 2) # alpha = parâmetro de suavidade da função de covariância Matérn (usando o valor default)
+
+
+
+
+# 5.6) Construção dos stacks de estimação e predição
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# A função inla.stack() é utilizada para organizar todas as informações necessárias para o ajuste do modelo. 
+# Em uma stack são reunidos os dados (variável resposta), as matrizes de projeção (Aest/Apred), os efeitos fixos e os efeitos aleatórios.
+# Essa organização permite que o INLA associe corretamente cada observação aos componentes do modelo.
+
+# Argumentos principais da função:
+
+# @ tag: identificador do stack (ex: 'est' para estimação, 'pred' para predição)
+# @ data: lista contendo a variável resposta 
+# @ A: lista com as matrizes de projeção
+# @ effects: lista contendo os efeitos fixos e aleatórios.
+
+
+# Assim como fizemos com a matriz de projeção "A", é necessário construir um stack para a ESTIMAÇÃO e outro para a PREDIÇÃO:
+# - Stack de Estimação: Construído a partir do conjunto de dados observado e utilizada para ajustar o modelo
+# - Stack de Predição: Construído a partir da malha espacial (mesh/grid). 
+
+# ATENÇÃO: Para realizar a predição, o valor de cada covariável do modelo deve ser previamente extraído para todos os pontos da grade espacial.
+
+
+# 5.6.1) Stack de estimação
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ATENÇÃO: Os nomes atribuídos aos efeitos dentro da função inla.stack() devem ser exatamente os mesmos utilizados 
+# posteriormente na especificação da fórmula do modelo (model formula).
+
+indexs <- inla.spde.make.index("spatial", spde$n.spde) # Cria os índices espaciais (necessário para ajuste do modelo)
+
+stk.est <- inla.stack(data = list(y = dfs_lea$Prionace_glauca),
+                      A = list(Aest, 1),
+                      effects = list(spatial = indexs, #mesma coisa que 1:spde$n.spde
+                                     list(data.frame(b0 = 1, # Intercepto - obrigatório
+                                                     year = dfs_lea$Year,
+                                                     month = dfs_lea$Month,
+                                                     fid = dfs_lea$Id,
+                                                     vessel = dfs_lea$Vessel,
+                                                     flag = dfs_lea$Flag,
+                                                     nhooks = dfs_lea$Nhooks,
+                                                     temp = scale(dfs_lea$temperatura),
+                                                     sheight = scale(dfs_lea$altura_mar),
+                                                     mlt = scale(dfs_lea$camada_mistura),
+                                                     npp = scale(dfs_lea$prod_primaria),
+                                                     depth = scale(dfs_lea$batimetria)))),
+                      tag = "est")
+
+
+
+
+# 5.6.2) Stack de predição
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# A predição implica em predizer valores da variável resposta em locais que NÃO foram amostrados, ie., predizer ao longo de todo SAO.
+# No stack de predição a variável resposta é, portanto, configurada como NA, uma vez que são exatamente esses os valores que o modelo irá predizer.
+
+# Como a estimação inclui um conjunto de covariávies, isso implica que para a etapa de predição, é necessário extrair os valores das covariáveis
+# para todos os pontos do grid de predicão. 
+# CUIDADO: dados faltantes (NAs) nas covariáveis para algumas regiões inviabilizam a predição naquele local.
+
+
