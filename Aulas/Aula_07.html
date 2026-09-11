@@ -42,19 +42,220 @@ class: title-slide
 # PPGECO | ECL0072 | out. 2026
 
 
-Retomar deifinição sobre o que é um modelo geoestatístico
-- Mostrar a equação de um modelo de regressão com efeito espacial
-- Mostrar como se traduz, matematicamente, o efeito espacial (matrizes de distância)
-
-- Falar sobre a importância do método de amostragem!!
-
-- Fazer o link em relação ao número de parâmetros (todos aleatórios, já que estaão no contexto bayesiano) e problema de MCMC - &gt; uso do INLA
-- Apresentar brevemente o INLA (teoricamente)
 
 
-- Modelos de distribuição de espécies (introdução breve)
-- enfatizar que não está restrito à dados de presença (e ausência)
+---
+# PPGECO | ECL0072 | out. 2026
+### Recapitulando
 
+Dados espaciais constituem uma realização parcial do **campo aleatório** 
+- Conjunto de variáveis aleatórias indexadas pelo espaço (2D)
+
+&lt;br&gt;
+&lt;br&gt;
+
+
+.pull-left[
+
+&lt;img src="../Figuras/grf2.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+
+
+.pull-right[
+
+&lt;br&gt;
+&lt;br&gt;
+
+
+`$$\large \eta(s_i) =  X(s_i)\beta + W(s_i) + \varepsilon(s_i)$$`
+
+`$$W(s_i) \sim GRF(0, \Sigma)$$`
+
+`$$\varepsilon(s_i) \sim N(0, \sigma^2)$$`
+]
+
+
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Recapitulando
+
+
+O principal objetivo da estatística espacial está na descrição da dependência espacial entre observações
+
+`$$\large W(s) \sim GRF(0, \Sigma)$$`
+
+onde a matriz de variância-covariância `\(\Sigma\)` descreve como o campo aleatório espacial é correlacionado
+- A construção da matriz depende do tipo de dado espacial&lt;sup&gt;1&lt;/sup&gt;
+  - A essência é a mesma: correlação entre observações é ditada pela proximidade espacial entre observações 
+
+
+.footnote[&lt;sup&gt;1&lt;/sup&gt; Dados geoestatísticos, de área e de processos pontuais]
+
+--
+
+&lt;br&gt;
+
+.gray-box-big[ .center[**Foco da aula** ]
+
+
+MODELOS GEOESTATÍSTICOS
+
+]
+
+
+
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+### Modelos geoestatísticos
+
+Em abordagens geoestatísticas clássicas, a dependência espacial é especificada por meio da função de semivariograma
+- Determina a matriz de variância-covariância do campo aleatório
+
+
+`$$\gamma(h) = \frac{1}{2N(h)} \sum\limits_{i=1}^{N(h)} (y_i-y_{i+h})^2$$`
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+&lt;img src="../Figuras/variogram_models.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos geoestatísticos
+
+
+O gargalo da geoestatística clássica consiste na fatoração de `\(\Sigma\)` quando o número de observações (`\(n\)`) é grande 
+- `\(\Sigma\)` é uma matriz de dimensão `\(n ~\text{x}~ n\)`
+  - Número de operações cresce na ordem de `\(n^3\)` (`\(\mathcal{O}(n^3)\)`)
+    - *Big 'n' problem* [(Lindren et al., 2011)](https://academic.oup.com/jrsssb/article-abstract/73/4/423/7034732?redirectedFrom=fulltext)
+
+--
+
+&lt;br&gt;
+
+Uma solução é tornar a matriz esparsa `\(\Sigma^{-1} = Q\)` 
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos geoestatísticos
+
+Para obter a matriz de precisão esparsa `\(\mathbf{Q}\)`, recorre-se Equação Diferencial Parcial Estocástica (SPDE; *Stochastic Partial Differential Equations*)
+  - Aproxima o campo aleatório Gaussiano (GRF) contínuo, com covariância de Matérn, em um Campo Aleatório Gaussiano Markoviano (GMRF) discreto, definido sobre os nós de uma malha (*mesh*)
+
+&lt;br&gt;
+
+
+
+&lt;img src="../Figuras/spde.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+
+
+.footnote[Figura adaptada de [Simpson et al., 2012](https://www.sciencedirect.com/science/article/abs/pii/S2211675312000048?via%3Dihub)]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos geoestatísticos
+
+
+O que significa a propriedade Markoviana na prática?
+
+Um ponto `\(s_i\)` depende apenas de seus vizinhos imediatos (independência condicional)
+- Se `\(s_i\)` e `\(s_j\)` não são vizinhos diretos -&gt; `\(Q_{ij} = 0\)`
+  - A matriz `\(\mathbf{Q}\)` torna-se esparsa, i.e., cheia de zeros
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+&lt;img src="../Figuras/precision_matrix_example.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+&lt;br&gt;
+
+
+
+
+.footnote[Figura: [Rufener, 2020](https://backend.orbit.dtu.dk/ws/portalfiles/portal/239528217/Marie_Christine_Rufener_thesis.pdf)]
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos geoestatísticos
+
+E por que é usada a função de covariância de Matérn?
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+`$$\mbox{Cov}(Y(\boldsymbol{s}_i), Y(\boldsymbol{s}_j))=\frac{\sigma^2}{2^{\nu-1}\Gamma(\nu)}(\kappa ||\boldsymbol{s}_i - \boldsymbol{s}_j ||)^\nu K_\nu(\kappa ||\boldsymbol{s}_i - \boldsymbol{s}_j ||)$$`
+
+&lt;div style="height: 4px;"&gt;&lt;/div&gt;
+
+
+&lt;img src="../Figuras/Matern_covariance.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+.small-text[
+onde:
+- `\(\kappa:\)` controla a taxa de decaimento da covariância em função da distância
+- `\(\nu:\)` controla a suavidade do campo aleatório espacial
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos geoestatísticos
+
+
+.pull-left[
+
+&lt;img src="../Figuras/Matern_covariance_1D.png" width="85%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+.pull-right[
+
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+.center[A função de Matérn é suficientemente flexível para representar diferentes padrões de dependência espacial]
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos geoestatísticos | .small-text[&lt;span style="color: #e07a5f;"&gt;Influência do desenho amostral&lt;/span&gt;]
+
+.small-text2[
+
+As predições em locais não amostrados são obtidas a partir da estrutura de correlação espacial inferida pelos dados
+- A qualidade das predições depende diretamente do método de amostragem
+
+]
+
+&lt;div style="height: 5px;"&gt;&lt;/div&gt;
+
+
+&lt;img src="../Figuras/tipos_de_amostragem_interpolação.png" width="65%" style="display: block; margin: auto;" /&gt;
+
+
+
+
+---
+Autocorrelação Espacial "Aparente" (Induzida): Ocorre quando a variável de resposta apresenta padrão espacial simplesmente porque segue uma covariável que também é estruturada no espaço. Se você inclui essa covariável no modelo, a dependência nos resíduos desaparece.
+
+Autocorrelação Espacial Residual (Verdadeira): É o que sobra nos resíduos depois de controlar pelas covariáveis. É aqui que entra o campo aleatório espacial (efeito aleatório espacial, como nos modelos INLA / SPDE ou GAMs com splines espaciais), para modelar essa dependência estocástica latente.
 
 ---
 
@@ -71,6 +272,26 @@ It is now clear that three main conditions need to be met for a species to occup
  
  This triple influence – dispersal, niche, and biotic – shaping species distributions, and their interactions, can be viewed schematically as sepa- rate ensembles defined by specific boundary conditions (Soberón, 2007). Suitable conditions for a species according to all three factors are found at the intersection of the three ensembles (Figure 3.2, case 1).
  # Do livro habitat suitability and distribution models - Guisan &amp; Zimmermann
+
+
+---
+
+
+
+
+Retomar deifinição sobre o que é um modelo geoestatístico
+- Mostrar a equação de um modelo de regressão com efeito espacial
+- Mostrar como se traduz, matematicamente, o efeito espacial (matrizes de distância)
+
+- Falar sobre a importância do método de amostragem!!
+
+- Fazer o link em relação ao número de parâmetros (todos aleatórios, já que estaão no contexto bayesiano) e problema de MCMC - &gt; uso do INLA
+- Apresentar brevemente o INLA (teoricamente)
+
+
+- Modelos de distribuição de espécies (introdução breve)
+- enfatizar que não está restrito à dados de presença (e ausência)
+
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
