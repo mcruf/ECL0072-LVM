@@ -478,7 +478,7 @@ knitr::include_graphics("../Figuras/moran_scatterplot.png")
 ### Autocorrelação espacial | .small-text[<span style="color: #e07a5f;">Variograma</span>]
 
 
-O variograma é um gráfico que descreve como a diferença entre observações aumenta com a distância espacial
+O variograma é uma função que descreve como a diferença entre observações aumenta com a distância espacial
 .small-text2[  
 - **Correlograma:** mede a *similaridade* entre observações vizinhas
 - **Variograma:** mede a *dissimilaridade* entre observações vizinhas
