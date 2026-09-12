@@ -20,6 +20,8 @@ style_xaringan(
   background_color = "#FAFAFA",
   text_color       = metropolis_dark,
   header_color     = "#846267", #6b705c
+  link_color       = "#ee9b00",
+  
   
   # Typography matching Metropolis
   header_font_google = google_font("Josefin Sans", "400"),
