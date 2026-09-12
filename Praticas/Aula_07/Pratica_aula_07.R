@@ -56,6 +56,7 @@ CRS_lea <- "+proj=laea +lat_0=-25 +lon_0=-20 +datum=WGS84 +units=km +no_defs" # 
 df <- readRDS("Dados/fisheries.rds")
 str(df)
 
+df$Month <- as.factor(df$Month) # Convertendo mês para fator
 
 
 # 1.2) Dados ambientais
@@ -386,15 +387,14 @@ points(coords, col = 'blue', pch = 19, cex =0.5 )
 
 
 
-# 5.4) Definindo a matriz de projeção 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 6) Definindo as matrizes de projeção, SPDE & stacks de estimação e predição
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # O SPDE e todos os outros componentes do modelo são definidos para cada vértice do mesh,
 # ao passo que o conjunto de dados (i.e., a variável resposta) está definido apenas em um subconjunto desses vértices.
 # É necessário, portanto, garantir que tanto os dados quanto o SPDE estejam relacionados ao mesmo índice dos vértices do mesh.
 # Isso é feito por meio da matriz de projeção "A". 
-
-# Precisamos construir uma matriz de projeção A para projetar o GRF dos vértices da triangulação para as observações.
 # A matriz A possui o número de linhas igual ao número de observações  e o número de colunas igual ao número de vértices da triangulação.
 
 # Como a estimação do modelo e a predição espacial ocorrem em locais diferentes, é necessário construir duas matrizes "A" distintas:
@@ -403,14 +403,14 @@ points(coords, col = 'blue', pch = 19, cex =0.5 )
 
 
 
-# 5.4.1) Matriz de estimação 
+# 6.1) Matriz de estimação 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Aest <- inla.spde.make.A(mesh = mesh, loc = as.matrix(coords))
 dim(Aest)
 
 
 
-# 5.4.2) Matriz de predição
+# 6.2) Matriz de predição
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Para construir a matriz de projeção de predição (Apred), é necessário definir a grade (grid) sobre a qual as predições espaciais serão realizadas.
 # Essa grade pode ser gerada de duas formas:
@@ -418,7 +418,7 @@ dim(Aest)
 #      - Vantagem: Resolução espacial fixa e conhecida (ex: 10 km x 10 km)
 #      - Desvantagem: Maior custo computacional (se usar uma grade muito fina)
 #   2) Utilizando os próprios vértices (nós) do mesh:
-#      - Vantagem: Computacionalmente muito mais eficiente e rápido
+#      - Vantagem: Computacionalmente muito mais rápido & mais preciso nos locais amostrado
 #      - Desvantagem: A resolução espacial torna-se heterogênea e variável no espaço (mais fina onde há alta densidade 
 #        de pontos e mais grosseira nas bordas)
 
@@ -438,7 +438,6 @@ points(mesh.points, col='red', pch=19, cex = 0.3)
 # Definindo a matriz de projeção Apred
 Apred <- inla.spde.make.A(mesh, loc = mesh.points) 
 dim(Apred)
-
 
 
 ### Usando um grid com resolução definida ###
@@ -475,14 +474,14 @@ dim(Apred)
 
 
 
-# 5.5) Definindo o SPDE
+# 6.3) Definindo o SPDE
 #~~~~~~~~~~~~~~~~~~~~~~~
 spde <- inla.spde2.matern(mesh = mesh, alpha = 2) # alpha = parâmetro de suavidade da função de covariância Matérn (usando o valor default)
 
 
 
 
-# 5.6) Construção dos stacks de estimação e predição
+# 6.4) Construção dos stacks de estimação e predição
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # A função inla.stack() é utilizada para organizar todas as informações necessárias para o ajuste do modelo. 
@@ -504,7 +503,7 @@ spde <- inla.spde2.matern(mesh = mesh, alpha = 2) # alpha = parâmetro de suavid
 # ATENÇÃO: Para realizar a predição, o valor de cada covariável do modelo deve ser previamente extraído para todos os pontos da grade espacial.
 
 
-# 5.6.1) Stack de estimação
+# 6.4.1) Stack de estimação
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ATENÇÃO: Os nomes atribuídos aos efeitos dentro da função inla.stack() devem ser exatamente os mesmos utilizados 
 # posteriormente na especificação da fórmula do modelo (model formula).
@@ -531,7 +530,7 @@ stk.est <- inla.stack(data = list(y = dfs_lea$Prionace_glauca),
 
 
 
-# 5.6.2) Stack de predição
+# 6.4.2) Stack de predição
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # A predição implica em predizer valores da variável resposta em locais que NÃO foram amostrados, ie., predizer ao longo de todo SAO.
 # No stack de predição a variável resposta é, portanto, configurada como NA, uma vez que são exatamente esses os valores que o modelo irá predizer.
@@ -540,4 +539,91 @@ stk.est <- inla.stack(data = list(y = dfs_lea$Prionace_glauca),
 # para todos os pontos do grid de predicão. 
 # CUIDADO: dados faltantes (NAs) nas covariáveis para algumas regiões inviabilizam a predição naquele local.
 
+
+## Extraindo dados ambientais para cada ponto do mesh (grid)
+dfp <- mesh.points
+
+
+
+### temperatura do mar (thetao)
+idx <- grep(paste0("^", 'thetao'), names(vfisicas2r)) # Reavendo índice das colunas com a variável desejada
+rast_sst <- vfisicas2[[idx]]
+mean_sst <- mean(rast_sst, na.rm = TRUE)
+plot(mean_sst)
+
+dfp$TEMPERATURA  <- extract(mean_sst, mesh.points)[, 2]
+ggplot() + geom_sf(data = dfp, aes(col = TEMPERATURA))
+ggplot() + geom_sf(data = filter(dfp, !is.na(TEMPERATURA)), aes(col = TEMPERATURA))
+
+
+### altura do mar (zos)
+idx <- grep(paste0("^", 'zos'), names(vfisicas2r)) # Reavendo índice das colunas com a variável desejada
+rast_ssh <- vfisicas2[[idx]]
+mean_ssh <- mean(rast_ssh, na.rm = TRUE)
+plot(mean_ssh)
+
+dfp$ALTURA_MAR  <- extract(mean_ssh, mesh.points)[, 2]
+ggplot() + geom_sf(data = dfp, aes(col = ALTURA_MAR))
+ggplot() + geom_sf(data = filter(dfp, !is.na(ALTURA_MAR)), aes(col = ALTURA_MAR))
+
+
+### camada de mistura (mlotst)
+idx <- grep(paste0("^", 'mlotst'), names(vfisicas2r)) # Reavendo índice das colunas com a variável desejada
+rast_mlt <- vfisicas2[[idx]]
+mean_mlt <- mean(rast_mlt, na.rm = TRUE)
+plot(mean_mlt)
+
+dfp$CAMADA_MISTURA  <- extract(mean_mlt, mesh.points)[, 2]
+ggplot() + geom_sf(data = dfp, aes(col = CAMADA_MISTURA))
+ggplot() + geom_sf(data = filter(dfp, !is.na(CAMADA_MISTURA)), aes(col = CAMADA_MISTURA))
+
+
+### produtividade primaria
+idx <- grep(paste0("^", 'nppv'), names(vbio2)) # Reavendo índice das colunas com a variável desejada
+rast_nppv <- vbio2[[idx]]
+mean_nppv <- mean(rast_nppv, na.rm = TRUE)
+plot(mean_nppv)
+
+dfp$PROD_PRIMARIA  <- extract(mean_nppv, mesh.points)[, 2]
+ggplot() + geom_sf(data = dfp, aes(col = PROD_PRIMARIA))
+ggplot() + geom_sf(data = filter(dfp, !is.na(PROD_PRIMARIA)), aes(col = PROD_PRIMARIA))
+
+
+### batimetria
+dfp$BATIMETRIA  <- extract(batimetria2r, mesh.points)[, 2]
+ggplot() + geom_sf(data = dfp, aes(col = BATIMETRIA))
+ggplot() + geom_sf(data = filter(dfp, !is.na(BATIMETRIA)), aes(col = BATIMETRIA))
+
+
+head(dfp)
+
+
+stk.pred <- inla.stack(data = list(y = NA), #Definir a variável-resposta como NA - isso é o que queremos predizer!
+                       A = list(Apred, 1),
+                       effects = list(spatial = indexs, 
+                                      list(data.frame(b0 = 1, # Intercepto - obrigatório
+                                                      year = "2", # Usando o segundo ano como referência
+                                                      month = "1", # Usando 'janeiro' como mês de referência
+                                                      fid = NA, # Efeito aleatório não estruturado - sempre como NA, pois não contribui para o preditor linear
+                                                      vessel = "V50", # Embarcação mais frequente como referência
+                                                      flag = "BRA", # Brasil como país de referência
+                                                      nhooks = round(mean(dfs_lea$Nhooks)), # Esforço médio - constante em toda a área; idealmente, fazer um raster do esforço
+                                                      temp = scale(dfp$TEMPERATURA),
+                                                      sheight = scale(dfp$ALTURA_MAR),
+                                                      mlt = scale(dfp$CAMADA_MISTURA),
+                                                      npp = scale(dfp$PROD_PRIMARIA),
+                                                      depth = scale(dfp$BATIMETRIA)))),
+                       tag = "pred")
+
+
+
+# 6.4.3) Juntando os stacks
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+stk.full <- inla.stack(stk.est, stk.pred)
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~
+# 7) Rodando os modelos
+#~~~~~~~~~~~~~~~~~~~~~~~~
 
