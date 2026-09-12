@@ -27,7 +27,7 @@ library(viridis) # Paleta de cores
 library(patchwork) # Confecção de figuras compostas
 library(mapview) # Visualização de dados espacializados
 library(gganimate) # Para gerar gráficos animados (gifs)
-library(ncf) # Computar correlograma
+library(ncf) # Computar correlograma 
 library(gstat) # Computar variograma
 library(spdep) # Computar Morans'I
 
@@ -341,6 +341,17 @@ nb <- knn2nb(knn) # Converte objeto knn para uma lista da classe nb
 listw <- nb2listw(nb, style = "W") # Cria a matriz de pesos espaciais (W)
 moran.test(dfsp2_r$Prionace_glauca, listw) # Teste de Moran's I
 moran.plot(dfsp2_r$Prionace_glauca, listw)
+
+
+
+## Spline correlogram (demora um tanto para rodar)
+moran.cor <- spline.correlog(x = coords[,1]/1000, # para expressar em Km
+                             y = coords[,2]/1000,
+                             z = dfsp2_r$Prionace_glauca)
+
+plot(moran.cor)
+
+
 
 # Interpretação dos 4 quadrantes:
 # - 1) Superior direito (High-high): capturas de P. glauca altas cercadas por vizinhos também com altas capturas (hotspots)
