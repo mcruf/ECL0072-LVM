@@ -56,14 +56,6 @@ class: title-slide
 ### Agenda
 
 
-
----
-
-# PPGECO | ECL0072 | out. 2026
-
-
-
-
 ---
 # PPGECO | ECL0072 | out. 2026
 ### Recapitulando
@@ -134,7 +126,12 @@ MODELOS GEOESTATÍSTICOS
 
 
 ---
+# PPGECO | ECL0072 | out. 2026
+### Modelos geoestatísticos
 
+Breve contexto histórico & expor aplicações na ecologia
+
+---
 # PPGECO | ECL0072 | out. 2026
 ### Modelos geoestatísticos
 
@@ -192,7 +189,7 @@ knitr::include_graphics("../Figuras/spde.png")
 ### Modelos geoestatísticos
 
 
-O que significa a propriedade Markoviana na prática?
+**O que significa a propriedade Markoviana na prática?**
 
 Um ponto $s_i$ depende apenas de seus vizinhos imediatos (independência condicional)
 - Se $s_i$ e $s_j$ não são vizinhos diretos -> $Q_{ij} = 0$
@@ -215,7 +212,7 @@ knitr::include_graphics("../Figuras/precision_matrix_example.png")
 # PPGECO | ECL0072 | out. 2026
 ### Modelos geoestatísticos
 
-E por que é usada a função de covariância de Matérn?
+**E por que é usada a função de covariância de Matérn?**
 
 <div style="height: 7px;"></div>
 
@@ -238,7 +235,7 @@ onde:
 
 ---
 # PPGECO | ECL0072 | out. 2026
-### Modelos geoestatísticos
+### Modelos geoestatísticos 
 
 
 .pull-left[
@@ -283,10 +280,833 @@ As predições em locais não amostrados são obtidas a partir da estrutura de c
 knitr::include_graphics("../Figuras/tipos_de_amostragem_interpolação.png")
 ```
 
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos geoestatísticos 
+
+Um modelo geoestatístico é, por definição, um modelo hierárquico
+
+<br>
+
+.pull-left[
+.center[<span style="color: #e07a5f;">**Processo observacional**</span>]
+$$\large \mathbf{Y} ~|~ \mathbf{\beta},\mathbf{W}, \phi ~\sim ~ F(\mathbf{X}\beta + W, ~ \phi)$$
+
+<br>
+
+.center[<span style="color: #e07a5f;">**Processo latente**</span>]
+$$\large \mathbf{W}~|~ \mathbf{\theta} ~\sim ~ N(\mathbf{0}, ~ \Sigma(\theta))$$
+
+<br>
+
+
+.center[<span style="color: #e07a5f;">**Hiperparâmetros**</span>]
+$$\large \{\mathbf{\beta}, \phi, \mathbf{\theta} \}$$
+
+]
+
+
+
+.pull-right[
+
+<br>
+<br>
+
+.gray-box-small[
+
+.center[**Curiosidade**]
+
+<div style="height: 7px;"></div>
+
+<div style="text-align: justify;">
+.small-text2[
+Os modelos geoestatísticospodem ser formulados como Modelos Gaussianos Latentes (LGMs), uma classe de modelos hierárquicos que engloba grande parte dos Modelos de Regressão Estruturada Aditiva (STAR) 
+
+]
+]
+</div>
+]
+
+--
+
+<br>
+
+.small-text2[Quando se atribui distribuições de probabilidade para] $\{\mathbf{\beta}, \phi, \mathbf{\theta} \}$.small-text2[, tem-se um modelo bayesiano!]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos geoestatísticos 
+
+
+A estrutura de um modelo STAR pode ser expressa genericamente conforme a relação 
+
+<br>
+
+$$\eta_i = \alpha + \sum_{j=1}^{n_\beta} \beta_j z_{ji} +
+\sum_{k=1}^{n_f} f^{(k)}(u_{ki})+\varepsilon_i$$
+
+<br>
+
+.small-text[
+onde:
+- $\mathbf{\eta_i :}$ preditor linear para $\scriptsize i ~\text{ésima}$ observação ($\scriptsize i=1,\ldots,n$)
+- $\mathbf{\alpha :}$ intercepto 
+- $\mathbf{\beta_j :}$ coeficientes das covariáveis $\scriptsize \{\mathbf{z}_j\}_{j=1}^{n_{\beta}}$
+- $\mathbf{\mathcal{f}^{(k)} :}$ funções que definem $\scriptsize n_f$ efeitos aleatórios sobre um conjunto de covariáveis $\scriptsize \{\mathbf{u}_k\}_{k=1}^{n_f}$ 
+- $\mathbf{\varepsilon_i :}$ erro (residual) do modelo
+
+]
 
 
 
 ---
+# PPGECO | ECL0072 | out. 2026
+### Modelos geoestatísticos 
+
+Os parâmetros de modelos espaciais (e temporais) podem ser estimados tanto via abordagem *frequentista* quanto *bayesiana*
+
+
+<div style="height: 7px;"></div>
+
+
+.pull-left[
+
+.center[**Abordagem frequentista**]
+
+
+.center[.small-text2[<span style="color: #e07a5f;">**TMB**</span>]]
+
+
+```{r, out.width="80%"}
+knitr::include_graphics("../Figuras/TMB_group.png")
+```
+
+.center[[Kristensen et al., 2016](https://www.jstatsoft.org/article/view/v070i05)]
+
+
+
+]
+
+
+.pull-right[
+
+.center[**Abordagem bayesiana**]
+
+
+.center[.small-text2[<span style="color: #e07a5f;">**INLA**</span>]]
+
+```{r, out.width="80%"}
+knitr::include_graphics("../Figuras/INLA_group.png")
+```
+
+.center[[Rue et al., 2009](https://rss.onlinelibrary.wiley.com/doi/10.1111/j.1467-9868.2008.00700.x)]
+
+
+
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos geoestatísticos 
+
+Os parâmetros de modelos espaciais (e temporais) podem ser estimados tanto via abordagem *frequentista* quanto *bayesiana*
+
+
+<div style="height: 7px;"></div>
+
+
+.pull-left[
+
+.center[**Abordagem frequentista**]
+
+
+.center[.small-text2[<span style="color: #e07a5f;">**TMB**</span>]]
+
+
+```{r, out.width="80%"}
+knitr::include_graphics("../Figuras/TMB_group.png")
+```
+
+.center[[Kristensen et al., 2016](https://www.jstatsoft.org/article/view/v070i05)]
+
+
+
+.small-text3[
+
+**Pacotes**
+
+- `TMB`
+- `sdmTMB`
+- `VAST`
+- `tinyVAST`
+
+]
+
+]
+
+
+.pull-right[
+
+.center[**Abordagem bayesiana**]
+
+
+.center[.small-text2[<span style="color: #e07a5f;">**INLA**</span>]]
+
+```{r, out.width="80%"}
+knitr::include_graphics("../Figuras/INLA_group.png")
+```
+
+.center[[Rue et al., 2009](https://rss.onlinelibrary.wiley.com/doi/10.1111/j.1467-9868.2008.00700.x)]
+
+
+.small-text3[
+
+**Pacotes**
+
+- `INLA`
+- `inlabru`
+- `INLAspacetime`
+- `brms`
+
+]
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos de distribuição de espécies (SDMs)
+
+O que determina a distribuição das espécies, comunidades e ecosistemas? 
+- Como essa interação varia no espaço e no tempo?
+
+--
+
+O ambiente e a relações com outras espécies são fatores-chave na determinação do espaço que uma espécie pode ocupar
+
+<br>
+
+```{r, out.width="70%"}
+knitr::include_graphics("../Figuras/determinantes_de_ocorrencia.png")
+```
+
+
+.footnote[.small-text[Figura adaptada de Guisan et al., 2017]]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos de distribuição de espécies (SDMs)
+
+A distribuição das espécies é determinada principalmente pela interação entre as condições ambientais, interações bióticas e a capacidade de dispersão dos organismos
+
+<div style="height: 7px;"></div>
+
+
+.pull-left[
+
+<br>
+
+```{r, out.width="100%"}
+knitr::include_graphics("../Figuras/drivers_species_range.png")
+```
+
+]
+
+
+
+.pull-right[
+
+<br>
+<br>
+<br>
+
+.gray-box-small[
+
+.center[**Atenção!**]
+
+<div style="height: 7px;"></div>
+
+<div style="text-align: justify;">
+
+.small-text2[
+Uma espécie pode estar ausente uma área por ação antrópica ou estocasticidade populacional intrínseca, que podem levar a flutuações no tamanho populacional ao longo do tempo e do espaço, com possíveis extinções locais e temporárias em algumas áreas
+]
+
+<div style="height: 7px;"></div>
+
+]
+</div>
+]
+
+
+
+.footnote[.small-text[Figura adaptada de Soberón et al., 2007]]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos de distribuição de espécies (SDMs)
+
+
+Embora processos estocásticos influenciem a dinâmica das espécies, sua distribuição é, em grande parte, determinada pelas condições ambientais locais 
+
+<div style="height: 7px;"></div>
+
+
+
+```{r, out.width="70%"}
+knitr::include_graphics("../Figuras/Humboldt_chimborazo.jpg")
+```
+
+
+
+
+.footnote[Imagem: [Smithsonian Magazine](https://www.smithsonianmag.com/history/pioneering-maps-alexander-von-humboldt-180973342/)]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos de distribuição de espécies (SDMs)
+
+Embora processos estocásticos influenciem a dinâmica das espécies, sua distribuição é, em grande parte, determinada pelas condições ambientais locais 
+
+- Portanto, a quantificação do nicho ecológico permite predizer sua distribuição no espaço geográfico
+  - I.e., quantificar a relação espécie-ambiente
+
+
+<br>
+
+
+.pull-left[
+
+.gray-box-small[
+
+.small-text2[.center[**Modelos de distribuição de espécies<sup>1</sup>**]]
+
+<div style="height: 7px;"></div>
+
+<div style="text-align: justify;">
+
+.small-text2[
+
+Constituem um conjunto de ferramentas estatísticas que relacionam a ocorrência ou abundância de espécies às condições ambientais
+- Consideram o ***nicho realizado***
+]
+
+<div style="height: 7px;"></div>
+
+]
+</div>
+]
+
+
+
+
+.pull-right[
+
+```{r, out.width="100%"}
+knitr::include_graphics("../Figuras/fundamental_vs_realized_niche.png")
+```
+
+]
+
+
+.footnote[<sup>1</sup> *Species Distribution Models*, SDMs]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos de distribuição de espécies (SDMs)
+
+Os SDMs são conhecidos por muitos nomes....
+
+
+.pull-left[
+
+<br>
+<br>
+<br>
+
+```{r, out.width="90%"}
+knitr::include_graphics("../Figuras/names_of_sdms.png")
+```
+
+]
+
+.pull-right[
+
+<br>
+
+
+.center[**SDMs permitem:**]
+
+<br>
+
+.small-text2[
+- Compreender e quantificar os fatores que determinam a distribuição de uma espécie
+- Predizer sua ocorrência em áreas não amostradas
+
+  ]
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos de distribuição de espécies (SDMs)
+
+**Para que são usados os SDMs?**
+
+ATUALIZAR FIGURA
+
+
+```{r, out.width="40%"}
+knitr::include_graphics("../Figuras/sdm-uses.png")
+```
+
+
+https://link.springer.com/article/10.1007/s10531-023-02648-1/figures/1
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos de distribuição de espécies (SDMs)
+
+
+#### Como funcionam os SDMs?
+
+
+ATUALIZAR A FIGURA!
+
+```{r, out.width="70%"}
+knitr::include_graphics("../Figuras/SDM.png")
+```
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos de distribuição de espécies (SDMs)
+
+
+Há vários algoritmos disponíveis:
+
+<div style="height: 7px;"></div>
+
+
+.pull-left[
+
+.center[.small-text2[**Modelos estatísticos**]]
+
+<div style="height: 7px;"></div>
+
+
+.small-text[
+- Climatic Envelopes (e.g., BIOCLIM)
+- Maximum Entropy (e.g., MAXENT)
+- Modelos de regressão (e.g., GLM, GAM, GL(A)MM)
+
+]
+
+]
+
+
+.pull-right[
+
+.center[.small-text2[**Modelos de aprendizado de máquina**]]
+
+<div style="height: 7px;"></div>
+
+.small-text[
+- Artificial Neural Networks
+- Random Forests
+- Convolutional Neural Networks
+- Suport Vector Machines
+
+]
+
+]
+
+--
+
+-----
+
+<div style="height: 7px;"></div>
+
+Os algoritmos diferem principalmente quanto:
+
+.small-text[
+- Tipo de variável-resposta (ocorrência, presenç-ausência, abundância, ...)
+
+- Forma como modelam a relação espécie-ambiente (linear, não linear, árvores de decisão, redes neurais, ...)
+
+]
+
+<div style="height: 7px;"></div>
+
+--
+
+
+.gray-box-small[
+.small-text2[
+.center[**Limitações da maioria dos algoritmos tradicionais:**]
+
+1. Assumem independência espacial das observações (i.e., ignoram a autocorrelação espacial)
+2. Não propagam adequadamente as incertezas nos parâmetros para as predições finais espaciais
+
+]
+
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos de distribuição de espécies (SDMs) 
+
+
+Modelos geoestatísticos bayesianos constituem uma escolha natural para conduzir estudos de SDMs, uma vez que permitem:
+
+.small-text2[
+
+- Modelar a dependência espacial (e temporal) dos dados 
+
+]
+
+--
+
+.small-text2[
+
+- Quantificar, probabilisticamente, a incerteza associada às predições
+
+]
+
+--
+
+.small-text2[
+- Obter mapas de distribuição com incerteza explícita
+]
+
+
+--
+
+.small-text2[
+- Incorporar informação de diferentes bancos de dados
+]
+
+
+--
+
+.small-text2[
+
+- Modelar várias espécies simultaneamente
+
+]
+
+--
+
+
+.small-text2[
+
+- Considerar fatores bióticos e antrópicos
+
+]
+
+
+```{r, out.width="100%"}
+knitr::include_graphics("../Figuras/biotic_and_antrophic_sdms.png")
+```
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos de distribuição de espécies (SDMs) 
+
+Modelos geoestatísticos bayesianos constituem uma escolha natural para conduzir estudos de SDMs, uma vez que permitem:
+
+.small-text2[
+- Modelar a dependência espacial (e temporal) dos dados 
+
+- Quantificar, probabilisticamente, a incerteza associada às predições
+
+- Obter mapas de distribuição com incerteza explícita
+
+- Incorporar informação de diferentes bancos de dados
+
+- Modelar várias espécies simultaneamente
+
+- Considerar fatores bióticos e antrópicos
+
+]
+
+<br>
+
+
+
+
+
+
+.pull-left[
+
+```{r, out.width="90%", fig.align='left'}
+knitr::include_graphics("../Figuras/INLA_group.png")
+```
+
+  
+]
+
+.pull-right[
+
+```{r, out.width="60%"}
+knitr::include_graphics("../Figuras/INLA_logo.png")
+```
+
+.center[.small-text[[https://www.r-inla.org/](https://www.r-inla.org/)]]
+
+]
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### INLA 
+
+
+O [INLA](https://www.r-inla.org/)<sup>1</sup> é um método de inferência bayesiana para estimar parâmetros de LGMs
+
+
+- No contexto bayesiano, o INLA consiste em uma alternativa ao método Monte Carlo via Cadeias de Markov (MCMC)
+
+--
+
+
+.footnote[<sup>1</sup>*Integrated Nested Laplace Approximations*]
+
+<br>
+
+------
+
+<br>
+
+
+.pull-left[
+
+.small-text2[
+
+.center[**MCMC**]
+
+<div style="height: 7px;"></div>
+
+- **Abordagem:** Amostragem estocástica via simulação
+- **Vantagem:** Suporta praticamente qualquer distribuição ou estrutura não linear
+- **Desvantagem:** Computacionalmente lento (horas/dias em modelos espaciais)
+- **Diagnóstico:** Exige checagem de convergência das cadeias
+
+]
+
+]
+
+.pull-right[
+
+.small-text2[
+
+.center[**INLA**]
+
+<div style="height: 7px;"></div>
+
+- **Abordagem:** Solução analítica baseada em aproximações de Laplace
+- **Vantagem:** Extremamente rápido e otimizado para dados espaciais
+- **Desvantagem:** Restrito à classe dos LGMs
+- **Diagnóstico:** Sem necessidade de avaliar cadeias de amostragem
+
+]
+
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### INLA | .small-text[<span style="color: #e07a5f;">Ajustando modelos</span>]
+
+
+A sintaxe para ajustar modelos no `INLA` é similar a outros pacotes de ajuste de modelos
+
+-  **1.** Definir preditor linear ($\eta$) via objeto *formula* 
+  
+-  **2.** Ajustar o modelo via função `inla()`
+
+--
+
+-----
+
+##### 1. Especificando o preditor linear 
+
+.code-bg[
+```{r, eval=F, echo=T}
+
+f1 <- y ~ x1 + x2 + f(x3, model = "")
+```
+]
+
+
+- .small-text2[O argumento model na função `f()` acomoda todos os tipos de efeitos aletórios (estruturados e não estruturados), bem como efeitos suavizadores (GAM).]
+
+--
+
+- .small-text2[Podemos acessar os efeitos aleatórios disponíveis via:]
+
+```{r}
+library(INLA)
+```
+
+.code-bg[
+```{r, eval=T, echo=T}
+
+## Expondo apenas os 20 primeiros modelos (+50)
+names(inla.models()$latent)[1:20]
+```
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### INLA | .small-text[<span style="color: #e07a5f;">Ajustando modelos</span>]
+
+
+A sintaxe para ajustar modelos no `INLA` é similar a outros pacotes de ajuste de modelos
+
+-  **1.** Definir preditor linear ($\eta$) via objeto *formula* 
+  
+-  **2.** Ajustar o modelo via função `inla()`
+
+-----
+
+##### 1. Especificando o preditor linear 
+
+
+.small-text2[Algumas estruturas de modelos *latentes* úteis:]
+
+
+
+.code-bg[
+```{r, echo=T, eval = F}
+
+# GAM
+f1 <- y ~ x1 + x2 + f(x3, model = "rw1")  #rw2
+
+
+# GLMM (efeito aleatório não estruturado)
+f2 <- y ~ x1 + x2 + f(x3, model = "iid") 
+
+
+# Temporal (efeito aleatório estruturado)
+f3 <- y ~ x1 + x2 + f(x3, model = "ar1")  #seasonal,....
+
+
+# Espacial (efeito aleatório estruturado)
+f4 <- y ~ x1 + x2 + f(x3, model = "spde") #bym, besag, matern2d
+
+```
+
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### INLA | .small-text[<span style="color: #e07a5f;">Ajustando modelos</span>]
+
+
+A sintaxe para ajustar modelos no `INLA` é similar a outros pacotes de ajuste de modelos
+
+-  **1.** Definir preditor linear ($\eta$) via objeto *formula* 
+  
+-  **2.** Ajustar o modelo via função `inla()`
+
+-----
+
+##### 2. Ajuste do modelo via `inla()` 
+
+.small-text2[
+
+Função usada para ajustar o modelo: 
+- Composta por vários argumentos
+]
+
+
+.code-bg[
+```{r, eval = F, echo=T}
+
+mod1 <- inla(formula = f1,
+             family = "poisson",
+             data = dados,
+             control.compute = list(dic = T, waic = T, cpo = T)), # Retorna quais métricas de ajustes são retornadas
+             control.predictor = list(compute = TRUE, link = 1), # Controla o cálculo do preditor linear 
+             control.fixed = list(expand.factor.strategy = 'inla'), # Útil na presença de variáveis categóricas (maior estabilização)
+            ...)
+```
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### INLA | .small-text[<span style="color: #e07a5f;">Ajustando modelos</span>]
+
+
+A sintaxe para ajustar modelos no `INLA` é similar a outros pacotes de ajuste de modelos
+
+-  **1.** Definir preditor linear ($\eta$) via objeto *formula* 
+  
+-  **2.** Ajustar o modelo via função `inla()`
+
+-----
+
+##### 2. Ajuste do modelo via `inla()` 
+
+.small-text2[O INLA possui uma ampla seleção de modelos probabilísticos para definir no argumento `family`:]
+
+.code-bg[
+```{r, echo=T, eval=T}
+
+## Expondo apenas os 50 primeiros modelos probabilísticos (+100)
+names(inla.models()$likelihood)[1:50]
+
+```
+
+]
+
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### INLA | .small-text[<span style="color: #e07a5f;">Ajustando modelos</span>]
+
+
+Como padrão, o INLA usa *prioris* não-informativas para definir todos os parâmetros do modelo
+
+.pull-left[
+
+**Efeitos fixos**
+
+```{r, echo=T, eval = T}
+inla.set.control.fixed.default()[c("mean.intercept", "prec.intercept", "mean", "prec")]
+```
+
+]
+
+
+.pull-right[
+
+
+
+```{r, echo = T, eval = F}
+
+prior.fixed <- list(mean.intercept = <>, prec.intercept = <>,
+                    mean = <>, prec = <>)
+res <- inla(formula,
+  data = d,
+  control.fixed = prior.fixed
+)
+
+```
+
+]
+
+.footnote[Uma lista completa de prioris pode ser accesada via `r names(inla.models()$prior)`]
+
+---
+
+
 Autocorrelação Espacial "Aparente" (Induzida): Ocorre quando a variável de resposta apresenta padrão espacial simplesmente porque segue uma covariável que também é estruturada no espaço. Se você inclui essa covariável no modelo, a dependência nos resíduos desaparece.
 
 Autocorrelação Espacial Residual (Verdadeira): É o que sobra nos resíduos depois de controlar pelas covariáveis. É aqui que entra o campo aleatório espacial (efeito aleatório espacial, como nos modelos INLA / SPDE ou GAMs com splines espaciais), para modelar essa dependência estocástica latente.
@@ -310,7 +1130,19 @@ It is now clear that three main conditions need to be met for a species to occup
 
 ---
 
+ebooks
 
+https://becarioprecario.bitbucket.io/inla-gitbook/index.html
+
+
+- https://www.annualreviews.org/content/journals/10.1146/annurev-statistics-060116-054045
+
+
+- caps. 3-5 (Guisan - Habitat suitability modeling)
+- cap. 3 (Franklin, 2010)
+
+
+---
 
 
 Retomar deifinição sobre o que é um modelo geoestatístico
