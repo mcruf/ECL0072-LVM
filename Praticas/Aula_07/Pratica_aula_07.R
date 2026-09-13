@@ -22,12 +22,14 @@
 # Carregando os pacotes
 #~~~~~~~~~~~~~~~~~~~~~~~~
 library(INLA)    # Ajustar modelos espaciais (bayesianos)
+library(fmesher) # Criação do mesh (novo!)
 library(ggplot2) # Visualização dos dados
 library(sf)      # Processamento de dados vetorizados 
 library(raster)  # Processamento de rasters
 library(terra)   # Processamento de rasters
 library(stringr) # Manipulação de strings
-
+library(corrplot) # Visualização de dados
+library(mapview) # Visualização de dados espacializados
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Carregando funções auxiliares
@@ -41,6 +43,23 @@ source("Praticas/auxiliary_functions.R")
 CRS_wgs <- 4326 # Coordenada padrão (WGS84 - long/lat)
 CRS_lea <- "+proj=laea +lat_0=-25 +lon_0=-20 +datum=WGS84 +units=km +no_defs" # Projeção LEA centrada no AS & expressa em Km
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Definindo tema geral do ggplot
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+my_theme <- theme_bw(base_size = 14) + 
+            theme(plot.title = element_text(hjust = 0.5, face = 'bold'),
+                  axis.text.x = element_text(colour = "grey20", margin = margin(t = 10)),
+                  axis.text.y = element_text(colour = "grey20", margin = margin(r = 10)),
+                  axis.title = element_text(face = "bold", colour = "black", size = 16),
+                  strip.background = element_rect(fill = 'white'),
+                  legend.background = element_rect(fill = "transparent", colour = NA),
+                  legend.box.background = element_rect(fill = "transparent", colour = NA),
+                  panel.grid.major.y = element_line(linetype = 'dotted'),
+                  panel.grid.major.x = element_line(linetype = 'dotted'),
+                  axis.line = element_line(color = "black"),
+                  plot.margin = margin(5, 10, 5, 5))
+          
 
 
 #><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
@@ -243,7 +262,7 @@ dfs_f$bathy  <- extract(batimetria2r, dfs_f)[, 2]
 
 ### To see the progress...
 head(as.data.frame(dfs_f))
-colnames(dfs_f)[23:27] <- c("temperatura","altura_mar", "camada_mistura", "prod_primaria", "batimetria") # Renomeando as variáveis
+colnames(dfs_f)[23:27] <- c("temperatura", "altura_mar", "camada_mistura", "prod_primaria", "batimetria") # Renomeando as variáveis
 
 
 
@@ -252,9 +271,47 @@ colnames(dfs_f)[23:27] <- c("temperatura","altura_mar", "camada_mistura", "prod_
 # 4) Análise exploratória dos dados ambientais
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#FIXME: Desenvolver esta seção!
+
+# 4.1) Relação de P.glauca com as variáveis ambientais
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+dfs_f %>%
+  tidyr::pivot_longer(cols = temperatura:batimetria,
+                      names_to = "Variavel",
+                      values_to = "Valor") %>% 
+  #filter(Variavel == 'prod_primaria', Valor < 120) %>% 
+  #filter(Variavel == 'altura_mar', Valor > -0.1) %>% 
+  ggplot(aes(x = Valor, y = Prionace_glauca)) +
+  geom_point(alpha = 0.5, color = "#e07a5f", size = 3) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, k = 10, bs = "cs"), col = 'black') +
+  #geom_smooth(method = 'lm', formula = y ~ x + I(x^2)) +
+  facet_wrap(Variavel ~ . , scales = 'free') +
+  my_theme
 
 
+## Curiando...
+mapview(dfs_f, 
+        zcol = "prod_primaria",
+        cex = "prod_primaria")
+
+
+
+# 4.2) Avaliando multicolinearidade entre as covariáveis
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+colnames(dfs_f)
+covars <- dfs_f[ , 23:27] # Selecionando apenas as colunas das covariáveis
+covars <- st_drop_geometry(covars)
+covars_cor <- cor(covars, method = 'spearman') 
+corrplot(covars_cor, method = "color", type = "lower", addCoef.col = "black")
+
+## Outra forma de visualizar...
+GGally::ggpairs(covars) + my_theme
+
+
+# Covariávies não são substancialmente correlacionadas entre si - todas podem ser inclusas no modelo.
+# Embora haja algumas covariáveis com outliers marcantes (prod. primária & altura do mar), estes serão mantidos.
+# Posteriormente, pode-se testar os modelos da seção 7 com os dados SEM esses outliers e ver qual o impacto destes sobre as estimativas dos parâmetros.
+# Perceba, contudo, que outliers são mais preocupantes a nível da variável resposta!
 
 
 
@@ -296,6 +353,7 @@ dfs_lea <- st_transform(dfs_f, CRS_lea)
 coords <- as.data.frame(st_coordinates(dfs_lea))
 
 
+
 # 5.3) Definindo o mesh
 #~~~~~~~~~~~~~~~~~~~~~~
 # Diversos estudos, tutoriais e discussões metodológicas sugerem que o valor 
@@ -314,6 +372,7 @@ coords <- as.data.frame(st_coordinates(dfs_lea))
 # estimado e, se necessário, reconstruir o mesh utilizando valores mais
 # adequados para max.edge.
 
+
 max.edge <- diff(range(coords[,1]))/(3*5)
 bound.outer <- diff(range(coords[,1]))/5
 
@@ -323,41 +382,41 @@ sw_oceant <- st_transform(sw_ocean, crs = CRS_lea) # Reprojetando o shp da área
 
 
 # Mesh 1: Malha padrão usando apenas os pontos amosrrais 
-mesh1 <- inla.mesh.2d(loc = coords); plot(mesh1) # Triângulos muito grandes e irregulares
+mesh1 <- fm_mesh_2d_inla(loc = coords); plot(mesh1) # Triângulos muito grandes e irregulares
 
 
 # Mesh 2: Malha com controle do tamanho máximo das arestas (max.edge = 200)
-mesh2 <- inla.mesh.2d(loc = coords, 
-                      max.edge = c(200)) ; plot(mesh2) # Homogeniza o tamanho dos triângulos na área interna (quanto menor o valor, menor os trângulos)
+mesh2 <- fm_mesh_2d_inla(loc = coords, 
+                         max.edge = c(200)) ; plot(mesh2) # Homogeniza o tamanho dos triângulos na área interna (quanto menor o valor, menor os trângulos)
 
 
 # Mesh 3: Mesh com distância mínima entre vértices (cutoff = 30)
-mesh3 <- inla.mesh.2d(loc = coords, 
-                      max.edge = c(200),
-                      cutoff = 30) ; plot(mesh3) # Evita triângulos minúsculos onde os pontos são muito adensados
+mesh3 <- fm_mesh_2d_inla(loc = coords, 
+                         max.edge = c(200),
+                         cutoff = 30) ; plot(mesh3) # Evita triângulos minúsculos onde os pontos são muito adensados
 
 
 # Mesh 4: Mesh com uma extensão externa (offset) 
-mesh4 <- inla.mesh.2d(loc = coords, 
-                      max.edge = c(200),
-                      cutoff = 30,
-                      offset = c(100, 300)) ; plot(mesh4) #  Cria uma zona de transição para evitar efeitos de borda (boundary effects)
+mesh4 <- fm_mesh_2d_inla(loc = coords, 
+                         max.edge = c(200),
+                         cutoff = 30,
+                         offset = c(100, 300)) ; plot(mesh4) #  Cria uma zona de transição para evitar efeitos de borda (boundary effects)
 
 
 # Mesh 5: Mesh tomando por base o polígono do SAO 
-mesh5 <- inla.mesh.2d(boundary = sw_oceant,
-                      loc = coords, 
-                      max.edge = c(200),
-                      cutoff = 30,
-                      offset = c(100, 300)) ; plot(mesh5) # Moldando melhor a malha à área de estudo
+mesh5 <- fm_mesh_2d_inla(boundary = sw_oceant,
+                         loc = coords, 
+                         max.edge = c(200),
+                         cutoff = 30,
+                         offset = c(100, 300)) ; plot(mesh5) # Moldando melhor a malha à área de estudo
 
 
 # Mesh 6: Mesh reparametrizado  
-mesh6 <- inla.mesh.2d(boundary = sw_oceant,
-                      loc = coords, 
-                      max.edge = c(1,2)*max.edge, 
-                      cutoff = max.edge/4, 
-                      offset = c(max.edge, bound.outer*1.5)) ; plot(mesh6)
+mesh6 <- fm_mesh_2d_inla(boundary = sw_oceant,
+                         loc = coords, 
+                         max.edge = c(1,2)*max.edge, 
+                         cutoff = max.edge/4, 
+                         offset = c(max.edge, bound.outer*1.5)) ; plot(mesh6)
 
 par(mfrow = c(2, 3))
 plot(mesh1); title("Mesh 1")
@@ -427,8 +486,8 @@ dim(Aest)
 ### Usando os vértices do mesh ###
 
 # Extraindo as coordenadas da malha
-mcoords <- data.frame(Long = mesh$loc[,1], Lat = mesh$loc[,2]) 
-mesh.points <- st_as_sf(mcoords, coords = c("Long", "Lat"), crs = CRS_lea) # Transformando as coordenadas para objeto espacial (sf)
+mcoords <- data.frame(X = mesh$loc[,1], Y = mesh$loc[,2]) 
+mesh.points <- st_as_sf(mcoords, coords = c("X", "Y"), crs = CRS_lea) # Transformando as coordenadas para objeto espacial (sf)
 
 # Sanity check
 plot(mesh)
@@ -476,10 +535,19 @@ dim(Apred)
 
 # 6.3) Definindo o SPDE
 #~~~~~~~~~~~~~~~~~~~~~~~
+
+## SPDE 'clássico'
 spde <- inla.spde2.matern(mesh = mesh, alpha = 2) # alpha = parâmetro de suavidade da função de covariância Matérn (usando o valor default)
 
 
-
+## SPDE com pc.prior (evita sobreajuste - overfitting)
+spde_pc <- inla.spde2.pcmatern(mesh = mesh,
+                               alpha = 2,
+                               prior.range = c(500, 0.01), # P(range < 500 km) = 0.01 (baseado +/- no variograma empírico); reavaliar após a primeira rodada dos modelos
+                               prior.sigma = c(1, 0.01) )   # P(sigma > 1) = 0.01
+                                
+                    
+                    
 
 # 6.4) Construção dos stacks de estimação e predição
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -507,6 +575,9 @@ spde <- inla.spde2.matern(mesh = mesh, alpha = 2) # alpha = parâmetro de suavid
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ATENÇÃO: Os nomes atribuídos aos efeitos dentro da função inla.stack() devem ser exatamente os mesmos utilizados 
 # posteriormente na especificação da fórmula do modelo (model formula).
+
+# ATENÇÃO-2: Todas as covariáveis serão padronizadas! 
+
 
 indexs <- inla.spde.make.index("spatial", spde$n.spde) # Cria os índices espaciais (necessário para ajuste do modelo)
 
@@ -563,8 +634,8 @@ mean_ssh <- mean(rast_ssh, na.rm = TRUE)
 plot(mean_ssh)
 
 dfp$ALTURA_MAR  <- extract(mean_ssh, mesh.points)[, 2]
-ggplot() + geom_sf(data = dfp, aes(col = ALTURA_MAR))
-ggplot() + geom_sf(data = filter(dfp, !is.na(ALTURA_MAR)), aes(col = ALTURA_MAR))
+# ggplot() + geom_sf(data = dfp, aes(col = ALTURA_MAR))
+# ggplot() + geom_sf(data = filter(dfp, !is.na(ALTURA_MAR)), aes(col = ALTURA_MAR))
 
 
 ### camada de mistura (mlotst)
@@ -574,8 +645,8 @@ mean_mlt <- mean(rast_mlt, na.rm = TRUE)
 plot(mean_mlt)
 
 dfp$CAMADA_MISTURA  <- extract(mean_mlt, mesh.points)[, 2]
-ggplot() + geom_sf(data = dfp, aes(col = CAMADA_MISTURA))
-ggplot() + geom_sf(data = filter(dfp, !is.na(CAMADA_MISTURA)), aes(col = CAMADA_MISTURA))
+# ggplot() + geom_sf(data = dfp, aes(col = CAMADA_MISTURA))
+# ggplot() + geom_sf(data = filter(dfp, !is.na(CAMADA_MISTURA)), aes(col = CAMADA_MISTURA))
 
 
 ### produtividade primaria
@@ -585,14 +656,14 @@ mean_nppv <- mean(rast_nppv, na.rm = TRUE)
 plot(mean_nppv)
 
 dfp$PROD_PRIMARIA  <- extract(mean_nppv, mesh.points)[, 2]
-ggplot() + geom_sf(data = dfp, aes(col = PROD_PRIMARIA))
-ggplot() + geom_sf(data = filter(dfp, !is.na(PROD_PRIMARIA)), aes(col = PROD_PRIMARIA))
+# ggplot() + geom_sf(data = dfp, aes(col = PROD_PRIMARIA))
+# ggplot() + geom_sf(data = filter(dfp, !is.na(PROD_PRIMARIA)), aes(col = PROD_PRIMARIA))
 
 
 ### batimetria
 dfp$BATIMETRIA  <- extract(batimetria2r, mesh.points)[, 2]
-ggplot() + geom_sf(data = dfp, aes(col = BATIMETRIA))
-ggplot() + geom_sf(data = filter(dfp, !is.na(BATIMETRIA)), aes(col = BATIMETRIA))
+# ggplot() + geom_sf(data = dfp, aes(col = BATIMETRIA))
+# ggplot() + geom_sf(data = filter(dfp, !is.na(BATIMETRIA)), aes(col = BATIMETRIA))
 
 
 head(dfp)
@@ -626,4 +697,201 @@ stk.full <- inla.stack(stk.est, stk.pred)
 #~~~~~~~~~~~~~~~~~~~~~~~~
 # 7) Rodando os modelos
 #~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+# 7.1) Definindo a estrutura dos modelos
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+form0 <- y ~ 0 + b0 # Modelo nulo
+form1 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp
+form2 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks))
+form3 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks)) + f(vessel, model = "iid") 
+form4 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks)) + f(vessel, model = "iid") + year + month
+form5 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks)) + f(vessel, model = "iid") + year + month + f(spatial, model = spde)
+form6 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks)) + f(vessel, model = "iid") + year + month + f(spatial, model = spde_pc)
+
+
+form7 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks)) + f(vessel, model = "iid") + year + month + f(spatial, model = spde_pc)
+
+
+
+formulas <- c(form0, form1, form2, form3, form4, form5, form6)
+#formulas <- c( form3, form4, form5)
+
+
+
+# 7.2) Rodando os modelos
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Distribuição Poisson
+pois_mod <- list()
+
+for(model in seq_along(formulas)){
+  
+  pois_mod[[model]] <- inla(formulas[[model]],
+                            family = "poisson",
+                            data = inla.stack.data(stk.full), # Realiza o processo de estimação e predição simultâneamente
+                            control.predictor = list(compute = TRUE, # Computa a distribuição posterior do preditor linear
+                                                     link = 1, # Mapeia a distribuição posterior estimada de volta para a escala original dos dados
+                                                     A = inla.stack.A(stk.full)),
+                             control.inla = list(strategy = "simplified.laplace"), # Para rodar mais rápido; bom na fase exploratória!
+                             control.fixed = list(expand.factor.strategy='inla'), # Quando o modelo envolver variáveis que são fatores
+                             control.compute = list(return.marginals.predictor = F,
+                                                    dic = T, waic=T, cpo=T),
+                             verbose = F)
+  
+  print(paste("finished model", model, "out of", length(formulas)))
+  
+}
+
+
+
+## Distribuição Binomial Negativa
+nb_mod <- list()
+
+for(model in seq_along(formulas)){
+  
+  nb_mod[[model]] <- inla(formulas[[model]],
+                          family = "nbinomial",
+                          data = inla.stack.data(stk.full), # Realiza o processo de estimação e predição simultâneamente
+                          control.predictor = list(compute = TRUE, # Computa a distribuição posterior do preditor linear
+                                                   link = 1, # Mapeia a distribuição posterior estimada de volta para a escala original dos dados
+                                                   A = inla.stack.A(stk.full)),
+                          control.inla = list(strategy = "simplified.laplace"), # Para rodar mais rápido; bom na fase exploratória!
+                          control.fixed = list(expand.factor.strategy='inla'), # Quando o modelo envolver variáveis que são fatores
+                          control.compute = list(return.marginals.predictor = F,
+                                                 dic = T, waic=T, cpo=T),
+                          verbose = F)
+  
+  print(paste("finished model", model, "out of", length(formulas)))
+  
+}
+
+
+# 7.3) Extraindo os resultados para avaliar qualidade de ajuste
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Usaremos a função 'mdiagnostic'; para maiores detalhes, vide a função no script 'Pratucas/auxiliary_functions.R'
+
+rpois <- do.call("rbind", lapply(pois_mod, mdiagnostic)); rpois$model <- as.factor(1:length(formulas)); rpois$family <- "Pois"
+rnb <- do.call("rbind", lapply(nb_mod, mdiagnostic)); rnb$model <- as.factor(1:length(formulas)) ; rnb$family <- "NB"
+
+mresults <- rbind(rpois, rnb)
+
+
+# 7.3.1) Comparando os modelos quantitativamente (via DIC, WAIC e LCPO
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+mresults %>% 
+  tidyr::pivot_longer(cols = DIC:LCPO,
+                      names_to = "Metrica",
+                      values_to = "Valor") %>% 
+  ggplot(aes(x = model, y = Valor, group = family, col = family)) + 
+  geom_point(size = 5) +
+  facet_wrap(Metrica ~ ., scales = 'free', ncol = 3) +
+  my_theme
+
+
+### Vamos rever os resultados sem a distribuição Poisson
+mresults %>% 
+  tidyr::pivot_longer(cols = DIC:LCPO,
+                      names_to = "Metrica",
+                      values_to = "Valor") %>%
+  filter(family != "Pois") %>% 
+  ggplot(aes(x = model, y = Valor, group = family, col = family)) + 
+  geom_point(size = 5) +
+  facet_wrap(Metrica ~ ., scales = 'free', ncol = 3) +
+  my_theme
+
+
+mresults %>% 
+  filter(family != "Pois") %>% 
+  arrange(DIC)
+
+
+
+# 7.3.2) Visualização dos pressupostos & ajuste do modelo
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+idx <- inla.stack.index(stack = stk.full, tag = "est")$data # Armazena os índices relacionados às estimações no objeto do modelo
+
+
+## Para ver
+summary.fitted.values
+
+
+## Extraindo os resultados dos modelos
+allm <- c(pois_mod, nb_mod)
+names(allm) <- c(paste("Pois", 1:length(formulas), sep = "_"), paste("NB", 1:length(formulas), sep = "_"))
+
+dat <- list()
+
+for(i in 1:length(allm)){
+  
+  family_name <- sub("_.*", "", names(allm)[i])   
+  model_number <- sub(".*_", "", names(allm)[i])  
+  
+  
+  dat[[i]] <- data.frame(predicted = allm[[i]]$summary.fitted.values[idx,'mean'], 
+                         lower = allm[[i]]$summary.fitted.values[idx, '0.025quant'], 
+                         upper = allm[[i]]$summary.fitted.values[idx, '0.975quant'], 
+                         observed = dfs_lea$Prionace_glauca,
+                         family = family_name,
+                         model = model_number)
+  
+}
+dat <- do.call("rbind", dat)
+head(dat)
+
+
+## Calculando os resíduos
+dat$residual <- dat$predicted - dat$observed
+dat$standardResidual <- dat$residual/stats::sd(dat$residual)
+dat$standardUpper <- (dat$upper - dat$observed)/stats::sd(dat$residual)
+dat$standardLower <- (dat$lower - dat$observed)/stats::sd(dat$residual)
+
+
+
+### Pressuposto de homocedasticidade 
+dat %>% 
+  filter(family == "NB") %>% 
+ggplot(aes(x = predicted, y = standardResidual)) + 
+  geom_point() + 
+  labs(y = "Standardised Residual", 
+       x = "Fitted",
+       title = "Homocedasticidade") + 
+  facet_wrap(model ~ ., scales = "free") +
+  geom_smooth(se = T) + 
+  geom_hline(yintercept = 0, linetype = 2, col = "red") + 
+  geom_segment(ggplot2::aes_string(y = "standardLower", 
+                                   yend = "standardUpper", xend = "predicted"), alpha = 0.4) + 
+  theme_bw()
+
+
+
+## Residual independence
+tmp <- dat %>%
+  subset(family == "NB" & model == "4")
+
+forecast::ggAcf(tmp$residual,lag.max=24) +
+  labs(title='Independência residual') + 
+  theme_bw()
+
+
+## Normality of residuals
+ggplot(dat, aes(sample = residual)) +
+  stat_qq_line(col='darkorange', linetype = 'dashed', linewidth = 1) +
+  stat_qq(size=2) +
+  labs(title = "QQplot") +
+  facet_wrap(family ~ model, ncol = 4, scales="fixed") +
+  theme_bw()
+
+
+## Predicted vs. observed
+ggplot(dat, aes(x = observed, y = predicted)) + 
+  geom_point() + 
+  labs(y = "Predicted",
+       x = "Observed",
+       title = "Obs. vs. pred.") + 
+  geom_smooth(method = "lm") +
+  facet_wrap(family ~ model, ncol = 4, scales="free") +
+  theme_bw()
+
 
