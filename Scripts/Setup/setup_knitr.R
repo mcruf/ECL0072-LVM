@@ -20,6 +20,7 @@ library(broom.mixed)
 library(lme4)
 library(knitr)
 library(emmeans)
+library(INLA)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~                  

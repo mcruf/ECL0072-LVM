@@ -21,7 +21,7 @@ style_xaringan(
   text_color       = metropolis_dark,
   header_color     = "#846267", #6b705c
   link_color       = "#ee9b00",
-  
+
   
   # Typography matching Metropolis
   header_font_google = google_font("Josefin Sans", "400"),
@@ -47,6 +47,10 @@ style_xaringan(
       "font-size" = "80%"
     ),
     
+    ### Change code chunk color
+    ".code-bg .remark-code, .code-bg .remark-code *" = list(
+      "background-color" = "#f5f3f4 !important"
+    ),
     
     # Text with different sizes 
     ".small-text" = list("font-size" = "80%"),
