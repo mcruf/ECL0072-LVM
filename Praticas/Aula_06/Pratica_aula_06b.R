@@ -13,6 +13,7 @@
 # via API utilizando python. Para detalhes sobre o download e a organização dos arquivos, consulte o script:
 # Praticas/Aula_06/Copernicus_data_download_practical.ipynb
 
+
 # Ao todo, foram baixadas cinco variáveis ambientais, provenientes de dois produtos distintos do Copernicus Marine Service:
 # 1) Variáveis físicas (Global Ocean Physics Reanalysis)
 #    - Sea surface temperature (SST)
@@ -24,10 +25,11 @@
 #     - Net primary productivity (NPPV)
 
 # Há um total de 4 variáveis dinâmicas (SST, SSH, MLT e NPPV), i.e., que possuem uma série temporal e foram baixadas na mesma 
-# resolução temporal dos dados pesqueiros (mensal). Já a batimetria é uma variável estática, permanecendo constante ao longo do tempo.
+# resolução temporal dos dados pesqueiros (mensal - 24 meses no total). Já a batimetria é uma variável estática, permanecendo constante ao longo do tempo.
 
 # Ao longo desta prática, as diferentes camadas ambientais serão padronizadas quanto à extensão espacial, sistema de referência de coordenadas (CRS) e
 # resolução espacial. Em seguida, os valores de cada variável ambiental serão extraídos para a localização e o período de cada pescaria.
+
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,7 +78,7 @@ batimetria <- rast("Dados/GIS/Environmental/bathymetry.nc")
 
 
 ## Explorando a estrutura dos dados
-dim(vfisicas)
+dim(vfisicas) 
 nlyr(vfisicas)
 names(vfisicas) 
 head(vfisicas)
@@ -95,33 +97,32 @@ boxplot(batimetria)
 plot(batimetria)
 plot(-batimetria)
 
-### Camada de mistura (os 12 últimos meses)
-par(mfrow=c(2,6))
 
-meses <- 1:12
+### Camada de mistura (os primeiros 12 meses)
+plot(vfisicas[[1:12]], nc = 6, nr = 2) # painel com 6 colunas, 2 linhas
+plot(vfisicas[[25:50]], nc = 6, nr = 2) # temperatura
+plot(vfisicas[[49:60]], nc = 6, nr = 2) # altura do mar
 
-for(i in 61:72){
-  plot(vfisicas[[i]], range = c(0, 550), main = meses[i - 60])
-}
 
-par(mfrow=c(1,1))
+
 
 
 # 1.2) Global Ocean Biogeochemistry Hindcast (raster)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 vbio <- rast("Dados/GIS/Environmental/Global_Ocean_Biogeochemistry_Hindcast_2004_2005_monthly.nc") 
 head(vbio)
-plot(vbio[[1]])
+plot(vbio[[1:12]], nc = 6, nr = 2) # altura do mar
 
 
 
 # 1.3) Extensão da área de estudo (shapefile)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## Camada necessária para padronizar o recorte espacial entre as diferentes camadas ambientais.
-## Usaremos a porção sudoeste do oceano atlântico como referência (mesma extensão dos dados pesqueiros) 
+# Camada necessária para padronizar o recorte espacial entre as diferentes camadas ambientais.
+# Usaremos a porção sudoeste do oceano atlântico como referência (mesma extensão dos dados pesqueiros) 
+
 sw_ocean <- read_sf("Dados/GIS/ICCAT/iccat_atsw.shp")
 
-plot(st_geometry(sw_ocean), col = 'lightblue') #Visualizando o dado
+plot(st_geometry(sw_ocean), col = 'lightblue') # Visualizando o dado
 sw_ocean # Estrutura do dado vetorial
 
 
@@ -129,6 +130,14 @@ sw_ocean # Estrutura do dado vetorial
 # 1.4) Dados pesqueiros (dataframe)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 df <- readRDS("Dados/fisheries.rds")
+
+## Transformando para objeto sf (espacial)
+CRS_wgs <- 4326 # Coordenada padrão (WGS84 - long/lat)
+
+dfsp <- st_as_sf(df, 
+                 coords = c('Long','Lat'), 
+                 crs = CRS_wgs) # As coordenadas estão originalmente em LAT/LONG; portanto, usar primeiro o CRS padrão (WGS84)
+
 
 
 
@@ -138,12 +147,14 @@ df <- readRDS("Dados/fisheries.rds")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Antes de poder utilizar as variáveis ambientais em uma análise estatística (e.g., GLM, GAM, etc.),
-# é necessário assegurar que todas as camadas compartilhem exatamente a mesma grade espacial
-# (i.e., extensão, CRS e resolução).
+# é necessário assegurar que todas as camadas compartilhem a mesma grade espacial (i.e., extensão, CRS e resolução).
 
 
 # 2.1) Padronizando a extensão espacial
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Em tese, não seria necessário esta seção no presente script, uma vez que a extensão das camadas ambientais já foi previamente padronizada quando os dados 
+# foram extraídos do Copernicus via API do python.
+
 
 ## Variáveis físicas
 vfisicas2 <- crop(vfisicas, sw_ocean)
@@ -152,7 +163,7 @@ vfisicas2 <- crop(vfisicas, sw_ocean)
 vbio2 <- crop(vbio, sw_ocean)
 
 ## Batimetira
-batimetria2 <- crop(batimetria, sw_ocean) #mantém a extensão
+batimetria2 <- crop(batimetria, sw_ocean) 
 
 
 ## EXTRA: Em alguns casos, é preciso recortar o raster de forma a manter os mesmos pixels dentro do polígono.
@@ -186,6 +197,7 @@ crs(vbio2) == crs(vfisicas2)
 # vbio2 <- terra::project(vbio, crs_ref)
 
 
+
 # 2.3) Padronizando a resolução espacial
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Ao utilizar rasters (dados) ambientais de diferentes fontes, é extremamente (!)
@@ -213,7 +225,7 @@ batimetria2r <- resample(batimetria2, vbio2, method = "bilinear")
 res(batimetria2r) #ok!
 
 par(mfrow=c(1,2))
-plot(batimetria2r, main = "Original")
+plot(batimetria2, main = "Original")
 plot(batimetria2r, main = "Reamostrado")
 par(mfrow=c(1,1))
 
@@ -238,12 +250,12 @@ plot(st_geometry(dfsp), pch = 19, cex = 0.7, col = "#e29578", add = T) #Eita! H�
 
 
 ## Filtrando pescarias (pontos amostrais) fora da área de estudo
-dfs_f <- dfsp %>% 
+dfsp_f <- dfsp %>% 
           st_filter(sw_ocean, .predicate = st_intersects)
 
-dim(dfs)[1] - dim(dfs_f)[1] #No. de pontos removidos
+dim(dfsp)[1] - dim(dfsp_f)[1] #No. de pontos removidos
 
-plot(st_geometry(dfs_f), pch = 19, cex = 0.7, col = 1, add = T) #Sucesso!
+plot(st_geometry(dfsp_f), pch = 19, cex = 0.7, col = 1, add = T) #Sucesso!
 
 
 
@@ -270,39 +282,44 @@ unique(word(names(batimetria2r), 1, sep = "_"))
 
 
 ### Extraindo dados para thetao (sst - temperatura superficial do mar); variável dinâmica
-dfs_f <- extract_env_dynamic(points_sf = dfs_f, #dados pesqueiros espacializados
-                             env_raster = vfisicas2r, #camada ambiental (raster)
-                             var_name = "thetao",#nome da variável dentro da camada ambiental
-                             year_map = year_mapping)
+dfsp_f <- extract_env_dynamic(points_sf = dfsp_f, # dados pesqueiros espacializados
+                              env_raster = vfisicas2r, # camada ambiental (raster)
+                              var_name = "thetao",# nome da variável dentro da camada ambiental
+                              year_map = year_mapping)
 
 
 ### Extraindo dados para zos (ssh - altura da superfície do mar); variável dinâmica
-dfs_f <- extract_env_dynamic(points_sf = dfs_f, #dados pesqueiros espacializados
-                             env_raster = vfisicas2r, #camada ambiental (raster)
-                             var_name = "zos",#nome da variável dentro da camada ambiental
-                             year_map = year_mapping)
+dfsp_f <- extract_env_dynamic(points_sf = dfsp_f, 
+                              env_raster = vfisicas2r, 
+                              var_name = "zos",
+                              year_map = year_mapping)
 
 
 ### Extraindo dados para mlotst (mlt - espessura da camada de mistura); variável dinâmica
-dfs_f <- extract_env_dynamic(points_sf = dfs_f, #dados pesqueiros espacializados
-                             env_raster = vfisicas2r, #camada ambiental (raster)
-                             var_name = "mlotst",#nome da variável dentro da camada ambiental
-                             year_map = year_mapping)
-
+dfsp_f <- extract_env_dynamic(points_sf = dfsp_f, 
+                              env_raster = vfisicas2r, 
+                              var_name = "mlotst",
+                              year_map = year_mapping)
 
 
 ### Extraindo dados para nppv (produtividade primária); variável dinâmica
-dfs_f <- extract_env_dynamic(points_sf = dfs_f, #dados pesqueiros espacializados
-                             env_raster = vbio2, #camada ambiental (raster)
-                             var_name = "nppv",#nome da variável dentro da camada ambiental
-                             year_map = year_mapping)
+dfsp_f <- extract_env_dynamic(points_sf = dfsp_f, 
+                              env_raster = vbio2, 
+                              var_name = "nppv",
+                              year_map = year_mapping)
 
 
 
 ### Extraindo dados para deptho (bathy - batimetria); variável estática
-dfs_f$bathy  <- extract(batimetria2r, dfs_f)[, 2]
+dfsp_f$bathy  <- extract(batimetria2r, dfsp_f)[, 2]
 
 
 
-head(as.data.frame(dfs_f)) # Cenas para o próximo capítulo...
+head(as.data.frame(dfsp_f)) # Cenas para o próximo capítulo...
 
+
+
+#### Salvando os dados
+dfsp_f <- st_drop_geometry(dfsp_f) # Remove geometria dos dados (i.e., spatial_data_frame -> data_frame)
+
+saveRDS(dfsp_f, "Dados/fisheries_covars.rds")
