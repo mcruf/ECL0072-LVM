@@ -1,6 +1,6 @@
 ---
 title: "MODELOS ESPAÇO-TEMPORAIS PARA DADOS ECOLÓGICOS (ECL0072)"
-subtitle: "AULA 01: MODELOS LINEARES"
+subtitle: "AULA 01: REVISITANDO MODELOS LINEARES"
 author: "Marie-Christine Rufener"
 institute: "macrufener@gmail.com"
 date: "Out / 2026"
@@ -82,8 +82,8 @@ class: title-slide
 
 <br>
 - **26/10 -** Fundamentos em Estatística Espacial & GIS
-- **27/10 -** Modelos Espaciais 
-- **28/10 -** Modelos Espaço-Temporais 
+- **27/10 -** Modelos Espaciais (via R-INLA)
+- **28/10 -** Modelos Espaço-Temporais (via R-INLA)
 - **29/10 -** Dúvidas dos projetos (opcional: tutorial de elaboração de mapas no R)
 - **30/10 -** Apresentação dos projetos
 
@@ -104,7 +104,7 @@ Entrega de projeto & apresentação de trabalho (grupos de 3-4 pessoas)
 ---
 # PPGECO | ECL0072 | out. 2026
 
-### Filosofia da aula
+### Filosofia do curso
 
 <br>
 
@@ -124,9 +124,66 @@ knitr::include_graphics("../Figuras/Indice_HBC.png")
 
 ### Uma jornada estatística
 
-```{r, out.width = "70%"}
+```{r, out.width = "80%"}
 knitr::include_graphics("../Figuras/stat_and_rock.png")
 ```
 
 
 ---
+# PPGECO | ECL0072 | out. 2026
+
+
+<br>
+<br>
+
+
+.pull-left[
+
+<br>
+<br>
+
+
+```{r echo=FALSE, out.width ="75%", fig.cap="Edwards Demming (1900-1993)", fig.topcaption=F}
+knitr::include_graphics("../Figuras/Edwards_Demming.png")
+```
+]
+
+
+.pull-right[
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+
+> <font size="6"><center> <span style="color: #e07a5f;"> <b>Without data</b>, you're just another <b>person with an opinion</b></center></font></span> 
+
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### O que é um modelo?
+
+#### A matemática é a linguagem da natureza
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Para que serve um modelo?
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### O que é modelagem estatística?
+
+
+---
+
+

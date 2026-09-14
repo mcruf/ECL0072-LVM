@@ -30,11 +30,14 @@ library(terra)   # Processamento de rasters
 library(stringr) # Manipulação de strings
 library(corrplot) # Visualização de dados
 library(mapview) # Visualização de dados espacializados
+library(virids) # Paleta de cores
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Carregando funções auxiliares
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 source("Praticas/auxiliary_functions.R")
+
 
 
 #~~~~~~~~~~~~~~~~~
@@ -68,7 +71,6 @@ my_theme <- theme_bw(base_size = 14) +
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 1) Carregando os dados 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 
 # 1.1) Dados pesqueiros
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -541,13 +543,15 @@ spde <- inla.spde2.matern(mesh = mesh, alpha = 2) # alpha = parâmetro de suavid
 
 
 ## SPDE com pc.prior (evita sobreajuste - overfitting)
-spde_pc <- inla.spde2.pcmatern(mesh = mesh,
-                               alpha = 2,
-                               prior.range = c(500, 0.01), # P(range < 500 km) = 0.01 (baseado +/- no variograma empírico); reavaliar após a primeira rodada dos modelos
-                               prior.sigma = c(1, 0.01) )   # P(sigma > 1) = 0.01
+# spde_pc <- inla.spde2.pcmatern(mesh = mesh,
+#                                alpha = 2,
+#                                prior.range = c(500, 0.01), # P(range < 500 km) = 0.01 (baseado +/- no variograma empírico); reavaliar após a primeira rodada dos modelos
+#                                prior.sigma = c(1, 0.01) )   # P(sigma > 1) = 0.01
                                 
                     
-                    
+
+
+
 
 # 6.4) Construção dos stacks de estimação e predição
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -595,7 +599,9 @@ stk.est <- inla.stack(data = list(y = dfs_lea$Prionace_glauca),
                                                      sheight = scale(dfs_lea$altura_mar),
                                                      mlt = scale(dfs_lea$camada_mistura),
                                                      npp = scale(dfs_lea$prod_primaria),
-                                                     depth = scale(dfs_lea$batimetria)))),
+                                                     depth = scale(dfs_lea$batimetria),
+                                                     X_coord = inla.group(coords[, 1], n = 50),
+                                                     Y_coord = inla.group(coords[, 2], n = 50)))),
                       tag = "est")
 
 
@@ -676,14 +682,16 @@ stk.pred <- inla.stack(data = list(y = NA), #Definir a variável-resposta como N
                                                       year = "2", # Usando o segundo ano como referência
                                                       month = "1", # Usando 'janeiro' como mês de referência
                                                       fid = NA, # Efeito aleatório não estruturado - sempre como NA, pois não contribui para o preditor linear
-                                                      vessel = "V50", # Embarcação mais frequente como referência
+                                                      vessel = NA, # Efeito aleatório não estruturado - sempre como NA, pois não contribui para o preditor linear
                                                       flag = "BRA", # Brasil como país de referência
                                                       nhooks = round(mean(dfs_lea$Nhooks)), # Esforço médio - constante em toda a área; idealmente, fazer um raster do esforço
                                                       temp = scale(dfp$TEMPERATURA),
                                                       sheight = scale(dfp$ALTURA_MAR),
                                                       mlt = scale(dfp$CAMADA_MISTURA),
                                                       npp = scale(dfp$PROD_PRIMARIA),
-                                                      depth = scale(dfp$BATIMETRIA)))),
+                                                      depth = scale(dfp$BATIMETRIA),
+                                                      X_coord = inla.group(mcoords[, 1], n = 50),
+                                                      Y_coord = inla.group(mcoords[, 2], n = 50)))),
                        tag = "pred")
 
 
@@ -702,26 +710,23 @@ stk.full <- inla.stack(stk.est, stk.pred)
 
 # 7.1) Definindo a estrutura dos modelos
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-form0 <- y ~ 0 + b0 # Modelo nulo
-form1 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp
+form1 <- y ~ 0 + b0 # Modelo nulo
 form2 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks))
-form3 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks)) + f(vessel, model = "iid") 
-form4 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks)) + f(vessel, model = "iid") + year + month
-form5 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks)) + f(vessel, model = "iid") + year + month + f(spatial, model = spde)
-form6 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks)) + f(vessel, model = "iid") + year + month + f(spatial, model = spde_pc)
+form3 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks)) + f(Y_coord, model = 'rw1') + f(X_coord, model = 'rw1') 
+form4 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks)) + f(spatial, model = spde)
+form5 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks)) + f(spatial, model = spde) + f(vessel, model = "iid")
+form6 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks)) + f(spatial, model = spde) + f(vessel, model = "iid") + f(fid, model = 'iid')
 
 
-form7 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks)) + f(vessel, model = "iid") + year + month + f(spatial, model = spde_pc)
-
-
-
-formulas <- c(form0, form1, form2, form3, form4, form5, form6)
-#formulas <- c( form3, form4, form5)
+formulas <- c(form1, form2, form3, form4, form5, form6) # Concatenando as fórmulas
 
 
 
 # 7.2) Rodando os modelos
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
+inla.setOption(num.threads = 8) # Para acelerar os cálculos, em caso de muitos dados
+
+
 
 ## Distribuição Poisson
 pois_mod <- list()
@@ -735,7 +740,6 @@ for(model in seq_along(formulas)){
                                                      link = 1, # Mapeia a distribuição posterior estimada de volta para a escala original dos dados
                                                      A = inla.stack.A(stk.full)),
                              control.inla = list(strategy = "simplified.laplace"), # Para rodar mais rápido; bom na fase exploratória!
-                             control.fixed = list(expand.factor.strategy='inla'), # Quando o modelo envolver variáveis que são fatores
                              control.compute = list(return.marginals.predictor = F,
                                                     dic = T, waic=T, cpo=T),
                              verbose = F)
@@ -758,7 +762,6 @@ for(model in seq_along(formulas)){
                                                    link = 1, # Mapeia a distribuição posterior estimada de volta para a escala original dos dados
                                                    A = inla.stack.A(stk.full)),
                           control.inla = list(strategy = "simplified.laplace"), # Para rodar mais rápido; bom na fase exploratória!
-                          control.fixed = list(expand.factor.strategy='inla'), # Quando o modelo envolver variáveis que são fatores
                           control.compute = list(return.marginals.predictor = F,
                                                  dic = T, waic=T, cpo=T),
                           verbose = F)
@@ -768,22 +771,34 @@ for(model in seq_along(formulas)){
 }
 
 
-# 7.3) Extraindo os resultados para avaliar qualidade de ajuste
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 8) Extraindo & avaliando os resultados 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+# 8.1) Extraindo os resultados para avaliar e selecionar os modelos
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Usaremos a função 'mdiagnostic'; para maiores detalhes, vide a função no script 'Pratucas/auxiliary_functions.R'
+# A função extrai as seguintes métricas: DIC, WAIC e LCPO
 
 rpois <- do.call("rbind", lapply(pois_mod, mdiagnostic)); rpois$model <- as.factor(1:length(formulas)); rpois$family <- "Pois"
 rnb <- do.call("rbind", lapply(nb_mod, mdiagnostic)); rnb$model <- as.factor(1:length(formulas)) ; rnb$family <- "NB"
 
 mresults <- rbind(rpois, rnb)
 
+# Curiando...
+head(mresults)
 
-# 7.3.1) Comparando os modelos quantitativamente (via DIC, WAIC e LCPO
+
+# 8.1.1) Comparando os modelos quantitativamente (via DIC, WAIC e LCPO)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 mresults %>% 
   tidyr::pivot_longer(cols = DIC:LCPO,
                       names_to = "Metrica",
                       values_to = "Valor") %>% 
+  filter(Metrica != "LCPO") %>% 
   ggplot(aes(x = model, y = Valor, group = family, col = family)) + 
   geom_point(size = 5) +
   facet_wrap(Metrica ~ ., scales = 'free', ncol = 3) +
@@ -795,7 +810,7 @@ mresults %>%
   tidyr::pivot_longer(cols = DIC:LCPO,
                       names_to = "Metrica",
                       values_to = "Valor") %>%
-  filter(family != "Pois") %>% 
+  filter(family != "Pois", Metrica != "LCPO") %>% 
   ggplot(aes(x = model, y = Valor, group = family, col = family)) + 
   geom_point(size = 5) +
   facet_wrap(Metrica ~ ., scales = 'free', ncol = 3) +
@@ -803,21 +818,18 @@ mresults %>%
 
 
 mresults %>% 
-  filter(family != "Pois") %>% 
-  arrange(DIC)
+  #filter(family != "Pois") %>% 
+  arrange(WAIC, DIC) # Modelo no. 6 é o melhor modelo
 
 
 
-# 7.3.2) Visualização dos pressupostos & ajuste do modelo
+# 8.1.2) Visualização dos pressupostos & ajuste do modelo
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-idx <- inla.stack.index(stack = stk.full, tag = "est")$data # Armazena os índices relacionados às estimações no objeto do modelo
 
+### Extraindo os índices relacionados às estimações no objeto do modelo
+idx <- inla.stack.index(stack = stk.full, tag = "est")$data 
 
-## Para ver
-summary.fitted.values
-
-
-## Extraindo os resultados dos modelos
+### Extraindo os resultados dos modelos
 allm <- c(pois_mod, nb_mod)
 names(allm) <- c(paste("Pois", 1:length(formulas), sep = "_"), paste("NB", 1:length(formulas), sep = "_"))
 
@@ -832,12 +844,14 @@ for(i in 1:length(allm)){
   dat[[i]] <- data.frame(predicted = allm[[i]]$summary.fitted.values[idx,'mean'], 
                          lower = allm[[i]]$summary.fitted.values[idx, '0.025quant'], 
                          upper = allm[[i]]$summary.fitted.values[idx, '0.975quant'], 
-                         observed = dfs_lea$Prionace_glauca,
+                         observed = dfs_lea$Prionace_glauca, # Inserir aqui a coluna correspondente à variável resposta!
                          family = family_name,
                          model = model_number)
   
 }
 dat <- do.call("rbind", dat)
+
+# Curiando...
 head(dat)
 
 
@@ -849,49 +863,335 @@ dat$standardLower <- (dat$lower - dat$observed)/stats::sd(dat$residual)
 
 
 
-### Pressuposto de homocedasticidade 
+### PRESSUPOSTO DE HOMOCEDASTICIDADE  
 dat %>% 
   filter(family == "NB") %>% 
-ggplot(aes(x = predicted, y = standardResidual)) + 
-  geom_point() + 
-  labs(y = "Standardised Residual", 
-       x = "Fitted",
-       title = "Homocedasticidade") + 
-  facet_wrap(model ~ ., scales = "free") +
-  geom_smooth(se = T) + 
-  geom_hline(yintercept = 0, linetype = 2, col = "red") + 
-  geom_segment(ggplot2::aes_string(y = "standardLower", 
-                                   yend = "standardUpper", xend = "predicted"), alpha = 0.4) + 
-  theme_bw()
+  #filter(family == "Pois") %>% 
+  mutate(model = factor(model, levels = 1:10)) %>% 
+  ggplot(aes(x = predicted, y = standardResidual)) + 
+        geom_point() + 
+        labs(y = "Resíduos padronizados", 
+             x = "Valores ajustados",
+             title = "Homocedasticidade") + 
+        facet_wrap(model ~ ., scales = "free", nrow = 2) +
+        geom_smooth(se = T) + 
+        geom_hline(yintercept = 0, linetype = 2, col = "red") + 
+        geom_segment(ggplot2::aes_string(y = "standardLower", 
+                                         yend = "standardUpper", xend = "predicted"), alpha = 0.4) + 
+        my_theme
+      
 
 
 
-## Residual independence
+### PRESSUPOSTO DE INDEPENDÊNCIA RESIDUAL
 tmp <- dat %>%
-  subset(family == "NB" & model == "4")
+  subset(family == "NB" & model == "6")
+  #subset(family == "NB" & model == "2")
 
+#### Independência temporal
 forecast::ggAcf(tmp$residual,lag.max=24) +
   labs(title='Independência residual') + 
   theme_bw()
 
 
-## Normality of residuals
-ggplot(dat, aes(sample = residual)) +
-  stat_qq_line(col='darkorange', linetype = 'dashed', linewidth = 1) +
-  stat_qq(size=2) +
-  labs(title = "QQplot") +
-  facet_wrap(family ~ model, ncol = 4, scales="fixed") +
-  theme_bw()
+#### Independenência espacial
+tmp <- dat %>%
+        subset(family == "NB" & model == "6") 
+        #subset(family == "NB" & model == "4") 
+
+dfs_lea$std_residuals <- tmp$standardResidual
 
 
-## Predicted vs. observed
-ggplot(dat, aes(x = observed, y = predicted)) + 
-  geom_point() + 
-  labs(y = "Predicted",
-       x = "Observed",
-       title = "Obs. vs. pred.") + 
-  geom_smooth(method = "lm") +
-  facet_wrap(family ~ model, ncol = 4, scales="free") +
-  theme_bw()
+ggplot(dfs_lea) +
+  geom_sf(aes(col = std_residuals, size = std_residuals), alpha = 0.5) +
+  scale_color_viridis(option = 'A') +
+  guides(size = "none") +
+  my_theme
+
+
+
+#### RESÍDUOS QUANTÍLICOS (baseado nos valores PIT)
+
+# A Transformação Integral de Probabilidade (PIT) avalia a calibração da distribuição preditiva posterior. 
+# Em um modelo bem especificado, os valores de PIT devem seguir uma distribuição uniforme U(0,1). A aplicação da
+# transformação normal inversa (qnorm) converte os valores de PIT em resíduos com escore normal, os quais podem ser avaliados usando um Q-Q plot padrão.
+# Desvios da linha de referência indicam potenciais problemas na especificação do modelo, tais como verossimilhança inadequada, covariáveis ausentes ou
+# fontes de variação não consideradas.
+
+
+pit_model <- nb_mod[[6]]$cpo$pit # Extraindo valores PIT do melhor modelo
+#pit_model <- nb_mod[[4]]$cpo$pit # Para comparar...
+
+pit_clean <- pit_model[is.finite(pit_model) & pit_model > 0 & pit_model < 1] # Removendo valores de PIT inválidos
+df_qq <- data.frame(rpit = qnorm(pit_clean)) # Transforma os PITs da escala uniforme para escala normal (padrão do qqplot)
+
+
+
+# Plotando...
+ggplot(df_qq, aes(sample = rpit)) +
+  stat_qq_line(col = 'blue', linetype = 'dashed', linewidth = 1) +
+  stat_qq(size = 2, alpha = 0.6) +
+  my_theme
+
+hist(pit_clean) # Simetria à direita; indicativo de subsestimação da variável resposta (mod6)
+
+
+
+#### VALORES PREDITOS VS. OBSERVADOS
+dat %>%
+  filter(family == "NB", model %in% c('4', '5', '6')) %>% 
+  #mutate(model = factor(model, levels = 1:10)) %>% 
+  ggplot(aes(x = observed, y = predicted)) + 
+    geom_point() + 
+    labs(y = "Predicted",
+         x = "Observed",
+         title = "Obs. vs. pred.") + 
+    geom_smooth(method = "lm") +
+    facet_wrap(model ~ ., ncol = 3, scales = "free_y") +
+    my_theme
+  
+
+# Há uma tendência sistemática de subestimação da abundância do tubarão azul (P. glauca)
+
+
+
+# 8.2) Avaliando o resultado estatístico
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+modelo <- nb_mod[[6]]
+modelo4 <- nb_mod[[4]] # Para comparar
+
+summary(modelo) # Sumário padrão
+summary(modelo4) # Repare na influência dos efeitos aleatórios (modelo 6) sobre a estimativa das covariáveis!
+
+
+
+
+
+# 8.3) Avaliando os mapas preditivos
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Extraindo os índices relacionados às predições no objeto do modelo
+idxs <- inla.stack.index(stack = stk.full, tag = "pred")$data
+
+
+### Extraindo distribuição posterior do efeito espacial (média, dp, IC de 95%)
+sp.mean <- modelo$summary.random$spatial$mean
+sp.sd   <- modelo$summary.random$spatial$sd
+sp.025  <- modelo$summary.random$spatial$`0.025quant`
+sp.975  <- modelo$summary.random$spatial$`0.975quant`
+
+
+### Extraindo distribuição posterior dos valores preditos (média, dp, IC de 95%)
+pred.mean <- modelo$summary.fitted.values[idxs, "mean"]
+pred.sd <- modelo$summary.fitted.values[idxs, "sd"]
+pred.025 <- modelo$summary.fitted.values[idxs, "0.025quant"]
+pred.975 <- modelo$summary.fitted.values[idxs, "0.975quant"]
+
+
+### Armazenando infos em dataframe
+#### Transformando as coordenadas (serão usadas para interpolação)
+mcoords_sp <- st_as_sf(mcoords, coords = c("X", "Y"), crs = CRS_lea)
+mcoords_wgs <- st_transform(mcoords_sp, CRS_wgs) # Re-projetando para WGS84 
+
+pred_df <- data.frame(Long = st_coordinates(mcoords_wgs)[, 1],
+                      Lat = st_coordinates(mcoords_wgs)[, 2],
+                      pred.mean = pred.mean,
+                      pred.sd = pred.sd,
+                      pred.025 = pred.025,
+                      pred.975 = pred.975,
+                      sp.mean = sp.mean,
+                      sp.sd = sp.sd,
+                      sp.025 = sp.025,
+                      sp.975 = sp.975)
+
+
+
+#### Interpolando os valores
+
+iVAR <- colnames(pred_df)[3:10] # Variáveis a serem interpoladas
+
+
+raster_list <- lapply(iVAR, function(var_name) {
+  
+  # Interpolação triangulada
+  interp_res <- interp(x = pred_df$Long, 
+                       y = pred_df$Lat, 
+                       z = pred_df[[var_name]],
+                       xo = seq(min(df_interp$Long), max(df_interp$Long), length.out = 300),
+                       yo = seq(min(df_interp$Lat), max(df_interp$Lat), length.out = 300))
+  
+  # Conversão para raster
+  r <- rast(interp_res)
+  crs(r) <- "EPSG:4326"
+  
+  # Recorando raster para área de estudo (mais bonitinho)
+  r_masked <- mask(crop(r, sw_ocean), sw_ocean)
+  names(r_masked) <- var_name # Renomeando os rasters
+  
+  return(r_masked)
+  
+})
+
+
+### Empilhando todos os rasters 
+rstack <- rast(raster_list)
+names(rstack)
+
+
+#### Visualizando as abundâncias preditas
+par(mfrow = c(1, 2))
+
+plot(rstack[[1]], col = viridis(100, option = "A"), main = 'Abundância média predita')
+plot(st_geometry(sw_ocean), add = TRUE, border = "black")
+
+plot(rstack[[2]], col = viridis(100, option = "A"), main = 'Desvio padrão')
+plot(st_geometry(sw_ocean), add = TRUE, border = "black")
+
+
+
+plot(rstack[[3]], col = viridis(100, option = "A"), main = 'limite inferior do IC-95%')
+plot(st_geometry(sw_ocean), add = TRUE, border = "black")
+
+
+plot(rstack[[4]], col = viridis(100, option = "A"), main = 'limite superior do IC-95%')
+plot(st_geometry(sw_ocean), add = TRUE, border = "black")
+
+par(mfrow = c(1, 1))
+
+
+
+#### Visualizando o efeito espacial
+
+par(mfrow = c(1, 2))
+
+plot(rstack[[5]], col = viridis(100, option = "A"), main = 'Média do efeito espacial')
+plot(st_geometry(sw_ocean), add = TRUE, border = "black")
+
+plot(rstack[[6]], col = viridis(100, option = "A"), main = 'Desvio padrão do efeito espacial')
+plot(st_geometry(sw_ocean), add = TRUE, border = "black")
+
+
+
+plot(rstack[[7]], col = viridis(100, option = "A"), main = 'Limite inferior do IC-95% do efeito espacial')
+plot(st_geometry(sw_ocean), add = TRUE, border = "black")
+
+
+plot(rstack[[8]], col = viridis(100, option = "A"), main = 'Limite superior do IC-95% do efeito espacial')
+plot(st_geometry(sw_ocean), add = TRUE, border = "black")
+
+par(mfrow = c(1, 1))
+
+
+
+
+# Convert to sf object
+pred.sf <- st_as_sf(pred.df, coords = c("X", "Y"), crs = CRS_lea)
+
+
+ggplot() +
+  geom_sf(data = pred.sf, aes(color = pred.mean), size = 1) +
+  scale_color_viridis_c(option = "plasma") +
+  theme_minimal() 
+
+
+# Interpoalte results
+library(akima)
+
+## predictions
+
+### expand grid
+i.pred.mean <- with(pred.df, interp(Long, Lat, pred.mean, nx=200, ny=200))
+i.pred.sd <- with(pred.df, interp(Long, Lat, pred.sd, nx=200, ny=200))
+i.pred.025 <- with(pred.df, interp(Long, Lat, pred.025, nx=200, ny=200))
+i.pred.975 <- with(pred.df, interp(Long, Lat, pred.975, nx=200, ny=200))
+
+
+
+### Convert to dataframe for ggplot
+i.pred.mean <- data.frame(expand.grid(Long = i.pred.mean$x, Lat = i.pred.mean$y), 
+                          predictions = as.vector(i.pred.mean$z))
+
+i.pred.sd <- data.frame(expand.grid(Long = i.pred.sd$x, Lat = i.pred.sd$y), 
+                        predictions = as.vector(i.pred.sd$z))
+
+i.pred.025 <- data.frame(expand.grid(Long = i.pred.025$x, Lat = i.pred.025$y), 
+                         predictions = as.vector(i.pred.025$z))
+
+i.pred.975 <- data.frame(expand.grid(Long = i.pred.975$x, Lat = i.pred.975$y), 
+                         predictions = as.vector(i.pred.975$z))
+
+
+
+## spatial effect
+
+### expand grid
+i.sp.mean <- with(pred.df, interp(Long, Lat, sp.mean, nx=200, ny=200))
+i.sp.sd <- with(pred.df, interp(Long, Lat, sp.sd, nx=200, ny=200))
+i.sp.025 <- with(pred.df, interp(Long, Lat, sp.025, nx=200, ny=200))
+i.sp.975 <- with(pred.df, interp(Long, Lat, sp.975, nx=200, ny=200))
+
+
+### Convert to dataframe for ggplot
+i.sp.mean <- data.frame(expand.grid(Long = i.sp.mean$x, Lat = i.sp.mean$y), 
+                        predictions = as.vector(i.sp.mean$z))
+
+i.sp.sd <- data.frame(expand.grid(Long = i.sp.sd$x, Lat = i.sp.sd$y), 
+                      predictions = as.vector(i.sp.sd$z))
+
+i.sp.025 <- data.frame(expand.grid(Long = i.sp.025$x, Lat = i.sp.025$y), 
+                       predictions = as.vector(i.sp.025$z))
+
+i.sp.975 <- data.frame(expand.grid(Long = i.sp.975$x, Lat = i.sp.975$y), 
+                       predictions = as.vector(i.sp.975$z))
+
+
+
+
+# Plot spatial rpedictionx§ of bycatch
+ggplot() +
+  geom_raster(data = i.pred.975, aes(x = Long, y = Lat, fill = predictions)) + 
+  geom_sf(data = land, fill = "grey70", color = "black") +  # Add land as grey
+  #scale_fill_viridis_c(option = "viridis") +
+  fishualize::scale_fill_fish(option = "Hypsypops_rubicundus") +
+  theme_minimal() 
+
+
+# Plot spatial effect
+ggplot() +
+  geom_raster(data = i.sp.mean, aes(x = Long, y = Lat, fill = predictions)) + 
+  geom_sf(data = land, fill = "grey70", color = "black") +  # Add land as grey
+  #scale_fill_viridis_c(option = "viridis") +
+  fishualize::scale_fill_fish(option = "Hypsypops_rubicundus") +
+  theme_minimal() 
+
+
+ggplot() +
+  geom_raster(data = i.sp.sd, aes(x = Long, y = Lat, fill = predictions)) + 
+  geom_sf(data = land, fill = "grey70", color = "black") +  # Add land as grey
+  #scale_fill_viridis_c(option = "viridis") +
+  fishualize::scale_fill_fish(option = "Hypsypops_rubicundus") +
+  theme_minimal() 
+
+
+# pgrid <- inla.mesh.projector(mesh,dims=c(250,250))
+# 
+# prd.m <- inla.mesh.project(pgrid,res$summary.random$spat$mean) # média do GMRF
+# prd.s <- inla.mesh.project(pgrid,res$summary.random$spat$sd) # desvio padrão do GMRF
+# 
+# 
+# ms.m <- inla.mesh.project(pgrid,res$summary.fitted.values[index,1]) # média do preditor linear
+# sd.s <- inla.mesh.project(pgrid,(res$summary.fitted.values[index,2])) # desv. padrão do preditor
+# 
+# 
+# gridExtra::grid.arrange(levelplot(ms.m, scales=list(draw=F), xlab='', ylab='', main='mean',col.regions = heat.colors(16)),
+#                         levelplot(sd.s, scal=list(draw=F), xla='', yla='', main='sd' ,col.regions = heat.colors(16)), nrow=1)
+# 
+# 
+# 
+# x <- as.matrix(mcoords)
+# z <- as.matrix(exp(ms.m))
+# 
+# tt <- rasterize(x, bat, field=z, fun='last', background=0)
+# plot(tt)
 
 
