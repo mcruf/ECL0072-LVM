@@ -650,36 +650,118 @@ knitr::include_graphics("../Figuras/names_of_sdms.png")
 # PPGECO | ECL0072 | out. 2026
 ### Modelos de distribuição de espécies (SDMs)
 
-**Para que são usados os SDMs?**
-
-ATUALIZAR FIGURA
-
-
-```{r, out.width="40%"}
-knitr::include_graphics("../Figuras/sdm-uses.png")
-```
-
-
-https://link.springer.com/article/10.1007/s10531-023-02648-1/figures/1
-
----
-# PPGECO | ECL0072 | out. 2026
-### Modelos de distribuição de espécies (SDMs)
-
 
 #### Como funcionam os SDMs?
 
+<br>
+<br>
 
-ATUALIZAR A FIGURA!
-
-```{r, out.width="70%"}
+```{r, out.width="95%"}
 knitr::include_graphics("../Figuras/SDM.png")
 ```
 
 
+
+---
+
+
+# PPGECO | ECL0072 | out. 2026
+### Modelos de distribuição de espécies (SDMs) | .small-text[<span style="color: #e07a5f;">Dados ecológicos</span>]
+
+
+Muitos SDMs são associados apenas à dados de ocorrência ou presença-ausência
+
+- Aplicável à qualquer tipo de variável ecológica
+  - Abundância
+  - Biomassa
+  - Razão de sexos / estágios
+  - Métricas de diversidade (funcional)
+  - ...
+
+
+--
+
+Idealmente, os dados ecológicos devem ser coletados via *expedições científicas* (amostragens padronizadas), mas podem ser obtidos oportunisticamente via:
+
+--
+
+.pull-left[
+
+**Ciência cidadã**
+
+Dados de platasformas comunitárias e repositórios globais
+
+- [iNaturalist](https://www.inaturalist.org/)
+
+- [eBird](https://ebird.org/home?continue)
+
+- [GBIF](https://www.gbif.org/), ...
+
+
+]
+
+
+--
+
+.pull-right[
+
+
+**Museus:**
+
+Registros históricos 
+
+]
+
+
 ---
 # PPGECO | ECL0072 | out. 2026
-### Modelos de distribuição de espécies (SDMs)
+### Modelos de distribuição de espécies (SDMs) | .small-text[<span style="color: #e07a5f;">Dados ambientais</span>]
+
+Uma ampla diversidade de variáveis ambientais tem sido utilizadas em SDMs, sendo as mais comuns àquelas realcionadas à:
+
+- **Climáticas:** temperatura, precipitação, ventos, ...
+- **Topográficas:** elevação, declividade, rugosidade, batimetria, ...
+- **Oceanográficas/limnológicas:** salinidade, concentração de oxigênio, temperatura, ...
+- **Antrôpicas: ** uso do solo, densidade populacional, ....
+
+
+<br>
+
+--
+
+----
+
+**Como obter as variáveis ambientais?**
+
+--
+
+<div style="height: 7px;"></div>
+
+.small-text2[
+- **Medidas locais (*in situ*):** coletadas simultaneamente à amostragem biológica
+  - Sondas multiparâmetros, estações meteorológicas, CTD em cruzeiros oceanográficos,)
+
+]
+<div style="height: 7px;"></div>
+
+--
+
+.small-text2[
+- **Sensoriamento remoto (*ex situ*):** coletadas via imagens de satélites (*rasters*)
+  - [WorldClim](https://www.worldclim.org/)
+  - [Copernicus](https://www.copernicus.eu/en/copernicus-services)
+  - [MapBiomas](https://brasil.mapbiomas.org/)
+  - [Bio-Oracle](https://www.bio-oracle.org/?utm_source=chatgpt.com)
+  - [MARSPEC](https://marspec.weebly.com/)
+  
+
+
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelos de distribuição de espécies (SDMs) | .small-text[<span style="color: #e07a5f;">Algoritmos</span>]
 
 
 Há vários algoritmos disponíveis:
@@ -754,7 +836,7 @@ Os algoritmos diferem principalmente quanto:
 
 ---
 # PPGECO | ECL0072 | out. 2026
-### Modelos de distribuição de espécies (SDMs) 
+### Modelos de distribuição de espécies (SDMs) | .small-text[<span style="color: #e07a5f;">Algoritmos</span>]
 
 
 Modelos geoestatísticos bayesianos constituem uma escolha natural para conduzir estudos de SDMs, uma vez que permitem:
@@ -811,7 +893,7 @@ knitr::include_graphics("../Figuras/biotic_and_antrophic_sdms.png")
 
 ---
 # PPGECO | ECL0072 | out. 2026
-### Modelos de distribuição de espécies (SDMs) 
+### Modelos de distribuição de espécies (SDMs) | .small-text[<span style="color: #e07a5f;">Algoritmos</span>]
 
 Modelos geoestatísticos bayesianos constituem uma escolha natural para conduzir estudos de SDMs, uma vez que permitem:
 
@@ -1031,7 +1113,6 @@ mod1 <- inla(formula = f1,
              data = dados,
              control.compute = list(dic = T, waic = T, cpo = T)), # Retorna quais métricas de ajustes são retornadas
              control.predictor = list(compute = TRUE, link = 1), # Controla o cálculo do preditor linear 
-             control.fixed = list(expand.factor.strategy = 'inla'), # Útil na presença de variáveis categóricas (maior estabilização)
             ...)
 ```
 
@@ -1073,62 +1154,111 @@ names(inla.models()$likelihood)[1:50]
 
 
 Como padrão, o INLA usa *prioris* não-informativas para definir todos os parâmetros do modelo
+- Prioris diferentes para os efeitos fixos, hiperparâmetros e *likelihood* (função de verossimilhança)
 
-.pull-left[
 
 **Efeitos fixos**
 
-```{r, echo=T, eval = T}
+.code-bg[
+```{r, echo=T, eval = F}
 inla.set.control.fixed.default()[c("mean.intercept", "prec.intercept", "mean", "prec")]
 ```
-
 ]
 
+$$\beta_0 \sim N(\mu = 0 , \tau =0)$$
+$$\beta \sim N(\mu = 0 , \tau = 0.001)$$
 
-.pull-right[
 
+--
 
+-----
 
+Como implementar no INLA:
+
+.code-bg[
 ```{r, echo = T, eval = F}
 
 prior.fixed <- list(mean.intercept = <>, prec.intercept = <>,
                     mean = <>, prec = <>)
 res <- inla(formula,
-  data = d,
-  control.fixed = prior.fixed
-)
+            data = df,
+            control.fixed = prior.fixed)
 
 ```
-
 ]
 
-.footnote[Uma lista completa de prioris pode ser accesada via `r names(inla.models()$prior)`]
+---
+# PPGECO | ECL0072 | out. 2026
+### INLA | .small-text[<span style="color: #e07a5f;">Ajustando modelos</span>]
+
+
+Como padrão, o INLA usa *prioris* não-informativas para definir todos os parâmetros do modelo
+- Prioris diferentes para os efeitos fixos, hiperparâmetros e *likelihood* (função de verossimilhança)
+
+
+
+.center[**Hiperparametros**]
+
+.code-bg[
+```{r, echo = T, eval = F}
+
+formula <- y ~ 1 + f(x, model = <>, hyper = prec.prior)
+
+
+```
+]
+
+
+
+-----
+
+.center[**Likelihood**]
+
+.code-bg[
+```{r,  echo = T, eval = F}
+res <- inla(formula,
+            data = df,
+            control.family = list(..., hyper = prec.prior))
+
+```
+]
+
+<br>
+
+--
+
+-----
+
+Definindo o .small-text[`prec.prior`]
+
+.code-bg[
+```{r, echo=T, eval=F}
+prec.prior <- list(prec = list(prior = "loggamma", # Distribuição a priori
+                               param = c(0.01, 0.01)), # Valores para os parametros (\mu e \tau)
+                               initial = 4, # Valores iniciais
+                               fixed = FALSE) # Variável booleana indicando se o hiperparâmetro é um valor fixo
+```
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### INLA | .small-text[<span style="color: #e07a5f;">Ajustando modelos espaciais</span>]
+
+O ajuste de um modelo geoestatístico bayesiano no INLA requer a especificação de uma malha triangular (*mesh*)
+
+- Processo que exige maior cuidado durante o processo de modelagem, uma vez que afeta diretamente a aproximação do campo aleatório espacial 
+
+<br>
+
+```{r, out.width="100%"}
+knitr::include_graphics("../Figuras/INLA_mesh.png")
+```
+
+
+.footnote[Figura adaptada de [Onkelinx](https://tutorials.inbo.be/tutorials/r_inla/spatial.pdf)]
 
 ---
 
-
-Autocorrelação Espacial "Aparente" (Induzida): Ocorre quando a variável de resposta apresenta padrão espacial simplesmente porque segue uma covariável que também é estruturada no espaço. Se você inclui essa covariável no modelo, a dependência nos resíduos desaparece.
-
-Autocorrelação Espacial Residual (Verdadeira): É o que sobra nos resíduos depois de controlar pelas covariáveis. É aqui que entra o campo aleatório espacial (efeito aleatório espacial, como nos modelos INLA / SPDE ou GAMs com splines espaciais), para modelar essa dependência estocástica latente.
-
----
-
-It is now clear that three main conditions need to be met for a species to occupy a site and maintain populations
-(i) the species has to reach the site, i.e. to access the region (Barve et al., 2011) and disperse there; 
-  - this is a matter of dispersal
-(ii) the abiotic environmental conditions must be ecophysiologically suitable for the species;
-  - this is a matter of habitat suitability
-    - this is the core of habitat suitability models!
-(iii) the biotic environment (interactions) must be suitable for the species.
- - this is a matter of biotic interactions
- 
- - Figura 3.1 pode ser interessante
- 
- This triple influence – dispersal, niche, and biotic – shaping species distributions, and their interactions, can be viewed schematically as sepa- rate ensembles defined by specific boundary conditions (Soberón, 2007). Suitable conditions for a species according to all three factors are found at the intersection of the three ensembles (Figure 3.2, case 1).
- # Do livro habitat suitability and distribution models - Guisan & Zimmermann
-
-
----
 
 ebooks
 
@@ -1140,21 +1270,4 @@ https://becarioprecario.bitbucket.io/inla-gitbook/index.html
 
 - caps. 3-5 (Guisan - Habitat suitability modeling)
 - cap. 3 (Franklin, 2010)
-
-
----
-
-
-Retomar deifinição sobre o que é um modelo geoestatístico
-- Mostrar a equação de um modelo de regressão com efeito espacial
-- Mostrar como se traduz, matematicamente, o efeito espacial (matrizes de distância)
-
-- Falar sobre a importância do método de amostragem!!
-
-- Fazer o link em relação ao número de parâmetros (todos aleatórios, já que estaão no contexto bayesiano) e problema de MCMC - > uso do INLA
-- Apresentar brevemente o INLA (teoricamente)
-
-
-- Modelos de distribuição de espécies (introdução breve)
-- enfatizar que não está restrito à dados de presença (e ausência)
 
