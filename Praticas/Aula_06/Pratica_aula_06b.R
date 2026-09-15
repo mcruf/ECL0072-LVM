@@ -1,9 +1,9 @@
-#######################################################################################
-#                                                                                     #
-#                                 Prática da aula 06                                  #
-#        - Processamento dados ambientais para estimação e predição espacial -        #
-#                                                                                     #
-#######################################################################################
+#########################################################################################
+#                                                                                       #
+#                                   Prática da aula 06                                  #
+#        - Processamento de dados ambientais para estimação e predição espacial -       #
+#                                                                                       #
+#########################################################################################
 
 
 # O presente script é uma continuação do script 'Pratica_aula_06a.R' e tem como objetivo preparar e extrair covariáveis ambientais
@@ -320,6 +320,10 @@ head(as.data.frame(dfsp_f)) # Cenas para o próximo capítulo...
 
 
 #### Salvando os dados
+coords <- st_coordinates(dfsp_f) # Recuperando as coordenadas (long/lat)
 dfsp_f <- st_drop_geometry(dfsp_f) # Remove geometria dos dados (i.e., spatial_data_frame -> data_frame)
+dfsp_f$Long <- coords[, 1] # Adicionando Long aos dados
+dfsp_f$Lat <- coords[, 2] # Adicionando Lat aos dados
+dfsp_f <- dfsp_f[, c(1:6,27:28, 7:26)] # Reordenando as colunas
 
 saveRDS(dfsp_f, "Dados/fisheries_covars.rds")
