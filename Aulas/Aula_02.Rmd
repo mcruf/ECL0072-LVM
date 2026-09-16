@@ -1,12 +1,13 @@
 ---
-title: "Modelos Lineares Generalizados e Aditivos para Dados Ecológicos (ECL0072)"
-subtitle: "Aula 02: Métodos de inferência, diagnóstico & seleção de modelos"
+title: "MODELOS ESPAÇO-TEMPORAIS PARA DADOS ECOLÓGICOS (ECL0072)"
+subtitle: "AULA 02: MÉTODOS DE INFERFÊNCIA ESTATÍSTICA: FREQUENTISTA vs. BAYESIANA"
 author: "Marie-Christine Rufener"
-#institute: "macrufener@gmail.com"
-#date: "2016/12/12 (updated: `r Sys.Date()`)"
+institute: "macrufener@gmail.com"
+date: "Out / 2026"
 output:
   xaringan::moon_reader:
-    css: [default, metropolis, metropolis-fonts, my-theme.css]
+    seal: false
+    css: xaringan-themer.css
     lib_dir: libs
     nature:
       #seal: false #disable title slide
@@ -16,100 +17,49 @@ output:
 ---
 
 
+```{r xaringan-themer, include=FALSE, warning=FALSE}
 
 
-## <span style="color: #ee6c4d;">Conteúdo programático </span> 
+#~~~~~~~~~~~~~~~~~~~~~~
+# Default knitr iputs
+#~~~~~~~~~~~~~~~~~~~~~~
 
-<br>
+source("../Scripts/Setup/setup_knitr.R")
 
-**1. Métodos de inferência**  
-
-  > Prática 
-
-**2. Diagnóstico de modelos** 
-
-
-**3. Seleção de modelos** 
-
-  > Prática 
-
-<br>
+#~~~~~~~~~~~~~~~~~~~~~~
+# Slide customization
+#~~~~~~~~~~~~~~~~~~~~~~
+source("../Scripts/Setup/setup_slides.R")
 
 
-
----
-## <span style="color: #ee6c4d;">Leitura sugerida </span> 
-
-**Livros**
-- **Caps. 6 & 10:** Faraway (2014)
-- **Caps. 8 & 11:** Gelman et al. (2020)
-- **Caps. 6 & 7:** Bolker (2008)
-- **Cap. 6:** Clark & Berry (2025)
-
-
------
-**Artigos**
-
-- Zuur, A.F. & Ieno, E.N. (2016). A protocol for conducting and presenting results of regression‐type analyses. Methods in Ecology and Evolution. https://doi.org/10.1111/2041-210X.12577
-
-
----
-class: inverse, center, middle
-
-#  Métodos de inferência
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span>
-
-<br>
-
-```{r echo=FALSE, out.width ="80%", fig.align ='center'}
-knitr::include_graphics("../Figuras/LM_ajustado2.png")
 ```
 
+class: title-slide
+<div class="title-block">
+  <h1>`r rmarkdown::metadata$title`</h1>
+  <div class="date-text">`r rmarkdown::metadata$date`</div>
+</div>
+
+<div class="subtitle-block">
+  <h2>`r rmarkdown::metadata$subtitle`</h2>
+  <p class="author-name">`r rmarkdown::metadata$author`</p>
+  <p class="author-email"><u>`r rmarkdown::metadata$institute`</u></p>
+</div>
+
+<img src="../Figuras/logo_ppgeco2.svg" class="cover-logo">
 
 ---
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span>
-
-
-#### Como estimamos (inferimos) as relações da natureza?
+# PPGECO | ECL0072 | out. 2026
 
 <br>
 
---
+### Agenda
 
-- 1) Definir o modelo que descreve o sistema em estudo (i.e., distribuição de probabilidade)
-    - Função será utilizada para predições
-
---
-
-<br>
-
-- 2) Identificar possíveis valores para os parâmetros desconhecidos do modelo 
-
---
-
-<br>
-
-- 3) Avaliar a incerteza dos parâmetros estimados
-    - Explorar a função em torno de valores de parâmetros plausíveis (espaço paramétrico; *parameter space*)
 
 ---
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span>
+# PPGECO | ECL0072 | out. 2026
 
-#### Como estimamos (inferimos) as relações da natureza?
-
-<br>
-
-- **2) Identificar possíveis valores para os parâmetros desconhecidos do modelo**
-
-    - Método dos momentos
-    - <span style="color: #ee6c4d;">Método dos mínimos quadrados</span>
-    - <span style="color: #ee6c4d;">Método de máxima verossimilhança</span>
-    - Método bayesiano
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Mínimos quadrados (OLS)  </span> 
+### O método científico
 
 
 .pull-left[
@@ -117,498 +67,8 @@ knitr::include_graphics("../Figuras/LM_ajustado2.png")
 <br>
 
 
-```{r echo=FALSE, out.width ="80%", fig.align ='center', fig.cap="Carl F. Gauss (1777-1855)", fig.topcaption=F}
-knitr::include_graphics("../Figuras/Gauss.png")
-```
-
-]
-
-.pull-right[
-
-
-```{r echo=FALSE, out.width ="80%", fig.align ='center'}
-knitr::include_graphics("../Figuras/Ceres_sketch.png")
-```
-
-]
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Mínimos quadrados (OLS)  </span> 
-
-
-.pull-left[
-
-<br>
-<br>
-
-```{r echo=FALSE,fig.align ='center'}
-knitr::include_graphics("../Figuras/Exemplo_OLS.png")
-```
-
-]
-
-
-.pull.right[
-
-
-<br>
-<br>
-
-
-$$\large y_i = f(x_i | \theta) + \varepsilon_i$$
-<br>
-
-$$\large \varepsilon_i = y_i - f(x_i|\theta)$$
-
-]
-
-
-.pull-right[
-<p class="comment">
-
-<b>Lembrando que:</b>
-
-$$ f(x_i|\theta) = \beta_0 + \beta_1x_i = \mu_i \\
-i = 1, ..., n
-$$
-</p>
-]
-
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Mínimos quadrados (OLS)  </span> 
-
-<br>
-
-.pull-left[
-```{r echo=FALSE,fig.align ='center', out.width ="100%"}
-knitr::include_graphics("../Figuras/exemplo_ajuste_LM.png")
-```
-
-]
-
-.pull-right[
-
-
-<br>
-<br>
-
-<p class="comment">
-
-<b>Achar a linha que melhor se ajusta aos dados!</b>
-
-</p>
-
-
-]
-
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Mínimos quadrados (OLS)  </span> 
-
-<br>
-
-$$\large y_i = f(x_i | \theta) + \varepsilon_i$$
-
-
-$$\large \varepsilon_i = y_i - f(x_i|\theta)$$
-
-<br>
-
-
-$$\large \text{SQR} = min \sum_{i=1}^{n} (y_i - f(x_i|\theta))^2$$
-
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Mínimos quadrados (OLS)  </span> 
-
-<br>
-
-$$\large y_i = f(x_i | \theta) + \varepsilon_i$$
-
---
-
-$$\large \varepsilon_i = y_i - f(x_i|\theta)$$
-
-<br>
-
-$$\large \text{SQR} = \underbrace{min \sum_{i=1}^{n} (y_i - f(x_i|\theta))^2}_
-{\text{Diferenciar a função em relação a }\ \theta}$$
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Mínimos quadrados (OLS)  </span> 
-
-**Solução analítica:**
-
-<br>
-
-$$\large \hat{\beta_0} = (X^TX)^{-1}X^Ty ~~\color{gray}{(= \overline{y} - \widehat{\beta_1}~\overline{x})}$$
---
-
-<br>
-
-$$\large \hat{\beta_1} = X(X^TX)^{-1}X^Ty ~~\color{gray}{(= r \frac{\sigma_y}{\sigma_x})}$$
-
-
-
-
-
-
-.footnote[**r** = coeficiente de correlação;  **σ** = desvio padrão]
-
-
----
-
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-<br>
-
-.pull-left[
-<br>
-
-- Formalizou a teoria de máxima verossimilhança 
-  - **estatística frequentista**
-      - <span style="color: #ee6c4d;">Intervalo de confiança</span>
-      - <span style="color: #ee6c4d;">Teste de hipótese (p-valor...)</span>
-      - <span style="color: #ee6c4d;">Comparação entre modelos</span>
-
-
-
-]
-
-.pull-right[
-
-```{r echo=FALSE, out.width ="66%", fig.align ='center', fig.cap="Ronald A. Fisher (1890-1962)", fig.topcaption=F}
-knitr::include_graphics("../Figuras/Ronald_Fisher.jpeg")
-```
-
-
-]
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-
-#### Entendendo o método:
-
-<br>
-
-- Os dados (i.e, $Y$) surgem de um processo aleatório
-  - podem ser descritos por um modelo probabilístico!
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-
-#### Entendendo o método:
-
-$$\large Y \sim N(\mu, \sigma^2)$$
-
-
-```{r echo=FALSE, out.width ="80%", fig.align ='center'}
-knitr::include_graphics("../Figuras/Dist_normal.png")
-```
-
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-
-#### Entendendo o método:
-<br>
-
-- Dado o modelo probabilístico, deseja-se encontrar os valores dos parâmetros ($\theta$) que mais provavelmente geraram os dados observados
-
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-
-
-#### Confrontando os dados com a distribuição de probabilidade
-
-<br>
-
-```{r echo=FALSE, out.width ="85%", fig.align ='center'}
-knitr::include_graphics("../Figuras/MLE0.png")
-```
-
-
----
-
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-
-
-#### Confrontando os dados com a distribuição de probabilidade
-
-<br>
-
-```{r echo=FALSE, out.width ="85%", fig.align ='center'}
-knitr::include_graphics("../Figuras/MLE1.png")
-```
-
-
----
-
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-
-
-#### Confrontando os dados com a distribuição de probabilidade
-
-<br>
-
-```{r echo=FALSE, out.width ="85%", fig.align ='center'}
-knitr::include_graphics("../Figuras/MLE2.png")
-```
-
----
-
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-
-
-#### Confrontando os dados com a distribuição de probabilidade
-
-<br>
-
-```{r echo=FALSE, out.width ="85%", fig.align ='center'}
-knitr::include_graphics("../Figuras/MLE3.png")
-```
-
----
-
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-
-
-#### Confrontando os dados com a distribuição de probabilidade
-
-
-```{r echo=FALSE, out.width ="90%", fig.align ='center'}
-knitr::include_graphics("../Figuras/MLE_gif.gif")
-```
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-
-
-#### Confrontando os dados com a distribuição de probabilidade
-
-.pull-left[
-<br>
-
-```{r echo=FALSE, out.width ="100%", fig.align ='center'}
-knitr::include_graphics("../Figuras/Exemplo_mle_mu.png")
-```
-]
-.pull-right[
-
-<br>
-<br>
-<br>
-<br>
-
-$$\large \hat{\theta} := argmax ~ L(\theta)$$
-]
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-
-
-#### Confrontando os dados com a distribuição de probabilidade
-
-Como a distribuição Normal é descrita por dois parâmetros ($\mu,\sigma^2$), é preciso achar o máximo da função de verossimilhança *simultaneamente* para ambos os parâmetros
-
-.pull-left[
-
-```{r echo=FALSE, out.width ="80%", fig.align ='center'}
-knitr::include_graphics("../Figuras/Exemplo_mle_mu.png")
-```
-]
-
-.pull-right[
-
-```{r echo=FALSE, out.width ="80%", fig.align ='center'}
-knitr::include_graphics("../Figuras/Exemplo_mle_sigma.png")
-```
-]
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-
-
-#### Confrontando os dados com a distribuição de probabilidade
-
-
-```{r, echo=F, message=F, warning=F}
-set.seed(1)
-y <- rnorm(1000, mean = 5, sd = 2)
-
-# Common grid
-mu_seq    <- seq(4.75,  5.15,  length.out = 100)
-sigma_seq <- seq(1.95, 2.25, length.out = 100)
-
-# Common log-likelihood function
-loglik_normal <- function(mu, sigma, y) {
-  if (sigma <= 0) return(NA_real_)
-  sum(dnorm(y, mean = mu, sd = sigma, log = TRUE))
-}
-
-# Grid for contour
-grid <- expand.grid(mu = mu_seq, sigma = sigma_seq)
-grid$loglik <- mapply(loglik_normal, grid$mu, grid$sigma, MoreArgs = list(y = y))
-grid$lik <- exp(grid$loglik - max(grid$loglik, na.rm = TRUE))
-
-mu_hat    <- mean(y)
-sigma_hat <- sqrt(mean((y - mu_hat)^2))
-nll_hat   <- -loglik_normal(mu_hat, sigma_hat, y) # neg LL for 3D
-```
-
-.pull-left[
-<br>
-
-```{r, echo=F, message=F, warning=F,  fig.asp=0.9}
-library(ggplot2)
-
-ggplot(grid, aes(x = mu, y = sigma, z = lik)) +
-  geom_contour_filled() +
-  geom_vline(xintercept = mu_hat, color = "white", size = .4) +
-  geom_hline(yintercept = sigma_hat, color = "white", size = .4) +
-  scale_fill_viridis_d(option = "D", direction = 1) +
-  labs(title = "Verossimilhança", x = expression(mu), y = expression(sigma^2), fill = NULL) +
-  theme_minimal(base_size = 14) +
-  theme(plot.title = element_text(hjust = 0.5, face='bold'))
-```
-
-
-]
-.pull-right[
-<br>
-
-```{r,echo=F, message=F, warning=F, fig.asp=0.7, fig.align='left'}
-library(plotly)
-
-Z <- outer(mu_seq, sigma_seq, Vectorize(function(m, s) -loglik_normal(m, s, y)))
-
-
-plot_ly(
-  x = ~mu_seq, y = ~sigma_seq, z = ~t(Z)
-) |>
-  add_surface(showscale = FALSE, opacity = 0.8, reversescale = T) |>
-  layout(scene = list(
-    xaxis = list(title = "mu"),
-    yaxis = list(title = "sigma"),
-    zaxis = list(title = "Neg. log lik")
-  )) |>
-  add_markers(
-    x = mu_hat, y = sigma_hat, z = nll_hat,
-    marker = list(size = 6, symbol = "circle", opacity = 1),
-    showlegend = FALSE) %>%
-  layout(margin = list(t = 0, b = 20, l = 0, r = 0))
-
-
-```
-
-
-]
-
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-
-
-<p class="comment">
-<b>ATENÇÃO</b>
-</p>
-
-$$\large \text{Verossimilhança} \neq \text{Probabilidade}$$ 
-
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-
-
-```{r echo=FALSE, out.width ="100%", fig.align ='center'}
-knitr::include_graphics("../Figuras/Probabilidade_verossimilhanca.png")
-```
-
-
-
----
-
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-
-
-#### Traduzindo para o matematiquês
-
-
-
-<br>
-
-$$\large L(\theta \mid y_1, \dots, y_n) = \prod_{i=1}^{n} f(y_i \mid \theta)$$
---
-
-$$\large L(\theta \mid y_1, \dots, y_n) = f(y_1 \mid \theta) \cdot f(y_2 \mid \theta) \cdot f(y_3 \mid \theta) \cdots f(y_n \mid \theta)$$
-<br>
-
---
-
-
-**Quando** $\bf{n >>}$
-- limitação computacional
-    - truque matemático: aplicar o log!
-    
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-
-
-#### Traduzindo para o matematiquês
-
-<br>
-
-$$\large L(\theta \mid y_1, \dots, y_n) = \prod_{i=1}^{n} f(y_i \mid \theta)$$
-
---
-
-Função de log-verossimilhança (*log-likelihood*)
-
-$$\large \log L(\theta\mid y_1,\dots,y_n)
-=\sum_{i=1}^n \log f(y_i\mid \theta)$$
-
---
-
-- Tornando o produto em somatório implica em:
-    - Estabilidade numérica e maior facilidade na diferenciação da função
-    - O máximo da função torna-se o mínimo, i.e., $\hat{\theta} := argmin ~ L(\theta)$
-
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-
-
-#### Verossimilhança perfilada (*profile likelihood*)
-
-<br>
-
-```{r echo=FALSE, out.width ="100%", fig.align ='center'}
-knitr::include_graphics("../Figuras/profile_likelihood.png")
-```
-
-<p class="comment">
-<b>ATENÇÃO</b>
-<br>
-
-A curvatura da função está relacionada à precisão do parâmetro estimado! 
-</p>
-
-
----
-
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-
-
-#### **Exemplo prático**
-
-O histograma *parece* indicar que o peso dos pinguins, $y_i$, pode ser descrito conforme uma distribuição Normal (Gaussiana)
-
-.pull-left[
-
-```{r echo=FALSE, out.width ="100%", fig.align ='center'}
-knitr::include_graphics("../Figuras/histograma_pinguins.png")
+```{r echo=FALSE, fig.align ='center', out.width ="80%", fig.cap="Richard Feynmann (1918-1988)"}
+knitr::include_graphics("../Figuras/R-Feynmann.png")
 ```
 
 ]
@@ -618,287 +78,251 @@ knitr::include_graphics("../Figuras/histograma_pinguins.png")
 <br>
 <br>
 
-$$\Large Y \sim N(\mu, \sigma^2)$$
+> <font size="5"><center> <span style="color: #e07a5f;"> *Science is a process for learning about nature in which competing ideas about how the world works are measured against observations* </center></font></span> 
+
+
 <br>
 
-> Como estimar os parâmetros? 
+------
+
+<br>
+
+- **Descrição:** incompleta e imperfeita
+- **Observações:** imprecisas e incertas
+- **Estatística:** ferramenta para contrastar ideias (hipóteses) e observações
 
 ]
 
 ---
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
+# PPGECO | ECL0072 | out. 2026
+
+### O método científico
 
 
-#### **Exemplo prático**
-
-Lembrando que a função de verossimilhança $L(\cdot)$ é descrita em relação ao modelo probabilístico que descreve a variável $f(Y|\theta)$
-
-$$\large L(\theta \mid y_1, \dots, y_n) = \prod_{i=1}^{n} \color{Tomato}{f(y_i \mid \theta)}$$
---
-
-Para a distribuição Normal, temos:
+.pull-left[
 
 
-$$\large L(\mu, \sigma^2 \mid Y) = \prod_{i=1}^n \color{Tomato}{\frac{1}{\sqrt{2\pi\sigma^2}} 
-\exp\left[ -\frac{(y_i - \mu)^2}{2\sigma^2} \right]}$$
-
---
-
-
----
-### <span style="color: #ee6c4d;">**Métodos de inferência** </span><span style="color: #3e5c76;">| Máxima verossimilhança  </span> 
-
-
-#### **Exemplo prático**
 
 <br>
-<br>
 
-```{r echo=FALSE, out.width ="25%", fig.align ='center', fig.cap="Pratica_aula_02.R", fig.topcaption=F}
-knitr::include_graphics("../Figuras/Rlogo.png")
+
+
+```{r echo=FALSE, fig.align ='center', out.width ="80%", fig.cap="Karl Popper (1902-1994)"}
+knitr::include_graphics("../Figuras/Karl-Popper.jpg")
 ```
 
 
----
-class: inverse, center, middle
-
-#  Diagnóstico de modelos
----
-
-### <span style="color: #ee6c4d;">**Diagnóstico de modelos** </span>
-
-
-Tem por objetivo avaliar os pressupostos e a qualidade do ajuste do modelo
-- o quão bem o modelo se ajustou aos dados
-
---
-
-<br>
-
-Realizado mediante a análise residual
-
-.pull-left[
-- LM $\neq$ GLM
-
-- No caso de LM:
-  - Independência
-  - Homocedasticidade
-  - Normalidade
 ]
 
---
 
 .pull-right[
 
-**Métodos de diagnóstico**
-
-- Numérico (validação estatística)
-- Gráfico (validação visual)
+Revolucionou a filosofia da Ciência no séc. XX
 
 ]
 
 ---
-### <span style="color: #ee6c4d;">**Diagnóstico de modelos** </span><span style="color: #3e5c76;">| Homocedasticidade</span> 
+# PPGECO | ECL0072 | out. 2026
 
-A constância da $\sigma^2$ implica que os resíduos precisam estar simetricamente distribuídos em torno da linha horizonthal $y=0$ 
-
-```{r echo=FALSE, out.width ="90%", fig.align ='center'}
-knitr::include_graphics("../Figuras/heterocedasticidade_plots.png")
-```
-
-
-
-
----
-### <span style="color: #ee6c4d;">**Diagnóstico de modelos** </span><span style="color: #3e5c76;">| Independência</span> 
-
-<br>
-
-$$\Large \epsilon \overset{\mathrm{iid}}{\sim} N(0,\sigma^2)$$
-
-<br>
-
-A violação da independência ocorre frequentemente por dados com estrutura:
-- espacial
-- temporal
-- em blocos
-
-
----
-
-### <span style="color: #ee6c4d;">**Diagnóstico de modelos** </span><span style="color: #3e5c76;">| Independência</span> 
-
-
-Se os dados foram coletados no espaço geográfico (long/lat), deve-se avaliar como os resíduos se comportam espacialmente
-  - **Validação visual:** *bubbleplot*
-  - **Validação estatística:** Morans' I 
-
-
----
-### <span style="color: #ee6c4d;">**Diagnóstico de modelos** </span><span style="color: #3e5c76;">| Independência</span> 
-
-
-```{r echo=FALSE, out.width ="100%", fig.align ='center'}
-knitr::include_graphics("../Figuras/corr_espacial.png")
-```
-
----
-### <span style="color: #ee6c4d;">**Diagnóstico de modelos** </span><span style="color: #3e5c76;">| Independência</span> 
-
-Caso a coleta de dados foi realizada ao longo do tempo, avalia-se o padrão temporal dos resíduos
-
-  - **Validação visual:** ACF plot
-  - **Validação estatística:** Durbin-Watson
-
----
-### <span style="color: #ee6c4d;">**Diagnóstico de modelos** </span><span style="color: #3e5c76;">| Independência</span> 
-
-<br>
-
-```{r echo=FALSE, out.width ="100%", fig.align ='center'}
-knitr::include_graphics("../Figuras/corr_temporal.png")
-```
-
----
-### <span style="color: #ee6c4d;">**Diagnóstico de modelos** </span><span style="color: #3e5c76;">| Normalidade</span> 
-
-
-<br>
-
-```{r echo=FALSE, out.width ="90%", fig.align ='center'}
-knitr::include_graphics("../Figuras/normalidade_plots.png")
-```
-
-
----
-class: inverse, center, middle
-
-#  Seleção de modelos
-
-
----
-
-### <span style="color: #ee6c4d;">**Seleção de modelos** </span>
+### O método científico
 
 
 .pull-left[
 
+
+
 <br>
 
-```{r echo=FALSE, out.width ="60%", fig.align ='center', fig.cap="George P. Box (1919-2013)", fig.topcaption=F}
-knitr::include_graphics("../Figuras/GeorgeEPBox.jpg")
+
+
+```{r echo=FALSE, fig.align ='center', out.width ="80%", fig.cap="Karl Popper (1902-1994)"}
+knitr::include_graphics("../Figuras/Karl-Popper.jpg")
 ```
 
 
 ]
+
 
 .pull-right[
 
-<br>
-<br>
-<br>
-<br>
+Revolucionou a filosofia da Ciência no séc. XX
 
-> <font size="6"><center> <span style="color: #ee6c4d;">Essentially, <b>all models are wrong</b>, but <b>some are useful</b></center></font></span> 
+<div style="height: 7px;"></div>
+
+.gray-box[**Uma hipótese não pode ser provada, apenas desprovada!**]
+
+<br>
 
 ]
 
 ---
+# PPGECO | ECL0072 | out. 2026
 
-### <span style="color: #ee6c4d;">**Seleção de modelos** </span>
+### O método científico
 
-Baseado no *princípio da parcimônia*
-  - Modelo mais simples com maior poder explicativo
-
---
-
-<br>
-
-Existem diversas métricas que podem ser utilizadas para comparar diferentes modelos:
-
-- Deviance
-- Teste da razão de verossimilhança (LRT)
-- Critérios de informação (AIC, BIC)
-- Ajuste gráfico
-
-
----
-
-### <span style="color: #ee6c4d;">**Seleção de modelos** </span><span style="color: #3e5c76;">| Deviance  </span>
-
-
-Generalização da soma dos quadrados dos resíduos (RSS):
-
-<br>
-
-$$\large D = 2 \times (logL_{saturado}- logL_{proposto})$$
-- $logL_{saturado}$: log-verossimilhança modelo saturado (ajuste perfeito)
-- $logL_{proposto}$: log-verossimilhança modelo proposto
-
-<br>
-
---
-
-> <span style="color: #ee6c4d;">**Interpretação:** quanto menor a deviance, mais próximo o modelo está do ajuste perfeito</p>
-
-<br>
-
-
----
-
-### <span style="color: #ee6c4d;">**Seleção de modelos** </span><span style="color: #3e5c76;">| Teste da razão de verossimilhança  </span>
-
-
-Usado para comparar modelos aninhados
-
-- $\text{modelo A:}~~~ \large y_i = \beta_0 + \beta_1x_{i_1}$
-
-- $\text{modelo B:}~~~ \large y_i = \beta_0 + \beta_1x_{i_1} + \beta_2x_{i_2}$
-
-
---
-
-
-Baseado na estatística do teste da razão de verossimilhança:
 
 .pull-left[
-$$G^2 = 2 \times log\Biggl(\frac{L_B}{L_A}\Biggr)$$
-$$G^2 = \underbrace{2 \times (logL_A - logL_B)}_\text{Deviance}$$
+
+
+
+<br>
+
+
+
+```{r echo=FALSE, fig.align ='center', out.width ="80%", fig.cap="Karl Popper (1902-1994)"}
+knitr::include_graphics("../Figuras/Karl-Popper.jpg")
+```
+
 
 ]
+
+
 .pull-right[
 
-- $G^2$ segue uma distribuição do qui-quadrado ($\chi^2$) com n = ($n_{p_A} - n_{p_B}$) graus de liberdade
+Revolucionou a filosofia da Ciência no séc. XX
+
+<div style="height: 7px;"></div>
+
+.gray-box[**Uma hipótese não pode ser provada, apenas desprovada!**]
+
+<div style="height: 7px;"></div>
+
+
+------
+
+
+A essência do método Popperiano consiste em contrastar uma hipótese repetidamente com experimentos alternativos
 
 ]
 
---
+---
 
-> <span style="color: #ee6c4d;">**Interpretação:** se p < 0.05 rejeita-se a hipótese nula (modelo mais simples); modelo mais complexo se ajusta melhor aos dados!</p>
+# PPGECO | ECL0072 | out. 2026
 
+### O método científico
+
+
+.pull-left[
+
+
+
+<br>
+
+
+
+```{r echo=FALSE, fig.align ='center', out.width ="80%", fig.cap="Karl Popper (1902-1994)"}
+knitr::include_graphics("../Figuras/Karl-Popper.jpg")
+```
+
+
+]
+
+
+.pull-right[
+
+Revolucionou a filosofia da Ciência no séc. XX
+
+<div style="height: 7px;"></div>
+
+.gray-box[**Uma hipótese não pode ser provada, apenas desprovada!**]
+
+<div style="height: 7px;"></div>
+
+
+------
+
+
+A essência do método Popperiano consiste em contrastar uma hipótese repetidamente com experimentos alternativos
+
+
+- Caso a hipótese se mantém ao longo dos experimentos, esta passa a adquirir um grau de *confiança* a é assumida como verdadeira 
+
+]
 
 ---
 
-### <span style="color: #ee6c4d;">**Seleção de modelos** </span><span style="color: #3e5c76;">| Critérios de informação  </span>
+# PPGECO | ECL0072 | out. 2026
+
+### O método científico
 
 
-Avalia não apenas o ajuste do modelo, como também a sua complexidade
-  - penalização pelo número de parâmetros
+.pull-left[
+
+
+
+<br>
+
+
+
+```{r echo=FALSE, fig.align ='center', out.width ="80%", fig.cap="Karl Popper (1902-1994)"}
+knitr::include_graphics("../Figuras/Karl-Popper.jpg")
+```
+
+
+]
+
+
+.pull-right[
+
+Revolucionou a filosofia da Ciência no séc. XX
+
+<div style="height: 7px;"></div>
+
+.gray-box[**Uma hipótese não pode ser provada, apenas desprovada!**]
+
+<div style="height: 7px;"></div>
+
+
+------
+
+
+A essência do método Popperiano consiste em contrastar uma hipótese repetidamente com experimentos alternativos
+
+
+- Caso a hipótese se mantém ao longo dos experimentos, esta passa a adquirir um grau de *confiança* a é assumida como verdadeira 
+
+
+.center[
+
+.salmon-box[
+
+.small-text2[
+
+**Cuidado!** 
+
+A hipótese não é validada!
+
+
+]
+]
+
+]
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### O método científico
+
+
+Na visão de Popper,  hipóteses devem ser rejeitadas (falseadas), porque o método dedutivo é o caminho do conhecimento mais seguro 
+- Método *hipotético-dedutivo*
+
+
+<div style="height: 7px;"></div>
 
 
 --
 
 .pull-left[
 
-**AIC (Akaike Information Criterion)**
+.center[**H<sub>0</sub>: Todos os cisnes são brancos**]
 
-<br>
+```{r echo=FALSE,  out.width = "60%"}
+knitr::include_graphics("../Figuras/white_swans.png")
+```
 
-$$\large AIC = -2log(L_{modelo}) + 2k$$
-$k:$ número de parâmetros
-
-
->   <span style="color: #ee6c4d;">**Interpretação:** quanto menor AIC, melhor o ajuste</p>
 
 ]
 
@@ -906,21 +330,83 @@ $k:$ número de parâmetros
 
 .pull-right[
 
-**BIC (Bayesian Information Criterion)**
+.center[**H<sub>0</sub> -> falsa**]
 
-<br>
+```{r echo=FALSE, out.width = "60%"}
+knitr::include_graphics("../Figuras/black_sawn.png")
+```
 
-$$\large BIC = -2log(L_{modelo}) + k~ log(n)$$
-$n:$ número de observações
-
-
->  <span style="color: #ee6c4d;">**Interpretação:** quanto menor BIC, melhor o ajuste</p>
 
 ]
 
 ---
+# PPGECO | ECL0072 | out. 2026
 
-```{r echo=FALSE, out.width ="80%", fig.align ='center'}
-knitr::include_graphics("../Figuras/modelling_workflow.png")
+### O método científico
+
+As raízes da estatística clássica (frequentista) estão associadas aos conceitos de *teste de hipótese* e *p-valor*
+- Forte influência da filosofia Popperiana e dos problemas práticos que emergiram da Biologia (e.g., Biometria)
+
+<div style="height: 3px;"></div>
+
+
+```{r echo=FALSE, fig.align ='center', out.width ="85%"}
+knitr::include_graphics("../Figuras/Fisher-Pearson-Neyman.png")
 ```
 
+---
+# PPGECO | ECL0072 | out. 2026
+
+### O método científico  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
+
+O teste de hipótese parte do pressuposto de que a hipótese nula ($H_0$) é *verdadeira*
+
+Se H₀ fosse verdadeira, qual seria a probabilidade de obter um valor igual ou maior que 1.7 (p-valor).
+
+
+
+- rejeita h0 ou deixa de rejeitar h0
+
+---
+
+Depois que apresentar p-valor/nivel de significancia, apresentar o intervalo de confianca (diretamente ligado ao nivel de significancia - alpha =5% -> IC = 95%)
+
+---
+O objetivo da inferência estatística reside em confrotar a hipótese sob investigação com a hipótese nula
+- Null-hypothesis test (NHTS)
+  - Método hipotético-dedutivo
+
+- According to Popper, theories/models/hypotheses can only be rejected (falsified),because the only save path of knowledge is deduction
+
+
+*Reductio ad absurdum* - é o que é a hipótese nula. argumento de redução ao absurdo
+- The NHST is a version of classica 'reductio ad absurdum' argument, which attempts to demonstrate that a statement is false by showing that an abusrd result follows from its acceptance 
+OBS: NHST is often identified with the falsificationist, or Popperian, philosophy of science. however, usually NHST is used to falisfy a null hypothesis, not the actual research hypothesis. So the falsification is being done to something other than the explanatory model. This seems the reverse from Karl Popper's philosophy.
+
+- As Sir. Ronald Fisher, put it: the only populations that can be referred to in a test of significance have no objective reality, being exclusively the product of the statistician's imagination
+  - Ideia conectada com a questão: This leads to frequentist uncertainty being premised on imaginary resampling of data—if we were to repeat the measurement many many times, we would end up collecting a list of values that will have some pattern to it. It means also that parameters and models cannot have probability distributions, only measurements can. The distribution of these measurements is called a sampling distribution. This resampling is never done, and in general it doesn’t even make sense—it is absurd to consider repeat sampling of the diversification of song birds in the Andes. 
+
+
+
+---
+
+
+```{r echo=FALSE, fig.align ='center', out.width ="85%"}
+knitr::include_graphics("../Figuras/Frequentist_workflow.png")
+```
+
+
+
+---
+
+Priors can have different levels of informativeness; the infomration reflected in a prior distribution can be anywhere on a continuum from complete uncertainty to relative certainty. Although priors can fall anywhere along this continuum, there are three main classifications of priors that are used in the literature to categorize the degree of (un)certainty surroudning the population parameter value
+- informative
+- weakly informative
+- diffuse
+
+- Bayesian workflow - https://arxiv.org/pdf/2011.01808 (Gelman - 2020)
+
+
+---
+
+https://educacao.uol.com.br/disciplinas/filosofia/filosofia-da-ciencia-karl-popper-falseabilidade-e-limites-da-ciencia.htm
