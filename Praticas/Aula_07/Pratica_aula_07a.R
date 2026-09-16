@@ -295,10 +295,11 @@ do.call("rbind", fits) # Fortes indícios de que o modelo Poisson não é adequa
 
 # 3.4) Avaliando a qualidade de ajuste do modelo
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Homocedasticidade
 # Independência
-#
-
+# Observado vs. predito
+# Calibração Preditiva
+# Normalidade dos resíduos quantílicos
+# Homocedasticidade (apenas para distribuição Gaussiana)
 
 ## Selecionando um modelo
 modelo <- modelos[[3]] #Modelos 1-5
@@ -317,21 +318,7 @@ df_fit <- data.frame(predicted = modelo$summary.fitted.values[ ,'mean'],
 
 
 
-
-
-# 3.4.1) Homocedasticidade
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ggplot(df_fit, aes(x = predicted, y = res_dev)) + 
-  geom_point() + 
-  labs(y = "Residuals", 
-       x = "Fitted") + 
-  geom_smooth(se = T) + 
-  geom_hline(yintercept = 0, linetype = 2, col = "red") + 
-  my_theme
-
-
-
-# 3.4.2) Independência
+# 3.4.1) Independência
 #~~~~~~~~~~~~~~~~~~~~~~~
 
 ## Independência temporal
@@ -345,7 +332,7 @@ bubble(df_fit2, "res_dev")
 rm(df_fit2)
 
 
-# 3.4.3) Observado vs. predito
+# 3.4.2) Observado vs. predito
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ggplot(df_fit, aes(x = observed, y = predicted)) + 
   geom_point() + 
@@ -356,14 +343,14 @@ ggplot(df_fit, aes(x = observed, y = predicted)) +
 
 
 
-# 3.4.4) Calibração Preditiva via PIT (Probability Integral Transform)
+# 3.4.3) Calibração Preditiva via PIT (Probability Integral Transform)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Se o modelo estiver bem calibrado - > PIT deve ter distribuição Uniforme U(0,1)
 hist(df_fit$pit, breaks = 15, col = "lightgrey")
 
 
 
-# 3.4.5) Normalidade dos Resíduos Quantílicos (QQ-Plot)
+# 3.4.4) Normalidade dos Resíduos Quantílicos (QQ-Plot)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Avalia se a distribuição de probabilidade escolhida (Poisson) capturou corretamente a variação dos dados.
 # Os pontos devem se alinhar sobre a linha pontilhada azul.
@@ -371,6 +358,19 @@ hist(df_fit$pit, breaks = 15, col = "lightgrey")
 ggplot(df_fit, aes(sample = res_quant)) +
   stat_qq_line(col = 'blue', linetype = 'dashed', linewidth = 1) +
   stat_qq(size = 2, alpha = 0.6) +
+  my_theme
+
+
+
+# 3.4.5) Homocedasticidade
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ATENÇÃO: Apenas válido para modelos com distribuição Normal (Gaussiana)
+ggplot(df_fit, aes(x = predicted, y = res_dev)) + 
+  geom_point() + 
+  labs(y = "Residuals", 
+       x = "Fitted") + 
+  geom_smooth(se = T) + 
+  geom_hline(yintercept = 0, linetype = 2, col = "red") + 
   my_theme
 
 
