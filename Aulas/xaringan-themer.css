@@ -281,6 +281,12 @@ table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
 .code-bg .remark-code, .code-bg .remark-code * {
   background-color: #f5f3f4 !important;
 }
+.small-code .remark-code {
+  font-size: 70% !important;
+}
+.small-code .remark-code-line {
+  font-size: 70% !important;
+}
 .small-text {
   font-size: 80%;
 }

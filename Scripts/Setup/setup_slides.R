@@ -52,6 +52,15 @@ style_xaringan(
       "background-color" = "#f5f3f4 !important"
     ),
     
+    
+    ### Classe personalizada para diminuir code chunks específicos
+    ".small-code .remark-code" = list(
+      "font-size" = "70% !important"
+    ),
+    ".small-code .remark-code-line" = list(
+      "font-size" = "70% !important"
+    ),
+    
     # Text with different sizes 
     ".small-text" = list("font-size" = "80%"),
     ".small-text2" = list("font-size" = "90%"),
