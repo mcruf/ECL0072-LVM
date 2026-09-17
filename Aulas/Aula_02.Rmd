@@ -235,7 +235,7 @@ Revolucionou a filosofia da Ciência no séc. XX
 A essência do método Popperiano consiste em contrastar uma hipótese repetidamente com experimentos alternativos
 
 
-- Caso a hipótese se mantém ao longo dos experimentos, esta passa a adquirir um grau de *confiança* a é assumida como verdadeira 
+- Caso a hipótese se mantém ao longo dos experimentos, esta passa a adquirir um grau de *confiança* e é assumida como verdadeira 
 
 ]
 
@@ -279,7 +279,7 @@ Revolucionou a filosofia da Ciência no séc. XX
 A essência do método Popperiano consiste em contrastar uma hipótese repetidamente com experimentos alternativos
 
 
-- Caso a hipótese se mantém ao longo dos experimentos, esta passa a adquirir um grau de *confiança* a é assumida como verdadeira 
+- Caso a hipótese se mantém ao longo dos experimentos, esta passa a adquirir um grau de *confiança* e é assumida como verdadeira 
 
 
 .center[
@@ -361,38 +361,346 @@ knitr::include_graphics("../Figuras/Fisher-Pearson-Neyman.png")
 
 O teste de hipótese parte do pressuposto de que a hipótese nula ($H_0$) é *verdadeira*
 
-Se H₀ fosse verdadeira, qual seria a probabilidade de obter um valor igual ou maior que 1.7 (p-valor).
+--
+
+.small-text2[**Exemplo**]
+
+.small-text2[
+
+Qual o efeito da temperatura sobre a abundância de uma espécie?
+
+- $H_0: ~ \beta = 0$ (sem efeito de temperatura)
+- $H_1: ~ \beta \neq 0$ (com efeito de temperatura)
+
+]
+
+--
+
+----
+
+
+.pull-left[
+
+<br>
+
+```{r echo=FALSE, fig.align ='center', out.width ="100%"}
+knitr::include_graphics("../Figuras/NHST.png")
+```
+]
+
+
+.pull-right[
+
+<div style="height: 9px;"></div>
+
+.small-text2[
+
+
+Assumindo $H_0$ como verdadeira, avalia-se a probabilidade de obter um resultado tão ou mais extremo quanto o observado nos dados
+
+- Se $p \leq 0.05:$ rejeita-se $H_0$
+- Se $p > 0.05:$ deixa de rejeitar $H_0$
+
+----
+
+
+.small-text2[**Cuidado!**
+
+- Em nenhum momento as hipóteses são efetivamente *validadas*
+
+- O p-valor reflete uma probabilidade condicional $p(dados|H_0)$
+
+]
+]
+]
 
 
 
-- rejeita h0 ou deixa de rejeitar h0
+---
+# PPGECO | ECL0072 | out. 2026
+
+### O método científico  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
+
+
+**Mito da intensidade da significância da relação**
+
+O número de asteriscos no sumário estatístico do modelo **não** mede a força nem o nível de significância do efeito
+
+
+
+.code-bg[
+```{r, eval=T, echo=F}
+
+# Definindo semente para reprodutibilidade dos asteriscos
+set.seed(42)
+n <- 150
+
+# Simulação das covariáveis
+temp   <- rnorm(n, mean = 20, sd = 3)   # Variável 1
+sal    <- rnorm(n, mean = 35, sd = 2)   # Variável 2
+prof   <- rnorm(n, mean = 100, sd = 15) # Variável 3
+
+# Construindo a variável resposta com diferentes níveis de ruído/efeito
+# temp  -> Efeito gigante e muito preciso (p < 0.001 -> ***)
+# sal   -> Efeito moderado (0.001 <= p < 0.01 -> **)
+# prof  -> Efeito pequeno em escala, mas presente (0.01 <= p < 0.05 -> *)
+riqueza <- 50 + (3.5 * temp) + (1.2 * sal) + (0.04 * prof) + rnorm(n, mean = 0, sd = 8)
+
+mod <- lm(riqueza ~ temp + sal + prof)
+
+```
+
+]
+
+
+
+.code-bg[
+.small-code[
+```{r, echo=T, eval=T}
+summary(mod)
+```
+]
+]
+
+<div style="height: 7px;"></div>
+
+--
+
+
+.small-text2[
+
+- Reforça a evidência estatística contra $H_0$
+
+- Quando $p > 0.05$: os dados não fornecem evidências suficientes para rejeitar $H_0$
+
+- **Cuidado:** significância estatística $\neq$ significância biológica
+
+
+]
+
+
 
 ---
 
-Depois que apresentar p-valor/nivel de significancia, apresentar o intervalo de confianca (diretamente ligado ao nivel de significancia - alpha =5% -> IC = 95%)
+# PPGECO | ECL0072 | out. 2026
+
+### O método científico  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
+
+O intervalo de confiança (IC%) quantifica a incerteza associada à estimativa do parâmetro diante do nível de significância estabelecido
+
+<br>
+
+.pull-left[
+
+```{r echo=FALSE, fig.align ='center', out.width ="90%"}
+knitr::include_graphics("../Figuras/frequentist_95CI.svg")
+```
+
+]
+
+
+.pull-right[
+
+.small-text2[
+.center[**Interpretação**]
+
+Se repetíssemos o mesmo estudo milhares de vezes, aproximadamente 95% dos intervalos de confiança *conteriam* o verdadeiro parâmetro
+
+- O parâmetro é *fixo* (i.e.,pré-determinado na natureza)
+]
+
+----
+
+
+<div style="height: 7px;"></div>
+
+.gray-box[
+.small-text2[
+
+.center[**O que o IC não é?**]
+
+Não representa a probabilidade do valor do parâmetro estar contido no intervalo indicado
+
+
+  ] 
+
+]
+
+]
+
+.footnote[.small-text2[Figura: [Wikipedia](https://en.wikipedia.org/wiki/Confidence_interval)]]
+---
+# PPGECO | ECL0072 | out. 2026
+### O método científico  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
+
+**Exemplo:**
+
+<div style="height: 7px;"></div>
+
+
+```{r echo=FALSE, fig.align ='center', out.width ="70%"}
+knitr::include_graphics("../Figuras/Intencao_de_voto.jpg")
+```
+
+<div style="height: 5px;"></div>
+
+
+.small-text2[Se repetirmos a intenção de votos, espera-se que a estimativa caia no intervalo estimado]
+
+
+.footnote[.small-text2[Fonte: [Globo](https://g1.globo.com/jornal-nacional/noticia/2026/09/11/datafolha-divulga-nova-pesquisa-de-intencao-de-voto-para-presidente-veja-os-numeros.ghtml)]]
+
+
+--
+
+.small-text2[
+- ou seja, a margem de erro diz respeito a incerteza associada ao *processo amostral* (e não ao *observador*)]
+
 
 ---
-O objetivo da inferência estatística reside em confrotar a hipótese sob investigação com a hipótese nula
-- Null-hypothesis test (NHTS)
-  - Método hipotético-dedutivo
-
-- According to Popper, theories/models/hypotheses can only be rejected (falsified),because the only save path of knowledge is deduction
+# PPGECO | ECL0072 | out. 2026
+### O método científico  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
 
 
-*Reductio ad absurdum* - é o que é a hipótese nula. argumento de redução ao absurdo
-- The NHST is a version of classica 'reductio ad absurdum' argument, which attempts to demonstrate that a statement is false by showing that an abusrd result follows from its acceptance 
-OBS: NHST is often identified with the falsificationist, or Popperian, philosophy of science. however, usually NHST is used to falisfy a null hypothesis, not the actual research hypothesis. So the falsification is being done to something other than the explanatory model. This seems the reverse from Karl Popper's philosophy.
+O teste de hipótese é uma versão clássica do argumento *reductio ad absurdum* (redução ao absurdo)
+- i.e., comparar os dados com uma situação improvável (i.e, $H_0$)
 
-- As Sir. Ronald Fisher, put it: the only populations that can be referred to in a test of significance have no objective reality, being exclusively the product of the statistician's imagination
-  - Ideia conectada com a questão: This leads to frequentist uncertainty being premised on imaginary resampling of data—if we were to repeat the measurement many many times, we would end up collecting a list of values that will have some pattern to it. It means also that parameters and models cannot have probability distributions, only measurements can. The distribution of these measurements is called a sampling distribution. This resampling is never done, and in general it doesn’t even make sense—it is absurd to consider repeat sampling of the diversification of song birds in the Andes. 
+
+<br>
+<br>
+<br>
+
+
+--
+
+.pull-left[
+
+```{r echo=FALSE, fig.align ='center', out.width ="100%", fig.cap="Ronald Fisher (1890-1962)"}
+knitr::include_graphics("../Figuras/Ronald-Fisher.jpg")
+```
+
+
+]
+
+.pull-right[
+
+
+> <font size="5"><center> <span style="color: #e07a5f;"> *...the only populations that can be referred to in a test of significance have no objective reality, being exclusively the product of the statistician's imaginations* </center></font></span> 
+
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### O método científico  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
+
+
+A falsificação de hipóteses é uma estratégia frágil na prática científica
+
+--
+
+<div style="height: 7px;"></div>
+
+
+**1. Hipóteses não são modelos**
+
+
+<br>
+<br>
+
+.pull-left[
+
+```{r echo=FALSE, fig.align ='center', out.width ="100%"}
+knitr::include_graphics("../Figuras/Hilborn_figure.png")
+```
+
+]
+
+
+
+
+.footnote[Figura: Hilborn & Mangel (1993)]
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+### O método científico  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
+
+
+A falsificação de hipóteses é uma estratégia frágil na prática científica
+
+
+<div style="height: 7px;"></div>
+
+
+**2. Medidas importam**
+
+
+A maioria dos problemas enfrentados pelos cientistas não se enquadram em uma lógica discreta (todos cisnes são brancos)
+
+--
+
+<br>
+
+- Hipóteses são, em sua maioria, quantitativas (i.e., hipóteses contínuas) e possuem limites pouco definidos
+  - $H_0:$ 80% dos cisnes são brancos
+  - $H_0:$ Cisnes pretos são raros
+
+--
+
+<br>
+
+- As observações (dados) estão sujeitas a erros, particularmente àquelas tangendo as fronteiras do conhecimento científico
 
 
 
 ---
+# PPGECO | ECL0072 | out. 2026
+### O método científico  
 
+
+O cérebro é uma maquina preditiva em constante atualização
+
+<br>
+
+
+.pull-left[
+
+```{r echo=FALSE, fig.align ='center', out.width ="60%"}
+knitr::include_graphics("../Figuras/Anil_Seth_book.jpg")
+```
+
+]
+
+
+.pull-right[
+
+```{r echo=FALSE, fig.align ='center', out.width ="60%"}
+knitr::include_graphics("../Figuras/Daniel_Dennett_book.jpg")
+```
+
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### O método científico  
+
+**Exemplo**
+
+Qual a probabilidade de detectar 
+
+```{r echo=FALSE, fig.align ='center', out.width ="85%"}
+knitr::include_graphics("../Figuras/prior_lik_post_densities.png")
+
+```
+
+
+---
 
 ```{r echo=FALSE, fig.align ='center', out.width ="85%"}
 knitr::include_graphics("../Figuras/Frequentist_workflow.png")
+
 ```
 
 
