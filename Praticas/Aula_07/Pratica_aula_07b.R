@@ -1,20 +1,24 @@
 #####################################################################
 #                                                                   #
-#                       Prática da aula 07                          #                                #
+#                       Prática da aula 07                          #                                
 #               - Modelos espaciais via R-INLA -                    #
 #                                                                   #
 #####################################################################
 
 
-# FIXME: Descrição do script
+# Esta prática tem como objetivo ajustar modelos espaciais (geoestatísticos) bayesianos via R-INLA, para avaliar a
+# distribuição espacial da abundância do tubarão azul (*Prionace glauca*), capturado pela frota atuneira ao longo do Atlântico Sul.
 
 
-# Dados da pesca atuneira no SAO
-
-# Foram baixadas um total de 5 variáveis ambientais, provenientes de 2 produtos distintos do Copernicus:
-# i) Global Ocean Physics Reanalysis: sea water tempertaure (sst), sea surface height (ssh), mixed layer thickness (mlt), bathymetry (bathy)
-# ii) Global Ocean Biogeochemistry Hindcast: net primary productivity (nppv)
-# Há 4 variáveis dinâmicas (i.e., variáveis baixadas para a mesma resolução temporal dos dados pesqueiros) e 1 variável estática (batimetira).
+# O fluxo da análise é dividido em 5 etapas sequenciais:
+# 1. Carregamento e tratamento dos dados pesqueiros e ambientais (rasters)
+# 2. Padronização espacial (CRS, resolução e extensão das variáveis ambientais)
+# 3. Extração de covariáveis ambientais dinâmicas e estáticas para os pontos amostrais
+# 4. Análise exploratória e verificação de multicolinearidade
+# 5. Construção da malha espacial 
+# 6. Definição da matriz de projeção A, SPDE e stacks 
+# 7. Ajuste dos modelos 
+# 8. Extração e avaliação dos resultados
 
 
 
@@ -30,7 +34,9 @@ library(terra)   # Processamento de rasters
 library(stringr) # Manipulação de strings
 library(corrplot) # Visualização de dados
 library(mapview) # Visualização de dados espacializados
-library(virids) # Paleta de cores
+library(viridis) # Paleta de cores
+library(tidyterra) # Visualização de rasters
+
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -282,10 +288,9 @@ dfs_f %>%
                       names_to = "Variavel",
                       values_to = "Valor") %>% 
   #filter(Variavel == 'prod_primaria', Valor < 120) %>% 
-  #filter(Variavel == 'altura_mar', Valor > -0.1) %>% 
   ggplot(aes(x = Valor, y = Prionace_glauca)) +
   geom_point(alpha = 0.5, color = "#e07a5f", size = 3) +
-  geom_smooth(method = 'gam', formula = y ~ s(x, k = 10, bs = "cs"), col = 'black') +
+  geom_smooth(method = 'gam', formula = y ~ s(x, k = 8, bs = "cs"), col = 'black') +
   #geom_smooth(method = 'lm', formula = y ~ x + I(x^2)) +
   facet_wrap(Variavel ~ . , scales = 'free') +
   my_theme
@@ -296,6 +301,7 @@ mapview(dfs_f,
         zcol = "prod_primaria",
         cex = "prod_primaria")
 
+head(dfs_f)
 
 
 # 4.2) Avaliando multicolinearidade entre as covariáveis
@@ -344,8 +350,8 @@ GGally::ggpairs(covars) + my_theme
 
 
 
-# 5.1) Transformando os dados para projeção LEA (expresso em metros)
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 5.1) Transformando os dados para projeção LEA (expresso em km)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 dfs_lea <- st_transform(dfs_f, CRS_lea)
 
 
@@ -493,7 +499,7 @@ mesh.points <- st_as_sf(mcoords, coords = c("X", "Y"), crs = CRS_lea) # Transfor
 
 # Sanity check
 plot(mesh)
-points(mesh.points, col='red', pch=19, cex = 0.3)
+plot(st_geometry(mesh.points),col='red', pch=19, cex = 0.3, add = T)
 
 
 # Definindo a matriz de projeção Apred
@@ -537,19 +543,38 @@ dim(Apred)
 
 # 6.3) Definindo o SPDE
 #~~~~~~~~~~~~~~~~~~~~~~~
+# Em modelos espaciais (SPDE), o uso de prioris padrões pode levar a estimativas instáveis ou ao sobreajuste (overfitting), especialmente em
+# regiões com pouca amostragem.
+
+# Os PC priors são distribuições a priori que penalizam campos espaciais excessivamente complexos, favorecendo  campos espaciais mais suaves e menos variáveis. 
+# Essa abordagem reduz a sensibilidade do modelo a escolhas arbitrárias dos hiperparâmetros e torna a inferência mais robusta.
+
+# No modelo SPDE, os PC priors são especificados para dois hiperparâmetros:
+#   - prior.range: controla o alcance espacial (range), isto é, a distância na qual a
+#     autocorrelação espacial se torna praticamente desprezível;
+#   - prior.sigma: controla a magnitude da variabilidade do campo espacial.
+
+# Para maiores detalhes, vide artigo de Fugstad et al. (2019): https://www.tandfonline.com/doi/full/10.1080/01621459.2017.1415907
+
 
 ## SPDE 'clássico'
 spde <- inla.spde2.matern(mesh = mesh, alpha = 2) # alpha = parâmetro de suavidade da função de covariância Matérn (usando o valor default)
 
 
 ## SPDE com pc.prior (evita sobreajuste - overfitting)
-# spde_pc <- inla.spde2.pcmatern(mesh = mesh,
-#                                alpha = 2,
-#                                prior.range = c(500, 0.01), # P(range < 500 km) = 0.01 (baseado +/- no variograma empírico); reavaliar após a primeira rodada dos modelos
-#                                prior.sigma = c(1, 0.01) )   # P(sigma > 1) = 0.01
-                                
-                    
+#diff(range(coords[,1]))
+#diff(range(coords[,2]))
 
+spde_pc <- inla.spde2.pcmatern(mesh = mesh,
+                               alpha = 2,
+                               #prior.range = c(1000, 0.5), # P(range < 1000 km) = 10% 
+                               prior.range = c(200, 0.05), # P(range < 200 km) = 5% (valores achados considerando um modelo com covariáveis)
+                               prior.sigma = c(1, 0.05) )   # P(sigma > 1) = 0.05
+
+# CUIDADO! A estimativa do alcance espacial pode mudar substancialmente após a inclusão de covariáveis no modelo. 
+# Isso ocorre porque parte da estrutura espacial anteriormente atribuída apenas ao efeito espacial, passa a ser explicada pelas covariáveis ambientais.
+# Portanto, deixe para escolher o pc.prior do efeito espacial somente após ter achado o melhor modelo usando a estrutura espacial (SPDE) convencional.
+# Essa etapa é um processo iterativo e requer (muita) paciência e cuidado!
 
 
 
@@ -565,7 +590,7 @@ spde <- inla.spde2.matern(mesh = mesh, alpha = 2) # alpha = parâmetro de suavid
 # @ tag: identificador do stack (ex: 'est' para estimação, 'pred' para predição)
 # @ data: lista contendo a variável resposta 
 # @ A: lista com as matrizes de projeção
-# @ effects: lista contendo os efeitos fixos e aleatórios.
+# @ effects: lista contendo os efeitos fixos e aleatórios
 
 
 # Assim como fizemos com a matriz de projeção "A", é necessário construir um stack para a ESTIMAÇÃO e outro para a PREDIÇÃO:
@@ -584,6 +609,8 @@ spde <- inla.spde2.matern(mesh = mesh, alpha = 2) # alpha = parâmetro de suavid
 
 
 indexs <- inla.spde.make.index("spatial", spde$n.spde) # Cria os índices espaciais (necessário para ajuste do modelo)
+
+
 
 stk.est <- inla.stack(data = list(y = dfs_lea$Prionace_glauca),
                       A = list(Aest, 1),
@@ -618,9 +645,9 @@ stk.est <- inla.stack(data = list(y = dfs_lea$Prionace_glauca),
 
 
 ## Extraindo dados ambientais para cada ponto do mesh (grid)
-dfp <- mesh.points
-
-
+mesh.points_wgs <- st_transform(mesh.points, crs = CRS_wgs) #Reprojetando para WGS84 - mesmo CRS usado na estimação
+#dfp <- mesh.points
+dfp <- mesh.points_wgs
 
 ### temperatura do mar (thetao)
 idx <- grep(paste0("^", 'thetao'), names(vfisicas2r)) # Reavendo índice das colunas com a variável desejada
@@ -628,7 +655,7 @@ rast_sst <- vfisicas2[[idx]]
 mean_sst <- mean(rast_sst, na.rm = TRUE)
 plot(mean_sst)
 
-dfp$TEMPERATURA  <- extract(mean_sst, mesh.points)[, 2]
+dfp$TEMPERATURA  <- extract(mean_sst, mesh.points_wgs)[, 2]
 ggplot() + geom_sf(data = dfp, aes(col = TEMPERATURA))
 ggplot() + geom_sf(data = filter(dfp, !is.na(TEMPERATURA)), aes(col = TEMPERATURA))
 
@@ -639,7 +666,7 @@ rast_ssh <- vfisicas2[[idx]]
 mean_ssh <- mean(rast_ssh, na.rm = TRUE)
 plot(mean_ssh)
 
-dfp$ALTURA_MAR  <- extract(mean_ssh, mesh.points)[, 2]
+dfp$ALTURA_MAR  <- extract(mean_ssh, mesh.points_wgs)[, 2]
 # ggplot() + geom_sf(data = dfp, aes(col = ALTURA_MAR))
 # ggplot() + geom_sf(data = filter(dfp, !is.na(ALTURA_MAR)), aes(col = ALTURA_MAR))
 
@@ -650,7 +677,7 @@ rast_mlt <- vfisicas2[[idx]]
 mean_mlt <- mean(rast_mlt, na.rm = TRUE)
 plot(mean_mlt)
 
-dfp$CAMADA_MISTURA  <- extract(mean_mlt, mesh.points)[, 2]
+dfp$CAMADA_MISTURA  <- extract(mean_mlt, mesh.points_wgs)[, 2]
 # ggplot() + geom_sf(data = dfp, aes(col = CAMADA_MISTURA))
 # ggplot() + geom_sf(data = filter(dfp, !is.na(CAMADA_MISTURA)), aes(col = CAMADA_MISTURA))
 
@@ -661,18 +688,46 @@ rast_nppv <- vbio2[[idx]]
 mean_nppv <- mean(rast_nppv, na.rm = TRUE)
 plot(mean_nppv)
 
-dfp$PROD_PRIMARIA  <- extract(mean_nppv, mesh.points)[, 2]
+dfp$PROD_PRIMARIA  <- extract(mean_nppv, mesh.points_wgs)[, 2]
 # ggplot() + geom_sf(data = dfp, aes(col = PROD_PRIMARIA))
 # ggplot() + geom_sf(data = filter(dfp, !is.na(PROD_PRIMARIA)), aes(col = PROD_PRIMARIA))
 
 
 ### batimetria
-dfp$BATIMETRIA  <- extract(batimetria2r, mesh.points)[, 2]
+dfp$BATIMETRIA  <- extract(batimetria2r, mesh.points_wgs)[, 2]
 # ggplot() + geom_sf(data = dfp, aes(col = BATIMETRIA))
 # ggplot() + geom_sf(data = filter(dfp, !is.na(BATIMETRIA)), aes(col = BATIMETRIA))
 
 
 head(dfp)
+
+
+### ATENÇÃO!
+# Como as covariáveis foram padronizadas na etapa de estimação, é IMPORTANTE que as covariáveis extraídas para o grid de predição também sejam padronizadas.
+# A padronização das covariáveis no grid é feita em relação ao valor médio e DP das covariáveis extraídas para os pontos amostrais.
+
+# As covariáveis utilizadas na PREDIÇÃO devem ser padronizadas utilizando a MESMA média e o MESMO desvio-padrão empregados na etapa de ESTIMAÇÃO.
+# Recalcular a padronização utilizando apenas os valores do grid altera a escala das covariáveis e torna as predições inconsistentes com os
+# coeficientes estimados pelo modelo.
+
+# Ref.: https://cran.r-project.org/web/packages/unmarked/vignettes/spp-dist.html
+
+
+m_temp <- mean(dfs_lea$temperatura, na.rm = TRUE)
+sd_temp <- sd(dfs_lea$temperatura, na.rm = TRUE)
+
+m_sheight <- mean(dfs_lea$altura_mar, na.rm = TRUE)
+sd_sheight <- sd(dfs_lea$altura_mar, na.rm = TRUE)
+
+m_mlt <- mean(dfs_lea$camada_mistura, na.rm = TRUE)
+sd_mlt <- sd(dfs_lea$camada_mistura, na.rm = TRUE)
+
+m_npp <- mean(dfs_lea$prod_primaria, na.rm = TRUE)
+sd_npp <- sd(dfs_lea$prod_primaria, na.rm = TRUE)
+
+m_depth <- mean(dfs_lea$batimetria, na.rm = TRUE)
+sd_depth <- sd(dfs_lea$batimetria, na.rm = TRUE)
+
 
 
 stk.pred <- inla.stack(data = list(y = NA), #Definir a variável-resposta como NA - isso é o que queremos predizer!
@@ -684,12 +739,12 @@ stk.pred <- inla.stack(data = list(y = NA), #Definir a variável-resposta como N
                                                       fid = NA, # Efeito aleatório não estruturado - sempre como NA, pois não contribui para o preditor linear
                                                       vessel = NA, # Efeito aleatório não estruturado - sempre como NA, pois não contribui para o preditor linear
                                                       flag = "BRA", # Brasil como país de referência
-                                                      nhooks = round(mean(dfs_lea$Nhooks)), # Esforço médio - constante em toda a área; idealmente, fazer um raster do esforço
-                                                      temp = scale(dfp$TEMPERATURA),
-                                                      sheight = scale(dfp$ALTURA_MAR),
-                                                      mlt = scale(dfp$CAMADA_MISTURA),
-                                                      npp = scale(dfp$PROD_PRIMARIA),
-                                                      depth = scale(dfp$BATIMETRIA),
+                                                      nhooks = 1, #round(mean(dfs_lea$Nhooks)), # Esforço médio - constante em toda a área; idealmente, fazer um raster do esforço
+                                                      temp = ((dfp$TEMPERATURA - m_temp) / sd_temp),
+                                                      sheight = ((dfp$ALTURA_MAR - m_sheight) / sd_sheight),
+                                                      mlt = ((dfp$CAMADA_MISTURA - m_mlt) / sd_mlt),
+                                                      npp = ((dfp$PROD_PRIMARIA - m_npp) / sd_npp),
+                                                      depth = ((dfp$BATIMETRIA - m_depth) / sd_depth),
                                                       X_coord = inla.group(mcoords[, 1], n = 50),
                                                       Y_coord = inla.group(mcoords[, 2], n = 50)))),
                        tag = "pred")
@@ -711,14 +766,14 @@ stk.full <- inla.stack(stk.est, stk.pred)
 # 7.1) Definindo a estrutura dos modelos
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 form1 <- y ~ 0 + b0 # Modelo nulo
-form2 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks))
-form3 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks)) + f(Y_coord, model = 'rw1') + f(X_coord, model = 'rw1') 
-form4 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks)) + f(spatial, model = spde)
-form5 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks)) + f(spatial, model = spde) + f(vessel, model = "iid")
-form6 <- y ~ 0 + b0 + depth + npp + mlt + sheight + temp + offset(log(nhooks)) + f(spatial, model = spde) + f(vessel, model = "iid") + f(fid, model = 'iid')
+form2 <- y ~ 0 + b0 + depth + mlt + sheight + temp + offset(log(nhooks)) # Modelo apenas com variáveis ambientais
+form3 <- y ~ 0 + b0 + depth + mlt + sheight + temp + offset(log(nhooks)) + f(Y_coord, model = 'rw1') + f(X_coord, model = 'rw1') #Modelo com covars + efeito suavizador do espaço (GAM)
+form4 <- y ~ 0 + b0 + depth + mlt + sheight + temp + offset(log(nhooks)) + f(spatial, model = spde) # Modelo com covars + campo espacial
+form5 <- y ~ 0 + b0 + depth + mlt + sheight + temp + offset(log(nhooks)) + f(spatial, model = spde) + f(vessel, model = "iid") # Modelo com covars + campo espacial + efeito do barco
+form6 <- y ~ 0 + b0 + depth + mlt + sheight + temp + offset(log(nhooks)) + f(spatial, model = spde_pc) + f(vessel, model = "iid")  # Modelo com covars + campo espacial com pc prior + efeito do barco
+form7 <- y ~ 0 + b0 + offset(log(nhooks)) + f(spatial, model = spde_pc) + f(vessel, model = "iid")  # Modelo com campo espacial com pc prior + efeito do barco
 
-
-formulas <- c(form1, form2, form3, form4, form5, form6) # Concatenando as fórmulas
+formulas <- c(form1, form2, form3, form4, form5, form6, form7) # Concatenando as fórmulas
 
 
 
@@ -739,7 +794,7 @@ for(model in seq_along(formulas)){
                             control.predictor = list(compute = TRUE, # Computa a distribuição posterior do preditor linear
                                                      link = 1, # Mapeia a distribuição posterior estimada de volta para a escala original dos dados
                                                      A = inla.stack.A(stk.full)),
-                             control.inla = list(strategy = "simplified.laplace"), # Para rodar mais rápido; bom na fase exploratória!
+                             #control.inla = list(strategy = "simplified.laplace"), # Para rodar mais rápido; bom na fase exploratória!
                              control.compute = list(return.marginals.predictor = F,
                                                     dic = T, waic=T, cpo=T),
                              verbose = F)
@@ -761,7 +816,7 @@ for(model in seq_along(formulas)){
                           control.predictor = list(compute = TRUE, # Computa a distribuição posterior do preditor linear
                                                    link = 1, # Mapeia a distribuição posterior estimada de volta para a escala original dos dados
                                                    A = inla.stack.A(stk.full)),
-                          control.inla = list(strategy = "simplified.laplace"), # Para rodar mais rápido; bom na fase exploratória!
+                          #control.inla = list(strategy = "simplified.laplace"), # Para rodar mais rápido; bom na fase exploratória!
                           control.compute = list(return.marginals.predictor = F,
                                                  dic = T, waic=T, cpo=T),
                           verbose = F)
@@ -845,41 +900,28 @@ for(i in 1:length(allm)){
                          lower = allm[[i]]$summary.fitted.values[idx, '0.025quant'], 
                          upper = allm[[i]]$summary.fitted.values[idx, '0.975quant'], 
                          observed = dfs_lea$Prionace_glauca, # Inserir aqui a coluna correspondente à variável resposta!
+                         Long = st_coordinates(dfs_f)[,1], #Coord em long/lat
+                         Lat = st_coordinates(dfs_f)[,2], #Coord em long/lat,
+                         res_dev = allm[[i]]$residuals$deviance.residuals[idx], # Residuo deviance
+                         pit = allm[[i]]$cpo$pit[idx],
+                         res_quant = qnorm(allm[[i]]$cpo$pit[idx]),
                          family = family_name,
                          model = model_number)
   
+  
+  dat[[i]]$residual <- dat[[i]]$predicted - dat[[i]]$observed
+  
+  dat[[i]]$pearsonResidual <- dat[[i]]$residual/stats::sd(dat[[i]]$residual)
+  dat[[i]]$pearsonUpper <- (dat[[i]]$upper - dat[[i]]$observed)/stats::sd(dat[[i]]$residual)
+  dat[[i]]$pearsondLower <- (dat[[i]]$lower - dat[[i]]$observed)/stats::sd(dat[[i]]$residual)
+  
+  
+
 }
 dat <- do.call("rbind", dat)
 
 # Curiando...
 head(dat)
-
-
-## Calculando os resíduos
-dat$residual <- dat$predicted - dat$observed
-dat$standardResidual <- dat$residual/stats::sd(dat$residual)
-dat$standardUpper <- (dat$upper - dat$observed)/stats::sd(dat$residual)
-dat$standardLower <- (dat$lower - dat$observed)/stats::sd(dat$residual)
-
-
-
-### PRESSUPOSTO DE HOMOCEDASTICIDADE  
-dat %>% 
-  filter(family == "NB") %>% 
-  #filter(family == "Pois") %>% 
-  mutate(model = factor(model, levels = 1:10)) %>% 
-  ggplot(aes(x = predicted, y = standardResidual)) + 
-        geom_point() + 
-        labs(y = "Resíduos padronizados", 
-             x = "Valores ajustados",
-             title = "Homocedasticidade") + 
-        facet_wrap(model ~ ., scales = "free", nrow = 2) +
-        geom_smooth(se = T) + 
-        geom_hline(yintercept = 0, linetype = 2, col = "red") + 
-        geom_segment(ggplot2::aes_string(y = "standardLower", 
-                                         yend = "standardUpper", xend = "predicted"), alpha = 0.4) + 
-        my_theme
-      
 
 
 
@@ -889,7 +931,7 @@ tmp <- dat %>%
   #subset(family == "NB" & model == "2")
 
 #### Independência temporal
-forecast::ggAcf(tmp$residual,lag.max=24) +
+forecast::ggAcf(tmp$res_dev,lag.max=24) +
   labs(title='Independência residual') + 
   theme_bw()
 
@@ -899,11 +941,11 @@ tmp <- dat %>%
         subset(family == "NB" & model == "6") 
         #subset(family == "NB" & model == "4") 
 
-dfs_lea$std_residuals <- tmp$standardResidual
+dfs_lea$pearson_residuals <- tmp$pearsonResidual
 
 
 ggplot(dfs_lea) +
-  geom_sf(aes(col = std_residuals, size = std_residuals), alpha = 0.5) +
+  geom_sf(aes(col = pearson_residuals, size = pearson_residuals), alpha = 0.5) +
   scale_color_viridis(option = 'A') +
   guides(size = "none") +
   my_theme
@@ -918,40 +960,54 @@ ggplot(dfs_lea) +
 # Desvios da linha de referência indicam potenciais problemas na especificação do modelo, tais como verossimilhança inadequada, covariáveis ausentes ou
 # fontes de variação não consideradas.
 
-
-pit_model <- nb_mod[[6]]$cpo$pit # Extraindo valores PIT do melhor modelo
-#pit_model <- nb_mod[[4]]$cpo$pit # Para comparar...
-
-pit_clean <- pit_model[is.finite(pit_model) & pit_model > 0 & pit_model < 1] # Removendo valores de PIT inválidos
-df_qq <- data.frame(rpit = qnorm(pit_clean)) # Transforma os PITs da escala uniforme para escala normal (padrão do qqplot)
+dat %>%
+  subset(family == "NB" & model == "6") %>% #comparar com modelo 7
+  ggplot(aes(sample = res_quant)) +
+    stat_qq_line(col = 'blue', linetype = 'dashed', linewidth = 1) +
+    stat_qq(size = 2, alpha = 0.6) +
+    my_theme
 
 
 
 # Plotando...
-ggplot(df_qq, aes(sample = rpit)) +
-  stat_qq_line(col = 'blue', linetype = 'dashed', linewidth = 1) +
-  stat_qq(size = 2, alpha = 0.6) +
+dat %>%
+  subset(family == "NB" & model == "6") %>% #comparar com modelo 7
+  ggplot(aes(x = pit)) +
+  geom_histogram(col = 'white', fill = "#e07a5f") + 
   my_theme
 
-hist(pit_clean) # Simetria à direita; indicativo de subsestimação da variável resposta (mod6)
+# Simetria à direita; indicativo de subsestimação da variável resposta (mod6)
 
 
 
 #### VALORES PREDITOS VS. OBSERVADOS
 dat %>%
-  filter(family == "NB", model %in% c('4', '5', '6')) %>% 
-  #mutate(model = factor(model, levels = 1:10)) %>% 
+  filter(family == "NB", model %in% c('5', '6', '7')) %>% 
   ggplot(aes(x = observed, y = predicted)) + 
     geom_point() + 
     labs(y = "Predicted",
          x = "Observed",
          title = "Obs. vs. pred.") + 
     geom_smooth(method = "lm") +
-    facet_wrap(model ~ ., ncol = 3, scales = "free_y") +
+    facet_wrap(model ~ ., nrow = 1, scales = "free_y") +
     my_theme
   
 
-# Há uma tendência sistemática de subestimação da abundância do tubarão azul (P. glauca)
+# Os melhores modelos tendem a subestimar substancialmente a abundância de P. glauca.
+
+
+### PRESSUPOSTO DE HOMOCEDASTICIDADE  
+# ATENÇÃO: Apenas válido para modelos com distribuição Normal (Gaussiana)
+# dat %>% 
+#   ggplot(aes(x = predicted, y = res_dev)) + 
+#   geom_point() + 
+#   labs(y = "Resíduos", 
+#        x = "Valores ajustados",
+#        title = "Homocedasticidade") + 
+#   facet_wrap(model ~ ., scales = "free", nrow = 2) +
+#   geom_smooth(se = T) + 
+#   geom_hline(yintercept = 0, linetype = 2, col = "red") + 
+#   my_theme()
 
 
 
@@ -1017,8 +1073,8 @@ raster_list <- lapply(iVAR, function(var_name) {
   interp_res <- interp(x = pred_df$Long, 
                        y = pred_df$Lat, 
                        z = pred_df[[var_name]],
-                       xo = seq(min(df_interp$Long), max(df_interp$Long), length.out = 300),
-                       yo = seq(min(df_interp$Lat), max(df_interp$Lat), length.out = 300))
+                       xo = seq(min(pred_df$Long), max(pred_df$Long), length.out = 300),
+                       yo = seq(min(pred_df$Lat), max(pred_df$Lat), length.out = 300))
   
   # Conversão para raster
   r <- rast(interp_res)
@@ -1038,160 +1094,90 @@ rstack <- rast(raster_list)
 names(rstack)
 
 
-#### Visualizando as abundâncias preditas
-par(mfrow = c(1, 2))
-
-plot(rstack[[1]], col = viridis(100, option = "A"), main = 'Abundância média predita')
-plot(st_geometry(sw_ocean), add = TRUE, border = "black")
-
-plot(rstack[[2]], col = viridis(100, option = "A"), main = 'Desvio padrão')
-plot(st_geometry(sw_ocean), add = TRUE, border = "black")
-
-
-
-plot(rstack[[3]], col = viridis(100, option = "A"), main = 'limite inferior do IC-95%')
-plot(st_geometry(sw_ocean), add = TRUE, border = "black")
-
-
-plot(rstack[[4]], col = viridis(100, option = "A"), main = 'limite superior do IC-95%')
-plot(st_geometry(sw_ocean), add = TRUE, border = "black")
-
-par(mfrow = c(1, 1))
-
-
-
-#### Visualizando o efeito espacial
-
-par(mfrow = c(1, 2))
-
-plot(rstack[[5]], col = viridis(100, option = "A"), main = 'Média do efeito espacial')
-plot(st_geometry(sw_ocean), add = TRUE, border = "black")
-
-plot(rstack[[6]], col = viridis(100, option = "A"), main = 'Desvio padrão do efeito espacial')
-plot(st_geometry(sw_ocean), add = TRUE, border = "black")
-
-
-
-plot(rstack[[7]], col = viridis(100, option = "A"), main = 'Limite inferior do IC-95% do efeito espacial')
-plot(st_geometry(sw_ocean), add = TRUE, border = "black")
-
-
-plot(rstack[[8]], col = viridis(100, option = "A"), main = 'Limite superior do IC-95% do efeito espacial')
-plot(st_geometry(sw_ocean), add = TRUE, border = "black")
-
-par(mfrow = c(1, 1))
-
-
-
-
-# Convert to sf object
-pred.sf <- st_as_sf(pred.df, coords = c("X", "Y"), crs = CRS_lea)
-
+#### Visualizando as abundâncias preditas (média, dp, IC 95%)
 
 ggplot() +
-  geom_sf(data = pred.sf, aes(color = pred.mean), size = 1) +
-  scale_color_viridis_c(option = "plasma") +
-  theme_minimal() 
-
-
-# Interpoalte results
-library(akima)
-
-## predictions
-
-### expand grid
-i.pred.mean <- with(pred.df, interp(Long, Lat, pred.mean, nx=200, ny=200))
-i.pred.sd <- with(pred.df, interp(Long, Lat, pred.sd, nx=200, ny=200))
-i.pred.025 <- with(pred.df, interp(Long, Lat, pred.025, nx=200, ny=200))
-i.pred.975 <- with(pred.df, interp(Long, Lat, pred.975, nx=200, ny=200))
-
-
-
-### Convert to dataframe for ggplot
-i.pred.mean <- data.frame(expand.grid(Long = i.pred.mean$x, Lat = i.pred.mean$y), 
-                          predictions = as.vector(i.pred.mean$z))
-
-i.pred.sd <- data.frame(expand.grid(Long = i.pred.sd$x, Lat = i.pred.sd$y), 
-                        predictions = as.vector(i.pred.sd$z))
-
-i.pred.025 <- data.frame(expand.grid(Long = i.pred.025$x, Lat = i.pred.025$y), 
-                         predictions = as.vector(i.pred.025$z))
-
-i.pred.975 <- data.frame(expand.grid(Long = i.pred.975$x, Lat = i.pred.975$y), 
-                         predictions = as.vector(i.pred.975$z))
-
-
-
-## spatial effect
-
-### expand grid
-i.sp.mean <- with(pred.df, interp(Long, Lat, sp.mean, nx=200, ny=200))
-i.sp.sd <- with(pred.df, interp(Long, Lat, sp.sd, nx=200, ny=200))
-i.sp.025 <- with(pred.df, interp(Long, Lat, sp.025, nx=200, ny=200))
-i.sp.975 <- with(pred.df, interp(Long, Lat, sp.975, nx=200, ny=200))
-
-
-### Convert to dataframe for ggplot
-i.sp.mean <- data.frame(expand.grid(Long = i.sp.mean$x, Lat = i.sp.mean$y), 
-                        predictions = as.vector(i.sp.mean$z))
-
-i.sp.sd <- data.frame(expand.grid(Long = i.sp.sd$x, Lat = i.sp.sd$y), 
-                      predictions = as.vector(i.sp.sd$z))
-
-i.sp.025 <- data.frame(expand.grid(Long = i.sp.025$x, Lat = i.sp.025$y), 
-                       predictions = as.vector(i.sp.025$z))
-
-i.sp.975 <- data.frame(expand.grid(Long = i.sp.975$x, Lat = i.sp.975$y), 
-                       predictions = as.vector(i.sp.975$z))
-
-
-
-
-# Plot spatial rpedictionx§ of bycatch
-ggplot() +
-  geom_raster(data = i.pred.975, aes(x = Long, y = Lat, fill = predictions)) + 
-  geom_sf(data = land, fill = "grey70", color = "black") +  # Add land as grey
-  #scale_fill_viridis_c(option = "viridis") +
+  tidyterra::geom_spatraster(data = rstack[[1]]) +
+  geom_sf(data = sw_ocean, fill = 'NA', color = "black", size = 0.5) +
+  #scale_fill_viridis_c( option = 'A') +
   fishualize::scale_fill_fish(option = "Hypsypops_rubicundus") +
-  theme_minimal() 
-
-
-# Plot spatial effect
-ggplot() +
-  geom_raster(data = i.sp.mean, aes(x = Long, y = Lat, fill = predictions)) + 
-  geom_sf(data = land, fill = "grey70", color = "black") +  # Add land as grey
-  #scale_fill_viridis_c(option = "viridis") +
-  fishualize::scale_fill_fish(option = "Hypsypops_rubicundus") +
-  theme_minimal() 
+  my_theme +
+  labs(title = 'Abundância média predita') +
+  coord_sf(expand = F) 
 
 
 ggplot() +
-  geom_raster(data = i.sp.sd, aes(x = Long, y = Lat, fill = predictions)) + 
-  geom_sf(data = land, fill = "grey70", color = "black") +  # Add land as grey
-  #scale_fill_viridis_c(option = "viridis") +
+  tidyterra::geom_spatraster(data = rstack[[2]]) +
+  geom_sf(data = sw_ocean, fill = 'NA', color = "black", size = 0.5) +
+  #scale_fill_viridis_c( option = 'D') +
   fishualize::scale_fill_fish(option = "Hypsypops_rubicundus") +
-  theme_minimal() 
+  my_theme +
+  labs(title = 'DP da abundância predita') +
+  coord_sf(expand = F) 
 
 
-# pgrid <- inla.mesh.projector(mesh,dims=c(250,250))
-# 
-# prd.m <- inla.mesh.project(pgrid,res$summary.random$spat$mean) # média do GMRF
-# prd.s <- inla.mesh.project(pgrid,res$summary.random$spat$sd) # desvio padrão do GMRF
-# 
-# 
-# ms.m <- inla.mesh.project(pgrid,res$summary.fitted.values[index,1]) # média do preditor linear
-# sd.s <- inla.mesh.project(pgrid,(res$summary.fitted.values[index,2])) # desv. padrão do preditor
-# 
-# 
-# gridExtra::grid.arrange(levelplot(ms.m, scales=list(draw=F), xlab='', ylab='', main='mean',col.regions = heat.colors(16)),
-#                         levelplot(sd.s, scal=list(draw=F), xla='', yla='', main='sd' ,col.regions = heat.colors(16)), nrow=1)
-# 
-# 
-# 
-# x <- as.matrix(mcoords)
-# z <- as.matrix(exp(ms.m))
-# 
-# tt <- rasterize(x, bat, field=z, fun='last', background=0)
-# plot(tt)
+ggplot() +
+  tidyterra::geom_spatraster(data = rstack[[3]]) +
+  geom_sf(data = sw_ocean, fill = 'NA', color = "black", size = 0.5) +
+  #scale_fill_viridis_c( option = 'D') +
+  fishualize::scale_fill_fish(option = "Hypsypops_rubicundus") +
+  my_theme +
+  labs(title = 'Limite inferior do IC-95%') +
+  coord_sf(expand = F) 
+
+
+ggplot() +
+  tidyterra::geom_spatraster(data = rstack[[4]]) +
+  geom_sf(data = sw_ocean, fill = 'NA', color = "black", size = 0.5) +
+  #scale_fill_viridis_c( option = 'D') +
+  fishualize::scale_fill_fish(option = "Hypsypops_rubicundus") +
+  my_theme +
+  labs(title = 'Limite superior do IC-95%') +
+  coord_sf(expand = F) 
+
+
+
+
+#### Visualizando o efeito espacial (média, sd, ic-95%)
+
+
+ggplot() +
+  tidyterra::geom_spatraster(data = rstack[[5]]) +
+  geom_sf(data = sw_ocean, fill = 'NA', color = "black", size = 0.5) +
+  #scale_fill_viridis_c( option = 'A') +
+  fishualize::scale_fill_fish(option = "Hypsypops_rubicundus") +
+  my_theme +
+  labs(title = 'Média do efeito espacial') +
+  coord_sf(expand = F) 
+
+
+ggplot() +
+  tidyterra::geom_spatraster(data = rstack[[6]]) +
+  geom_sf(data = sw_ocean, fill = 'NA', color = "black", size = 0.5) +
+  #scale_fill_viridis_c( option = 'D') +
+  fishualize::scale_fill_fish(option = "Hypsypops_rubicundus") +
+  my_theme +
+  labs(title = 'DP do efeito espacial') +
+  coord_sf(expand = F) 
+
+
+ggplot() +
+  tidyterra::geom_spatraster(data = rstack[[7]]) +
+  geom_sf(data = sw_ocean, fill = 'NA', color = "black", size = 0.5) +
+  #scale_fill_viridis_c( option = 'D') +
+  fishualize::scale_fill_fish(option = "Hypsypops_rubicundus") +
+  my_theme +
+  labs(title = 'Limite inferior do IC-95%') +
+  coord_sf(expand = F) 
+
+
+ggplot() +
+  tidyterra::geom_spatraster(data = rstack[[8]]) +
+  geom_sf(data = sw_ocean, fill = 'NA', color = "black", size = 0.5) +
+  #scale_fill_viridis_c( option = 'D') +
+  fishualize::scale_fill_fish(option = "Hypsypops_rubicundus") +
+  my_theme +
+  labs(title = 'Limite superior do IC-95%') +
+  coord_sf(expand = F) 
 
 
