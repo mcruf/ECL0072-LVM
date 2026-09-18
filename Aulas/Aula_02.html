@@ -39,6 +39,84 @@ class: title-slide
 ---
 # PPGECO | ECL0072 | out. 2026
 
+### Como estimamos (inferimos) as relações na natureza?
+
+&lt;br&gt;
+
+
+&lt;img src="../Figuras/LM_pinguins2.png" alt="" width="80%" style="display: block; margin: auto;" /&gt;
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Como estimamos (inferimos) as relações na natureza?
+
+&lt;br&gt;
+
+- **1. Definir o modelo que descreve o sistema em estudo**
+  - Distribuição de probabilidade para `\(y\)`
+  - Estrutura das relações 
+
+--
+
+&lt;br&gt;
+
+- **2. Identificar possíveis valores para os parâmetros desconhecidos do modelo** (`\(\mathbf{\theta}\)`)
+
+--
+
+&lt;br&gt;
+
+- **3. Avaliar a incerteza dos parâmetros estimados**
+
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### Como estimamos (inferimos) as relações na natureza?
+
+
+**Como lidar diante da *incerteza*?**
+
+
+--
+
+A única descrição satisfatória da incerteza é a *probabilidade* ([Lindley](https://www.ime.usp.br/~abe/lista/pdfbgYmxDKGzI.pdf))
+
+
+--
+
+&lt;br&gt;
+
+.pull-left[
+
+
+.center[**Escola Bayesiana**]
+
+
+
+&lt;img src="../Figuras/TB_portrait.png" alt="" width="80%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+.pull-right[
+
+
+.center[**Escola Frequentista**]
+
+
+&lt;img src="../Figuras/RF_portrait.png" alt="" width="80%" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
 ### O método científico
 
 
@@ -402,9 +480,6 @@ Assumindo `\(H_0\)` como verdadeira, avalia-se a probabilidade de obter um resul
 
 **Mito da intensidade da significância da relação**
 
-O número de asteriscos no sumário estatístico do modelo **não** mede a força nem o nível de significância do efeito
-
-
 
 .code-bg[
 
@@ -449,6 +524,9 @@ F-statistic:  94.3 on 3 and 146 DF,  p-value: &lt; 2.2e-16
 
 --
 
+O número de asteriscos no sumário estatístico do modelo **não** mede a força nem o nível de significância do efeito
+
+
 
 .small-text2[
 
@@ -461,6 +539,19 @@ F-statistic:  94.3 on 3 and 146 DF,  p-value: &lt; 2.2e-16
 
 ]
 
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### O método científico  | .small-text[&lt;span style="color: #e07a5f;"&gt;Teste de hipótese (nula)&lt;/span&gt;]
+
+&lt;br&gt;
+
+
+&lt;img src="../Figuras/p-valium.png" alt="" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+.footnote[Figura: [Prof. Thiago Rangel](https://estat.bio.br/bayes6.html)]
 
 
 ---
@@ -570,6 +661,8 @@ O teste de hipótese é uma versão clássica do argumento *reductio ad absurdum
 
 ]
 
+
+
 ---
 # PPGECO | ECL0072 | out. 2026
 ### O método científico  | .small-text[&lt;span style="color: #e07a5f;"&gt;Teste de hipótese (nula)&lt;/span&gt;]
@@ -633,8 +726,19 @@ A maioria dos problemas enfrentados pelos cientistas não se enquadram em uma l�
 
 
 ---
+
 # PPGECO | ECL0072 | out. 2026
-### O método científico  
+### A natureza sob o olhar bayesiano  
+
+A inferência bayesiana é a realocação da *credibilidade* diante de *possibilidades*
+
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### A natureza sob o olhar bayesiano  
+
 
 
 O cérebro é uma maquina preditiva em constante atualização
@@ -656,34 +760,215 @@ O cérebro é uma maquina preditiva em constante atualização
 
 ]
 
+
+
+
 ---
 # PPGECO | ECL0072 | out. 2026
-### O método científico  
+### A natureza sob o olhar bayesiano  
+
+
+
+
+.pull-left[
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="../Figuras/Thomas_Bayes.jpg" alt="Thomas Bayes (1701-1761)" width="80%" /&gt;
+&lt;p class="caption"&gt;Thomas Bayes (1701-1761)&lt;/p&gt;
+&lt;/div&gt;
+
+]
+
+.pull-right[
+
+&lt;br&gt;
+
+.center[**Teorema de Bayes**]
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+.gray-box-small[
+
+`$$\Large p(\color{#e07a5f}{\theta} ~ | ~ y) = \frac{p(y~ | ~\color{#e07a5f}{\theta}) \cdot p(\color{#e07a5f}{\theta})}{p(y)}$$`
+
+
+]
+
+&lt;br&gt;
+
+.small-text2[
+
+`\(\small p(\theta | y) ~ -\)` Distribuição posterior
+
+
+`\(\small p(\theta) ~ -\)` Distribuição à priori
+- Crença sobre o parâmetro populacional *antes* de observar os dados
+
+
+`\(\small p(y | \theta) ~ -\)` Função de verossimilhança
+- 
+
+
+`\(\small p(y) ~ -\)` Constante de normalização
+- Garante que a distribuição posterior seja probabilística `\(\int_\theta p(\theta|y) = 1\)`
+
+]
+]
+
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### A natureza sob o olhar bayesiano  
+
+
+&lt;div style="height: 5px;"&gt;&lt;/div&gt;
+
+`$$\underbrace{p(\theta ~ | ~ y)}_\text{Posterior} ~ \propto ~ \underbrace{p(y~ | ~\theta)}_\text{Dados} \cdot \underbrace{p(\theta)}_\text{Priori}$$`
+
+&lt;img src="../Figuras/prior_lik_post_densities.png" alt="" width="85%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### A natureza sob o olhar bayesiano  
+
+
+As prioris podem ter diferentes níveis de *informatividade*
+
+- a informação pode estar ao longo de um *continuum* que vai da incerteza completa à certeza relativa
+
+--
+
+----
+
+**Exemplo**
+
+
+Qual a detectabilidade do *Coleodactylus natalensis* no Parque das Dunas?
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+.pull-left[
+&lt;img src="../Figuras/Coleodactylus_natalensis.jpg" alt="" width="85%" style="display: block; margin: auto auto auto 0;" /&gt;
+]
+
+.pull-right[
+
+.small-text2[
+
+.center[**Dados**]
+
+Uma saída de campo com 10 quadrantes
+- 4/10 detecções
+
+-----
+
+.center[**Modelo**]
+
+**parte determinística:** detecção média `\(\theta\)`
+
+**parte estocástica:** `\(y ~ \sim Binomial(N, \theta)\)`
+
+A incerteza está no parâmetro `\(\theta\)`
+
+]
+
+]
+
+
+.footnote[.small-text2[Foto: [UFRN](https://ufrn.br/en/press/features-and-knowledge/30696/a-luta-pela-)]]
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### A natureza sob o olhar bayesiano  
+
+
+As prioris podem ter diferentes níveis de *informatividade*
+
+- a informação pode estar ao longo de um *continuum* que vai da incerteza completa à certeza relativa
+  
+
+
+----
+
+**Priori difusa**
+
+Reflete um elevado grau de incerteza sobre o parâmetro (`\(\theta\)`)
+- A distribuição não inclui nenhum tipo de informação sobre o parâmetro
+- distribuição uniforme `\(\theta \sim \text{uniform}(0,1) = \text{beta}(1,1)\)`
+
+--
+
+
+.pull-left[
+
+&lt;img src="../Figuras/diffuse_prior_likelihood.png" alt="" width="90%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+]
+
+
+--
+
+.pull-right[
+
+
+&lt;img src="../Figuras/diffuse_prior_likelihood_posterior.png" alt="" width="90%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+]
+
+
+
+---
+Priors can have different levels of informativeness; the infomration reflected in a prior distribution can be anywhere on a continuum from complete uncertainty to relative certainty. Although priors can fall anywhere along this continuum, there are three main classifications of priors that are used in the literature to categorize the degree of (un)certainty surroudning the population parameter value
+- informative
+- weakly informative
+- diffuse
+  
+
+
+---
 
 **Exemplo**
 
 Qual a probabilidade de detectar 
 
-&lt;img src="../Figuras/prior_lik_post_densities.png" alt="" width="85%" style="display: block; margin: auto;" /&gt;
 
 
+
+`$$\underbrace{p(\theta ~ | ~ y)}_\text{Posterior} ~ \propto ~ \underbrace{p(y~ | ~\theta)}_\text{Dados} \cdot \underbrace{p(\theta)}_\text{Priori}$$`
 ---
+
 
 &lt;img src="../Figuras/Frequentist_workflow.png" alt="" width="85%" style="display: block; margin: auto;" /&gt;
 
 
 
+
+
+
 ---
 
-Priors can have different levels of informativeness; the infomration reflected in a prior distribution can be anywhere on a continuum from complete uncertainty to relative certainty. Although priors can fall anywhere along this continuum, there are three main classifications of priors that are used in the literature to categorize the degree of (un)certainty surroudning the population parameter value
-- informative
-- weakly informative
-- diffuse
+
+**MCMC**
+
+https://chi-feng.github.io/mcmc-demo/app.html?algorithm=RandomWalkMH&amp;target=standard
+
+---
+
 
 - Bayesian workflow - https://arxiv.org/pdf/2011.01808 (Gelman - 2020)
 
-
----
 
 https://educacao.uol.com.br/disciplinas/filosofia/filosofia-da-ciencia-karl-popper-falseabilidade-e-limites-da-ciencia.htm
     </textarea>

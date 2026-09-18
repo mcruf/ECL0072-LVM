@@ -59,6 +59,90 @@ class: title-slide
 ---
 # PPGECO | ECL0072 | out. 2026
 
+### Como estimamos (inferimos) as relações na natureza?
+
+<br>
+
+
+```{r echo=FALSE, fig.align ='center', out.width ="80%"}
+knitr::include_graphics("../Figuras/LM_pinguins2.png")
+```
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Como estimamos (inferimos) as relações na natureza?
+
+<br>
+
+- **1. Definir o modelo que descreve o sistema em estudo**
+  - Distribuição de probabilidade para $y$
+  - Estrutura das relações 
+
+--
+
+<br>
+
+- **2. Identificar possíveis valores para os parâmetros desconhecidos do modelo** ($\mathbf{\theta}$)
+
+--
+
+<br>
+
+- **3. Avaliar a incerteza dos parâmetros estimados**
+
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### Como estimamos (inferimos) as relações na natureza?
+
+
+**Como lidar diante da *incerteza*?**
+
+
+--
+
+A única descrição satisfatória da incerteza é a *probabilidade* ([Lindley](https://www.ime.usp.br/~abe/lista/pdfbgYmxDKGzI.pdf))
+
+
+--
+
+<br>
+
+.pull-left[
+
+
+.center[**Escola Bayesiana**]
+
+
+
+```{r echo=FALSE, fig.align ='center', out.width ="80%"}
+knitr::include_graphics("../Figuras/TB_portrait.png")
+```
+
+]
+
+
+.pull-right[
+
+
+.center[**Escola Frequentista**]
+
+
+```{r echo=FALSE, fig.align ='center', out.width ="80%"}
+knitr::include_graphics("../Figuras/RF_portrait.png")
+```
+
+
+]
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
 ### O método científico
 
 
@@ -424,9 +508,6 @@ Assumindo $H_0$ como verdadeira, avalia-se a probabilidade de obter um resultado
 
 **Mito da intensidade da significância da relação**
 
-O número de asteriscos no sumário estatístico do modelo **não** mede a força nem o nível de significância do efeito
-
-
 
 .code-bg[
 ```{r, eval=T, echo=F}
@@ -466,6 +547,9 @@ summary(mod)
 
 --
 
+O número de asteriscos no sumário estatístico do modelo **não** mede a força nem o nível de significância do efeito
+
+
 
 .small-text2[
 
@@ -478,6 +562,21 @@ summary(mod)
 
 ]
 
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### O método científico  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
+
+<br>
+
+
+```{r echo=FALSE, fig.align ='center', out.width ="50%"}
+knitr::include_graphics("../Figuras/p-valium.png")
+```
+
+
+.footnote[Figura: [Prof. Thiago Rangel](https://estat.bio.br/bayes6.html)]
 
 
 ---
@@ -590,6 +689,8 @@ knitr::include_graphics("../Figuras/Ronald-Fisher.jpg")
 
 ]
 
+
+
 ---
 # PPGECO | ECL0072 | out. 2026
 ### O método científico  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
@@ -655,8 +756,19 @@ A maioria dos problemas enfrentados pelos cientistas não se enquadram em uma l�
 
 
 ---
+
 # PPGECO | ECL0072 | out. 2026
-### O método científico  
+### A natureza sob o olhar bayesiano  
+
+A inferência bayesiana é a realocação da *credibilidade* diante de *possibilidades*
+
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### A natureza sob o olhar bayesiano  
+
 
 
 O cérebro é uma maquina preditiva em constante atualização
@@ -682,21 +794,206 @@ knitr::include_graphics("../Figuras/Daniel_Dennett_book.jpg")
 
 ]
 
+
+
+
 ---
 # PPGECO | ECL0072 | out. 2026
-### O método científico  
+### A natureza sob o olhar bayesiano  
 
-**Exemplo**
 
-Qual a probabilidade de detectar 
 
-```{r echo=FALSE, fig.align ='center', out.width ="85%"}
+
+.pull-left[
+<br>
+<br>
+<br>
+
+```{r echo=FALSE, fig.align ='center', out.width ="80%", fig.cap="Thomas Bayes (1701-1761)"}
+knitr::include_graphics("../Figuras/Thomas_Bayes.jpg")
+```
+
+]
+
+.pull-right[
+
+<br>
+
+.center[**Teorema de Bayes**]
+
+<div style="height: 7px;"></div>
+
+
+.gray-box-small[
+
+$$\Large p(\color{#e07a5f}{\theta} ~ | ~ y) = \frac{p(y~ | ~\color{#e07a5f}{\theta}) \cdot p(\color{#e07a5f}{\theta})}{p(y)}$$
+
+
+]
+
+<br>
+
+.small-text2[
+
+$\small p(\theta | y) ~ -$ Distribuição posterior
+
+
+$\small p(\theta) ~ -$ Distribuição à priori
+- Crença sobre o parâmetro populacional *antes* de observar os dados
+
+
+$\small p(y | \theta) ~ -$ Função de verossimilhança
+- 
+
+
+$\small p(y) ~ -$ Constante de normalização
+- Garante que a distribuição posterior seja probabilística $\int_\theta p(\theta|y) = 1$
+
+]
+]
+
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### A natureza sob o olhar bayesiano  
+
+
+<div style="height: 5px;"></div>
+
+$$\underbrace{p(\theta ~ | ~ y)}_\text{Posterior} ~ \propto ~ \underbrace{p(y~ | ~\theta)}_\text{Dados} \cdot \underbrace{p(\theta)}_\text{Priori}$$
+
+```{r echo=FALSE, out.width ="85%", fig.align = 'left'}
 knitr::include_graphics("../Figuras/prior_lik_post_densities.png")
 
 ```
 
 
 ---
+# PPGECO | ECL0072 | out. 2026
+
+### A natureza sob o olhar bayesiano  
+
+
+As prioris podem ter diferentes níveis de *informatividade*
+
+- a informação pode estar ao longo de um *continuum* que vai da incerteza completa à certeza relativa
+
+--
+
+----
+
+**Exemplo**
+
+
+Qual a detectabilidade do *Coleodactylus natalensis* no Parque das Dunas?
+
+<div style="height: 7px;"></div>
+
+
+.pull-left[
+```{r echo=FALSE, out.width ="85%", fig.align = 'left'}
+knitr::include_graphics("../Figuras/Coleodactylus_natalensis.jpg")
+
+```
+]
+
+.pull-right[
+
+.small-text2[
+
+.center[**Dados**]
+
+Uma saída de campo com 10 quadrantes
+- 4/10 detecções
+
+-----
+
+.center[**Modelo**]
+
+**parte determinística:** detecção média $\theta$
+
+**parte estocástica:** $y ~ \sim Binomial(N, \theta)$
+
+A incerteza está no parâmetro $\theta$
+
+]
+
+]
+
+
+.footnote[.small-text2[Foto: [UFRN](https://ufrn.br/en/press/features-and-knowledge/30696/a-luta-pela-)]]
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### A natureza sob o olhar bayesiano  
+
+
+As prioris podem ter diferentes níveis de *informatividade*
+
+- a informação pode estar ao longo de um *continuum* que vai da incerteza completa à certeza relativa
+  
+
+
+----
+
+**Priori difusa**
+
+Reflete um elevado grau de incerteza sobre o parâmetro ($\theta$)
+- A distribuição não inclui nenhum tipo de informação sobre o parâmetro
+- distribuição uniforme $\theta \sim \text{uniform}(0,1) = \text{beta}(1,1)$
+
+--
+
+
+.pull-left[
+
+```{r echo=FALSE, out.width ="90%", fig.align = 'left'}
+knitr::include_graphics("../Figuras/diffuse_prior_likelihood.png")
+
+```
+
+]
+
+
+--
+
+.pull-right[
+
+
+```{r echo=FALSE, out.width ="90%", fig.align = 'left'}
+knitr::include_graphics("../Figuras/diffuse_prior_likelihood_posterior.png")
+
+```
+
+]
+
+
+
+---
+Priors can have different levels of informativeness; the infomration reflected in a prior distribution can be anywhere on a continuum from complete uncertainty to relative certainty. Although priors can fall anywhere along this continuum, there are three main classifications of priors that are used in the literature to categorize the degree of (un)certainty surroudning the population parameter value
+- informative
+- weakly informative
+- diffuse
+  
+
+
+---
+
+**Exemplo**
+
+Qual a probabilidade de detectar 
+
+
+
+
+$$\underbrace{p(\theta ~ | ~ y)}_\text{Posterior} ~ \propto ~ \underbrace{p(y~ | ~\theta)}_\text{Dados} \cdot \underbrace{p(\theta)}_\text{Priori}$$
+---
+
 
 ```{r echo=FALSE, fig.align ='center', out.width ="85%"}
 knitr::include_graphics("../Figuras/Frequentist_workflow.png")
@@ -705,16 +1002,20 @@ knitr::include_graphics("../Figuras/Frequentist_workflow.png")
 
 
 
+
+
+
 ---
 
-Priors can have different levels of informativeness; the infomration reflected in a prior distribution can be anywhere on a continuum from complete uncertainty to relative certainty. Although priors can fall anywhere along this continuum, there are three main classifications of priors that are used in the literature to categorize the degree of (un)certainty surroudning the population parameter value
-- informative
-- weakly informative
-- diffuse
+
+**MCMC**
+
+https://chi-feng.github.io/mcmc-demo/app.html?algorithm=RandomWalkMH&target=standard
+
+---
+
 
 - Bayesian workflow - https://arxiv.org/pdf/2011.01808 (Gelman - 2020)
 
-
----
 
 https://educacao.uol.com.br/disciplinas/filosofia/filosofia-da-ciencia-karl-popper-falseabilidade-e-limites-da-ciencia.htm
