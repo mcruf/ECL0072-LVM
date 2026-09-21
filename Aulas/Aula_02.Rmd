@@ -426,7 +426,7 @@ knitr::include_graphics("../Figuras/black_sawn.png")
 ---
 # PPGECO | ECL0072 | out. 2026
 
-### O método científico
+### A natureza sob olhar frequentista
 
 As raízes da estatística clássica (frequentista) estão associadas aos conceitos de *teste de hipótese* e *p-valor*
 - Forte influência da filosofia Popperiana e dos problemas práticos que emergiram da Biologia (e.g., Biometria)
@@ -441,26 +441,30 @@ knitr::include_graphics("../Figuras/Fisher-Pearson-Neyman.png")
 ---
 # PPGECO | ECL0072 | out. 2026
 
-### O método científico
+### A natureza sob olhar frequentista
 
 Na visão *frequentista*, a probabilidade é definida em termos de frequências relativas de um evento
 
 
-$$\large p(E) = \frac{f}{n}$$
+$$\large p(E) = \lim_{n\to\infty}\frac{x}{n}$$
 
 --
 
-```{r echo=FALSE, fig.align ='center', out.width ="80%"}
+```{r echo=FALSE, fig.align ='center', out.width ="65%"}
 knitr::include_graphics("../Figuras/relative_frequency.png")
 ```
 
+
+--
+
+Assume que o valor do parâmetro ($\theta$) é *fixo* e o que varia são os dados
 
 
 
 ---
 # PPGECO | ECL0072 | out. 2026
 
-### O método científico  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
+### A natureza sob olhar frequentista  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
 
 O teste de hipótese parte do pressuposto de que a hipótese nula ($H_0$) é *verdadeira*
 
@@ -470,7 +474,7 @@ O teste de hipótese parte do pressuposto de que a hipótese nula ($H_0$) é *ve
 
 .small-text2[
 
-Qual o efeito da temperatura sobre a abundância de uma espécie?
+Qual o efeito da temperatura sobre a riqueza de espécies?
 
 - $H_0: ~ \beta = 0$ (sem efeito de temperatura)
 - $H_1: ~ \beta \neq 0$ (com efeito de temperatura)
@@ -522,11 +526,27 @@ Assumindo $H_0$ como verdadeira, avalia-se a probabilidade de obter um resultado
 ---
 # PPGECO | ECL0072 | out. 2026
 
-### O método científico  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
+### A natureza sob olhar frequentista  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
 
 
 **Mito da intensidade da significância da relação**
 
+<br>
+
+
+
+
+
+.pull-left[
+
+```{r echo=FALSE, fig.align ='center', out.width ="50%"}
+knitr::include_graphics("../Figuras/p_values_comic.png")
+```
+
+]
+
+
+.pull-right[
 
 .code-bg[
 ```{r, eval=T, echo=F}
@@ -555,22 +575,29 @@ mod <- lm(riqueza ~ temp + sal + prof)
 
 
 .code-bg[
+
 .small-code[
 ```{r, echo=T, eval=T}
 summary(mod)
 ```
+
+]
 ]
 ]
 
-<div style="height: 7px;"></div>
+
+.footnote[.small-text2[Fonte: [explainxkcd](https://www.explainxkcd.com/wiki/index.php/1478:_P-Values)]]
+
 
 --
 
+<div style="height: 10px;"></div>
+
+
+.small-text[
+
 O número de asteriscos no sumário estatístico do modelo **não** mede a força nem o nível de significância do efeito
 
-
-
-.small-text2[
 
 - Reforça a evidência estatística contra $H_0$
 
@@ -582,10 +609,11 @@ O número de asteriscos no sumário estatístico do modelo **não** mede a forç
 ]
 
 
+
 ---
 # PPGECO | ECL0072 | out. 2026
 
-### O método científico  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
+### A natureza sob olhar frequentista  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
 
 <br>
 
@@ -595,14 +623,14 @@ knitr::include_graphics("../Figuras/p-valium.png")
 ```
 
 
-.footnote[Figura: [Prof. Thiago Rangel](https://estat.bio.br/bayes6.html)]
+.footnote[Figura: [Prof. Thiago Rangel](https://estat.bio.br/)]
 
 
 ---
 
 # PPGECO | ECL0072 | out. 2026
 
-### O método científico  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
+### A natureza sob olhar frequentista | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
 
 O intervalo de confiança (IC%) quantifica a incerteza associada à estimativa do parâmetro diante do nível de significância estabelecido
 
@@ -647,9 +675,10 @@ Não representa a probabilidade do valor do parâmetro estar contido no interval
 ]
 
 .footnote[.small-text2[Figura: [Wikipedia](https://en.wikipedia.org/wiki/Confidence_interval)]]
+
 ---
 # PPGECO | ECL0072 | out. 2026
-### O método científico  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
+### A natureza sob olhar frequentista  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
 
 **Exemplo:**
 
@@ -677,7 +706,7 @@ knitr::include_graphics("../Figuras/Intencao_de_voto.jpg")
 
 ---
 # PPGECO | ECL0072 | out. 2026
-### O método científico  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
+### A natureza sob olhar frequentista | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
 
 
 O teste de hipótese é uma versão clássica do argumento *reductio ad absurdum* (redução ao absurdo)
@@ -712,7 +741,7 @@ knitr::include_graphics("../Figuras/Ronald-Fisher.jpg")
 
 ---
 # PPGECO | ECL0072 | out. 2026
-### O método científico  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
+### A natureza sob olhar frequentista  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
 
 
 A falsificação de hipóteses é uma estratégia frágil na prática científica
@@ -744,7 +773,7 @@ knitr::include_graphics("../Figuras/Hilborn_figure.png")
 ---
 
 # PPGECO | ECL0072 | out. 2026
-### O método científico  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
+### A natureza sob olhar frequentista  | .small-text[<span style="color: #e07a5f;">Teste de hipótese (nula)</span>]
 
 
 A falsificação de hipóteses é uma estratégia frágil na prática científica
@@ -770,7 +799,7 @@ A maioria dos problemas enfrentados pelos cientistas não se enquadram em uma l�
 
 <br>
 
-- As observações (dados) estão sujeitas a erros, particularmente àquelas tangendo as fronteiras do conhecimento científico
+- As observações (dados) estão sujeitas a erros, particularmente aquelas tangendo as fronteiras do conhecimento científico
 
 
 
@@ -779,7 +808,126 @@ A maioria dos problemas enfrentados pelos cientistas não se enquadram em uma l�
 # PPGECO | ECL0072 | out. 2026
 ### A natureza sob o olhar bayesiano  
 
-A inferência bayesiana é a realocação da *credibilidade* diante de *possibilidades*
+No contexto bayesiano, a probabilidade é interpretada como o grau de (in)certeza sobre um evento (ou parâmetro) diante do conhecimento disponível
+
+- Assume que os dados são fixos e o parâmetro é aleatório
+
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+### A natureza sob o olhar bayesiano  
+
+
+**Exemplo: mortalidade de peixes em uma lagoa**
+
+O que poderia ter causado a mortalidade dos peixes?
+
+--
+
+1. contaminação química?
+
+--
+
+2. doença?
+
+--
+
+3. hipoxia?
+
+--
+
+4. pesca ilegal (explosiva)?
+
+
+--
+
+```{r echo=FALSE, fig.align = 'left', out.width ="25%"}
+knitr::include_graphics("../Figuras/credibility_experiment0.png")
+```
+
+
+
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+### A natureza sob o olhar bayesiano  
+
+
+**Exemplo: mortalidade de peixes em uma lagoa**
+
+O que poderia ter causado a mortalidade dos peixes?
+
+
+1. contaminação química?
+
+2. doença?
+
+3. hipoxia?
+
+4. pesca ilegal (explosiva)?
+
+
+
+```{r echo=FALSE, fig.align ='left', out.width ="54%"}
+knitr::include_graphics("../Figuras/credibility_experiment1.png")
+```
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+### A natureza sob o olhar bayesiano  
+
+
+**Exemplo: mortalidade de peixes em uma lagoa**
+
+O que poderia ter causado a mortalidade dos peixes?
+
+
+1. contaminação química?
+
+2. doença?
+
+3. hipoxia?
+
+4. pesca ilegal (explosiva)?
+
+
+```{r echo=FALSE, fig.align ='left', out.width ="83%"}
+knitr::include_graphics("../Figuras/credibility_experiment2.png")
+```
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+### A natureza sob o olhar bayesiano  
+
+
+**Exemplo: mortalidade de peixes em uma lagoa**
+
+O que poderia ter causado a mortalidade dos peixes?
+
+
+1. contaminação química?
+
+2. doença?
+
+3. hipoxia?
+
+4. pesca ilegal (explosiva)?
+
+
+```{r echo=FALSE, fig.align ='left'}
+knitr::include_graphics("../Figuras/credibility_experiment3.png")
+```
+
+<div style="height: 20px;"></div>
+
+--
+
+.center[ .gray-box-small[ A inferência bayesiana é a realocação da *credibilidade* diante de *possibilidades*]
+]
 
 
 
@@ -797,7 +945,7 @@ O cérebro é uma maquina preditiva em constante atualização
 
 .pull-left[
 
-```{r echo=FALSE, fig.align ='center', out.width ="60%"}
+```{r echo=FALSE, fig.align ='right', out.width ="60%"}
 knitr::include_graphics("../Figuras/Anil_Seth_book.jpg")
 ```
 
@@ -806,7 +954,7 @@ knitr::include_graphics("../Figuras/Anil_Seth_book.jpg")
 
 .pull-right[
 
-```{r echo=FALSE, fig.align ='center', out.width ="60%"}
+```{r echo=FALSE, fig.align ='left', out.width ="60%"}
 knitr::include_graphics("../Figuras/Daniel_Dennett_book.jpg")
 ```
 
@@ -820,15 +968,17 @@ knitr::include_graphics("../Figuras/Daniel_Dennett_book.jpg")
 # PPGECO | ECL0072 | out. 2026
 ### A natureza sob o olhar bayesiano  
 
+Na perspectiva bayesiana, todo processo de inferência estatística é realizado mediante o Teorema de Bayes
+
+- i.e., a probabilidade de uma hipótese é atualizada à medida que novas evidências (dados) são observadas
 
 
 
 .pull-left[
-<br>
-<br>
+
 <br>
 
-```{r echo=FALSE, fig.align ='center', out.width ="80%", fig.cap="Thomas Bayes (1701-1761)"}
+```{r echo=FALSE, fig.align ='center', out.width ="70%", fig.cap="Thomas Bayes (1701-1761)"}
 knitr::include_graphics("../Figuras/Thomas_Bayes.jpg")
 ```
 
@@ -836,7 +986,10 @@ knitr::include_graphics("../Figuras/Thomas_Bayes.jpg")
 
 .pull-right[
 
+
 <br>
+<br>
+
 
 .center[**Teorema de Bayes**]
 
@@ -845,32 +998,13 @@ knitr::include_graphics("../Figuras/Thomas_Bayes.jpg")
 
 .gray-box-small[
 
-$$\Large p(\color{#e07a5f}{\theta} ~ | ~ y) = \frac{p(y~ | ~\color{#e07a5f}{\theta}) \cdot p(\color{#e07a5f}{\theta})}{p(y)}$$
+$$\large p(\color{#e07a5f}{\theta} ~ | ~ y) = \frac{p(y~ | ~\color{#e07a5f}{\theta}) \cdot p(\color{#e07a5f}{\theta})}{p(y)}$$
+
+]
+
 
 
 ]
-
-<br>
-
-.small-text2[
-
-$\small p(\theta | y) ~ -$ Distribuição posterior
-
-
-$\small p(\theta) ~ -$ Distribuição à priori
-- Crença sobre o parâmetro populacional *antes* de observar os dados
-
-
-$\small p(y | \theta) ~ -$ Função de verossimilhança
-- 
-
-
-$\small p(y) ~ -$ Constante de normalização
-- Garante que a distribuição posterior seja probabilística $\int_\theta p(\theta|y) = 1$
-
-]
-]
-
 
 
 
@@ -881,10 +1015,78 @@ $\small p(y) ~ -$ Constante de normalização
 
 <div style="height: 5px;"></div>
 
-$$\underbrace{p(\theta ~ | ~ y)}_\text{Posterior} ~ \propto ~ \underbrace{p(y~ | ~\theta)}_\text{Dados} \cdot \underbrace{p(\theta)}_\text{Priori}$$
 
-```{r echo=FALSE, out.width ="85%", fig.align = 'left'}
+.pull-left[
+
+<div style="height: 7px;"></div>
+
+
+.gray-box-small[
+
+$$\large p(\color{#e07a5f}{\theta} ~ | ~ y) = \frac{p(y~ | ~\color{#e07a5f}{\theta}) \cdot p(\color{#e07a5f}{\theta})}{p(y)}$$
+
+]
+
+
+<div style="height: 20px;"></div>
+
+
+.small-text[
+
+$~~~ \small\mathbf{p(\theta | y):}$ **Distribuição posterior**
+- Conhecimento atualizado sobre o parâmetro após observar os dados
+
+
+$~~~ \small \mathbf{p(\theta):}$ **Distribuição a priori**
+- Crença sobre o parâmetro populacional *antes* de observar os dados
+
+
+$~~~ \small \mathbf{p(y | \theta):}$ **Função de verossimilhança**
+- Representa a evidência fornecida pelos dados sobre o parâmetro
+
+
+$~~~ \small \mathbf{p(y):}$ **Constante de normalização**
+- Garante que a distribuição posterior seja probabilística $\int_\theta p(\theta|y) = 1$
+
+]
+
+
+]
+
+
+<div style="height: 20px;"></div>
+
+.pull-right[
+
+
+
+
+
+
+
+$$\large \underbrace{p(\theta ~ | ~ y)}_\text{Posterior} ~ \propto ~ \underbrace{p(y~ | ~\theta)}_\text{Dados} \cdot \underbrace{p(\theta)}_\text{Priori}$$
+
+
+<div style="height: 20px;"></div>
+
+```{r echo=FALSE, out.width ="100%", fig.align = 'left'}
 knitr::include_graphics("../Figuras/prior_lik_post_densities.png")
+
+```
+
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### A natureza sob o olhar bayesiano  
+
+<br>
+
+
+```{r echo=FALSE, out.width ="60%", fig.align = 'center'}
+knitr::include_graphics("../Figuras/bayesian_statisticians.png")
 
 ```
 
@@ -952,22 +1154,16 @@ A incerteza está no parâmetro $\theta$
 ### A natureza sob o olhar bayesiano  
 
 
-As prioris podem ter diferentes níveis de *informatividade*
-
-- a informação pode estar ao longo de um *continuum* que vai da incerteza completa à certeza relativa
-  
-
-
-----
 
 ***Priori difusa***
 
 Reflete um elevado grau de incerteza sobre o parâmetro ($\theta$)
 - A priori não inclui nenhum tipo de informação sobre o parâmetro
-  - Distribuição uniforme $\theta \sim \text{uniform}(0,1) = \text{beta}(1,1)$
+  - Distribuição uniforme $\theta \sim \text{beta}(1,1) = \text{uniform}(0,1)$
 
 --
 
+<br>
 
 .pull-left[
 
@@ -997,14 +1193,6 @@ knitr::include_graphics("../Figuras/diffuse_prior_likelihood_posterior.png")
 ### A natureza sob o olhar bayesiano  
 
 
-As prioris podem ter diferentes níveis de *informatividade*
-
-- a informação pode estar ao longo de um *continuum* que vai da incerteza completa à certeza relativa
-  
-
-
-----
-
 ***Priori vagamente informativa***
 
 Representa um conhecimento prévio sobre o parâmetro, porém ainda associado a um grau moderado de incerteza
@@ -1014,6 +1202,8 @@ Representa um conhecimento prévio sobre o parâmetro, porém ainda associado a 
 
 --
 
+
+<br>
 
 .pull-left[
 
@@ -1043,13 +1233,6 @@ knitr::include_graphics("../Figuras/weakly_informative_prior_likelihood_posterio
 ### A natureza sob o olhar bayesiano  
 
 
-As prioris podem ter diferentes níveis de *informatividade*
-
-- a informação pode estar ao longo de um *continuum* que vai da incerteza completa à certeza relativa
-  
-
-
-----
 
 ***Priori informativa***
 
@@ -1060,6 +1243,8 @@ Reflete um alto grau de conhecimento (certeza) sobre o parâmetro
 
 
 --
+
+<br>
 
 .pull-left[
 
@@ -1104,17 +1289,412 @@ knitr::include_graphics("../Figuras/SampleSize_impact_posterior.png")
 ```
 
 ---
+# PPGECO | ECL0072 | out. 2026
 
-**Exemplo**
+### Métodos de inferência
 
-Qual a probabilidade de detectar 
+Como estimamos os valores para os parâmetros desconhecidos do modelo?
+
+<br>
+<br>
+<br>
+
+
+.pull-left[
+
+```{r echo=FALSE, fig.align ='center', out.width ="100%"}
+knitr::include_graphics("../Figuras/LM_pinguins2.png")
+```
+
+]
+
+.pull-right[
+
+<br>
+<br>
+
+
+- Método dos momentos
+- <span style="color: #e07a5f;">Método dos mínimos quadrados </span>
+- <span style="color: #e07a5f;">Método de máxima verossimilhança </span>
+- <span style="color: #e07a5f;">Método bayesiano </span>
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Mínimos Quadrados (OLS) </span>]
+
+<br>
+<br>
+
+
+.pull-left[
+
+<br>
+
+```{r echo=FALSE, fig.align ='right', out.width ="100%"}
+knitr::include_graphics("../Figuras/MMQ_animacao.gif")
+```
+
+]
+
+.pull-right[
+
+<br>
+<br>
+
+
+$$\large y_i = f(x_i | \theta) + \varepsilon_i$$
+$$\large \varepsilon_i = y_i - f(x_i|\theta)$$
+
+
+]
+
+
+.footnote[OLS - *Ordinary Least Squares*]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Mínimos Quadrados (OLS) </span>]
+
+<br>
+<br>
+
+
+.pull-left[
+
+<br>
+
+```{r echo=FALSE, fig.align ='right', out.width ="100%"}
+knitr::include_graphics("../Figuras/MMQ_animacao.gif")
+```
+
+]
+
+.pull-right[
+
+<br>
+<br>
+
+
+$$\large y_i = f(x_i | \theta) + \varepsilon_i$$
+$$\large \varepsilon_i = y_i - f(x_i|\theta)$$
+
+
+<div style="height: 10px;"></div>
+
+
+-----
+
+.center[.small-text2[**Qual linha se ajusta melhor aos dados?**]]
+
+
+
+]
+
+.footnote[OLS - *Ordinary Least Squares*]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Mínimos Quadrados (OLS) </span>]
+
+<br>
+<br>
+
+
+.pull-left[
+
+<br>
+
+```{r echo=FALSE, fig.align ='right', out.width ="100%"}
+knitr::include_graphics("../Figuras/MMQ_animacao.gif")
+```
+
+]
+
+.pull-right[
+
+<br>
+<br>
+
+
+$$\large y_i = f(x_i | \theta) + \varepsilon_i$$
+$$\large \varepsilon_i = y_i - f(x_i|\theta)$$
+
+
+<div style="height: 10px;"></div>
+
+
+-----
+
+.center[.small-text2[**Qual linha se ajusta melhor aos dados?**]]
+
+<br>
+
+.gray-box-small[
+$$\large \text{SQR} = min \sum_{i=1}^{n} (y_i - f(x_i|\theta))^2$$
+
+]
+
+]
+
+.footnote[OLS - *Ordinary Least Squares*]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Mínimos Quadrados (OLS) </span>]
+
+
+<br>
+
+
+$$\large \text{SQR} = \underbrace{min \sum_{i=1}^{n} (y_i - f(x_i|\theta))^2}_
+{\text{Diferenciar a função em relação a }\ \theta}$$
+
+<br>
+
+--
+
+Possui solução analítica
+
+<br>
+
+$$\large \hat{\beta_0} = (X^TX)^{-1}X^Ty ~~\color{gray}{(= \overline{y} - \widehat{\beta_1}~\overline{x})}$$
+
+
+<br>
+
+$$\large \hat{\beta_1} = X(X^TX)^{-1}X^Ty ~~\color{gray}{(= r \frac{\sigma_y}{\sigma_x})}$$
 
 
 
 
-$$\underbrace{p(\theta ~ | ~ y)}_\text{Posterior} ~ \propto ~ \underbrace{p(y~ | ~\theta)}_\text{Dados} \cdot \underbrace{p(\theta)}_\text{Priori}$$
+
+
+.footnote[r = coeficiente de correlação;  σ = desvio padrão]
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Máxima Verossimilhança (ML) </span>]
+
+
+
+
+.pull-left[
+
+<br>
+<br>
+
+```{r echo=FALSE, out.width ="66%", fig.align ='center', fig.cap="Ronald A. Fisher (1890-1962)", fig.topcaption=F}
+knitr::include_graphics("../Figuras/RonaldFisher.jpg")
+```
+
+
+]
+
+
+.pull-right[
+
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+Formalizou a teoria de máxima verossimilhança 
+- Estatística frequentista
+  - Teste de hipótese, ANOVA, ...
+
+
+
+]
+
+
+
+
+
+.footnote[ML - *Maximum Likelihood*]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Máxima Verossimilhança (ML) </span>]
+
+
+**Entendendo o método:**
+
+
+Os dados (i.e, $Y$) surgem de um processo aleatório
+- podem ser descritos por um modelo probabilístico
+
+
+--
+
+<div style="height: 7px;"></div>
+
+$$\large Y \sim N(\mu, \sigma^2)$$
+
+<div style="height: 7px;"></div>
+
+
+```{r echo=FALSE, fig.align ='center', out.width ="55%"}
+knitr::include_graphics("../Figuras/Dist_normal.png")
+
+```
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Máxima Verossimilhança (ML) </span>]
+
+**Entendendo o método:**
+
+Dado o modelo probabilístico, deseja-se encontrar os valores dos parâmetros ($\theta$) que mais provavelmente geraram os dados observados
+- Confrontando os dados com a distribuição de probabilidade
+
+
+
+```{r echo=FALSE, out.width ="75%", fig.align ='center'}
+knitr::include_graphics("../Figuras/MLE0.png")
+```
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Máxima Verossimilhança (ML) </span>]
+
+**Entendendo o método:**
+
+Dado o modelo probabilístico, deseja-se encontrar os valores dos parâmetros ($\theta$) que mais provavelmente geraram os dados observados
+- Confrontando os dados com a distribuição de probabilidade
+
+
+
+```{r echo=FALSE, out.width ="65%", fig.align ='center'}
+knitr::include_graphics("../Figuras/MLE1.png")
+```
+
 ---
 
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Máxima Verossimilhança (ML) </span>]
+
+**Entendendo o método:**
+
+Dado o modelo probabilístico, deseja-se encontrar os valores dos parâmetros ($\theta$) que mais provavelmente geraram os dados observados
+- Confrontando os dados com a distribuição de probabilidade
+
+
+```{r echo=FALSE, out.width ="65%", fig.align ='center'}
+knitr::include_graphics("../Figuras/MLE2.png")
+```
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Máxima Verossimilhança (ML) </span>]
+
+**Entendendo o método:**
+
+Dado o modelo probabilístico, deseja-se encontrar os valores dos parâmetros ($\theta$) que mais provavelmente geraram os dados observados
+- Confrontando os dados com a distribuição de probabilidade
+
+
+
+```{r echo=FALSE, out.width ="65%", fig.align ='center'}
+knitr::include_graphics("../Figuras/MLE3.png")
+```
+
+
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Máxima Verossimilhança (ML) </span>]
+
+**Entendendo o método:**
+
+
+```{r echo=FALSE, out.width ="90%", fig.align ='center'}
+knitr::include_graphics("../Figuras/MLE_gif.gif")
+```
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Máxima Verossimilhança (ML) </span>]
+
+**Entendendo o método:**
+
+.pull-left[
+
+<br>
+<br>
+<br>
+
+```{r echo=FALSE, out.width ="100%", fig.align ='center'}
+knitr::include_graphics("../Figuras/Exemplo_mle_mu.png")
+```
+]
+.pull-right[
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+$$\large \hat{\theta} := argmax ~ L(\theta)$$
+]
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Máxima Verossimilhança (ML) </span>]
+
+**Entendendo o método:**
+
+
+Como a distribuição Normal é descrita por dois parâmetros ($\mu,\sigma^2$), é preciso achar o máximo da função de verossimilhança *simultaneamente* para ambos os parâmetros
+
+<br>
+
+.pull-left[
+
+```{r echo=FALSE, out.width ="100%", fig.align ='center'}
+knitr::include_graphics("../Figuras/Exemplo_mle_mu.png")
+```
+]
+
+.pull-right[
+
+```{r echo=FALSE, out.width ="100%", fig.align ='left'}
+knitr::include_graphics("../Figuras/Exemplo_mle_sigma.png")
+```
+]
+
+
+
+---
 
 ```{r echo=FALSE, fig.align ='center', out.width ="85%"}
 knitr::include_graphics("../Figuras/Frequentist_workflow.png")
