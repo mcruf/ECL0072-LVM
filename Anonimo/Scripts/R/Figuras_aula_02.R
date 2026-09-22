@@ -10,6 +10,10 @@
 # Load libraries
 #~~~~~~~~~~~~~~~~~~~
 library(ggplot2)
+library(dplyr)
+library(patchwork)
+library(gganimate)
+library(purrr)
 
 
 #~~~~~~~~~~~~~~~~~
@@ -36,7 +40,29 @@ tema_clean <- theme_classic(base_size = 13) +
                     axis.title.x        = element_text(color = "gray20", size = 16, face = "bold"),
                     axis.title.y        = element_text(color = "gray20", size = 12),
                     axis.ticks        = element_line(color = "gray40", size = 0.4),
+                    #panel.grid.major.y = element_line(linetype = 'dotted'),
+                    #panel.grid.major.x = element_line(linetype = 'dotted'),
                     plot.margin       = margin(15, 15, 15, 15))
+
+# my_theme <- theme_minimal(base_size = 14) +
+#   theme(plot.title = element_text(hjust = 0.5, face = 'bold', margin = margin(b = 15), size = 13),
+#         axis.text.x = element_text(colour = "grey20", margin = margin(t = 5)),
+#         axis.text.y = element_text(colour = "grey20", margin = margin(r = 5)),
+#         axis.title = element_text(face = "bold", colour = "black"),
+#         axis.title.y = element_text(margin = margin(t = 0, r = 15, b = 0, l = 0)),
+#         axis.title.x = element_text(margin = margin(t = 15, r = 0, b = 0, l = 0)),
+#         strip.background = element_rect(fill = 'white'),
+#         legend.background = element_rect(fill = "transparent", colour = NA),
+#         legend.box.background = element_rect(fill = "transparent", colour = NA),
+#         legend.title = element_text(hjust = 0.5, face = 'bold', size = 10),
+#         legend.text = element_text(size = 9),
+#         legend.position = "bottom",
+#         legend.box = "horizontal",
+#         panel.grid.major.y = element_line(linetype = 'dotted'),
+#         panel.grid.major.x = element_line(linetype = 'dotted'),
+#         plot.margin = margin(t = 10, r = 20, b = 10, l = 20)) # Espaçamento lateral por painel
+
+
 
 
 
@@ -63,6 +89,35 @@ gera_dados <- function(a, b, k, n) {
   )
 }
 
+
+
+
+#><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Exemplo: REGRESSÃO LINEAR PINGUINS
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Importando o banco de dados
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+dados <- readRDS("~/OneDrive/Arbeit/Lectures_and_Talks/UFRN/Lectures/Graduation/ECL0072-GLM_GAM/Dados/palmerpenguins_extended.rds")
+
+
+
+p1 <- dados %>%
+  ggplot(aes(y = body_mass_g, x = bill_length_mm)) +
+  geom_point(size = 3.5, col ='#e07a5f', alpha = 0.2) +
+  geom_smooth(method = 'lm', col = 'gray20', fill = 'gray40', se = TRUE) +
+  my_theme +
+  labs(
+    x = "Tamanho do bico (mm)",
+    y = "Peso (g)",
+    title = expression(Peso[i] == 2299.7 + 65.8 * Bico[i])) +
+  theme(axis.title.y = element_text(vjust = 3),
+        axis.title.x = element_text(vjust = -3),
+        plot.title = element_text(hjust = 0.5),
+        plot.margin = margin(20, 20, 20, 20))
+p1
 
 
 #><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
@@ -138,6 +193,116 @@ ggsave(filename = "Figuras/relative_frequency.png",
 
 
 #><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Exemplo: REALOCACAO DE CREDIBILIDADE
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+# --- Configuração de Cores (Paleta Lux) ---
+col_bar <- "#e07a5f"  # Azul pastel das barras
+col_bg  <- "transparent"  # Off-white
+
+# --- Dados dos 3 Passos da Inferência (B como Vencedor Final) ---
+# Passo 1: A é descartado -> Credibilidade de B, C, D sobe para 1/3 (0.333)
+df_p1_prior <- data.frame(Poss = c("A", "B", "C", "D"), Cred = c(0.25, 0.25, 0.25, 0.25))
+df_p1_post  <- data.frame(Poss = c("A", "B", "C", "D"), Cred = c(0, 1/3, 1/3, 1/3))
+
+# Passo 2: D é descartado -> Credibilidade de B, C sobe para 1/2 (0.50)
+df_p2_prior <- df_p1_post
+df_p2_post  <- data.frame(Poss = c("A", "B", "C", "D"), Cred = c(0, 0.5, 0.5, 0))
+
+# Passo 3: C é descartado -> Credibilidade de B sobe para 1.0
+df_p3_prior <- df_p2_post
+df_p3_post  <- data.frame(Poss = c("A", "B", "C", "D"), Cred = c(0, 1.0, 0, 0))
+
+
+
+
+# --- Função Auxiliar para Criar os Gráficos ---
+cria_grafico <- function(df, titulo, texto_seta = NULL, pos_x_seta = NULL) {
+  p <- ggplot(df, aes(x = Poss, y = Cred)) +
+    geom_col(fill = col_bar, width = 0.8) +
+    coord_cartesian(expand = c(0,0)) +
+    scale_y_continuous(limits = c(0, 1.05), breaks = seq(0, 1, 0.2), labels = c("0.0", "0.2", "0.4", "0.6", "0.8", "1.0")) +
+    labs(title = titulo, x = "Possibilidades", y = "Credibilidade") +
+    tema_sherlock
+  
+  if (!is.null(texto_seta)) {
+    p <- p + 
+      # Seta apontando para a barra zerada
+      annotate("segment", x = pos_x_seta, xend = pos_x_seta, y = 0.60, yend = 0.03,
+               arrow = arrow(length = unit(0.2, "cm")), color = "black", linewidth = 0.5) +
+      # Texto explicativo da eliminação
+      annotate("text", x = pos_x_seta, y = 0.72, label = texto_seta, 
+               color = "black", size = 3.5, hjust = 0.5)
+  }
+  return(p)
+}
+
+# --- Construção dos Painéis ---
+# Coluna 1: A é descartado (posição x = 1)
+p1_top <- cria_grafico(df_p1_prior, "") +  theme(axis.text = element_text(size = 13),
+                                                 axis.title.x = element_text(color = "gray20", size = 14, face = "bold",  margin = margin(t = 25)),
+                                                 axis.title.y = element_text(color = "gray20", size = 14, face = "bold", margin = margin(r = 20)))
+
+p1_bot <- cria_grafico(df_p1_post,  "Posterior", "A is\nimprobable", 1)
+
+# Coluna 2: D é descartado (posição x = 4)
+p2_top <- cria_grafico(df_p2_prior, "") +  theme(axis.text = element_text(size = 13),
+                                                 axis.title.x = element_text(color = "gray20", size = 14, face = "bold",  margin = margin(t = 25)),
+                                                 axis.title.y = element_text(color = "gray20", size = 14, face = "bold", margin = margin(r = 20)))
+
+p2_bot <- cria_grafico(df_p2_post,  "Posterior", "D is\nimprobable", 4)
+
+# Coluna 3: C é descartado (posição x = 3)
+p3_top <- cria_grafico(df_p3_prior, "") +  theme(axis.text = element_text(size = 13),
+                                                 axis.title.x = element_text(color = "gray20", size = 14, face = "bold",  margin = margin(t = 25)),
+                                                 axis.title.y = element_text(color = "gray20", size = 14, face = "bold", margin = margin(r = 20)))
+
+#p3_bot <- cria_grafico(df_p3_post,  "Posterior", "C is\nimprobable", 3)
+p3_bot <- cria_grafico(df_p3_post,  "") +  theme(axis.text = element_text(size = 13),
+                                                 axis.title.x = element_text(color = "gray20", size = 14, face = "bold",  margin = margin(t = 25)),
+                                                 axis.title.y = element_text(color = "gray20", size = 14, face = "bold", margin = margin(r = 20)))
+
+
+# --- Montagem Final com Patchwork ---
+# col1 <- (p1_top / p1_bot)
+# col2 <- (p2_top / p2_bot)
+# col3 <- (p3_top / p3_bot)
+
+p1_top + p2_top + p3_top + p3_bot
+
+
+figura_sherlock_B <- (p1_top | p2_top | p3_top | p3_bot) +
+  plot_layout(widths = c(1, 1, 1, 1)) &
+  tema_clean +
+  theme(axis.text = element_text(size = 13),
+        axis.title.x = element_text(color = "gray20", size = 14, face = "bold",  margin = margin(t = 25)),
+        axis.title.y = element_text(color = "gray20", size = 14, face = "bold", margin = margin(r = 20)))
+
+
+figura_sherlock_B
+
+
+# --- Salvando a Figura ---
+ggsave(filename = "Figuras/reallocation_of_credibility_4.png", 
+       plot = p3_bot, 
+       width = 4, 
+       height = 4, 
+       dpi = 400, 
+       bg = 'transparent')
+
+
+
+
+
+
+#><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Exemplo: TIPOS DE PRIORIS
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 1) Priori não-informativa
@@ -263,9 +428,10 @@ ggsave(filename = "Figuras/informative_prior_likelihood_posterior.png",
 
 ###########################################################################
 
-library(ggplot2)
-library(patchwork)
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Exemplo: INFLUENCIA DO NAMOSTRAL SOBRE A POSTERIORI
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # --- CENÁRIO 1: Amostra Pequena (N = 10, k = 4) ---
 d_pequeno <- gera_dados(a = 7, b = 3, k = 4, n = 10)
@@ -326,4 +492,155 @@ ggsave(filename = "Figuras/SampleSize_impact_posterior.png",
 )
 
 
-#########################################
+#><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Exemplo: REGRESSÃO LINEAR COM DESVIOS
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+# --- 1. Preparação dos Dados ---
+dados <- readRDS("~/OneDrive/Arbeit/Lectures_and_Talks/UFRN/Lectures/Graduation/ECL0072-GLM_GAM/Dados/palmerpenguins_extended.rds")
+
+set.seed(125)
+dados_100 <- dados %>%
+  slice_head(n = 150) %>%
+  mutate(id = row_number())
+
+# IDs dos pontos destacados
+ids_destaque <- sample(dados_100$id, 15)
+
+# --- 2. Ajuste do Modelo MQO (para obter a reta ideal como referência) ---
+mod_lm <- lm(body_mass_g ~ bill_length_mm, data = dados_100)
+a_mqo <- coef(mod_lm)[1]
+b_mqo <- coef(mod_lm)[2]
+
+# --- 3. Criando uma Grade de Várias Inclinações (Frames da Animação) ---
+# Vamos variar a inclinação (b) de -40 até 120 (passando pelo valor ideal ~87)
+slopes <- seq(-40, 120, by = 4)
+
+# Para cada inclinação, fazemos a reta girar ao redor do ponto médio (x_mean, y_mean)
+x_mean <- mean(dados_100$bill_length_mm)
+y_mean <- mean(dados_100$body_mass_g)
+
+# Gerando a base de dados expandida para todos os frames
+dados_anim <- map_df(seq_along(slopes), function(f) {
+  b_curr <- slopes[f]
+  a_curr <- y_mean - b_curr * x_mean # Mantém a reta girando no centro dos dados
+  
+  dados_100 %>%
+    mutate(
+      frame = f,
+      slope = b_curr,
+      intercept = a_curr,
+      pred = a_curr + b_curr * bill_length_mm,
+      sqr = sum((body_mass_g - pred)^2), # Soma dos Quadrados dos Resíduos
+      grupo = if_else(id %in% ids_destaque, "highlight", "fade")
+    )
+})
+
+
+# --- 4. Construção do Gráfico Base ---
+p_anim <- ggplot(dados_anim, aes(x = bill_length_mm, y = body_mass_g)) +
+  # Segmentos de resíduos para os pontos em destaque
+  geom_segment(data = filter(dados_anim, grupo == "highlight"),
+               aes(xend = bill_length_mm, yend = pred),
+               color = "#e07a5f", linewidth = 0.8) +
+  
+  # Pontos
+  geom_point(aes(alpha = grupo, color = grupo), size = 3.5) +
+  
+  # Reta com a inclinação do frame atual
+  geom_abline(aes(intercept = intercept, slope = slope), color = "#2b5c8f", linewidth = 1.2) +
+  
+  # Escalas de Cores e Transparência
+  scale_color_manual(values = c("fade" = "gray50", "highlight" = "#e07a5f")) +
+  scale_alpha_manual(values = c("highlight" = 1, "fade" = 0.20)) +
+  
+  # Rótulo Dinâmico mostrando a Inclinação e a Soma dos Quadrados dos Resíduos (SQR)
+  labs(x = "Tamanho do bico (mm)", 
+       y = "Peso (g)") +
+  
+  tema_clean +
+  theme(axis.text = element_text(size = 13),
+        axis.title.x = element_text(color = "gray20", size = 14, face = "bold", margin = margin(t = 25)),
+        axis.title.y = element_text(color = "gray20", size = 14, face = "bold", margin = margin(r = 20)),
+        legend.position = "none") +
+  
+# --- 5. Adicionando Animação ---
+transition_manual(frame)
+
+# --- 6. Renderizando o GIF ---
+gif_residuos <- animate(p_anim, 
+                        nframes = length(slopes), 
+                        fps = 6, 
+                        width = 700, 
+                        height = 500, 
+                        res = 100, 
+                        dpi = 400)
+
+# Visualizar no RStudio
+gif_residuos
+
+# Salvar o arquivo em disco
+anim_save("Figuras/MMQ_animacao.gif", animation = gif_residuos)
+
+
+
+#><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Exemplo: CURVAS DE DISTRIBUIÇÃO NORMAL
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Criando a variável x (comum a todos os y's simulados)
+x <- seq(-5, 5, length.out = 200)
+
+
+## Simulando a variável y (com diferentes parâmetros)
+set.seed(452)
+df <- rbind(data.frame(x = x, y = dnorm(x, mean = 0, sd = 0.5), 
+             dist = "mu==0 ~ ',' ~ sigma^2==0.5"),
+            data.frame(x = x, y = dnorm(x, mean = -2, sd = 0.5), 
+                       dist = "mu==-2 ~ ',' ~ sigma^2==0.5"),
+            data.frame(x = x, y = dnorm(x, mean = 0, sd = 2), 
+                       dist = "mu==0 ~ ',' ~ sigma^2==2"))
+
+## Convertendo para fator 
+df$dist <- factor(df$dist, 
+                  levels = c("mu==-2 ~ ',' ~ sigma^2==0.5",
+                             "mu==0 ~ ',' ~ sigma^2==0.5",
+                             "mu==0 ~ ',' ~ sigma^2==2"))
+
+## Figura
+p2 <- ggplot(df, aes(x = x, y = y, colour = dist)) +
+  geom_line(size = 1.2) +
+  scale_color_manual(values = c("#457b9d", "#f6bd60", "#e07a5f"),
+                     labels = c(expression(mu==-2 ~ "," ~ sigma^2 == 0.5),
+                                expression(mu==0 ~ "," ~ sigma^2 == 0.5),
+                                expression(mu==0 ~ "," ~ sigma^2 == 2))) +
+  labs(x = "x", y = "Densidade", color = "Parâmetros") +
+  tema_clean +
+  theme(axis.text = element_text(size = 13),
+        axis.title.x = element_text(color = "gray20", size = 14, face = "bold", margin = margin(t = 25)),
+        axis.title.y = element_text(color = "gray20", size = 14, face = "bold", margin = margin(r = 20)),
+        plot.title = element_text(hjust = 0.5),
+        plot.margin = margin(20, 20, 20, 20),
+        legend.position = c(0.8, 0.8),         # Inside plot (x, y) coords
+        legend.background = element_rect(fill = 'transparent', colour = NA))
+
+p2
+
+
+
+ggsave(plot = p2,
+       filename ="Figuras/Dist_normal.png", 
+       width = 6,
+       height = 4,
+       dpi = 400)
+
+
+
