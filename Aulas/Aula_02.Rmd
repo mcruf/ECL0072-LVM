@@ -1695,15 +1695,178 @@ knitr::include_graphics("../Figuras/Exemplo_mle_sigma.png")
 
 
 ---
+# PPGECO | ECL0072 | out. 2026
 
-```{r echo=FALSE, fig.align ='center', out.width ="85%"}
-knitr::include_graphics("../Figuras/Frequentist_workflow.png")
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Máxima Verossimilhança (ML) </span>]
+
+**Entendendo o método:**
+
+
+<div style="height: 7px;"></div>
+
+
+```{r, echo=F, message=F, warning=F}
+
+set.seed(1)
+y <- rnorm(1000, mean = 5, sd = 2)
+
+# Common grid
+mu_seq    <- seq(4.75,  5.15,  length.out = 100)
+sigma_seq <- seq(1.95, 2.25, length.out = 100)
+
+# Common log-likelihood function
+loglik_normal <- function(mu, sigma, y) {
+  if (sigma <= 0) return(NA_real_)
+  sum(dnorm(y, mean = mu, sd = sigma, log = TRUE))
+}
+
+# Grid for contour
+grid <- expand.grid(mu = mu_seq, sigma = sigma_seq)
+grid$loglik <- mapply(loglik_normal, grid$mu, grid$sigma, MoreArgs = list(y = y))
+grid$lik <- exp(grid$loglik - max(grid$loglik, na.rm = TRUE))
+
+mu_hat    <- mean(y)
+sigma_hat <- sqrt(mean((y - mu_hat)^2))
+nll_hat   <- -loglik_normal(mu_hat, sigma_hat, y) # neg LL for 3D
 
 ```
 
 
 
 
+.pull-left[
+
+<br>
+
+```{r, echo=F, message=F, warning=F,  out.width="100%", fig.height=6}
+library(ggplot2)
+library(viridis)
+
+grid$nll <- -grid$loglik
+
+ggplot(grid, aes(mu, sigma, z = nll))+
+  geom_contour_filled(bins = 15,aes(fill=after_stat(level_mid)))+
+  scale_fill_viridis_c(option="F", direction = -1,
+                       guide = guide_colorbar(
+                         title.position = "top", 
+                         title.hjust = 0.5,
+                         barwidth = unit(5, "cm"), 
+                         barheight = unit(0.4, "cm"))) +
+  geom_vline(xintercept = mu_hat, color = "black", size = .5) +
+  geom_hline(yintercept = sigma_hat, color = "black", size = .5) +
+  geom_point(aes(x=4.976704, y = 2.068797), size = 2) +
+  labs(x = expression(mu), y = expression(sigma^2), fill = "Neg. log-likelihood") +
+  theme_bw(base_size = 13) +
+  coord_cartesian(expand = c(0,0)) +
+  theme(plot.background   = element_rect(fill = "transparent", color = NA),
+        panel.background  = element_rect(fill = "transparent", color = NA),
+        axis.text         = element_text(color = "gray30", size = 12),
+        axis.title.x = element_text(color = "gray20", size = 16, face = "bold", margin = margin(t = 25)),
+        axis.title.y = element_text(color = "gray20", size = 16, face = "bold", margin = margin(r = 20)),
+        axis.ticks        = element_line(color = "gray40", size = 0.4),
+        legend.position = "bottom",
+        legend.box = "horizontal",
+        legend.background = element_rect(fill = "transparent", colour = NA),
+        legend.box.background = element_rect(fill = "transparent", colour = NA),
+        legend.title = element_text(hjust = 0.5, face = 'bold', size = 10),
+        legend.text = element_text(size = 9),
+        plot.margin       = margin(15, 15, 15, 15))
+
+
+```
+
+]
+
+
+
+.pull-right[
+
+<br>
+<br>
+
+```{r,echo=F, message=F, warning=F, out.width="100%", fig.height=7}
+library(plotly)
+
+Z <- outer(mu_seq, sigma_seq, Vectorize(function(m, s) -loglik_normal(m, s, y)))
+
+
+cols <- viridis(10, option = "F")
+
+
+plot_ly(
+  x = ~mu_seq, y = ~sigma_seq, z = ~t(Z),
+  height = 300 # Força a altura exata do container para casar com a coluna
+) |>
+  add_surface(
+    showscale = FALSE, 
+    opacity = 0.8, 
+    colorscale = setNames(cols, seq(0, 1, length.out = length(cols))),
+    reversescale = FALSE
+  ) |>
+  add_markers(
+    x = mu_hat, y = sigma_hat, z = nll_hat,
+    marker = list(size = 7, symbol = "circle", opacity = 1, color = "black"),
+    showlegend = FALSE
+  ) |>
+  layout(
+    autosize = TRUE,
+    margin = list(t = 0, b = 0, l = 0, r = 0, pad = 0),
+    scene = list(
+      xaxis = list(title = "mu"),
+      yaxis = list(title = "sigma"),
+      zaxis = list(title = "Neg. log lik"),
+      # Expande a caixa 3D para preencher as laterais
+      aspectmode = "manual",
+      aspectratio = list(x = 0.6, y = 0.6, z = 0.6),
+      # Aproxima a câmera (valores menores aproximam o zoom)
+      camera = list(
+        eye = list(x = 0.8, y = 0.8, z = 0.8)
+      )
+    )
+  )
+```
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Máxima Verossimilhança (ML) </span>]
+
+**Traduzindo para o matematiquês**
+
+<br>
+
+$$\large L(\theta \mid y_1, \dots, y_n) = \prod_{i=1}^{n} f(y_i \mid \theta)$$
+--
+
+$$\large L(\theta \mid y_1, \dots, y_n) = f(y_1 \mid \theta) \cdot f(y_2 \mid \theta) \cdot f(y_3 \mid \theta) \cdots f(y_n \mid \theta)$$
+<br>
+
+--
+
+
+**Quando** $\bf{n >>}$
+- limitação computacional
+    - truque matemático: aplicar o log!
+    
+--
+
+$$\large \log L(\theta\mid y_1,\dots,y_n)
+=\sum_{i=1}^n \log f(y_i\mid \theta)$$
+
+
+- Tornando o produto em somatório implica em:
+    - Estabilidade numérica e maior facilidade na diferenciação da função
+    - O máximo da função torna-se o mínimo, i.e., $\hat{\theta} := argmin ~ L(\theta)$
+
+
+---
+
+```{r echo=FALSE, fig.align ='center', out.width ="85%"}
+knitr::include_graphics("../Figuras/Frequentist_workflow.png")
+
+```
 
 
 ---
