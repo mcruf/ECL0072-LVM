@@ -13,7 +13,7 @@
 
 <title>Tópicos Especias em Ecologia</title>
 
-<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.32/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/journal.min.css" rel="stylesheet" />
@@ -367,13 +367,13 @@ espaço-temporais. O avanço de tecnologias como o sensoriamento remoto e
 sistemas de monitoramento automatizados tem ampliado significativamente
 a disponibilidade de informações para a compreensão de processos
 ecológicos que ocorrem no espaço e tempo.</p>
-<p>Nesse contexto, torna-se essencial que ecólogos desenvolvam
-competências em Sistemas de Informação Geográfica (SIG), estatística e
-programação, a fim de integrar, modelar e interpretar dados de forma
-robusta e eficiente. O domínio dessas ferramentas não apenas aprimora a
-capacidade analítica e de tomada de decisão, como também consolida o
-papel do ecólogo na era da informação.</p>
-<p>Este curso, portanto, tem como objetivo capacitar os(as)
+<p>Diante deste contexto, torna-se essencial que ecólogos desenvolvam
+competências em estatística, programação e Sistemas de Informação
+Geográfica (SIG), a fim de integrar, modelar e interpretar dados de
+forma robusta e eficiente. O domínio dessas ferramentas não apenas
+aprimora a capacidade analítica e de tomada de decisão, como também
+consolida o papel do ecólogo na era da informação.</p>
+<p>Esta discplina, portanto, tem como objetivo capacitar as(os)
 participantes no uso de ferramentas estatísticas modernas para estimar e
 prever a dinâmica espaço-temporal de processos ecológicos. A ênfase será
 nos modelos hierárquicos bayesianos, uma abordagem estatística versátil
@@ -384,8 +384,8 @@ espaciais e temporais.</p>
 </div>
 <div id="público-alvo" class="section level1">
 <h1>Público-alvo</h1>
-<p>Pós-graduandos e pesquisadores interessados em estatística aplicada e
-programação.</p>
+<p>Pós-graduandos, docentes e pesquisadores interessadas em estatística
+aplicada à ecologia espacial e programação.</p>
 <p><br></p>
 </div>
 <div id="pré-requisitos-da-disciplina" class="section level1">
@@ -393,10 +393,8 @@ programação.</p>
 <ul>
 <li><p>Ter cursado qualquer disciplina introdutória à (i) inferência
 estatística e (ii) programação em R (e.g., ECL005, ECL0017)</p></li>
-<li><p>Ter cursado, preferencialmente, a disciplina <em>Modelos Lineares
-Generalizados e Aditivos para Dados Ecológicos</em> (ECL0072), uma vez
-que a presente disciplina dará continuidade ao conteúdo nela
-abordado.</p></li>
+<li><p>Conhecimento básico de modelos lineares generalizados e aditivos,
+como LM, GLM e GAM</p></li>
 </ul>
 <p><br></p>
 </div>
@@ -405,12 +403,12 @@ abordado.</p></li>
 <ul>
 <li><p>Conhecimento teórico e prático em estatística espacial e temporal
 com ênfase em inferência bayesiana</p></li>
-<li><p>Conhecimento prático do pacote R-INLA</p></li>
+<li><p>Conhecimento prático dos pacotes <em>brms</em> &amp;
+<em>R-INLA</em></p></li>
 <li><p>Conhecimento prático em Sistemas de Informação Geográfica (SIG),
-incluindo elaboração de mapas cartográficos e mapas de distribuição de
-espécies no R</p></li>
-<li><p>Maior familiarização com o ambiente GitHub, Markdown e
-RMarkdown</p></li>
+incluindo elaboração de mapas cartográficos, via linguagem R</p></li>
+<li><p>Conceitos de boas práticas de programação e
+reprodutibilidade</p></li>
 </ul>
 <p><br></p>
 </div>
@@ -429,16 +427,19 @@ QGIS/ArcGIS)</p></li>
 <h2>Plano de aula</h2>
 <p><strong>ATUALIZAR</strong></p>
 <ul>
-<li><strong>Aula 1:</strong> Modelos lineares e suas extensões</li>
-<li><strong>Aula 2:</strong> Fundamentos em inferência bayesiana</li>
-<li><strong>Aula 3:</strong> Modelos mistos I</li>
-<li><strong>Aula 4:</strong> Modelos mistos II</li>
-<li><strong>Aula 5:</strong> Aquisição, manipulação e visualização de
-dados espaço-temporais</li>
-<li><strong>Aula 6:</strong> Modelo espacial I</li>
-<li><strong>Aula 7:</strong> Modelo espacial II</li>
-<li><strong>Aula 8:</strong> Modelo espaço-temporal</li>
-<li><strong>Aula 9:</strong> Projetos</li>
+<li><strong>Aula 1:</strong> Revisitando Modelos Lineares (LM)</li>
+<li><strong>Aula 2:</strong> Métodos de inferência estatística:
+frequentista vs. bayesiana</li>
+<li><strong>Aula 3:</strong> Modelagem bayesiana</li>
+<li><strong>Aula 4:</strong> Modelos Lineares Mistos (LMM)</li>
+<li><strong>Aula 5:</strong> Modelos Lineares/Aditivos Generalizados
+Mistos (GLMM/GAMM)</li>
+<li><strong>Aula 6:</strong> Fundamentos em Estatística Espacial &amp;
+GIS</li>
+<li><strong>Aula 7:</strong> Modelos Espaciais</li>
+<li><strong>Aula 8:</strong> Modelos Espaço-Temporais</li>
+<li><del><strong>Aula 9:</strong> Dúvidas dos projetos (opcional:
+tutorial de elaboração de mapas no R)</del> [Feriado]</li>
 <li><strong>Aula 10:</strong> Apesentação de projetos</li>
 </ul>
 <p>Cada dia da disciplina será dividida entre aulas teóricas e práticas,
@@ -446,22 +447,44 @@ de forma que se associe a teoria estatística por meio de exercícios
 práticos.</p>
 <p><br></p>
 </div>
-<div id="avaliação" class="section level2">
-<h2>Avaliação</h2>
-<p><strong>ATUALIZAR</strong></p>
+<div id="estrutura-da-disciplina-1" class="section level2">
+<h2>Estrutura da disciplina</h2>
+<p>Cada dia da disciplina será dividida entre aulas teóricas e práticas,
+de forma que o discente aprenda a associar a teoria estatística por meio
+de exercícios aplicados.</p>
+<p>Sempre que possível, os discentes serão incentivados a utilizar seus
+próprios conjuntos de dados para replicar os exercíos das práticas após
+cada dia da disciplina e no desenvolvimento do projeto final da
+disciplina.</p>
+<p>Todo o material da disciplina, incluindo slides, roteiros das aulas
+práticas, conjuntos de dados e materiais complementares será
+disponibilizado em um repositório do GitHub.</p>
 <p><br></p>
 </div>
-<div id="dúvidas" class="section level2">
-<h2>Dúvidas</h2>
-<p><strong>ATUALIZAR</strong> Envie sua dúvida de programação na sessão
-<a href="https://github.com/mcruf/ECL0072-GLM_GAM/issues">Issues</a>do
-repositório da disciplina no GitHub. Essa abordagem permitirá que suas
-dúvidas (e respectivas respostas) fiquem disponíveis para os demais
-discentes, promovendo dessa forma o aprendizado coletivo.</p>
-<p>Envie apenas perguntas que possam ser respondidas com uma mensagem
-breve. Dúvidas que demandem respostas mais detalhadas deverão ser
-discutidas presencialmente em horário previamente marcado com a
-professora via e-mail.</p>
+<div id="avaliação" class="section level2">
+<h2>Avaliação</h2>
+<p>A avaliação da disciplina será baseada no desenvolvimento de um
+projeto prático, em grupos de três integrantes, utilizando,
+preferencialmente dados oriundos das pesquisas dos próprios
+participantes. A avaliação será composta por duas etapas
+complementares:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Relatório escrito:</strong> Cada grupo deverá entregar um
+resumo do projeto (máx. 2 páginas), contemplando os seguintes
+tópicos:</li>
+</ol>
+<ul>
+<li>Objetivo do estudo</li>
+<li>Hipótese(s)</li>
+<li>Descrição do conjunto de dados</li>
+<li>Abordagem estatística proposta</li>
+</ul>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>Apresentação oral:</strong> No último dia da disciplina,
+cada grupo compartilhará seus resultados com a turma em uma exposição de
+10 minutos, seguida de uma breve sessão de discussão e comentários
+gerais.</li>
+</ol>
 </div>
 </div>
 
