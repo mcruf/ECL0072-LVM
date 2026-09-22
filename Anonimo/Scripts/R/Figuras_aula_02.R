@@ -644,3 +644,104 @@ ggsave(plot = p2,
 
 
 
+#><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Exemplo: Histograma pinguins
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Importando o banco de dados
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+dados <- readRDS("~/OneDrive/Arbeit/Lectures_and_Talks/UFRN/Lectures/Graduation/ECL0072-GLM_GAM/Dados/palmerpenguins_extended.rds")
+
+
+
+pp<-dados %>%
+  #filter(body_mass_g <= 6000) %>% 
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram(size = 3.5, fill ='#e07a5f', col = 'white', alpha = 0.8) +
+  tema_clean +
+  labs(y = "Frequência (N)",
+       x = "Peso (g)") +
+  theme(axis.text = element_text(size = 13),
+        axis.title.x = element_text(color = "gray20", size = 14, face = "bold", margin = margin(t = 25)),
+        axis.title.y = element_text(color = "gray20", size = 14, face = "bold", margin = margin(r = 20)),
+        plot.title = element_text(hjust = 0.5),
+        plot.margin = margin(20, 20, 20, 20),
+        legend.position = c(0.8, 0.8),         # Inside plot (x, y) coords
+        legend.background = element_rect(fill = 'transparent', colour = NA))
+
+
+ggsave(plot = pp,
+       filename ="Figuras/histograma_pinguins.png", 
+       width = 6,
+       height = 4,
+       dpi = 400,
+       bg = 'transparent')
+
+
+
+#><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Exemplo: Amostragem via MCMC
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# 1. Configuração dos dados (alinhado ao seu exemplo anterior)
+set.seed(1)
+y <- rnorm(1000, mean = 5, sd = 2)
+
+# Estimativa analítica/amostral da a posteriori de mu
+mu_hat <- mean(y)
+se_mu  <- sd(y) / sqrt(length(y)) # Erro padrão da média
+
+# 2. Amostragem MCMC simulada para mu
+n_samples <- 30
+samples_mu <- rnorm(n_samples, mean = mu_hat, sd = se_mu)
+
+df_samples <- data.frame(mu = samples_mu,
+                         y_jitter = runif(n_samples, min = 0.05, max = 0.25)) # Jitter para dispersão vertical
+
+
+# 3. Curva da densidade teórica (a posteriori de mu)
+mu_seq <- seq(4.75, 5.25, length.out = 300)
+df_post <- data.frame(mu = mu_seq,
+                      density = dnorm(mu_seq, mean = mu_hat, sd = se_mu))
+
+
+# 4. Construção do gráfico
+pmcmc <- ggplot() +
+  # Área sob a curva com o gradiente da paleta 'F' (Magma/Viridis)
+  geom_area(data = df_post, aes(x = mu, y = density), 
+            fill = "#e07a5f", alpha = 0.2) +
+  
+  # Curva de densidade a posteriori p(mu | y)
+  geom_line(data = df_post, aes(x = mu, y = density), 
+            color = "#e07a5f", linewidth = 1.2) +
+  
+  # Pontos da amostragem MCMC
+  geom_point(data = df_samples, aes(x = mu, y = y_jitter), 
+             color = "#e07a5f", alpha = 0.6, size = 2.5) +
+  
+  # Estética e rótulos
+  scale_x_continuous(limits = c(4.75, 5.20), breaks = seq(4.75, 5.20, by = 0.1)) +
+  labs(x = expression(bold(paste("Parâmetro (",mu, ")"))),
+       y = "Densidade") +
+  tema_clean +
+  theme(axis.text = element_text(size = 13),
+        axis.title.x = element_text(color = "gray20", size = 14, face = "bold", margin = margin(t = 25)),
+        axis.title.y = element_text(color = "gray20", size = 14, face = "bold", margin = margin(r = 20)),
+        plot.title = element_text(hjust = 0.5),
+        plot.margin = margin(20, 20, 20, 20),
+        legend.position = c(0.8, 0.8),         # Inside plot (x, y) coords
+        legend.background = element_rect(fill = 'transparent', colour = NA))
+
+
+pmcmc
+
+ggsave(plot = pmcmc,
+       filename ="Figuras/mcmc_idea.png", 
+       width = 7,
+       height = 5,
+       dpi = 400,
+       bg = 'transparent')
