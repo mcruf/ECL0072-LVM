@@ -52,7 +52,7 @@ head(df) # oops! Reposicionar o nome das colunas
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 2) Manipulação dos dados
+# 2) Tratamento dos dados
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # 2.1) Ajustando o nome das colunas
