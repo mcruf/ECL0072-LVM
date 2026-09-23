@@ -48,12 +48,6 @@ class: title-slide
 
 <img src="../Figuras/logo_ppgeco2.svg" class="cover-logo">
 
----
-# PPGECO | ECL0072 | out. 2026
-
-<br>
-
-### Agenda
 
 
 ---
@@ -115,12 +109,11 @@ A única descrição satisfatória da incerteza é a *probabilidade* ([Lindley](
 .pull-left[
 
 
-.center[**Escola Bayesiana**]
+.left[**Escola Bayesiana**]
 
 
-
-```{r echo=FALSE, fig.align ='center', out.width ="80%"}
-knitr::include_graphics("../Figuras/TB_portrait.png")
+```{r echo=FALSE, fig.align ='left', out.width ="55%", fig.cap="Thomas Bayes (1701-1761)"}
+knitr::include_graphics("../Figuras/Thomas_Bayes.jpg")
 ```
 
 ]
@@ -129,13 +122,12 @@ knitr::include_graphics("../Figuras/TB_portrait.png")
 .pull-right[
 
 
-.center[**Escola Frequentista**]
+.right[**Escola Frequentista**]
 
 
-```{r echo=FALSE, fig.align ='center', out.width ="80%"}
-knitr::include_graphics("../Figuras/RF_portrait.png")
+```{r echo=FALSE, out.width ="50%", fig.align ='right', fig.cap="Ronald A. Fisher (1890-1962)", fig.topcaption=F}
+knitr::include_graphics("../Figuras/RonaldFisher.jpg")
 ```
-
 
 ]
 
@@ -439,6 +431,22 @@ knitr::include_graphics("../Figuras/Fisher-Pearson-Neyman.png")
 ```
 
 ---
+# PPGECO | ECL0072 | out. 2026
+
+### A natureza sob olhar frequentista
+
+<div style="height: 7px;"></div>
+
+
+```{r echo=FALSE, fig.align ='center', out.width ="65%"}
+knitr::include_graphics("../Figuras/Frequentist_workflow.png")
+
+```
+
+.footnote[Figura: McElreath (2020)]
+
+---
+
 # PPGECO | ECL0072 | out. 2026
 
 ### A natureza sob olhar frequentista
@@ -766,6 +774,20 @@ knitr::include_graphics("../Figuras/Hilborn_figure.png")
 ]
 
 
+.pull-right[
+
+<br>
+
+*All models are wrong...* (George Box)
+
+- Um modelo estatístico é uma versão simplificada de uma hipótese científica
+
+- A mesma hipótese pode ser descrita por diferentes modelos
+
+- O mesmo modelo pode descrever diferentes hipóteses
+
+
+]
 
 
 .footnote[Figura: Hilborn & Mangel (1993)]
@@ -825,19 +847,19 @@ O que poderia ter causado a mortalidade dos peixes?
 
 --
 
-1. contaminação química?
+- contaminação química?
 
 --
 
-2. doença?
+- doença?
 
 --
 
-3. hipoxia?
+- hipoxia?
 
 --
 
-4. pesca ilegal (explosiva)?
+- pesca ilegal (explosiva)?
 
 
 --
@@ -846,7 +868,27 @@ O que poderia ter causado a mortalidade dos peixes?
 knitr::include_graphics("../Figuras/credibility_experiment0.png")
 ```
 
+---
+# PPGECO | ECL0072 | out. 2026
+### A natureza sob o olhar bayesiano  
 
+
+**Exemplo: mortalidade de peixes em uma lagoa**
+
+O que poderia ter causado a mortalidade dos peixes?
+
+
+
+- **contaminação química?**
+- <span style="color: #d9d9d9;">doença?</span>
+- <span style="color: #d9d9d9;">hipoxia?</span>
+- <span style="color: #d9d9d9;">pesca ilegal (explosiva)?</span>
+
+
+
+```{r echo=FALSE, fig.align = 'left', out.width ="25%"}
+knitr::include_graphics("../Figuras/credibility_experiment0.png")
+```
 
 
 ---
@@ -860,13 +902,10 @@ knitr::include_graphics("../Figuras/credibility_experiment0.png")
 O que poderia ter causado a mortalidade dos peixes?
 
 
-1. contaminação química?
-
-2. doença?
-
-3. hipoxia?
-
-4. pesca ilegal (explosiva)?
+- **contaminação química?**
+- <span style="color: #d9d9d9;">doença?</span>
+- <span style="color: #d9d9d9;">hipoxia?</span>
+- <span style="color: #d9d9d9;">pesca ilegal (explosiva)?</span>
 
 
 
@@ -885,14 +924,12 @@ knitr::include_graphics("../Figuras/credibility_experiment1.png")
 O que poderia ter causado a mortalidade dos peixes?
 
 
-1. contaminação química?
+- <span style="color: #d9d9d9;">~~contaminação química?~~</span>
+- <span style="color: #d9d9d9;">doença?</span>
+- <span style="color: #d9d9d9;">hipoxia?</span>
+- **pesca ilegal (explosiva)?**
 
-2. doença?
-
-3. hipoxia?
-
-4. pesca ilegal (explosiva)?
-
+--
 
 ```{r echo=FALSE, fig.align ='left', out.width ="83%"}
 knitr::include_graphics("../Figuras/credibility_experiment2.png")
@@ -909,13 +946,37 @@ knitr::include_graphics("../Figuras/credibility_experiment2.png")
 O que poderia ter causado a mortalidade dos peixes?
 
 
-1. contaminação química?
+- <span style="color: #d9d9d9;">~~contaminação química?~~</span>
+- <span style="color: #d9d9d9;">doença?</span>
+- **hipoxia?**
+- <span style="color: #d9d9d9;">~~pesca ilegal (explosiva)?~~</span>
 
-2. doença?
 
-3. hipoxia?
+--
 
-4. pesca ilegal (explosiva)?
+```{r echo=FALSE, fig.align ='left'}
+knitr::include_graphics("../Figuras/credibility_experiment3.png")
+```
+
+<div style="height: 20px;"></div>
+
+---
+
+
+# PPGECO | ECL0072 | out. 2026
+### A natureza sob o olhar bayesiano  
+
+
+**Exemplo: mortalidade de peixes em uma lagoa**
+
+O que poderia ter causado a mortalidade dos peixes?
+
+
+- <span style="color: #d9d9d9;">~~contaminação química?~~</span>
+- **doença?**
+- <span style="color: #d9d9d9;">~~hipoxia?~~</span>
+- <span style="color: #d9d9d9;">~~pesca ilegal (explosiva)?~~</span>
+
 
 
 ```{r echo=FALSE, fig.align ='left'}
@@ -938,7 +999,7 @@ knitr::include_graphics("../Figuras/credibility_experiment3.png")
 
 
 
-O cérebro é uma maquina preditiva em constante atualização
+A lógica indutiva é a forma natural de processarmos as informações
 
 <br>
 
@@ -1283,7 +1344,7 @@ As prioris exercem maior impacto em dados pequenos
 
 <br>
 
-```{r echo=FALSE, out.width ="100%", fig.align = 'center'}
+```{r echo=FALSE, out.width ="90%", fig.align = 'center'}
 knitr::include_graphics("../Figuras/SampleSize_impact_posterior.png")
 
 ```
@@ -1312,12 +1373,13 @@ knitr::include_graphics("../Figuras/LM_pinguins2.png")
 
 <br>
 <br>
+<br>
 
 
 - Método dos momentos
-- <span style="color: #e07a5f;">Método dos mínimos quadrados </span>
-- <span style="color: #e07a5f;">Método de máxima verossimilhança </span>
-- <span style="color: #e07a5f;">Método bayesiano </span>
+- **Método dos mínimos quadrados**
+- **Método de máxima verossimilhança**
+- **Método bayesiano**
 
 ]
 
@@ -1514,7 +1576,7 @@ knitr::include_graphics("../Figuras/RonaldFisher.jpg")
 
 Formalizou a teoria de máxima verossimilhança 
 - Estatística frequentista
-  - Teste de hipótese, ANOVA, ...
+  - Teste de hipótese, p-valor, ANOVA, ...
 
 
 
@@ -1584,7 +1646,7 @@ Dado o modelo probabilístico, deseja-se encontrar os valores dos parâmetros ($
 
 
 
-```{r echo=FALSE, out.width ="65%", fig.align ='center'}
+```{r echo=FALSE, out.width ="75%", fig.align ='center'}
 knitr::include_graphics("../Figuras/MLE1.png")
 ```
 
@@ -1600,7 +1662,7 @@ Dado o modelo probabilístico, deseja-se encontrar os valores dos parâmetros ($
 - Confrontando os dados com a distribuição de probabilidade
 
 
-```{r echo=FALSE, out.width ="65%", fig.align ='center'}
+```{r echo=FALSE, out.width ="75%", fig.align ='center'}
 knitr::include_graphics("../Figuras/MLE2.png")
 ```
 
@@ -1617,7 +1679,7 @@ Dado o modelo probabilístico, deseja-se encontrar os valores dos parâmetros ($
 
 
 
-```{r echo=FALSE, out.width ="65%", fig.align ='center'}
+```{r echo=FALSE, out.width ="75%", fig.align ='center'}
 knitr::include_graphics("../Figuras/MLE3.png")
 ```
 
@@ -1827,6 +1889,25 @@ plot_ly(
 ```
 ]
 
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Máxima Verossimilhança (ML) </span>]
+
+#### Verossimilhança perfilada (*profile likelihood*)
+
+A curvatura da função está relacionada à precisão do parâmetro estimado
+- Usado para calcular o *intervalo de confiança*
+
+<br>
+<br>
+
+
+```{r echo=FALSE, out.width ="90%", fig.align='center'}
+knitr::include_graphics("../Figuras/profile_likelihood.png")
+```
+
+
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -1856,30 +1937,432 @@ $$\large \log L(\theta\mid y_1,\dots,y_n)
 =\sum_{i=1}^n \log f(y_i\mid \theta)$$
 
 
-- Tornando o produto em somatório implica em:
-    - Estabilidade numérica e maior facilidade na diferenciação da função
-    - O máximo da função torna-se o mínimo, i.e., $\hat{\theta} := argmin ~ L(\theta)$
+--
+
+.small-text2[
+
+Tornando o produto em somatório implica em:
+- Estabilidade numérica e maior facilidade na diferenciação da função
+- O máximo da função torna-se o mínimo, i.e., $\hat{\theta} := argmin ~ L(\theta)$
+
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Máxima Verossimilhança (ML) </span>]
+
+
+**Exemplo prático**
+
+
+Assumiremos que o peso dos pinguins, $y_i$, pode ser descrito conforme uma distribuição de probabilidade Normal (Gaussiana)
+
+<br>
+
+.pull-left[
+
+.center[
+
+$$\large Y \sim N(\mu, \sigma^2)$$
+]
+
+
+
+```{r echo=FALSE, out.width ="100%"}
+knitr::include_graphics("../Figuras/histograma_pinguins.png")
+```
+
+
+]
+
+
+
+.pull-right[
+
+<br>
+<br>
+
+
+.center[**Distribuição Normal**]
+
+.gray-box-small[
+$$\large f(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left( -\frac{(x - \mu)^2}{2\sigma^2} \right)$$
+
+]
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Máxima Verossimilhança (ML) </span>]
+
+
+**Exemplo prático**
+
+Lembrando que a função de verossimilhança $L(\cdot)$ é descrita em relação ao modelo probabilístico que escolhemos para descrever a variável-resposta $f(Y|\theta)$
+
+
+$$\large L(\theta \mid y_1, \dots, y_n) = \prod_{i=1}^{n} \color{#e07a5f}{f(y_i \mid \theta)}$$
+
+--
+
+<br>
+
+Para a distribuição Normal, temos:
+
+
+$$\large L(\mu, \sigma ~|~y_i) = \prod_{i=1}^{n} \color{#e07a5f}{\frac{1}{\sqrt{2\pi\sigma^2}} \exp\left( -\frac{(y_i - \mu)^2}{2\sigma^2} \right)}$$
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Máxima Verossimilhança (ML) </span>]
+
+<div style="height: 7px;"></div>
+
+$$\large \text{Probabilidade} \neq \text{Verossimilhança}$$ 
+
+<div style="height: 7px;"></div>
+
+
+```{r echo=FALSE, out.width ="85%"}
+knitr::include_graphics("../Figuras/Probabilidade_verossimilhanca.png")
+```
+
+<div style="height: 20px;"></div>
+
+
+.small-text3[
+$\small p(\cdot):$ função de densidade de probabilidade
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Bayesiano </span>]
+
+Todo o processo inferencial sobre o parâmetro ($\theta$) é realizado mediante a distribuição posterior
+- média
+- desvio padrão
+- *intervalo de confiança*
+- teste de hipótese...
+
+<br>
+
+```{r echo=FALSE, out.width ="50%", fig.align = 'center'}
+knitr::include_graphics("../Figuras/informative_prior_likelihood_posterior.png")
+
+```
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Bayesiano </span>]
+
+
+Todo o processo inferencial sobre o parâmetro ($\theta$) é realizado mediante a distribuição posterior
+- média
+- desvio padrão
+- *intervalo de confiança*
+- teste de hipótese...
+
+<br>
+
+Para computar as estatísticas, precisamos saber $p(\theta| y)$ para todos os $\theta$
+
+--
+
+- Não possui solução analítica
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Bayesiano </span>]
+
+**Entendendo o método**
+
+
+A alternativa consiste em gerar amostras aleatórias de $\theta$
+- Eventualmente converge para a distribuição posterior 
+
+
+<br>
+
+
+.pull-left[
+
+
+.center[.small-text2[**Cadeias de Markov Monte Carlo (MCMC)**]]
+
+<br>
+
+```{r echo=FALSE, fig.align ='center', out.width ="100%"}
+knitr::include_graphics("../Figuras/Gelfand_and_Smith.png")
+
+```
+
+]
+
+
+.pull-right[
+
+
+<br>
+
+
+```{r echo=FALSE, fig.align ='center', out.width ="100%"}
+knitr::include_graphics("../Figuras/mcmc_idea.png")
+
+```
+
+]
+
+.footnote[MCMC - *Markov Chain Monte Carlo*]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Bayesiano </span>]
+
+**Entendendo o método**
+
+<br>
+
+.pull-left[
+
+
+.center[.small-text2[**Cadeias de Markov Monte Carlo (MCMC)**]]
+
+<div style="height: 7px;"></div>
+
+
+.gray-box[
+
+.small-text3[
+
+1. Escolher arbitrariamente um valor para $\small \theta$
+
+2. Calcular a densidade a posterior nesse ponto
+  - $\small f(\theta_1)=L(\theta_1) \cdot p(\theta_1)$
+
+3. Propor um novo valor para $\small \theta_{novo}$
+- $\small \theta_{novo} \sim N(\theta_1, \sigma)$
+  - Calcular $\small f(\theta_{novo})=L(\theta_{novo}) \cdot p(\theta_{novo})$
+
+----
+
+Caso $\small f(\theta_{novo}) > f(\theta_1)$
+- Aceitar $\small \theta_{i+1} = \theta_{new}$
+
+Caso $\small f(\theta_{novo}) < f(\theta_1)$
+- Aceitar $\small \theta_{i+1} = \theta_{new}$ com probabilidade $\small \frac{f(\theta_{new})}{f(\theta_1)}$
+- Rejeitar, caso contrário
+
+]
+]
+
+.small-text2[Repetir o processo 500, 1000, 10.000, ...]
+
+
+]
+
+
+.pull-right[
+
+
+<br>
+<br>
+<br>
+
+```{r echo=FALSE, fig.align ='center', out.width ="100%"}
+knitr::include_graphics("../Figuras/mcmc_idea.png")
+
+```
+
+]
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Bayesiano </span>]
+
+**Exemplo prático**
+
+<div style="height: 7px;"></div>
+
+.small-text[
+**Dados:** 1 observação ($y=3$)
+- $y \sim N(\mu, \sigma = 1.5)$
+
+
+**Priori:** $\mu \sim N(0, \sigma = 10^3)$
+
+]
+
+--
+
+- .small-text[1) Escolher um valor arbitrário para $\mu$
+  - $\mu_1 = 4.8$]
+
+--
+
+- .small-text[2) Calcular a função densidade para esse ponto
+  - $f(\mu_1) = L(\mu_1) \cdot p(\mu_1)$]
+
+--
+
+.code-bg[
+```{r, echo=T, eval=T}
+
+f_mu1 <- dnorm(3, mean = 4.8, sd = 1.5) * dnorm(4.8, mean = 0, sd = 1000)
+f_mu1
+```
+]
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Bayesiano </span>]
+
+**Exemplo prático**
+
+<div style="height: 7px;"></div>
+
+.small-text[
+**Dados:** 1 observação ($y=3$)
+- $y \sim N(\mu, \sigma = 1.5)$
+
+
+**Priori:** $\mu \sim N(0, \sigma = 10^3)$
+
+]
+
+
+
+
+- .small-text[1) Escolher um valor arbitrário para $\mu$
+  - $\mu_1 = 4.8$]
+
+
+
+- .small-text[2) Calcular a função densidade para esse ponto
+  - $f(\mu_1) = L(\mu_1) \cdot p(\mu_1)$]
+
+
+- .small-text[3) Propor um novo valor para $\mu$ & caclular a função densidade
+  - $\mu_2 = 4.2$]
+
+--
+
+.code-bg[
+```{r, echo=T, eval=T}
+
+f_mu2 <- dnorm(3, mean = 4.2, sd = 1.5) * dnorm(4.2, mean = 0, sd = 1000)
+f_mu2
+```
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Bayesiano </span>]
+
+**Exemplo prático**
+
+<div style="height: 7px;"></div>
+
+.small-text[
+**Dados:** 1 observação ($y=3$)
+- $y \sim N(\mu, \sigma = 1.5)$
+
+
+**Priori:** $\mu \sim N(0, \sigma = 10^3)$
+
+]
+
+
+- .small-text[1) Escolher um valor arbitrário para $\mu$
+  - $\mu_1 = 4.8$]
+
+
+
+- .small-text[2) Calcular a função densidade para esse ponto
+  - $f(\mu_1) = L(\mu_1) \cdot p(\mu_1)$]
+
+
+- .small-text[3) Propor um novo valor para $\mu$ & caclular a função densidade
+  - $\mu_2 = 4.2$]
+
+- .small-text[4) Comparar os valores]
+
+
+.code-bg[
+
+```{r, echo=T, eval=T}
+f_mu2 > f_mu1
+```
+]
+
+--
+
+.small-text[Como] $\small f(\mu_2) > f(\mu_1)$ .small-text[-> Aceita] $\small \mu_2$ .small-text[como novo valor para o parâmetro]
 
 
 ---
 
-```{r echo=FALSE, fig.align ='center', out.width ="85%"}
-knitr::include_graphics("../Figuras/Frequentist_workflow.png")
+# PPGECO | ECL0072 | out. 2026
+
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Bayesiano </span>]
+
+
+```{r echo=FALSE, fig.align ='center', out.width ="90%"}
+knitr::include_graphics("../Figuras/MCMC_hamilton.png")
 
 ```
 
 
+<br>
+
+.center[.small-text[https://chi-feng.github.io/mcmc-demo/app.html?algorithm=RandomWalkMH&target=standard]]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Métodos de inferência | .small-text[<span style="color: #e07a5f;">Bayesiano </span>]
+
+**Markov Chain Monte Carlo**
+
+
+<br>
+
+- **Markov:** a propriedade de Markov diz que o estado futuro depende apenas do presente (e não do passado)
+  - O parâmetro $\theta_i$ depende apenas do parâmetro anterior $\theta_{i-1}$
+
+
+<br>
+
+- **Chain:** referente às amostras do parâmetro 
+  - $\theta_1, \theta_2, \theta_3, ..., \theta_n$  
+
+<br>
+
+- **Monte Carlo:** cada nova amostragem de $\theta$ é feita de maneira aleatória
+  - *random walk*
+
 ---
 
 
+https://www.youtube.com/watch?v=3qodjHRUxAo
+
+
+
+O intervalo de confiança sempre quis ser o intervalo de confiança, mas nunca foi
 **MCMC**
 
-https://chi-feng.github.io/mcmc-demo/app.html?algorithm=RandomWalkMH&target=standard
-
----
-
-
 - Bayesian workflow - https://arxiv.org/pdf/2011.01808 (Gelman - 2020)
-
-
-https://educacao.uol.com.br/disciplinas/filosofia/filosofia-da-ciencia-karl-popper-falseabilidade-e-limites-da-ciencia.htm
