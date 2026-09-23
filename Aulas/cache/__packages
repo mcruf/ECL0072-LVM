@@ -10,3 +10,6 @@ lme4
 knitr
 emmeans
 INLA
+viridisLite
+viridis
+plotly
