@@ -41,6 +41,8 @@
 #     logit(p_i) = beta_0 + beta_1*x_1
 # onde p_i representa a probabilidade de o indivíduo i estar maturo.
 
+# Para mais informações, acesse o artigo: https://www.sciencedirect.com/science/article/abs/pii/S030438001730073X
+
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~
@@ -118,8 +120,8 @@ ggplot(df, aes(x = Length, y = Maturity, col = Sex, fill = Sex)) +
 
 # 4.1) Centralizando os comprimentos
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Facilita interpretação: representa o log-odds de maturidade de um indivíduo com comprimento igual ao
-# comprimento médio da população.
+# Centralizamos o comprimento em torno de sua média para facilitar a interpretação do intercepto. 
+# Assim, Length_c = 0 corresponde ao comprimento médio da amostra e beta_0 representa o log-odds de maturidade nesse comprimento.
 df$Length_c <- df$Length - mean(df$Length)
 
 
@@ -187,9 +189,9 @@ pp_check(mod3, type = "bars", ndraws = 100)
 
 summary(mod3)
 # Intercepto: log-odds de maturidade de uma fêmea com comprimento médio. Para uma fêmea de comprimento médio, a probabilidade esperada de estar madura é aproximadamente 57%.
-# Length_s: efeito do comprimento para as fêmeas. Como todo o IC-95% > 0, os dados dão suporte a uma relação positiva entre comprimento e probabilidade de maturidade nas fêmeas.
+# Length_c: efeito do comprimento para as fêmeas. Como todo o IC-95% > 0, os dados dão suporte a uma relação positiva entre comprimento e probabilidade de maturidade nas fêmeas.
 # SexM: para um peixe de comprimento médio, o modelo estima probabilidades de maturidade muito semelhantes entre os sexos
-# Length_s:SexM: 
+# Length_c:SexM:  diferença entre o efeito do comprimento (slope) de machos e fêmeas. Valores próximos de zero indicam pouca evidência de que a relação comprimento-maturidade apresente inclinações distintas entre os sexos.
 
 
 # Em tese, não há distinção entre os L50%, mas vamos rodar os modelos separadamente e avaliar
@@ -280,10 +282,10 @@ pf + pm
 
 
 
-# Para as fêmeas, os dados fornecem suporte relativamente claro para um aumento da probabilidade de maturidade com o aumento do comprimento,
-# uma vez que a densidade posterior conjunta dos parâmetros (usado para calcular o L50) encontra-se majoritariarmente no quadrante onde beta_0 > 0 & beta_1 > 0.
-# Para os machos, os resultados indicam que a probabilidade de maturidade também aumenta com o comprimento (beta_1 > 0), porém existe consideravelmente mais incerteza sobre essa relação do que nas fêmeas. 
-# A posterior admite inclusive efeitos muito próximos de zero.
+# Para as fêmeas, a posterior de beta_1 encontra-se predominantemente acima de zero, indicando suporte para uma relação positiva entre 
+# comprimento e probabilidade de maturação. 
+# Para os machos, beta_1 também se concentra principalmente em valores positivos, porém a posterior se aproxima e ultrapassa zero, indicando maior
+# incerteza quanto à magnitude e até mesmo à direção desse efeito.
 
 
 ## Visualizando os parâmetros separadamente (beta_1)
@@ -311,10 +313,16 @@ beta_m <- ggplot(post_m, aes(x = b_Length_c)) +
 
 beta_f + beta_m
 
+
+# Probabilidade posterior de o efeito do comprimento ser negativo nos machos
 mean(post_m$b_Length_c < 0)
 
+# Equivalentemente, probabilidade posterior de o efeito ser positivo:
+mean(post_m$b_Length_c > 0)
 
-
+     
+     
+     
 # 6.6) Calculando a distribuição posterior de L50
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # O modelo logístico pode ser escrito como: logit(p) = beta_0 + beta_1 * Length_c
@@ -323,7 +331,7 @@ mean(post_m$b_Length_c < 0)
 # Portanto, L50_c = - beta_0 / beta_1
 # Como Length_c representa o comprimento centralizado, precisamos adicionar novamente o comprimento médio (Lbar)
 # para retornar à escala original (cm).
-# Portanto, L50_c = (- beta_0 / beta_1) + Lbar
+# Portanto, L50 = (- beta_0 / beta_1) + Lbar
 
 
 # Comprimentos médios por sexo
@@ -436,6 +444,7 @@ new_m <- data.frame(Length_c = seq(min(df_m$Length_c),
 
 
 # Calcular os valores preditos (da distribuição posterior)
+## Fornece draws da distribuição posterior da probabilidade esperada de maturação para cada comprimento.
 
 ## Fêmeas 
 pred_f <- posterior_epred(object = mod_f,
