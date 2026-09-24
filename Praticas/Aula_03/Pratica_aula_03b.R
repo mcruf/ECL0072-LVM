@@ -1,22 +1,31 @@
-#########################################
-#                                       #
-#         Prática da aula 02            #
-#          - L50 bayesiano -            #
-#                                       #
-#########################################
+#############################################################################
+#                                                                           #
+#                            Prática da aula 02                             #
+#          - Estimação do tamanho de primeira maturação (L50) -             #
+#                                                                           #
+#############################################################################
 
-# FIXME: melhorar o contexto - introduzir os dados do Lutjanus Synagris
-# Contexto:
-# O comprimento de primeira maturação (L50) corresponde ao comprimento no qual um indivíduo apresenta 50% de probabilidade de estar sexualmente
-# maduro. Nesta prática, utilizaremos modelos de regressão logística Bayesianos para descrever a relação entre comprimento corporal,
+
+# CONTEXTO:
+# Os dados utilizados nesta prática são provenientes de amostragens realizadas por meio de pesca experimental ao longo da costa do Rio Grande do Norte, 
+# entre os anos de 2012 e 2014. Para esta análise, foram selecionados os dados biológicos de Lutjanus synagris (ariocó), 
+# um importante recurso pesqueiro na região Nordeste do Brasil.
+# O conjunto de dados compreende informações de 89 indivíduos, incluindo comprimento corporal, sexo e estágio de maturação gonadal.
+
+# A partir dessas informações, iremos investigar a relação entre o comprimento corporal e a maturidade sexual e
+# estimar o comprimento de primeira maturação (L50). O L50 é definido como o comprimento no qual um indivíduo apresenta 50% de probabilidade de estar 
+# sexualmente maduro.
+
+# Para isso, utilizaremos modelos de regressão logística Bayesianos para descrever a relação entre comprimento corporal,
 # sexo e maturidade sexual.
 
 
-# Objetivo: 
+# OBJETIVOS:
 #   - 1) Entender o efeito do comprimento e sexo sobre a probabilidade do peixe estar maturo;
 #   - 2) Estimar o comprimento no qual a maturidade esperada é de 50% (L50)
 
-# Estrutura dos dados:
+
+# ESTRUTURA DOS DADOS
 # $Length         = comprimento corporal (cm)
 # $Sex            = sexo (F = fêmea; M = macho)
 # $Maturity_stage = estágio de maturação (A-D)
@@ -25,7 +34,7 @@
 #   1 = maturo   (C/D)
 
 
-# Abordagem analítica:
+# ABORDAGEM ANALÍTICA:
 # O estado de maturação de cada indivíduo é uma variável binária (imaturo/maturo) e pode
 # ser descrito de acordo com uma distribuição de probabilidade de Bernoulli, conforme:
 #         Y_i ~ Bernoulli(p_i)
@@ -128,7 +137,7 @@ get_prior(Maturity ~ Length_c * Sex,
 
 ## Modelo 1: efeito apenas do comprimento sobre a maturidade 
 # Considera uma única relação comprimento-maturidade para ambos os sexos (mesmo intercepto e mesmo efeito do comprimento)
-mod1 <- brm(Maturity ~ Length_s,
+mod1 <- brm(Maturity ~ Length_c,
             data = df,
             family = bernoulli(link = 'logit'))
 
@@ -136,7 +145,7 @@ mod1 <- brm(Maturity ~ Length_s,
 
 ## Modelo 2: efeito do comprimento & diferença entre sexos (i.e., machos e fêmeas diferem quanto ao tamanho de maturação)
 # Considera que machos e fêmeas podem diferir na probabilidade de maturidade, porém o efeito do comprimento é o mesmo para ambos os sexos (slopes iguais)
-mod2 <- brm(Maturity ~ Length_s + Sex,
+mod2 <- brm(Maturity ~ Length_c + Sex,
             data = df,
             family = bernoulli(link = 'logit'))
 
@@ -144,11 +153,9 @@ mod2 <- brm(Maturity ~ Length_s + Sex,
 
 ## Modelo 3: efeito do comprimento, diferença entre sexos & interação
 # Considera que machos e fêmeas podem diferir na probabilidade de maturidade e também no efeito do comprimetno (interceptos e slopes diferentes)
-mod3 <- brm(Maturity ~ Length_s*Sex,
+mod3 <- brm(Maturity ~ Length_c*Sex,
             data = df,
             family = bernoulli(link = 'logit'))
-
-
 
 
 
@@ -185,7 +192,8 @@ summary(mod3)
 # Length_s:SexM: 
 
 
-# Em tese, não há distinção entre os L50%, mas vamos rodar os modelos separadamente
+# Em tese, não há distinção entre os L50%, mas vamos rodar os modelos separadamente e avaliar
+# se há diferença entre os L50 das fêmeas e dos machos (teste de hipótese bayesiano!).
 
 
 
@@ -205,23 +213,24 @@ df_m <- subset(df, Sex == 'M')
 
 
 ## Re-centralizando os comprimentos
-df_f$Length_s <- df_f$Length - mean(df_f$Length) # Femeas
-df_m$Length_s <- df_m$Length - mean(df_m$Length) # Machos
+df_f$Length_c <- df_f$Length - mean(df_f$Length) # Femeas
+df_m$Length_c <- df_m$Length - mean(df_m$Length) # Machos
 
 
 
 # 6.2) Modelo para as fêmeas
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-mod_f <- brm(Maturity ~ Length_s,
+mod_f <- brm(Maturity ~ Length_c,
              data = df_f,
              family = bernoulli(link = 'logit'))
 
 
 # 6.3) Modelo para os machos
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-mod_m <- brm(Maturity ~ Length_s,
+mod_m <- brm(Maturity ~ Length_c,
              data = df_m,
              family = bernoulli(link = 'logit'))
+
 
 
 # 6.4) Diagnóstico dos modelos
@@ -229,129 +238,253 @@ mod_m <- brm(Maturity ~ Length_s,
 plot(mod_f)
 plot(mod_m)
 
-summary(mod_f)
-summary(mod_m)
+summary(mod_f) # Os dados fornecem evidência de que, para as fêmeas, a probabilidade de estar madura aumenta com o comprimento
+summary(mod_m) # Menos suporte para os machos (IC-95% inclui valor zero)
 
 
+# 6.5) Extraindo as distribuições posteriores
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+## Fêmeas
 post_f <- as_draws_df(mod_f)
 names(post_f)
+dim(post_f)
 head(post_f)
 
 
+## Machos
 post_m <- as_draws_df(mod_m)
 
 
-## Visualizando os parâmetros
-pf <- ggplot(post_f, aes(x = b_Intercept, y = b_Length_s)) +
+## Visualizando os parâmetros conjuntamente 
+pf <- ggplot(post_f, aes(x = b_Intercept, y = b_Length_c)) +
       geom_point(alpha = 0.3, size = 4, col = "#e07a5f") +
+      geom_density2d(col = 'black') + 
       geom_vline(xintercept = 0) +
       geom_hline(yintercept = 0) +
-      labs(title = 'Fêmeas') +
-      theme_bw()
+      labs(title = 'Fêmeas', x = expression(beta[0]), y = expression(beta[1])) +
+      theme_default() +
+      theme(plot.title = element_text(hjust = 0.5, face = 'bold'))
       
 
-pm <- ggplot(post_m, aes(x = b_Intercept, y = b_Length_s)) +
+pm <- ggplot(post_m, aes(x = b_Intercept, y = b_Length_c)) +
       geom_point(alpha = 0.3, size = 4, col = "gray40") +
+      geom_density2d(col = 'black') + 
       geom_vline(xintercept = 0) +
       geom_hline(yintercept = 0) +
-      labs(title = 'Machos') +
-      theme_bw()
+      labs(title = 'Machos', x = expression(beta[0]), y = expression(beta[1])) +
+      theme_default() +
+      theme(plot.title = element_text(hjust = 0.5, face = 'bold'))
 
 pf + pm
 
 
-post_f$L50 <- (- post_f$b_Intercept / post_f$b_Length_s) + mean(df_f$Length)
-post_m$L50 <- (-post_m$b_Intercept / post_m$b_Length_s) + mean(df_m$Length)
+
+# Para as fêmeas, os dados fornecem suporte relativamente claro para um aumento da probabilidade de maturidade com o aumento do comprimento,
+# uma vez que a densidade posterior conjunta dos parâmetros (usado para calcular o L50) encontra-se majoritariarmente no quadrante onde beta_0 > 0 & beta_1 > 0.
+# Para os machos, os resultados indicam que a probabilidade de maturidade também aumenta com o comprimento (beta_1 > 0), porém existe consideravelmente mais incerteza sobre essa relação do que nas fêmeas. 
+# A posterior admite inclusive efeitos muito próximos de zero.
 
 
-quantile(post_f$L50, probs = c(0.025, 0.5, 0.975))
-quantile(post_m$L50, probs = c(0.025, 0.5, 0.975))
+## Visualizando os parâmetros separadamente (beta_1)
+
+### Fêmeas
+beta_f <- ggplot(post_f, aes(x = b_Length_c)) +
+          geom_density(col = "#e07a5f", fill = "#e07a5f", alpha = 0.4) +
+          geom_vline(xintercept = 0, linetype = "dashed") +
+          labs(title = "Fêmeas",
+               x = expression(beta[1]),
+               y = "Densidade posterior") +
+          theme_default() +
+          theme(plot.title = element_text(hjust = 0.5, face = 'bold'))
+
+
+### Machos
+beta_m <- ggplot(post_m, aes(x = b_Length_c)) +
+          geom_density(col = "gray40", fill = "gray40", alpha = 0.4) +
+          geom_vline(xintercept = 0, linetype = "dashed") +
+          labs(title = "Machos",
+               x = expression(beta[1]),
+               y = "Densidade posterior") +
+          theme_default() +
+          theme(plot.title = element_text(hjust = 0.5, face = 'bold'))
+
+beta_f + beta_m
+
+mean(post_m$b_Length_c < 0)
+
+
+
+# 6.6) Calculando a distribuição posterior de L50
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# O modelo logístico pode ser escrito como: logit(p) = beta_0 + beta_1 * Length_c
+# Por definição, L50 corresponde ao comprimento em que p = 0.5, já que logit(0.5) = 0.
+# Assim, 0 = beta_0 + beta_1 * L50_c
+# Portanto, L50_c = - beta_0 / beta_1
+# Como Length_c representa o comprimento centralizado, precisamos adicionar novamente o comprimento médio (Lbar)
+# para retornar à escala original (cm).
+# Portanto, L50_c = (- beta_0 / beta_1) + Lbar
+
+
+# Comprimentos médios por sexo
+(mean_f <- mean(df_f$Length))
+(mean_m <- mean(df_m$Length))
+
+
+# Calculando o L50 para CADA draw da posterior (..e propagação da incerteza!)
+post_f$L50 <-  (-post_f$b_Intercept/post_f$b_Length_c) + mean_f
+post_m$L50 <-  (-post_m$b_Intercept/post_m$b_Length_c) + mean_m
+
+
+
+# 6.7) Analisando a distribuição posterior de L50
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+quantile(post_f$L50,c(0.001,.025,0.25,.5,0.75,.975,0.999))
+quantile(post_m$L50,c(0.001,.025,0.25,.5,0.75,.975,0.999)) # IC-95% bem mais amplo do que nas fêmeas
+
 
 par(mfrow = c(1,2))
-hist(post_f$L50, nclass = 80)
-hist(post_m$L50, nclass = 80)
+hist(post_f$L50[post_f$L50 > 20 & post_f$L50 < 29], main="Fêmeas", ylab="Frequência", xlab="L50")
+abline(v = quantile(post_f$L50, 0.5), col = 'red')
+hist(post_m$L50[post_m$L50 > 9 & post_m$L50 < 37],  main="Machos", ylab="Frequência", xlab="L50")
+abline(v = quantile(post_m$L50, 0.5), col = 'red')
 par(mfrow = c(1,1))
 
-L50_post <- data.frame(L50 = c(post_f$L50, post_m$L50),
-                       sexo = rep(c("Fêmea", "Macho"), 
-                                  c(nrow(post_f), nrow(post_m))))
+
+# Organizando as posteriores em um único df (para visualização via ggplot)
+df_l50 <- data.frame(L50 = c(post_f$L50, post_m$L50),
+                     Sex = rep(c("Fêmea", "Macho"), c(nrow(post_f), nrow(post_m))))
 
 
-
-ggplot(L50_post, aes(x = L50, fill = sexo)) +
-  geom_density(alpha = 0.4) +
+# Visualizando no ggplot (mais bonitinho...)
+df_l50 %>% 
+  group_by(Sex) %>% 
+  filter(L50 >= quantile(L50, 0.025), L50 <= quantile(L50, 0.975)) %>% 
+  ggplot(aes(x = L50, fill = Sex, colour = Sex)) +
+  geom_density(alpha = 0.25) +
+  scale_fill_manual(values = c("#e07a5f", "gray40")) +
+  scale_colour_manual(values = c("#e07a5f", "gray40")) +
   labs(x = expression(L[50]~"(cm)"),
-    y = "Densidade posterior",
-    fill = "Sexo") +
-  theme_minimal()
+       y = "Densidade posterior",
+       fill = "Sexo",
+       colour = "Sexo") +
+  theme_default() +
+  theme(legend.position = "inside",
+        legend.position.inside = c(0.1, 0.85)) 
 
 
-delta_L50 <- post_f$L50 - post_m$L50
-median(delta_L50)
 
-hist(delta_L50)
 
-quantile(delta_L50,c(0.001,.025,0.25,.5,0.75,.975,0.999))
-hist(delta_L50[delta_L50>-12 & delta_L50<17],nclass=80,main="",ylab="Frequ?ncia",xlab="Diferen?a entre os valores simulados")
+# 6.8) Comparação posterior do L50 entre os sexos
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Pergunta: há evidência de diferença entre o L50 de fêmeas e machos?
+# Na abordagem Bayesiana, essa comparação pode ser realizada diretamente a partir das
+# distribuições posteriores de L50. Para cada draw, calculamos a diferença entre o L50
+# estimado para fêmeas e machos: diff = L50_fêmeas - L50_machos
+# - diff > 0 -> L50 maior nas fêmeas
+# - diff < 0 -> L50 maior nos machos
+
+# A proporção de draws acima e abaixo de zero fornece as probabilidades de o L50 ser 
+# maior nas fêmeas ou nos machos, respectivamente. Para avaliar a força da evidência
+# em favor de uma dessas possibilidades, calculamos a razão entre essas probabilidades conforme:
+# prob_ratio = p(diff >= 0) / p(diff < 0)
+
+# - prob_ratio > 5    -> evidência em favor de L50_fêmeas > L50_machos
+# - prob_ratio < 1/5  -> evidência em favor de L50_fêmeas < L50_machos
+# Valores entre 1/5 e 5 indicam que  a distribuição posterior não fornece evidência 
+# suficientemente forte em favor de uma das duas possibilidades.
+
+
+# Calculando a diferença
+diff_L50 <- post_f$L50 - post_m$L50
+
+quantile(diff_L50, c(0.001,.025,0.25,.5,0.75,.975,0.999)) # A distribuição posterior permite quantificar diretamente a magnitude e a incerteza associadas à diferença entre os L50.
+hist(diff_L50[diff_L50 >- 14 & diff_L50 < 18], nclass = 80, main = "", ylab = "Frequência", xlab = "Diferença entre os valores simulados")
 abline(v=0,col=2,lwd=2)
 
-legend("topright",legend=expression(P(H[0]==0.63)),bty="n")
-legend("topleft",legend=expression(P(H[1]==0.36)),bty="n")
-#sum(delta_L50>0)/length(delta_L50)
-mean(delta_L50 > 0)
-1-mean(delta_L50 > 0)
+
+# Probabilidades posteriores
+p_female <- mean(diff_L50 >= 0) # Probabilidade de L50 ser maior nas fêmeas do que nos machos
+p_male <- mean(diff_L50 < 0) # Probabilidade de L50 ser maior nos machos
+
+p_female
+p_male # 1-p_female
+
+
+# Razão entre as probabilidades posteriores
+prob_ratio <- p_female / p_male
+prob_ratio # Não sustenta a hipótese de que L50 seja distinto entre os sexos
+# Para os dados em questão, temos evidências para suportar a ideia de que, para fins de manejo pesqueiro,
+# podemos considerar um único L50 para a espécie em questão.
+
+# IMPORTANTE: ausência de evidência de diferença não implica evidência de igualdade.
+
+
+# 6.9) Curvas de maturação (ajustadas)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Definir os dados para predição
+
+## Fêmeas 
+new_f <- data.frame(Length_c = seq(min(df_f$Length_c), 
+                                   max(df_f$Length_c), length.out = 100))
+
+## Machos 
+new_m <- data.frame(Length_c = seq(min(df_m$Length_c), 
+                                   max(df_m$Length_c), length.out = 100))
 
 
 
+# Calcular os valores preditos (da distribuição posterior)
+
+## Fêmeas 
+pred_f <- posterior_epred(object = mod_f,
+                          newdata = new_f)
 
 
 
-new_f <- data.frame(
-  Length_s = seq(
-    min(df_f$Length_s),
-    max(df_f$Length_s),
-    length.out = 100
-  )
-)
-
-epred_f <- posterior_epred(
-  mod_f,
-  newdata = new_f
-)
+## Machos 
+pred_m <- posterior_epred(object = mod_m,
+                          newdata = new_m)
 
 
-new_f$mean <- apply(epred_f, 2, mean)
-new_f$lower <- apply(epred_f, 2, quantile, 0.025)
-new_f$upper <- apply(epred_f, 2, quantile, 0.975)
+
+# Calculando as estatísticas
+
+## Fêmeas
+new_f$mean <- apply(pred_f, 2, mean)
+new_f$lower <- apply(pred_f, 2, quantile, 0.025)
+new_f$upper <- apply(pred_f, 2, quantile, 0.975)
+
+## Machos
+new_m$mean  <- apply(pred_m, 2, mean)
+new_m$lower <- apply(pred_m, 2, quantile, 0.025)
+new_m$upper <- apply(pred_m, 2, quantile, 0.975)
 
 
-new_f$Length <- new_f$Length_s + mean(df_f$Length)
+# Retornando os comprimentos para a escala original
+new_f$Length <- new_f$Length_c + mean_f
+new_m$Length <- new_m$Length_c + mean_m
 
 
-ggplot(new_f,
-       aes(x = Length,
-           y = mean)) +
-  
-  geom_ribbon(
-    aes(
-      ymin = lower,
-      ymax = upper
-    ),
-    alpha = 0.2
-  ) +
-  
-  geom_line(linewidth = 1) +
-  
-  geom_hline(
-    yintercept = 0.5,
-    linetype = "dashed"
-  ) +
-  
-  labs(
-    x = "Comprimento (cm)",
-    y = "Probabilidade de maturidade"
-  ) +
-  
-  theme_minimal()
+# Juntando os dados
+new_f$Sex <- "Fêmeas"
+new_m$Sex <- "Machos"
 
+preds <- bind_rows(new_f, new_m)
+
+
+# Visualizando as curvas de maturação preditas
+ggplot(preds, aes(x = Length, y = mean, colour = Sex, fill = Sex)) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.15, colour = NA) +
+  geom_line(linewidth = 1.2) +
+  geom_hline(yintercept = 0.5, linetype = "dashed") +
+  scale_colour_manual(values = c("#e07a5f", "gray40")) +
+  scale_fill_manual(values = c("#e07a5f", "gray40")) +
+  labs(x = "Comprimento (cm)",
+       y = "Probabilidade de maturação",
+       colour = "Sexo",
+       fill = "Sexo") +
+  theme_default() +
+  theme(legend.position = "inside",
+        legend.position.inside = c(0.1, 0.85)) 
