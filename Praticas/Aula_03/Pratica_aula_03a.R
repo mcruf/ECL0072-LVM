@@ -7,28 +7,52 @@
 
 
 # CONTEXTO:
-
-# Esta prática irá utilizar dados de riqueza de espécies de plantas
-# nas ilhas Galápagos para introduzir os principais componentes de uma
+# Esta prática irá utilizar dados de riqueza de espécies de plantas nas ilhas Galápagos para introduzir os principais componentes de uma
 # regressão linear Bayesiana utilizando o pacote brms.
 
-# https://github.com/jfieberg/Data4Ecologists
-# https://www.science.org/doi/10.1126/science.179.4076.893
 
+# DADOS:
+# O conjunto de dados reúne informações sobre a riqueza de espécies de plantas e diferentes características das ilhas, incluindo área, elevação
+# e medidas relacionadas ao seu grau de isolamento.
+
+# Fontes dos dados
+# - Johnson & Raven (1973). Species frequency and island area. https://www.science.org/doi/10.1126/science.179.4076.893
+# - Fieberg, J. Data4Ecologists: https://github.com/jfieberg/Data4Ecologists
 
 
 # OBJETIVOS:
+# Percorrer as principais etapas de um fluxo de trabalho Bayesiano (Bayesian workflow), incluindo:
+# - especificação do modelo estatístico
+# - definição e interpretação das distribuições a priori (priors)
+# - realização de prior predictive checks
+# - ajuste do modelo e obtenção da distribuição posterior via MCMC
+# - diagnóstico da convergência das cadeias
+# - avaliação do ajuste por meio de posterior predictive checks
+# - interpretação das distribuições posteriores dos parâmetros
+# - realização de inferências e predições a partir do modelo ajustado
 
-
-# ESTRUTURA DOS DADOS
+# Ao final, iremos explorar brevemente como diferentes hipóteses ecológicas podem ser 
+# contrastadas e interpretadas sob o paradigma Bayesiano.
 
 
 # ABORDAGEM ANALÍTICA:
-# A título de exemplo, iremos considerar que a riqueza pode ser descrita por uma distribuição Normal, conforme:
+# Nesta prática investigaremos a relação entre a riqueza de espécies de plantas e a área das ilhas.
+# A relação espécie-área (SAR) é tradicionalmente modelada por uma função potência:
+#   Species = c * Area^z
 
-# A relação espécie-área é tradicionalmente descrita por uma função potência: Species = c * Area^z
-# Esta relação pode ser linearizada ao logaritmizar a equação, resultando em: log(Species) = log(c) + z * log(Area)
-# Neste caso, beta_0 = log(c); beta_1 = z
+# Ao logaritmizar ambos as variáveis (x, y), linearizamos a relação:
+#   log(Species) = log(c) + z * log(Area)
+
+# Podemos, dessa forma, relacionar os parâmetros da relação espécie-área aos parâmetros de um modelo linear (beta0 e beta1), conforme:
+#   log(Species) = beta_0 + beta_1 * log(Area)
+
+# O parâmetro beta_1 (ou z) será de especial interesse ao longo da prática, uma vez que representa a magnitude e a direção da associação 
+# entre a área dailha e a riqueza de espécies (na escala log-log!).
+# Assumindo que o erro na escala logarítmica segue uma distribuição Normal, podemos formular o modelo conforme:
+#   y_i ~ Normal(mu_i, sigma)
+#   mu_i = beta_0 + beta_1 * x_i
+# Lembrando que y_i e x_i estão na escala log!
+
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~
@@ -40,6 +64,7 @@ library(bayesplot) # Visualização dos resultados Bayesianos (extra)
 library(ggplot2) # Visualização dos dados/resultados
 library(GGally) # Gráfico de multicolinearidade
 library(patchwork) # Visualização de dados (figuras com +1 painel)
+
 
 
 
@@ -68,8 +93,10 @@ summary(df)
 df$Island <- as.factor(df$Island) # Convertendo para fator 
 df$Species_log <- log(df$Species) # Log da variável resposta
 df$Area_log <- log(df$Area) # Log da área (preditor)
-df$Adj_isl_log <- log(df$Adjacent.isl.area) # Log da área (preditor)
-
+df$Adj_isl_log <- log(df$Adjacent.isl.area) # Log da área adjacente (preditor)
+df$Elevation_log <- log(df$Elevation) # Log da elevação
+df$Nearest.dist_log <- log(df$Nearest.dist) # Log da distância à ilha mais próxima
+df$Santacruz.dist_log <- log1p(df$Santacruz.dist) # Log(x+1) da distância à Santa Cruz (contém valor 0 - log(0): -Inf)
 
 
 
@@ -146,8 +173,7 @@ ggplot(df, aes(x = Area_log, y = Species_log)) +
  
 
 
-
-# 2.2) Relação espécie & demais preditores
+# 2.3) Relação espécie & demais preditores
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Analisando multicolinearidade
@@ -230,7 +256,7 @@ default_prior(mformula,
 # S = cA^z -> log(S) = log(c) + z*log(A)
 # o efeito da área, portanto, é mensurado pelo coeficiente 'z' (beta_1; beta_logarea)
 
-# O efeito de \beta_1 pode ser interpretado como \beta_logarea = detla log(Species) / delta log(Area) - onde delta = diff entre máximo e mínimo,
+# O efeito de \beta_1 pode ser interpretado como \beta_logarea = delta log(Species) / delta log(Area) - onde delta = diff entre máximo e mínimo,
 # Isto nos fornece uma ideia (inicial) da escala do coeficiente \beta_area, mas cuidado, não devemos nos basear apeans nos dados!
 
 diff(range(df$Species_log)) /diff(range(df$Area_log)) # Está na escala do parâmetro estimado (logArea = 0.4)
@@ -257,7 +283,7 @@ qnorm(c(0.025, 0.975), mean = 0, sd = 0.5) # Aproximadamente 95% da probabilidad
 
 
 ### Priori informativa ###
-informative_prior <- prior(normal(0.3, 0.2), class = "b", coef = "Area_log")  # Esta priori assume que a relação espécie-área é essencialmente positiva.
+informative_prior <- prior(normal(0.3, 0.2), class = "b", coef = "Area_log")  # Esta priori atribui maior plausibilidade a uma relação espécie-área positiva (porém ainda permita valores negativos de z).
 qnorm(c(0.025, 0.975), mean = 0.3, sd = 0.2) # Aproximadamente 95% da probabilidade de z está entre [-0.09, 0.69]
 
 # ATENÇÃO: a priori informativa é meramente ilustrativa a título do exemplo aqui abordado. 
@@ -268,11 +294,8 @@ qnorm(c(0.025, 0.975), mean = 0.3, sd = 0.2) # Aproximadamente 95% da probabilid
 
 # 3.3) Prior predictive check
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# FIXME: traduzir
-#Now that we understand how to do posterior predictive checks, we can also do prior predictive checks.
-#Unless we have prior information from previous studies / experiments, how do we know if we have a good / meaningful prior? Parameters sampled from the prior distribution should generate predictions which are roughly in the range of observed data. Sure, the information contained in the data goes into the model via the likelihood, but priors that generate predictions of a total different magnitude as the data do not make much sense.
-#Instead of sampling from the posterior = prior * likelihood, we can just sample from the prior. Why? We can check if predictions from prior are approximately in line with the data. For linear models this may be obvious (intercept & slope), but for GLMs etc. prior predictive checks can be a helpful tool.
-#We start with the previous model, where we used a custom prior for the slope and default priors for intercept and sd. By specifying sample_prior="only", parameters are only sampled from the prior, ignoring the likelihood and therefore the data.
+# Antes de ajustar o modelo aos dados, devemos avaliar quais tipos de observações são gerados pelas distribuições a priori escolhidas.
+# Essa etapa é denominada prior predictive check e permite verificar se as prioris resultam em valores plausíveis para a variável-resposta.
 
 
 ## Modelo com priori fracamente informativa
@@ -410,8 +433,9 @@ bayes_R2(mod_iprior)
 
 
 ## Avaliando os resíduos
-performance::check_model(mod_iprior) # Função funciona para a maioria dos modelos brms, mas cuidado: interpretação dos residuos (pressupostos) não é igual para modelos mais complexos como glm, glmms, ...
-
+performance::check_model(mod_iprior) 
+# ATENÇÃO: a interpretação dos diferentes diagnósticos depende da família e da estrutura do modelo. 
+# Nem todos os pressupostos dos modelos lineares clássicos são avaliados da mesma maneira em modelos Bayesianos mais complexos (GLM, GLMMs, ...).
 
 
 
@@ -432,11 +456,13 @@ mcmc_hist(mod_iprior, pars = c("b_Intercept", "b_Area_log")) # Mesma coisa, mas 
 
 ## Predições
 # ATENÇÃO: as predições podem ser realizadas usando:
-# (i) a distribuição posterior da média: mu = beta0 + beta1*x (fitted distribution)
-#   - expressa nossa incertaza sobre a média 
-# (ii) a distribuição de uma nvoa observação: y_i = mu_i + epsilon_i (predictive distribution)
-#   - simulam-se variáveis-respostas que, condicionadas ao modelo ajustado, seriam réplicas dos dados observados.
+# (i) distribuição posterior da média esperada:
+#     mu = beta0 + beta1*x
+# -> representa a incerteza sobre a resposta média esperada
 
+# (ii) distribuição preditiva posterior de uma nova observação:
+#     y_new ~ Normal(mu, sigma)
+# -> incorpora tanto a incerteza dos parâmetros quanto a variabilidade residual
 
 ### Predições da média
 plot(conditional_effects(mod_iprior, spaghetti = TRUE, ndraws = 200),points = TRUE)
@@ -475,6 +501,7 @@ ph <- plot(hypothesis(mod_iprior, "Area_log > 0"),  plot = FALSE)
 ph[[1]] + geom_vline(xintercept=0)
 
 
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 4) Contrastando os resultados com abordagem frequentista
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -487,3 +514,147 @@ fixef(mod_iprior)
 # No modelo Bayesiano, todo o processo inferencial é baseado na distribuição posterior e não apenas em uma estimativa pontual.
 # Isso, por consequência, permite interpretar os resultados probabilisticamente
 
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 5) Comparando hipóteses ecológicas alternativas
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Até agora, investigamos apenas a relação espécie-área, assumindo que a área da ilha está associada
+# à variação na riqueza de espécies. No entanto, outros fatores também podem contribuir para explicar os padrões observados.
+# O banco de dados contém informações sobre características das ilhas que nos permitem representar diferentes hipóteses 
+# ecológicas por meio de modelos estatísticos alternativos.
+
+# Vamos considerar 5 hipóteses:
+
+# H0: a riqueza varia aleatoriamente (hipótese nula)
+# H1: a riqueza de espécie é influenciada pela área
+# H2: a riqueza de espécie é influenciada pela elevação
+# H3: a riqueza de espécie depende do seu grau de isolamento
+# H4: a riqueza de espécie depende da área da ilha e do seu grau de isolamento
+
+# OBS.: Para vias de simplificação, não iremos realizar um processo detalhado de elicitação das prioris para cada modelo. 
+# Antes de interpretar uma comparação Bayesiana entre modelos, entretanto, é importante verificar as prioris utilizadas.
+
+
+
+
+# 5.1) Rodando os modelos
+#~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## H0: Hipótese nula
+m0 <- Species_log ~ 1
+mod0 <- brm(m0,
+            data = df,
+            family = gaussian()) 
+
+
+## H1: Hipótese da área
+m1 <- Species_log ~ Area_log
+mod1 <- brm(m1,
+            data = df,
+            family = gaussian()) 
+
+
+## H2: Hipótese da elevação
+m2 <- Species_log ~ Elevation_log
+mod2 <- brm(m2,
+            data = df,
+            family = gaussian()) 
+
+
+## H3: Hipótese do isolamento
+m3 <- Species_log ~ Nearest.dist_log + Santacruz.dist_log
+mod3 <- brm(m3,
+            data = df,
+            family = gaussian()) 
+
+
+## H4: Hipótese da área + isolamento
+m4 <- Species_log ~ Area_log + Nearest.dist_log + Santacruz.dist_log
+mod4 <- brm(m4,
+            data = df,
+            family = gaussian()) 
+
+
+
+# 5.2) Comparando os modelos (capacidade preditiva)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Podemos comparar os modelos utilizando o leave-one-out cross-validation (LOO), uma abordagem de validação cruzada que 
+# avalia a capacidade PREDITIVA do modelo para observações que não foram utilizadas no ajuste.
+
+# Nessa metodologia, cada observação é, sucessivamente, tratada como se estivesse fora do conjunto de dados. 
+# Avalia-se, então, quão bem o modelo seria capaz de predizer a observação que ficou de fora.
+
+# O desempenho preditivo é resumido pela métrica ELPD, sendo maiores valores indicativos de melhor capacidade preditiva.
+# A comparação entre os modelos é feita em relação ao modelo com maior ELPD, com os demais modelos apresentando a sua diferença de ELPD em relação ao melhor modelo (elpd_diff).
+# Assim, valores negativos de elpd_diff indicam menor desempenho preditivo.
+
+# ATENÇÃO: A magnitude de elpd_diff não deve ser interpretada isoladamente.
+# Deve-se, também, considerar o erro-padrão associado à diferença de ELPD entre cada modelo e o modelo de referência  (se_diff) .
+
+# ATENÇÃO-2: O LOO compara a capacidade preditiva dos MODELOS utilizados para representar nossas hipóteses ecológicas. 
+# Ele não calcula a probabilidade de uma hipótese ser verdadeira ou falsa!
+
+loo0 <- loo(mod0)
+loo1 <- loo(mod1)
+loo2 <- loo(mod2)
+loo3 <- loo(mod3)
+loo4 <- loo(mod4)
+
+loo_compare(loo0, loo1, loo2, loo3, loo4) # Modelo com maior ELPD é usado como referência; todos os demais modelos são comparados ao modelo de referência
+# mod1 apresentou maior desempenho preditivo, sendo praticamente indistinguível do mod4.
+
+
+
+# 5.3) Comparando as hipóteses
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Após avaliar a capacidade preditiva de cada modelo, podemos nos perguntar qual o suporte que os dados fornecem em relação às hipóteses testadas.
+# Para isso, podemos utilizar o Bayes factor (BF): BF = p(y | model A) / p(y | model B) 
+# O BF indica quantas vezes os dados alteram as razões de chances relativas (odds) entre os dois modelos.
+
+# ATENÇÃO: O cálculo do Bayes factor requer prioris minimamente informativas para os parâmetros do modelo. 
+# Prioris flat (impróprias), como as utilizadas por default pelo brms para alguns coeficientes, não são adequadas para
+# o cálculo do BF, visto que a verossimilhança marginal depende diretamente da distribuição a priori.
+# Portanto, antes de calcular o BF, devem ser especificadas prioris apropriadas em cada modelo.
+
+
+# Qual o suporte do mod1 em relação ao mod4?
+bayes_factor(mod1, mod4) # 
+#bayes_factor(mod4, mod1) # Cuidado com a direção.
+
+
+# Qual o suporte do mod1 em relação ao mod0?
+bayes_factor(mod1, mod0) # Eita!!
+
+
+
+#~~~~~~~~~~~~~~~~~
+# 6) Curiosidades
+#~~~~~~~~~~~~~~~~~
+# O pacote bayestestR possui várias funcionalidades interessantes e que podem ser exploradas:
+# https://easystats.github.io/bayestestR/
+library(bayestestR)
+
+
+# 6.1) HDI (highest density interval)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# O HDI representa o intervalo que contém uma determinada proporção da distribuição posterior, priorizando os valores de maior densidade.
+hdi(mod1, ci = c(0.5, 0.80, 0.95))
+plot(hdi(mod1, ci = c(0.5, 0.80, 0.95)), show_intercept = T)
+
+
+
+# 6.2) Probabilidade da direção do efeito
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Determina a probabilidade de um parâmetro ser estritamente positivo ou negativo.
+p_direction(mod1) 
+plot(p_direction(mod1))
+
+
+# 6.3) ROPE (region of practical equivalence)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Define uma região ao redor de zero correspondente a efeitos considerados pequenos o suficiente para serem praticamente irrelevantes.
+# Assim, avalia-se o quanto da distribuição posterior se encontra dentro dessa região, permitindo investigar não apenas se o efeito difere de zero,
+# mas também se sua magnitude é relevante na prática.
+rope(mod1)
+plot(rope(mod1))
