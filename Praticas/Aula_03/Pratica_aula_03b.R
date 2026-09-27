@@ -21,8 +21,8 @@
 
 
 # OBJETIVOS:
-#   - 1) Entender o efeito do comprimento e sexo sobre a probabilidade do peixe estar maturo;
-#   - 2) Estimar o comprimento no qual a maturidade esperada é de 50% (L50)
+# - Entender o efeito do comprimento e sexo sobre a probabilidade do peixe estar maturo;
+# - Estimar o comprimento no qual a maturidade esperada é de 50% (L50)
 
 
 # ESTRUTURA DOS DADOS
@@ -53,6 +53,7 @@ library(tidyr)
 library(brms)
 library(ggplot2)
 library(patchwork)
+
 
 
 #><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
@@ -130,6 +131,14 @@ df$Length_c <- df$Length - mean(df$Length)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 options(mc.cores = 4, brms.backend = "cmdstanr") # Para acelerar a computação
 
+# MCMC inputs
+CHAINS <- 3 # Número de cadeias
+ITER <- 5000 # Número de iterações (amostragens)
+WARMUP <- 1000 # Número de iterações para descartar
+THIN <- 5 # Reter cada 5o valor
+
+
+
 ## Prioris default
 get_prior(Maturity ~ Length_c * Sex,
           data = df,
@@ -141,7 +150,11 @@ get_prior(Maturity ~ Length_c * Sex,
 # Considera uma única relação comprimento-maturidade para ambos os sexos (mesmo intercepto e mesmo efeito do comprimento)
 mod1 <- brm(Maturity ~ Length_c,
             data = df,
-            family = bernoulli(link = 'logit'))
+            family = bernoulli(link = 'logit'),
+            chains = CHAINS,
+            iter = ITER,
+            warmup = WARMUP,
+            thin = THIN)
 
 
 
@@ -149,7 +162,11 @@ mod1 <- brm(Maturity ~ Length_c,
 # Considera que machos e fêmeas podem diferir na probabilidade de maturidade, porém o efeito do comprimento é o mesmo para ambos os sexos (slopes iguais)
 mod2 <- brm(Maturity ~ Length_c + Sex,
             data = df,
-            family = bernoulli(link = 'logit'))
+            family = bernoulli(link = 'logit'),
+            chains = CHAINS,
+            iter = ITER,
+            warmup = WARMUP,
+            thin = THIN)
 
 
 
@@ -157,7 +174,11 @@ mod2 <- brm(Maturity ~ Length_c + Sex,
 # Considera que machos e fêmeas podem diferir na probabilidade de maturidade e também no efeito do comprimetno (interceptos e slopes diferentes)
 mod3 <- brm(Maturity ~ Length_c*Sex,
             data = df,
-            family = bernoulli(link = 'logit'))
+            family = bernoulli(link = 'logit'),
+            chains = CHAINS,
+            iter = ITER,
+            warmup = WARMUP,
+            thin = THIN)
 
 
 
@@ -224,14 +245,22 @@ df_m$Length_c <- df_m$Length - mean(df_m$Length) # Machos
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 mod_f <- brm(Maturity ~ Length_c,
              data = df_f,
-             family = bernoulli(link = 'logit'))
+             family = bernoulli(link = 'logit'),
+             chains = CHAINS,
+             iter = ITER,
+             warmup = WARMUP,
+             thin = THIN)
 
 
 # 6.3) Modelo para os machos
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 mod_m <- brm(Maturity ~ Length_c,
              data = df_m,
-             family = bernoulli(link = 'logit'))
+             family = bernoulli(link = 'logit'),
+             chains = CHAINS,
+             iter = ITER,
+             warmup = WARMUP,
+             thin = THIN)
 
 
 
