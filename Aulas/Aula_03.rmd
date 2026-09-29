@@ -82,7 +82,7 @@ knitr::include_graphics("../Figuras/Bayesian_workflow.png")
 
 4. Avaliar a convergência das cadeias 
   - *Traceplots*
-  - $\widehat{R}$
+  - $\widehat{R}$ & ESS
 
 5. Avaliar qualidade do ajuste do modelo
   - *Posterior predictive check*
@@ -129,7 +129,7 @@ knitr::include_graphics("../Figuras/prior_lik_post_densities.png")
 ### Modelagem Bayesiana | .small-text[<span style="color: #e07a5f;">Propor modelo incial </span>]
 
 
-Ao definir um modelo bayesiano, temos que escolher uma distribuição de probabilidade que melhor descreve os dados (verossimilhança) e os parâmetros (priors)
+Ao definir um modelo bayesiano, temos que escolher uma distribuição de probabilidade que melhor descreve os dados (verossimilhança) e os parâmetros (prioris)
 
 <br>
 
@@ -252,7 +252,7 @@ knitr::include_graphics("../Figuras/tipos_prioris.png")
 
 <br>
 
-- Toda prática científica nunca é 100% objetiva
+- A prática científica nunca é 100% objetiva
   - Escolha das distribuições de probabilidade (dados/prioris)
   - Nível de significância a 5% (abordagem frequentista)
 
@@ -282,6 +282,8 @@ Quando na dúvida sobre as prioris, realizar um teste de sensibilidade
 - testar diferentes prioris e avaliar seu efeito sobre a distribuição posterior
 
 
+--
+
 As práticas mais recentes de modelagem bayesiana incluem o *prior predictive check* no seu *workflow* habitual
 - permite verificar se as prioris fazem sentido
   - Gerar predições usando os parâmetros da priori 
@@ -302,7 +304,6 @@ knitr::include_graphics("../Figuras/Prior_predictive_check.png")
 
 ### Modelagem Bayesiana | .small-text[<span style="color: #e07a5f;">Convergência das cadeias </span>]
 
-<br>
 
 O MCMC produz sequências de valores para os parâmetros
 
@@ -317,22 +318,23 @@ Na prática, definimos diferentes cadeias para explorarem a distribuição poste
 
 **Como saber se as cadeias convergiram**
 
-- **Traceplot** $\rightarrow$ as cadeias apresentam boa mistura? (Visual)
+- .small-text[**Traceplot:**] as cadeias apresentam boa mistura? (Visual)
 
-- $\mathbf{\widehat{R}}$ $\rightarrow$ as diferentes cadeias convergiram para a mesma distribuição? (quantitativo)
+- $\small \mathbf{\widehat{R}}:$ as diferentes cadeias convergiram para a mesma distribuição? (Quantitativo)
 
-- **ESS** $\rightarrow$ quantas amostras efetivamente independentes temos? (quantitativo)
+- .small-text[**Effective Sample Size (ESS):**]  quantas amostras independentes temos efetivamente? (Quantitativo)
 
 ---
 # PPGECO | ECL0072 | out. 2026
 
 ### Modelagem Bayesiana | .small-text[<span style="color: #e07a5f;">Convergência das cadeias </span>]
 
-**Traceplot**
 
 <br>
 
 .pull-left[
+
+.center[**Traceplot**]
 
 <br>
 
@@ -348,6 +350,8 @@ Na prática, definimos diferentes cadeias para explorarem a distribuição poste
 
 
 .pull-right[
+
+<br>
 
 ```{r echo=FALSE, out.width ="85%"}
 knitr::include_graphics("../Figuras/trace-plot.png")
@@ -366,9 +370,9 @@ knitr::include_graphics("../Figuras/trace-plot.png")
 
 .pull-left[
 
-$\mathbf{\widehat{R}}$
+.center[**R̂**]
 
-.small-text[
+.small-text2[
 - Compara a variação de $\theta$ dentro e entre as cadeias
 - Valores devem ser < 1.1
 ]
@@ -376,9 +380,9 @@ $\mathbf{\widehat{R}}$
 
 .pull-right[
 
-**Effective sample size (ESS)**
+.center[**Effective sample size (ESS)**]
 
-.small-text[
+.small-text2[
 - Avalia a quantidade efetiva de informação presente nas amostras
   - Considera a autocorrelação entre as amostras e expressa essa informação em termos de um número equivalente de amostras independentes
 ]
@@ -410,6 +414,264 @@ summary(mod)
 
 ```
 ]
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelagem Bayesiana | .small-text[<span style="color: #e07a5f;">Distribuição posterior </span>]
+
+A distribuição posterior é multivariada por natureza
+
+
+<br>
+
+
+
+.pull-left[
+
+```{r echo=FALSE, out.width ="75%"}
+knitr::include_graphics("../Figuras/post_dist_output.png")
+
+```
+
+.center[.small-text[Cada linha representa uma amostra da posterior]]
+
+
+]
+
+.pull-right[
+
+```{r echo=FALSE, out.width ="100%"}
+knitr::include_graphics("../Figuras/multivariate_posterior.png")
+
+```
+
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelagem Bayesiana | .small-text[<span style="color: #e07a5f;">Distribuição posterior </span>]
+
+Todo o processo inferencial é realizado com base na distribuição posterior
+
+<br>
+<br>
+
+```{r echo=FALSE, out.width ="87%"}
+knitr::include_graphics("../Figuras/posterior_distribution_possibilities.png")
+
+```
+
+
+---
+### Modelagem Bayesiana | .small-text[<span style="color: #e07a5f;">Distribuição posterior </span>]
+
+Cada amostra da distribuição posterior resulta, também, em uma linha de regressão
+
+
+.pull-left[
+
+<br>
+
+```{r echo=FALSE, out.width ="70%"}
+knitr::include_graphics("../Figuras/posterior_distribution_table.png")
+```
+
+]
+
+
+.pull-right[
+<br>
+
+
+```{r echo=FALSE, out.width ="100%", fig.align='left'}
+knitr::include_graphics("../Figuras/posterior_regression2.gif")
+```
+
+]
+
+---
+### Modelagem Bayesiana | .small-text[<span style="color: #e07a5f;">Distribuição posterior </span>]
+
+
+É da distribuição posterior que também derivamos a *incertza* sobre os parâmetros avaliados
+- Intervalo de credibilidade (IC)
+  - IC95%: probabilidade do parâmetro estar contido no intervalo
+
+
+<div style="height: 7px;"></div>
+
+
+$$\large \mu_i(x) = \beta_0^{(i)} + \beta_1^{(i)}x ~~~~(i = 1,...,n)$$
+<br>
+
+
+```{r echo=FALSE, out.width ="100%"}
+knitr::include_graphics("../Figuras/posterior_ic95.png")
+```
+
+
+
+---
+### Modelagem Bayesiana | .small-text[<span style="color: #e07a5f;">Distribuição posterior </span>]
+
+
+É da distribuição posterior que também derivamos a *incertza* sobre os parâmetros avaliados
+- Intervalo de credibilidade (IC)
+  - IC95%: probabilidade do parâmetro estar contido no intervalo
+
+
+<div style="height: 7px;"></div>
+
+
+
+
+
+$$\bar\mu(x)= \frac{(\mu_1(x) + \mu_2(x) + \mu_3(x) + ~... ~ + \mu_n(x))}{n}$$
+
+<div style="height: 7px;"></div>
+
+
+
+```{r echo=FALSE, out.width ="60%"}
+knitr::include_graphics("../Figuras/posterior_mu_ic95.png")
+```
+
+
+---
+### Modelagem Bayesiana | .small-text[<span style="color: #e07a5f;">Predições </span>]
+
+<div style="height: 7px;"></div>
+
+.pull-left[
+
+
+.center[**Predição da média**]
+
+<div style="height: 7px;"></div>
+
+
+$$\mu_i(x) = \beta_0^{(i)} + \beta_1^{(i)}x$$
+
+<br>
+<div style="height: 7px;"></div>
+
+
+.small-text2[
+
+- Incorpora a incerteza nos coeficientes
+- Produz um intervalo de credibilidade para a média
+]
+
+<div style="height: 5px;"></div>
+
+```{r echo=FALSE, out.width ="90%"}
+knitr::include_graphics("../Figuras/posterior_mu_predictions.png")
+```
+
+
+]
+
+.pull-right[
+
+.center[**Predição de uma nova observação**]
+
+
+<div style="height: 7px;"></div>
+
+$$\widehat{y_i}(x) = \mu_i(x) + \varepsilon_i$$
+$$\varepsilon_i \sim Normal(0, \sigma_i)$$
+
+
+.small-text2[
+- Incorpora a incerteza nos parâmetros e a variabilidade residual
+- Produz um intervalo preditivo, geralmente mais amplo
+]
+
+
+
+```{r echo=FALSE, out.width ="90%"}
+knitr::include_graphics("../Figuras/posterior_obs_predictions.png")
+```
+
+]
+
+
+---
+### Modelagem Bayesiana | .small-text[<span style="color: #e07a5f;">Software </span>]
+
+
+
+.pull-left[
+
+<br>
+
+```{r echo=FALSE, out.width ="70%"}
+knitr::include_graphics("../Figuras/brms.png")
+```
+
+.center[[Livro](https://paulbuerkner.com/software/brms-book/brms-book.pdf)]]
+
+
+]
+
+
+.pull-right[
+
+```{r echo=FALSE, out.width ="80%"}
+knitr::include_graphics("../Figuras/paul-buerkner.png")
+```
+
+.center[[Paul Bürkner](https://paulbuerkner.com/)]]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Estudo dirigido
+
+
+.small-text3[
+
+**Livros**
+
+- **Caps. 6-7** - Gelman et al. (2013). Bayesian Data Analysis, 3. ed.
+
+- **Caps. 4-6** - Kinas & Agrelli (2020). Introdução à análise bayesiana (com R), 2. ed.
+
+- **Cap. 10** - McCarthy (2007). Bayesian Methods for Ecology.
+
+
+----
+
+**Artigos**
+
+
+- Banner et al. (2020). [The use of Bayesian priors in Ecology: The good, the bad and the not great](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.13407)
+
+- Conn et al. (2018). [A guide to Bayesian model checking for ecologists](https://doi.org/10.1002/ecm.1314)
+
+- Lemoine (2019). [Moving beyond noninformative priors: why and how to choose weakly informative priors in Bayesian](https://doi.org/10.1111/oik.05985)
+
+- Wesner & Pomeranz (2021). [Choosing priors in Bayesian ecological models by simulating from the prior predictive distribution](https://doi.org/10.1002/ecs2.3739)
+
+- Williams & Hooten (2016). [Combining statistical inference and decisions in ecology](https://esajournals.onlinelibrary.wiley.com/doi/10.1890/15-1593.1)
+
+
+
+----
+
+**Videos**
+
+- https://www.youtube.com/watch?v=d6i6xNDmExQ&t=1689s
+
+- https://www.youtube.com/watch?v=1qeXD4NQ4To&t=1450s
+
+- https://www.youtube.com/watch?v=EGgzJFtox2c&t=8175s [todos os vídeos da série]
+
+
 ]
 
 

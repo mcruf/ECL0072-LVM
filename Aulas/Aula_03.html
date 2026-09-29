@@ -60,7 +60,7 @@ class: title-slide
 
 4. Avaliar a convergência das cadeias 
   - *Traceplots*
-  - `\(\widehat{R}\)`
+  - `\(\widehat{R}\)` &amp; ESS
 
 5. Avaliar qualidade do ajuste do modelo
   - *Posterior predictive check*
@@ -104,7 +104,7 @@ Sob o prisma Bayesiano, tudo são probabilidades
 ### Modelagem Bayesiana | .small-text[&lt;span style="color: #e07a5f;"&gt;Propor modelo incial &lt;/span&gt;]
 
 
-Ao definir um modelo bayesiano, temos que escolher uma distribuição de probabilidade que melhor descreve os dados (verossimilhança) e os parâmetros (priors)
+Ao definir um modelo bayesiano, temos que escolher uma distribuição de probabilidade que melhor descreve os dados (verossimilhança) e os parâmetros (prioris)
 
 &lt;br&gt;
 
@@ -224,7 +224,7 @@ As prioris descrevem os valores considerados plausíveis para os parâmetros do 
 
 &lt;br&gt;
 
-- Toda prática científica nunca é 100% objetiva
+- A prática científica nunca é 100% objetiva
   - Escolha das distribuições de probabilidade (dados/prioris)
   - Nível de significância a 5% (abordagem frequentista)
 
@@ -254,6 +254,8 @@ Quando na dúvida sobre as prioris, realizar um teste de sensibilidade
 - testar diferentes prioris e avaliar seu efeito sobre a distribuição posterior
 
 
+--
+
 As práticas mais recentes de modelagem bayesiana incluem o *prior predictive check* no seu *workflow* habitual
 - permite verificar se as prioris fazem sentido
   - Gerar predições usando os parâmetros da priori 
@@ -271,7 +273,6 @@ As práticas mais recentes de modelagem bayesiana incluem o *prior predictive ch
 
 ### Modelagem Bayesiana | .small-text[&lt;span style="color: #e07a5f;"&gt;Convergência das cadeias &lt;/span&gt;]
 
-&lt;br&gt;
 
 O MCMC produz sequências de valores para os parâmetros
 
@@ -286,22 +287,23 @@ Na prática, definimos diferentes cadeias para explorarem a distribuição poste
 
 **Como saber se as cadeias convergiram**
 
-- **Traceplot** `\(\rightarrow\)` as cadeias apresentam boa mistura? (Visual)
+- .small-text[**Traceplot:**] as cadeias apresentam boa mistura? (Visual)
 
-- `\(\mathbf{\widehat{R}}\)` `\(\rightarrow\)` as diferentes cadeias convergiram para a mesma distribuição? (quantitativo)
+- `\(\small \mathbf{\widehat{R}}:\)` as diferentes cadeias convergiram para a mesma distribuição? (Quantitativo)
 
-- **ESS** `\(\rightarrow\)` quantas amostras efetivamente independentes temos? (quantitativo)
+- .small-text[**Effective Sample Size (ESS):**]  quantas amostras independentes temos efetivamente? (Quantitativo)
 
 ---
 # PPGECO | ECL0072 | out. 2026
 
 ### Modelagem Bayesiana | .small-text[&lt;span style="color: #e07a5f;"&gt;Convergência das cadeias &lt;/span&gt;]
 
-**Traceplot**
 
 &lt;br&gt;
 
 .pull-left[
+
+.center[**Traceplot**]
 
 &lt;br&gt;
 
@@ -318,6 +320,8 @@ Na prática, definimos diferentes cadeias para explorarem a distribuição poste
 
 .pull-right[
 
+&lt;br&gt;
+
 &lt;img src="../Figuras/trace-plot.png" alt="" width="85%" style="display: block; margin: auto;" /&gt;
 
 
@@ -332,9 +336,9 @@ Na prática, definimos diferentes cadeias para explorarem a distribuição poste
 
 .pull-left[
 
-`\(\mathbf{\widehat{R}}\)`
+.center[**R̂**]
 
-.small-text[
+.small-text2[
 - Compara a variação de `\(\theta\)` dentro e entre as cadeias
 - Valores devem ser &lt; 1.1
 ]
@@ -342,9 +346,9 @@ Na prática, definimos diferentes cadeias para explorarem a distribuição poste
 
 .pull-right[
 
-**Effective sample size (ESS)**
+.center[**Effective sample size (ESS)**]
 
-.small-text[
+.small-text2[
 - Avalia a quantidade efetiva de informação presente nas amostras
   - Considera a autocorrelação entre as amostras e expressa essa informação em termos de um número equivalente de amostras independentes
 ]
@@ -374,18 +378,251 @@ Formula: Species_log ~ Area_log
 
 Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     2.84      0.17     2.50     3.16 1.00     3526     2936
-Area_log      0.40      0.04     0.32     0.48 1.00     3135     2589
+Intercept     2.85      0.17     2.52     3.18 1.00     3472     2437
+Area_log      0.40      0.04     0.31     0.48 1.00     2910     2198
 
 Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.80      0.11     0.61     1.06 1.00     2784     2424
+sigma     0.79      0.11     0.61     1.04 1.00     2949     2717
 
-Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
+Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 ```
 ]
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelagem Bayesiana | .small-text[&lt;span style="color: #e07a5f;"&gt;Distribuição posterior &lt;/span&gt;]
+
+A distribuição posterior é multivariada por natureza
+
+
+&lt;br&gt;
+
+
+
+.pull-left[
+
+&lt;img src="../Figuras/post_dist_output.png" alt="" width="75%" style="display: block; margin: auto;" /&gt;
+
+.center[.small-text[Cada linha representa uma amostra da posterior]]
+
+
+]
+
+.pull-right[
+
+&lt;img src="../Figuras/multivariate_posterior.png" alt="" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelagem Bayesiana | .small-text[&lt;span style="color: #e07a5f;"&gt;Distribuição posterior &lt;/span&gt;]
+
+Todo o processo inferencial é realizado com base na distribuição posterior
+
+&lt;br&gt;
+&lt;br&gt;
+
+&lt;img src="../Figuras/posterior_distribution_possibilities.png" alt="" width="87%" style="display: block; margin: auto;" /&gt;
+
+
+---
+### Modelagem Bayesiana | .small-text[&lt;span style="color: #e07a5f;"&gt;Distribuição posterior &lt;/span&gt;]
+
+Cada amostra da distribuição posterior resulta, também, em uma linha de regressão
+
+
+.pull-left[
+
+&lt;br&gt;
+
+&lt;img src="../Figuras/posterior_distribution_table.png" alt="" width="70%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+.pull-right[
+&lt;br&gt;
+
+
+&lt;img src="../Figuras/posterior_regression2.gif" alt="" width="100%" style="display: block; margin: auto auto auto 0;" /&gt;
+
+]
+
+---
+### Modelagem Bayesiana | .small-text[&lt;span style="color: #e07a5f;"&gt;Distribuição posterior &lt;/span&gt;]
+
+
+É da distribuição posterior que também derivamos a *incertza* sobre os parâmetros avaliados
+- Intervalo de credibilidade (IC)
+  - IC95%: probabilidade do parâmetro estar contido no intervalo
+
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+`$$\large \mu_i(x) = \beta_0^{(i)} + \beta_1^{(i)}x ~~~~(i = 1,...,n)$$`
+&lt;br&gt;
+
+
+&lt;img src="../Figuras/posterior_ic95.png" alt="" width="100%" style="display: block; margin: auto;" /&gt;
+
+
+
+---
+### Modelagem Bayesiana | .small-text[&lt;span style="color: #e07a5f;"&gt;Distribuição posterior &lt;/span&gt;]
+
+
+É da distribuição posterior que também derivamos a *incertza* sobre os parâmetros avaliados
+- Intervalo de credibilidade (IC)
+  - IC95%: probabilidade do parâmetro estar contido no intervalo
+
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+
+
+
+`$$\bar\mu(x)= \frac{(\mu_1(x) + \mu_2(x) + \mu_3(x) + ~... ~ + \mu_n(x))}{n}$$`
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+
+&lt;img src="../Figuras/posterior_mu_ic95.png" alt="" width="60%" style="display: block; margin: auto;" /&gt;
+
+
+---
+### Modelagem Bayesiana | .small-text[&lt;span style="color: #e07a5f;"&gt;Predições &lt;/span&gt;]
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+.pull-left[
+
+
+.center[**Predição da média**]
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+`$$\mu_i(x) = \beta_0^{(i)} + \beta_1^{(i)}x$$`
+
+&lt;br&gt;
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+.small-text2[
+
+- Incorpora a incerteza nos coeficientes
+- Produz um intervalo de credibilidade para a média
+]
+
+&lt;div style="height: 5px;"&gt;&lt;/div&gt;
+
+&lt;img src="../Figuras/posterior_mu_predictions.png" alt="" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+.pull-right[
+
+.center[**Predição de uma nova observação**]
+
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+`$$\widehat{y_i}(x) = \mu_i(x) + \varepsilon_i$$`
+`$$\varepsilon_i \sim Normal(0, \sigma_i)$$`
+
+
+.small-text2[
+- Incorpora a incerteza nos parâmetros e a variabilidade residual
+- Produz um intervalo preditivo, geralmente mais amplo
+]
+
+
+
+&lt;img src="../Figuras/posterior_obs_predictions.png" alt="" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+---
+### Modelagem Bayesiana | .small-text[&lt;span style="color: #e07a5f;"&gt;Software &lt;/span&gt;]
+
+
+
+.pull-left[
+
+&lt;br&gt;
+
+&lt;img src="../Figuras/brms.png" alt="" width="70%" style="display: block; margin: auto;" /&gt;
+
+.center[[Livro](https://paulbuerkner.com/software/brms-book/brms-book.pdf)]]
+
+
+]
+
+
+.pull-right[
+
+&lt;img src="../Figuras/paul-buerkner.png" alt="" width="80%" style="display: block; margin: auto;" /&gt;
+
+.center[[Paul Bürkner](https://paulbuerkner.com/)]]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Estudo dirigido
+
+
+.small-text3[
+
+**Livros**
+
+- **Caps. 6-7** - Gelman et al. (2013). Bayesian Data Analysis, 3. ed.
+
+- **Caps. 4-6** - Kinas &amp; Agrelli (2020). Introdução à análise bayesiana (com R), 2. ed.
+
+- **Cap. 10** - McCarthy (2007). Bayesian Methods for Ecology.
+
+
+----
+
+**Artigos**
+
+
+- Banner et al. (2020). [The use of Bayesian priors in Ecology: The good, the bad and the not great](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.13407)
+
+- Conn et al. (2018). [A guide to Bayesian model checking for ecologists](https://doi.org/10.1002/ecm.1314)
+
+- Lemoine (2019). [Moving beyond noninformative priors: why and how to choose weakly informative priors in Bayesian](https://doi.org/10.1111/oik.05985)
+
+- Wesner &amp; Pomeranz (2021). [Choosing priors in Bayesian ecological models by simulating from the prior predictive distribution](https://doi.org/10.1002/ecs2.3739)
+
+- Williams &amp; Hooten (2016). [Combining statistical inference and decisions in ecology](https://esajournals.onlinelibrary.wiley.com/doi/10.1890/15-1593.1)
+
+
+
+----
+
+**Videos**
+
+- https://www.youtube.com/watch?v=d6i6xNDmExQ&amp;t=1689s
+
+- https://www.youtube.com/watch?v=1qeXD4NQ4To&amp;t=1450s
+
+- https://www.youtube.com/watch?v=EGgzJFtox2c&amp;t=8175s [todos os vídeos da série]
+
+
 ]
 
 
