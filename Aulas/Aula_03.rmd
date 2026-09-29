@@ -672,9 +672,12 @@ knitr::include_graphics("../Figuras/paul-buerkner.png")
 - https://www.youtube.com/watch?v=EGgzJFtox2c&t=8175s [todos os vídeos da série]
 
 
+
+
+----
+
+***Just for fun***
+
+- https://bookdown.org/content/8ba612b7-90f2-4ebc-b329-0159008e2340/07.html
+
 ]
-
-
----
-https://paulbuerkner.com/software/brms-book/brms-book.pdf
-https://bookdown.org/content/8ba612b7-90f2-4ebc-b329-0159008e2340/07.html
