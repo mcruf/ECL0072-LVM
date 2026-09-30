@@ -678,6 +678,8 @@ knitr::include_graphics("../Figuras/paul-buerkner.png")
 
 ***Just for fun***
 
+- https://github.com/stan-dev/stan/wiki/prior-choice-recommendations
+
 - https://bookdown.org/content/8ba612b7-90f2-4ebc-b329-0159008e2340/07.html
 
 ]
