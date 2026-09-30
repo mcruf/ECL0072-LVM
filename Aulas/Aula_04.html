@@ -4,7 +4,7 @@
     <title>MODELOS ESPAÇO-TEMPORAIS PARA DADOS ECOLÓGICOS (ECL0072)</title>
     <meta charset="utf-8" />
     <meta name="author" content="Marie-Christine Rufener" />
-    <script src="libs/header-attrs-2.29/header-attrs.js"></script>
+    <script src="libs/header-attrs-2.32/header-attrs.js"></script>
     <script src="libs/kePrint-0.0.1/kePrint.js"></script>
     <link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
@@ -63,9 +63,11 @@ class: title-slide
 
 
 &lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
 
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-1-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-1-1.svg" alt="" width="80%" style="display: block; margin: auto;" /&gt;
 
 
 
@@ -81,7 +83,7 @@ Processos ecológicos atuam em múltiplas escalas:
 &lt;br&gt;
 
 
-&lt;img src="../Figuras/spatial_structure.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="../Figuras/spatial_structure.png" alt="" width="70%" style="display: block; margin: auto;" /&gt;
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -95,7 +97,7 @@ Processos ecológicos atuam em múltiplas escalas:
 &lt;br&gt;
 &lt;br&gt;
 
-&lt;img src="../Figuras/temporal_structure.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="../Figuras/temporal_structure.png" alt="" width="90%" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -111,7 +113,7 @@ Processos ecológicos atuam em múltiplas escalas:
 
 
 
-&lt;img src="../Figuras/spatial-temporal_structure.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="../Figuras/spatial-temporal_structure.png" alt="" width="90%" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -125,7 +127,7 @@ Processos ecológicos atuam em múltiplas escalas:
 
 &lt;br&gt;
 
-&lt;img src="../Figuras/age_structure.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="../Figuras/age_structure.png" alt="" width="80%" style="display: block; margin: auto;" /&gt;
 
 
 ---
@@ -142,7 +144,7 @@ Um dado é *estruturado* quando as observações (`\(y_i\)`) estão organizadas 
 
 
 
-&lt;img src="../Figuras/dependency.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="../Figuras/dependency.png" alt="" width="60%" style="display: block; margin: auto;" /&gt;
 
 
 
@@ -202,55 +204,68 @@ class: center, middle
 ### - Particionado a variância -
 
 ---
-class: center, middle, inverse
-
-
-## &lt;span style="color: #6b705c;"&gt;ESTUDO DE CASO&lt;/span&gt;
-
----
-class: center, inverse
-
-# &lt;span style="color: #6b705c;"&gt;PPGECO | ECL0072 | out. 2026&lt;/span&gt;
-### &lt;span style="color: #6b705c;"&gt;Monitoramento da biomassa da ictiofauna recifal&lt;/span&gt;
+# PPGECO | ECL0072 | out. 2026
+### Estudo de caso | .small-text[&lt;span style="color: #e07a5f;"&gt;Monitoramento da ictiofauna recifal&lt;/span&gt;]
 
 &lt;br&gt;
+
 .pull-left[
-&lt;img src="../Figuras/reef_sampling_design.png" width="100%" style="display: block; margin: auto 0 auto auto;" /&gt;
+
+&lt;br&gt;
+
+&lt;img src="../Figuras/reef_sampling_design.png" alt="" width="90%" style="display: block; margin: auto 0 auto auto;" /&gt;
 ]
 
 .pull-right[
 
-.center[**Desenho amostral**]
-
 &lt;br&gt;
 
-**Escala espaço-temporal:** amostragens mensais de diferentes recifes (n=5) ao longo de 3 anos
+.small-text2[
 
-**Unidade amostral:** transecto (esforço constante)
+.center[**Escala espaço-temporal:**] 
 
-**Pseudo-réplicas:** 5 tansectos / recife / mes
+amostragens mensais de diferentes recifes (n=5) ao longo de 3 anos
 
-**Efeito do mergulhador:** amostragens realizdas por 3 mergulhadores
 
+-----
+
+.center[**Unidade amostral:**]
+
+transecto (esforço constante)
+
+-------
+
+.center[**Pseudo-réplicas:**]
+
+5 tansectos / recife / mês
+
+-------
+
+.center[**Efeito do mergulhador:**]
+
+amostragens realizdas por 3 mergulhadores
+]
 
 ]
 
 ---
-class: center, inverse
+# PPGECO | ECL0072 | out. 2026
+### Estudo de caso | .small-text[&lt;span style="color: #e07a5f;"&gt;Monitoramento da ictiofauna recifal&lt;/span&gt;]
 
-# &lt;span style="color: #6b705c;"&gt;PPGECO | ECL0072 | out. 2026&lt;/span&gt;
-### &lt;span style="color: #6b705c;"&gt;Monitoramento da biomassa da ictiofauna recifal&lt;/span&gt;
-
-
+.code-bg[
 
 ``` r
-df &lt;- readRDS("/Dados/biomass_reef.rds")
+df &lt;- readRDS("/Dados/reef_biomass.rds")
 ```
+]
 
+
+&lt;br&gt;
 &lt;br&gt;
 
 
-&lt;table class="table" style="font-size: 16px; color: black; margin-left: auto; margin-right: auto;"&gt;
+
+&lt;table class="table" style="font-size: 16px; margin-left: auto; margin-right: auto;"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:center;background-color: white;border-bottom: 2px solid #333333; background-color: white;"&gt; id_transecto &lt;/th&gt;
@@ -260,7 +275,7 @@ df &lt;- readRDS("/Dados/biomass_reef.rds")
    &lt;th style="text-align:center;background-color: white;border-bottom: 2px solid #333333; background-color: white;"&gt; transecto &lt;/th&gt;
    &lt;th style="text-align:center;background-color: white;border-bottom: 2px solid #333333; background-color: white;"&gt; mergulhador &lt;/th&gt;
    &lt;th style="text-align:center;background-color: white;border-bottom: 2px solid #333333; background-color: white;"&gt; sst &lt;/th&gt;
-   &lt;th style="text-align:center;background-color: white;border-bottom: 2px solid #333333; background-color: white;"&gt; biomassa_kg &lt;/th&gt;
+   &lt;th style="text-align:center;background-color: white;border-bottom: 2px solid #333333; background-color: white;"&gt; biomassa_kg_m2 &lt;/th&gt;
   &lt;/tr&gt;
  &lt;/thead&gt;
 &lt;tbody&gt;
@@ -272,7 +287,7 @@ df &lt;- readRDS("/Dados/biomass_reef.rds")
    &lt;td style="text-align:center;background-color: white;"&gt; 1 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_2 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 29.82 &lt;/td&gt;
-   &lt;td style="text-align:center;background-color: white;"&gt; 113.34 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 0.56670 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 2 &lt;/td&gt;
@@ -282,7 +297,7 @@ df &lt;- readRDS("/Dados/biomass_reef.rds")
    &lt;td style="text-align:center;background-color: white;"&gt; 2 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_2 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 28.34 &lt;/td&gt;
-   &lt;td style="text-align:center;background-color: white;"&gt; 135.16 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 0.67580 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 3 &lt;/td&gt;
@@ -292,7 +307,7 @@ df &lt;- readRDS("/Dados/biomass_reef.rds")
    &lt;td style="text-align:center;background-color: white;"&gt; 3 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_2 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 28.52 &lt;/td&gt;
-   &lt;td style="text-align:center;background-color: white;"&gt; 151.36 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 0.75680 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 4 &lt;/td&gt;
@@ -302,7 +317,7 @@ df &lt;- readRDS("/Dados/biomass_reef.rds")
    &lt;td style="text-align:center;background-color: white;"&gt; 4 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_3 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 29.12 &lt;/td&gt;
-   &lt;td style="text-align:center;background-color: white;"&gt; 99.39 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 0.49695 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 5 &lt;/td&gt;
@@ -312,7 +327,7 @@ df &lt;- readRDS("/Dados/biomass_reef.rds")
    &lt;td style="text-align:center;background-color: white;"&gt; 5 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_2 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 28.77 &lt;/td&gt;
-   &lt;td style="text-align:center;background-color: white;"&gt; 165.53 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 0.82765 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 6 &lt;/td&gt;
@@ -322,7 +337,7 @@ df &lt;- readRDS("/Dados/biomass_reef.rds")
    &lt;td style="text-align:center;background-color: white;"&gt; 1 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_3 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 28.42 &lt;/td&gt;
-   &lt;td style="text-align:center;background-color: white;"&gt; 107.03 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 0.53515 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 7 &lt;/td&gt;
@@ -332,7 +347,7 @@ df &lt;- readRDS("/Dados/biomass_reef.rds")
    &lt;td style="text-align:center;background-color: white;"&gt; 2 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_2 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 28.10 &lt;/td&gt;
-   &lt;td style="text-align:center;background-color: white;"&gt; 139.66 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 0.69830 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 8 &lt;/td&gt;
@@ -342,7 +357,7 @@ df &lt;- readRDS("/Dados/biomass_reef.rds")
    &lt;td style="text-align:center;background-color: white;"&gt; 3 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_2 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 27.38 &lt;/td&gt;
-   &lt;td style="text-align:center;background-color: white;"&gt; 119.03 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 0.59515 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 9 &lt;/td&gt;
@@ -352,7 +367,7 @@ df &lt;- readRDS("/Dados/biomass_reef.rds")
    &lt;td style="text-align:center;background-color: white;"&gt; 4 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_3 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 28.08 &lt;/td&gt;
-   &lt;td style="text-align:center;background-color: white;"&gt; 107.14 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 0.53570 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 10 &lt;/td&gt;
@@ -362,7 +377,7 @@ df &lt;- readRDS("/Dados/biomass_reef.rds")
    &lt;td style="text-align:center;background-color: white;"&gt; 5 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; Mergulhador_2 &lt;/td&gt;
    &lt;td style="text-align:center;background-color: white;"&gt; 27.42 &lt;/td&gt;
-   &lt;td style="text-align:center;background-color: white;"&gt; 77.28 &lt;/td&gt;
+   &lt;td style="text-align:center;background-color: white;"&gt; 0.38640 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
@@ -370,17 +385,21 @@ df &lt;- readRDS("/Dados/biomass_reef.rds")
 
 .left[.footnote[Cada linha representa uma amostra]]
 
----
-class: center, inverse
-# &lt;span style="color: #6b705c;"&gt;PPGECO | ECL0072 | out. 2026&lt;/span&gt;
-### &lt;span style="color: #6b705c;"&gt;Monitoramento da biomassa da ictiofauna recifal&lt;/span&gt;
 
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Estudo de caso | .small-text[&lt;span style="color: #e07a5f;"&gt;Monitoramento da ictiofauna recifal&lt;/span&gt;]
 
 &lt;br&gt;
 
-&lt;span style="color: #6b705c;"&gt;Os recifes diferem quanto a sua produtividade?&lt;/span&gt;
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-10-1.svg" width="60%" style="display: block; margin: auto;" /&gt;
+.center[**Os recifes diferem quanto a sua produtividade?**]
+
+&lt;br&gt;
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-11-1.svg" alt="" width="70%" style="display: block; margin: auto;" /&gt;
 
 
 
@@ -402,7 +421,7 @@ Parte da variabilidade dos dados pode ser reduzida, agregando as observações e
 
 .pull-left[
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-11-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-12-1.svg" alt="" width="90%" style="display: block; margin: auto;" /&gt;
 
 
 ]
@@ -411,14 +430,19 @@ Parte da variabilidade dos dados pode ser reduzida, agregando as observações e
 .pull-right[
 
 .small-text2[
-**Consequências**
 
-&lt;br&gt;
 
-- Útil em algumas poucas situações
-  - Mascara a variabilidade natural dos dados (informação!) 
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+Útil em algumas poucas situações, porém:
+
+
+- Mascara a variabilidade natural dos dados (informação!) 
+
 
 - Reduz o número de observações (logo, poder estatístico)
+
 
 - Falácia ecológica
   - Inferir relações individuais a partir de dados agregados
@@ -473,15 +497,17 @@ onde:
 
 
 .center[
+.code-bg[
 
 ``` r
-lm(biomassa_kg ~ recife, data = df)
+lm(biomassa_kg_m2 ~ recife, data = df)
 ```
+]
 ]
 
 
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-13-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-14-1.svg" alt="" width="90%" style="display: block; margin: auto;" /&gt;
 
 
 ]
@@ -541,13 +567,15 @@ onde:
 .pull-right[
 
 .center[
+.code-bg[
 
 ``` r
-f(biomassa_kg ~ 1 + (1|recife), data = df)
+f(biomassa_kg_m2 ~ 1 + (1|recife), data = df)
 ```
 ]
+]
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-15-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-16-1.svg" alt="" width="90%" style="display: block; margin: auto;" /&gt;
 
 
 ]
@@ -583,7 +611,7 @@ Y =
 &lt;br&gt;
 
 
-&lt;img src="../Figuras/fixed_vs_random_effect.png" width="85%" style="display: block; margin: auto;" /&gt;
+&lt;img src="../Figuras/fixed_vs_random_effect.png" alt="" width="85%" style="display: block; margin: auto;" /&gt;
 
 
 
@@ -626,6 +654,9 @@ Parâmetro vs. hiperparâmetros
 
 `$$\large \varepsilon_i \sim N(0, \sigma^2)$$`
 
+&lt;br&gt;
+
+
 .pull-left[
 
 **Parâmetros**
@@ -659,7 +690,7 @@ A estrutura hierárquica força o compartilhamento de informações entre a popu
 
 &lt;br&gt;
 
-&lt;img src="../Figuras/shrinkage_example.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="../Figuras/shrinkage_example.png" alt="" width="60%" style="display: block; margin: auto;" /&gt;
 
 
 
@@ -687,7 +718,7 @@ A flexibilidade dos modelos mistos está na sua abordagem para o parâmetro `\(\
 
 .pull-left[
 
-&lt;img src="../Figuras/variance_partitioning.png" width="85%" style="display: block; margin: auto 0 auto auto;" /&gt;
+&lt;img src="../Figuras/variance_partitioning.png" alt="" width="85%" style="display: block; margin: auto 0 auto auto;" /&gt;
 
 ]
 
@@ -752,7 +783,7 @@ Os efeitos aleatórios podem ser a nível do intercepto e/ou inclinação da ret
 
 .center[.small-text2[**Intercepto aleatório**]]
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-19-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-20-1.svg" alt="" width="100%" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -760,7 +791,7 @@ Os efeitos aleatórios podem ser a nível do intercepto e/ou inclinação da ret
 
 .center[.small-text2[**Intercepto &amp; inclinação aleatórios**]]
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-20-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-21-1.svg" alt="" width="100%" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -772,14 +803,14 @@ Os efeitos aleatórios podem ser a nível do intercepto e/ou inclinação da ret
 
 **Modelo linear**
 
-Considere a biomassa de peixes `\(y\)` no *i-ésimo* transecto como descrita em função da temperatura `\(x_i = SST\)`
+Considere a biomassa de peixes `\(y\)` no *i-ésimo* transecto, descrita em função da temperatura `\(x_i = SST\)`
 
-&lt;div style="height: 15px;"&gt;&lt;/div&gt;
+&lt;div style="height: 10px;"&gt;&lt;/div&gt;
 
 .pull-left[
 
 &lt;br&gt;
-&lt;br&gt;
+
 
 .gray-box-big[
 `$$\large y = {X\beta} + \varepsilon$$`
@@ -792,18 +823,21 @@ Considere a biomassa de peixes `\(y\)` no *i-ésimo* transecto como descrita em 
 `$$\Large y_i = \beta_0 + \beta_1x_i + \varepsilon_i$$`
 ]
 
+&lt;br&gt;
+
+.code-bg[
+
+``` r
+f(biomassa_kg_m2 ~ 1 + sst, data = df)
+```
+]
+
 ]
 
 
 .pull-right[
 
-
-``` r
-f(biomassa_kg ~ 1 + sst, data = df)
-```
-
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-22-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
-
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-23-1.svg" alt="" width="90%" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -990,10 +1024,10 @@ Lembrando que:
 
 
 ``` r
-f(biomassa_kg ~ 1 + (1 | recife), data = df)
+f(biomassa_kg_m2 ~ 1 + (1 | recife), data = df)
 ```
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-24-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-25-1.svg" alt="" width="90%" style="display: block; margin: auto;" /&gt;
 
 
 
@@ -1234,12 +1268,12 @@ O modelo anterior é também conhecido por modelo linear misto com intercepto al
 
 .pull-left[
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-25-1.svg" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-26-1.svg" alt="" width="70%" style="display: block; margin: auto;" /&gt;
 ]
 
 .pull-right[
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-26-1.svg" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-27-1.svg" alt="" width="70%" style="display: block; margin: auto;" /&gt;
 ]
   
 ---
@@ -1290,10 +1324,10 @@ Onde:
 
 
 ``` r
-f(biomassa_kg ~ 1 + sst + (1 + sst | recife), data = df)
+f(biomassa_kg_m2 ~ 1 + sst + (1 + sst | recife), data = df)
 ```
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-28-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-29-1.svg" alt="" width="80%" style="display: block; margin: auto;" /&gt;
 
 
 
@@ -1438,7 +1472,7 @@ A variabilidade entre grupos (recifes) é incorporada na incerteza da média pop
 
 .pull-left[
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-30-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-31-1.svg" alt="" width="90%" style="display: block; margin: auto;" /&gt;
 
 
 
@@ -1455,7 +1489,7 @@ Assume que todas as observações são independentes
 
 .pull-right[
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-31-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-32-1.svg" alt="" width="90%" style="display: block; margin: auto;" /&gt;
 
 
 &lt;div style="height: 15px;"&gt;&lt;/div&gt;
@@ -1478,7 +1512,7 @@ A estruturação dos efeitos aleatórios depende não só das hipóteses, como t
 
 .center[ **Desenho amostral aninhado** ]
 
-&lt;img src="../Figuras/nested_design.png" width="50%" style="display: block; margin: auto;" /&gt;
+&lt;img src="../Figuras/nested_design.png" alt="" width="50%" style="display: block; margin: auto;" /&gt;
 
 &lt;div style="height: 20px;"&gt;&lt;/div&gt;
 
@@ -1501,7 +1535,7 @@ Fatores independentes não se cruzam
 `$$\text{biomassa}_{ijk} = \mu_a + \gamma_k + \delta_{j(k)} + \epsilon_{ijk}$$`
 
 
-&lt;img src="../Figuras/nested_random_effect.png" width="50%" style="display: block; margin: auto;" /&gt;
+&lt;img src="../Figuras/nested_random_effect.png" alt="" width="50%" style="display: block; margin: auto;" /&gt;
 
 
 ----
@@ -1523,13 +1557,13 @@ Fatores independentes não se cruzam
 
 
 ``` r
-f(biomassa_kg ~ 1 + (1 | ano/recife))
+f(biomassa_kg_m2 ~ 1 + (1 | ano/recife))
 ```
 
 
 
 ``` r
-f(biomassa_kg ~ 1 + (1 | ano) + (1 | ano:recife))
+f(biomassa_kg_m2 ~ 1 + (1 | ano) + (1 | ano:recife))
 ```
 
 
@@ -1541,7 +1575,7 @@ f(biomassa_kg ~ 1 + (1 | ano) + (1 | ano:recife))
 
 
 
-&lt;img src="../Figuras/crossed_design.png" width="50%" style="display: block; margin: auto;" /&gt;
+&lt;img src="../Figuras/crossed_design.png" alt="" width="50%" style="display: block; margin: auto;" /&gt;
 
 &lt;div style="height: 20px;"&gt;&lt;/div&gt;
 
@@ -1563,7 +1597,7 @@ Fatores independentes se cruzam
 `$$\text{biomassa}_{ijk} = \mu_a + \gamma_k + \delta_j + \epsilon_{ijk}$$`
 
 
-&lt;img src="../Figuras/crossed_random_effect.png" width="40%" style="display: block; margin: auto;" /&gt;
+&lt;img src="../Figuras/crossed_random_effect.png" alt="" width="40%" style="display: block; margin: auto;" /&gt;
 
 
 ----
@@ -1585,7 +1619,7 @@ Fatores independentes se cruzam
 
 
 ``` r
-f(biomassa_kg ~ 1 + (1 | ano) + (1 | recife))
+f(biomassa_kg_m2 ~ 1 + (1 | ano) + (1 | recife))
 ```
 
 
@@ -1602,7 +1636,7 @@ A abordagem *frequentista* para estimação dos parâmetros de modelos mistos ex
   
 .pull-left[
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-39-1.svg" width="85%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-40-1.svg" alt="" width="85%" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -1642,7 +1676,7 @@ A abordagem *frequentista* para estimação dos parâmetros de modelos mistos ex
   
 .pull-left[
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-40-1.svg" width="85%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-41-1.svg" alt="" width="85%" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -1831,6 +1865,13 @@ Também conhecidos por:
 - modelos hiearárquicos
 
 
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### Estudo dirigido
+
+- **Caps. 6** - Hobbs &amp; Hooten (2007). Bayesian Models - A Statistical Primer for Ecologists.
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

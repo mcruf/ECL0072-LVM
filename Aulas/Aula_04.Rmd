@@ -81,24 +81,34 @@ class: title-slide
 
 
 <br>
+<br>
+<br>
 
 
-```{r, out.width ="80%", fig.asp = 0.6}
-
-df <- readRDS("~/OneDrive/Arbeit/Supervision/ICCAT/Dados/iccat_updated_aug26.rds")
+```{r, out.width ="80%", fig.asp = 0.4}
 
 
-df %>%
+
+
+iccat <- readRDS("~/OneDrive/Arbeit/Supervision/ICCAT/Dados/iccat_updated_aug26.rds")
+
+
+iccat %>%
     mutate(MonthYear = zoo::as.yearmon(Date)) %>%
     mutate(CPUE = (Xiphias_gladius/Nhooks)*1000) %>%
     group_by(MonthYear) %>%
     summarise(avg_cpue = mean(CPUE)) %>%
     ggplot(aes(x=MonthYear, y= avg_cpue)) +
-    geom_line(col = '#d5bdaf', size = 0.6) + 
-    geom_point(col = '#d5bdaf', size = 0.8, shape = 1) +
-    geom_smooth(method = 'gam', fill = '#dda3a4', col = "#bc4749") +
+    geom_line(col = '#e07a5f', size = 0.6) + 
+    geom_point(col = '#e07a5f', size = 0.8, shape = 1) +
+    geom_smooth(method = 'gam', fill = 'gray70', col = "gray40") +
     labs(x = "Anos",y = "CPUE (N/1000 anzóis)") +
-    theme_light(base_size = 12)
+    theme_void() +
+    my_theme
+
+
+
+
 
 ```
 
@@ -248,20 +258,16 @@ class: center, middle
 ### - Particionado a variância -
 
 ---
-class: center, middle, inverse
-
-
-## <span style="color: #6b705c;">ESTUDO DE CASO</span>
-
----
-class: center, inverse
-
-# <span style="color: #6b705c;">PPGECO | ECL0072 | out. 2026</span>
-### <span style="color: #6b705c;">Monitoramento da biomassa da ictiofauna recifal</span>
+# PPGECO | ECL0072 | out. 2026
+### Estudo de caso | .small-text[<span style="color: #e07a5f;">Monitoramento da ictiofauna recifal</span>]
 
 <br>
+
 .pull-left[
-```{r, out.width ="100%", fig.align='right'}
+
+<br>
+
+```{r, out.width ="90%", fig.align='right'}
 knitr::include_graphics("../Figuras/reef_sampling_design.png")
 
 ```
@@ -269,38 +275,61 @@ knitr::include_graphics("../Figuras/reef_sampling_design.png")
 
 .pull-right[
 
-.center[**Desenho amostral**]
-
 <br>
 
-**Escala espaço-temporal:** amostragens mensais de diferentes recifes (n=5) ao longo de 3 anos
+.small-text2[
 
-**Unidade amostral:** transecto (esforço constante)
+.center[**Escala espaço-temporal:**] 
 
-**Pseudo-réplicas:** 5 tansectos / recife / mes
+amostragens mensais de diferentes recifes (n=5) ao longo de 3 anos
 
-**Efeito do mergulhador:** amostragens realizdas por 3 mergulhadores
 
+-----
+
+.center[**Unidade amostral:**]
+
+transecto (esforço constante)
+
+-------
+
+.center[**Pseudo-réplicas:**]
+
+5 tansectos / recife / mês
+
+-------
+
+.center[**Efeito do mergulhador:**]
+
+amostragens realizdas por 3 mergulhadores
+]
 
 ]
 
 ---
-class: center, inverse
+# PPGECO | ECL0072 | out. 2026
+### Estudo de caso | .small-text[<span style="color: #e07a5f;">Monitoramento da ictiofauna recifal</span>]
 
-# <span style="color: #6b705c;">PPGECO | ECL0072 | out. 2026</span>
-### <span style="color: #6b705c;">Monitoramento da biomassa da ictiofauna recifal</span>
-
-
+.code-bg[
 ```{r, eval = F, echo=T}
-df <- readRDS("/Dados/biomass_reef.rds")
+df <- readRDS("/Dados/reef_biomass.rds")
 ```
+]
+
 
 <br>
+<br>
 
+```{r,eval =T, echo =F, cache=FALSE}
+
+## Read data
+df <- readRDS("../Dados/reef_biomass.rds")
+
+```
 
 ```{r}
-## Read data
-df <- readRDS("../Dados/biomass_reef.rds")
+
+library(kableExtra)
+
 
 head(df, 10) %>%
   kable(format = "html", align = "c", booktabs = TRUE) %>%
@@ -314,26 +343,31 @@ head(df, 10) %>%
 
 .left[.footnote[Cada linha representa uma amostra]]
 
----
-class: center, inverse
-# <span style="color: #6b705c;">PPGECO | ECL0072 | out. 2026</span>
-### <span style="color: #6b705c;">Monitoramento da biomassa da ictiofauna recifal</span>
 
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Estudo de caso | .small-text[<span style="color: #e07a5f;">Monitoramento da ictiofauna recifal</span>]
 
 <br>
 
-<span style="color: #6b705c;">Os recifes diferem quanto a sua produtividade?</span>
 
-```{r, out.width="60%", fig.asp = 0.7}
+.center[**Os recifes diferem quanto a sua produtividade?**]
+
+<br>
+
+```{r, out.width="70%", fig.asp = 0.6}
+
 df$recife <- as.factor(df$recife)
 levels(df$recife) <- c("A","B", "C", "D", "E")
 
 df %>%
     #filter(recife %in% c("A", "B", "C")) %>%
-    ggplot(aes(x = recife, y = biomassa_kg)) +
+    ggplot(aes(x = recife, y = biomassa_kg_m2)) +
     geom_jitter(aes(col = recife), size = 4, alpha = 0.5) +
     geom_boxplot(size = 1, alpha = 0.3) +
-    labs(x = "Recifes",y = "Biomassa (Kg)") +
+    labs(x = "Recifes",y = "Biomassa (Kg/m2)") +
     scale_color_manual(values = c("#846267", "#588157","#e07a5f", "#457b9d", "#f6bd60")) +
     theme_minimal(base_size = 14) +
     my_theme +
@@ -365,7 +399,7 @@ Parte da variabilidade dos dados pode ser reduzida, agregando as observações e
 ```{r, fig.asp = 0.8, out.width="90%"}
 
 df %>%
-    ggplot(aes(x = recife, y = biomassa_kg)) +
+    ggplot(aes(x = recife, y = biomassa_kg_m2)) +
     geom_jitter(aes(col = recife), size = 4, alpha = 0.5, width = 0.2) +
     
     # 1. Point for the MEDIAN (e.g., solid black diamond)
@@ -388,7 +422,7 @@ df %>%
         linewidth = 0.8
     ) +
     
-    labs(x = "Recifes", y = "Biomassa (Kg)") +
+    labs(x = "Recifes", y = "Biomassa (Kg/m2)") +
     scale_color_manual(values = c("#846267", "#588157", "#e07a5f", "#457b9d", "#f6bd60")) +
     theme_minimal(base_size = 14) +
     theme( axis.text.x = element_text(margin = margin(t = 25)),
@@ -413,14 +447,19 @@ df %>%
 .pull-right[
 
 .small-text2[
-**Consequências**
 
-<br>
 
-- Útil em algumas poucas situações
-  - Mascara a variabilidade natural dos dados (informação!) 
+<div style="height: 7px;"></div>
+
+
+Útil em algumas poucas situações, porém:
+
+
+- Mascara a variabilidade natural dos dados (informação!) 
+
 
 - Reduz o número de observações (logo, poder estatístico)
+
 
 - Falácia ecológica
   - Inferir relações individuais a partir de dados agregados
@@ -475,11 +514,13 @@ onde:
 
 
 .center[
+.code-bg[
 ```{r, echo=T, eval=F}
 
-lm(biomassa_kg ~ recife, data = df)
+lm(biomassa_kg_m2 ~ recife, data = df)
 
 ```
+]
 ]
 
 
@@ -487,7 +528,7 @@ lm(biomassa_kg ~ recife, data = df)
 ```{r, out.width="90%", fig.asp = 0.8}
 
 ## Adjust model (ANOVA)
-mod1 <- lm(biomassa_kg ~ recife, data = df)
+mod1 <- lm(biomassa_kg_m2 ~ recife, data = df)
 
 ## Get average by group
 group_preds <- emmeans(mod1, ~ recife) %>%
@@ -500,12 +541,12 @@ group_preds <- emmeans(mod1, ~ recife) %>%
 
 ## Go for the plot
 ggplot() +
-    geom_jitter(data = df, aes(x = recife,y = biomassa_kg, col = recife),size = 4,alpha = .3, width = .15) +
+    geom_jitter(data = df, aes(x = recife,y = biomassa_kg_m2, col = recife),size = 4,alpha = .3, width = .15) +
     
     geom_pointrange(data = group_preds, aes(x = recife, y = estimate, ymin = ymin, ymax = ymax),
                     colour = "gray10",linewidth = 1) +
     scale_color_manual(values = c("#846267", "#588157","#e07a5f", "#457b9d", "#f6bd60")) +
-    labs(x = "Recifes",y = "Biomassa (Kg)") +
+    labs(x = "Recifes",y = "Biomassa (Kg/m2)") +
     theme_minimal(base_size = 14) +
     my_theme
 
@@ -585,17 +626,19 @@ onde:
 .pull-right[
 
 .center[
+.code-bg[
 ```{r, echo=T, eval=F}
 
-f(biomassa_kg ~ 1 + (1|recife), data = df)
+f(biomassa_kg_m2 ~ 1 + (1|recife), data = df)
 
 ```
+]
 ]
 
 ```{r, out.width="90%", fig.asp = 0.8}
 
 ## Adjust LMM
-mod <- lmer(biomassa_kg ~ 1 + (1 | recife), data = df)
+mod <- lmer(biomassa_kg_m2 ~ 1 + (1 | recife), data = df)
 
 
 ## Extract fixed-effect coefficients (overall mean)
@@ -622,10 +665,10 @@ recife_levels <- unique(as.character(df$recife))
 all_levels <- c("mu_a", recife_levels)
 
 ggplot() +
-    geom_jitter(data = df, aes(x = factor(recife, levels = all_levels), y = biomassa_kg, col = recife), size = 4, alpha = 0.3, width = 0.15) +
+    geom_jitter(data = df, aes(x = factor(recife, levels = all_levels), y = biomassa_kg_m2, col = recife), size = 4, alpha = 0.3, width = 0.15) +
     geom_pointrange(data = model_estimates, aes(x = factor(recife, levels = all_levels),y = estimate,ymin = ymin,ymax = ymax), color = c(2,1,1,1,1,1), size = 1, linewidth = 1 ) +
     scale_x_discrete(limits = all_levels,labels = parse(text = c("mu[a]", recife_levels))) +
-    labs(x = "Recifes",y = "Biomassa (Kg)") +
+    labs(x = "Recifes",y = "Biomassa (Kg/m2)") +
     scale_color_manual(values = c("#846267", "#588157","#e07a5f", "#457b9d", "#f6bd60")) +
     theme_minimal(base_size = 14) +
     my_theme
@@ -712,6 +755,9 @@ $$\large \alpha_j \sim N(0, \sigma_\alpha^2)$$
 
 $$\large \varepsilon_i \sim N(0, \sigma^2)$$
 
+<br>
+
+
 .pull-left[
 
 **Parâmetros**
@@ -745,7 +791,7 @@ A estrutura hierárquica força o compartilhamento de informações entre a popu
 
 <br>
 
-```{r, out.width ="70%", fig.asp = 0.7}
+```{r, out.width ="60%", fig.asp = 0.7}
 knitr::include_graphics("../Figuras/shrinkage_example.png")
 ```
 
@@ -864,7 +910,7 @@ reef_cols <- c(
 ###############################################################################
 
 m_ri <- lmer(
-  biomassa_kg ~ sst + (1 | recife),
+  biomassa_kg_m2 ~ sst + (1 | recife),
   data = df
 )
 
@@ -899,7 +945,7 @@ pop_line <- newdat %>%
 ## Plot 1
 ###############################################################################
 
-ggplot(df, aes(sst, biomassa_kg)) +
+ggplot(df, aes(sst, biomassa_kg_m2)) +
     geom_point(aes(colour = recife), alpha = .30, size = 3) +
     geom_line(data = newdat, aes(x = sst, y = pred_group, colour = recife), linewidth = 1.3) +
     geom_line(data = pop_line, aes(x = sst, y = pred_pop, colour = recife), linewidth = 1.5, linetype = "dashed") +
@@ -917,7 +963,6 @@ ggplot(df, aes(sst, biomassa_kg)) +
             override.aes = list(size = 3, alpha = 1) # Makes points in legend bigger & non-transparent
         )
     ) +
-    theme_minimal(base_size = 14) +
     my_theme +
     theme(
         legend.position = "inside",
@@ -940,7 +985,7 @@ ggplot(df, aes(sst, biomassa_kg)) +
 ###############################################################################
 
 m_rs <- lmer(
-  biomassa_kg ~ sst + (sst | recife),
+  biomassa_kg_m2 ~ sst + (sst | recife),
   data = df
 )
 
@@ -977,7 +1022,7 @@ pop_line2 <- newdat2 %>%
 ## Plot 2
 ###############################################################################
 
-ggplot(df, aes(sst, biomassa_kg)) +
+ggplot(df, aes(sst, biomassa_kg_m2)) +
   geom_point(aes(colour = recife), alpha = .3, size = 3) +
   geom_line(data = newdat2, aes(x = sst, y = pred_group, colour = recife), linewidth = 1.3) +
   geom_line(data = pop_line2, aes(x = sst, y = pred_pop, colour = recife), linewidth = 1.5, linetype = "dashed") +
@@ -990,8 +1035,13 @@ ggplot(df, aes(sst, biomassa_kg)) +
     x = "SST (°C)",
     y = "Biomassa (kg)"
   ) +
-  theme_minimal(base_size = 14) +
-  my_theme
+  my_theme +
+    theme(
+        legend.position = "inside",
+        legend.position.inside = c(0.12, 0.81), # Adjust X and Y between 0 and 1
+        legend.background = element_rect(fill = "white", color = "gray80", linewidth = 0.3), legend.title = element_text(size = 14, face = "bold"), # Legend title size
+        legend.text = element_text(size = 12))
+    
 
 
 ```
@@ -1006,14 +1056,14 @@ ggplot(df, aes(sst, biomassa_kg)) +
 
 **Modelo linear**
 
-Considere a biomassa de peixes $y$ no *i-ésimo* transecto como descrita em função da temperatura $x_i = SST$
+Considere a biomassa de peixes $y$ no *i-ésimo* transecto, descrita em função da temperatura $x_i = SST$
 
-<div style="height: 15px;"></div>
+<div style="height: 10px;"></div>
 
 .pull-left[
 
 <br>
-<br>
+
 
 .gray-box-big[
 $$\large y = {X\beta} + \varepsilon$$
@@ -1026,29 +1076,34 @@ $$\large \varepsilon \sim  \text{MVN}(0, \sigma^2I)$$
 $$\Large y_i = \beta_0 + \beta_1x_i + \varepsilon_i$$
 ]
 
+<br>
+
+.code-bg[
+```{r, echo=T, eval=F}
+
+f(biomassa_kg_m2 ~ 1 + sst, data = df)
+
+```
+]
+
 ]
 
 
 .pull-right[
 
-```{r, echo=T, eval=F}
-
-f(biomassa_kg ~ 1 + sst, data = df)
-
-```
-
 ```{r, fig.asp = 0.9, out.width="90%"}
 
 df %>%
-    ggplot(aes(x = sst, y = biomassa_kg)) +
-    geom_point(size = 4, alpha = 0.5, col = "#d5bdaf") +
-    geom_smooth(method = 'lm', se = TRUE, fill = '#dda3a4', col = "#bc4749", size = 2) +
-    labs(x = "SST (°C))",y = "Biomassa (kg)") +
+    ggplot(aes(x = sst, y = biomassa_kg_m2)) +
+    # geom_point(size = 4, alpha = 0.5, col = "gray40") +
+    # geom_smooth(method = 'lm', se = TRUE,  fill = '#e07a5f', col = "#e07a5f", size = 2) +
+    geom_point(size = 4, alpha = 0.4, col = "#e07a5f") +
+    geom_smooth(method = 'lm', se = TRUE,  fill = 'gray80', col = "gray50", size = 2) +
+    labs(x = "SST (°C)",y = "Biomassa (Kg/m2)") +
     theme_minimal(base_size = 14) +
     my_theme
 
 ```
-
 
 ]
 
@@ -1234,16 +1289,16 @@ Lembrando que:
 .pull-right[
 
 ```{r, echo=T, eval=F}
-f(biomassa_kg ~ 1 + (1 | recife), data = df)
+f(biomassa_kg_m2 ~ 1 + (1 | recife), data = df)
 ```
 
 ```{r, fig.asp = 0.9, out.width="90%"}
 
 df %>%
-    ggplot(aes(x = recife, y = biomassa_kg)) +
+    ggplot(aes(x = recife, y = biomassa_kg_m2)) +
     geom_jitter(aes(col = recife), size = 4, alpha = 0.5) +
     geom_boxplot(size = 1, alpha = 0.3) +
-    labs(x = "Recifes",y = "Biomassa (Kg)") +
+    labs(x = "Recifes",y = "Biomassa (Kg/m2)") +
     scale_color_manual(values = c("#846267", "#588157","#e07a5f", "#457b9d", "#f6bd60")) +
     theme_minimal(base_size = 14) +
     my_theme +
@@ -1492,7 +1547,7 @@ O modelo anterior é também conhecido por modelo linear misto com intercepto al
 .pull-left[
 
 ```{r, out.width="70%", fig.asp=0.8}
-ggplot(df, aes(sst, biomassa_kg)) +
+ggplot(df, aes(sst, biomassa_kg_m2)) +
     geom_point(aes(colour = recife), alpha = .30, size = 3) +
     geom_line(data = newdat, aes(x = sst, y = pred_group, colour = recife), linewidth = 1.3) +
     geom_line(data = pop_line, aes(x = sst, y = pred_pop, colour = recife), linewidth = 1.5, linetype = "dashed") +
@@ -1503,7 +1558,7 @@ ggplot(df, aes(sst, biomassa_kg)) +
     ) +
     labs(
         x = "SST (°C)",
-        y = "Biomassa (kg)"
+        y = "Biomassa (Kg/m2)"
     ) +
     guides(
         colour = guide_legend(
@@ -1524,7 +1579,7 @@ ggplot(df, aes(sst, biomassa_kg)) +
 .pull-right[
 
 ```{r, out.width="70%", fig.asp=0.8}
-ggplot(df, aes(sst, biomassa_kg)) +
+ggplot(df, aes(sst, biomassa_kg_m2)) +
   geom_point(aes(colour = recife), alpha = .3, size = 3) +
   geom_line(data = newdat2, aes(x = sst, y = pred_group, colour = recife), linewidth = 1.3) +
   geom_line(data = pop_line2, aes(x = sst, y = pred_pop, colour = recife), linewidth = 1.5, linetype = "dashed") +
@@ -1535,7 +1590,7 @@ ggplot(df, aes(sst, biomassa_kg)) +
   ) +
   labs(
     x = "SST (°C)",
-    y = "Biomassa (kg)"
+    y = "Biomassa (Kg/m2)"
   ) +
   theme_minimal(base_size = 16) +
   my_theme
@@ -1589,16 +1644,16 @@ Onde:
 
 
 ```{r, echo=T, eval=F}
-f(biomassa_kg ~ 1 + sst + (1 + sst | recife), data = df)
+f(biomassa_kg_m2 ~ 1 + sst + (1 + sst | recife), data = df)
 ```
 
 ```{r, fig.asp = 0.9, out.width="80%"}
 
 df %>%
-    ggplot(aes(x = sst, y = biomassa_kg)) +
+    ggplot(aes(x = sst, y = biomassa_kg_m2)) +
     geom_point(col = '#d5bdaf', size = 4, alpha = 0.4) +
     geom_smooth(aes(col = recife, fill = recife),method = 'lm',size = 1, alpha = 0.3) +
-    labs(x = "Recifes",y = "Biomassa (kg)") +
+    labs(x = "Recifes",y = "Biomassa (Kg/m2)") +
     scale_color_manual(values = c("#846267", "#588157","#e07a5f", "#457b9d", "#f6bd60")) +
     scale_fill_manual(values = c("#846267", "#588157","#e07a5f", "#457b9d", "#f6bd60")) +
     theme_minimal(base_size = 14) +
@@ -1752,10 +1807,10 @@ A variabilidade entre grupos (recifes) é incorporada na incerteza da média pop
 ###############################################################################
 
 # Modelo 1: Regressão Linear Simples (Sem efeitos aleatórios)
-m_lm <- lm(biomassa_kg ~ sst, data = df)
+m_lm <- lm(biomassa_kg_m2 ~ sst, data = df)
 
 # Modelo 2: Modelo Misto com Intercepto e Inclinação Aleatórios por Recife
-m_rs <- lmer(biomassa_kg ~ sst + (sst | recife), data = df)
+m_rs <- lmer(biomassa_kg_m2 ~ sst + (sst | recife), data = df)
 
 
 
@@ -1790,11 +1845,11 @@ newdat$upr_mixed <- newdat$fit_mixed + 1.96 * se_mixed
 ```{r, out.width="90%", fig.asp=0.75}
 
 # --- Gráfico 1: Modelo Simples ---
-ggplot(df, aes(x = sst, y = biomassa_kg)) +
+ggplot(df, aes(x = sst, y = biomassa_kg_m2)) +
   geom_point(alpha = 0.5, color = "#d5bdaf", size = 3) +
   geom_ribbon(data = newdat, aes(y = fit_lm, ymin = lwr_lm, ymax = upr_lm), fill = "#dda3a4", alpha = 0.4) +
   geom_line(data = newdat, aes(y = fit_lm), color = "#bc4749",  linewidth = 1.2) +
-  labs(x = "SST (°C)", y = "Biomassa (kg)", title = "biomassa_kg ~ sst",) +
+  labs(x = "SST (°C)", y = "Biomassa (Kg/m2)", title = "biomassa ~ sst",) +
   theme_minimal(base_size = 14) +
   my_theme
 ```
@@ -1816,11 +1871,11 @@ Assume que todas as observações são independentes
 
 ```{r, out.width="90%", fig.asp=0.75}
 
-ggplot(df, aes(x = sst, y = biomassa_kg)) +
+ggplot(df, aes(x = sst, y = biomassa_kg_m2)) +
   geom_point(alpha = 0.5, color = "#d5bdaf", size = 3) +
   geom_ribbon(data = newdat, aes(y = fit_mixed, ymin = lwr_mixed, ymax = upr_mixed), fill = "#dda3a4", alpha = 0.4) +
   geom_line(data = newdat, aes(y = fit_mixed), color = "#bc4749", linewidth = 1.2) +
-  labs(x = "SST (°C)", y = "Biomassa (kg)", title = "biomassa_kg ~ sst + (sst|recife)",) +
+  labs(x = "SST (°C)", y = "Biomassa (Kg/m2)", title = "biomassa ~ sst + (sst|recife)",) +
   theme_minimal(base_size = 14) +
   my_theme
 
@@ -1895,13 +1950,13 @@ $$\sigma^2_{Total} = \sigma^2_{Ano} + \sigma^2_{Recife:Ano} + \sigma^2_{residual
 
 
 ```{r, eval=F, echo=T}
-f(biomassa_kg ~ 1 + (1 | ano/recife))
+f(biomassa_kg_m2 ~ 1 + (1 | ano/recife))
 ```
 
 
 ```{r, eval=F, echo=T}
 
-f(biomassa_kg ~ 1 + (1 | ano) + (1 | ano:recife))
+f(biomassa_kg_m2 ~ 1 + (1 | ano) + (1 | ano:recife))
 
 ```
 
@@ -1961,7 +2016,7 @@ $$\sigma^2_{Total} = \sigma^2_{Ano} + \sigma^2_{Recife} + \sigma^2_{residual}$$
 
 
 ```{r, eval=F, echo=T}
-f(biomassa_kg ~ 1 + (1 | ano) + (1 | recife))
+f(biomassa_kg_m2 ~ 1 + (1 | ano) + (1 | recife))
 ```
 
 
@@ -2271,3 +2326,10 @@ Também conhecidos por:
 - modelos hiearárquicos
 
 
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### Estudo dirigido
+
+- **Caps. 6** - Hobbs & Hooten (2007). Bayesian Models - A Statistical Primer for Ecologists.
