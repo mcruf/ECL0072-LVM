@@ -30,30 +30,6 @@ class: title-slide
 
 &lt;img src="../Figuras/logo_ppgeco2.svg" class="cover-logo"&gt;
 
----
-# PPGECO | ECL0072 | out. 2026
-
-&lt;br&gt;
-
-### Agenda
-
-- **Introdução geral**
-
-&lt;br&gt;
-
-- **Abordando a dependência dos dados**
-
-&lt;br&gt;
-
-- **Modelos (lineares) mistos**
-  - Conceitos gerias
-  - Um olhar matemático
-
-&lt;br&gt;
-
-- **Exemplo prático no R**
-
-&lt;span style="color: red;"&gt;TODO: ajustar seguintes slides:(i) parâmetros vs. hiperparâmetros; (ii) Ajustar a parte das matrizes, em especifico as de intercepto/slope aleatóiro, também verificar a dimensão de cada matriz;(iii) melhorar último slide conclusivo&lt;/span&gt;
 
 
 ---
@@ -123,11 +99,14 @@ Processos ecológicos atuam em múltiplas escalas:
 
 Processos ecológicos atuam em múltiplas escalas: 
 
-- **Ontogenêtica**
+- **Taxonômica (genética)**
 
 &lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
 
-&lt;img src="../Figuras/age_structure.png" alt="" width="80%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="../Figuras/genetic_structure.png" alt="" width="85%" style="display: block; margin: auto;" /&gt;
 
 
 ---
@@ -167,9 +146,18 @@ Essas estruturações violam o principal pressuposto dos modelos lineares (gener
 
 &lt;br&gt;
 
+.footnote[
+&lt;sup&gt;1&lt;/sup&gt; e suas versões aditivas (GLM/GAM)
+]
+
+--
+
+
+&lt;br&gt;
+
 .small-text2[
 
-**Pressupostos**
+**Pressupostos de um LM:**
 
 - **Linearidade:** tendência de `\(y\)` é descrita por um modelo linear
 
@@ -182,10 +170,6 @@ Essas estruturações violam o principal pressuposto dos modelos lineares (gener
   
 
 
-
-.footnote[
-&lt;sup&gt;1&lt;/sup&gt; e suas versões aditivas (GLM/GAM)
-]
 
 ---
 class:center, middle
@@ -626,7 +610,8 @@ Modelos mistos são conhecidos por muitos nomes:
 - Modelos hierárquicos (*hierarchical models*)
 
 
-Na prática, o termo *efeito aleatório* implica em atribuir uma distribuição de probabilidade para os parâmetros desses efeitos
+Na prática, tratar um efeito como *aleatório* significa modelar os efeitos dos diferentes grupos como provenientes de uma distribuição de probabilidade 
+  - Descreve a variabilidade entre os grupos
 
 &lt;br&gt;
 
@@ -639,6 +624,14 @@ Na prática, o termo *efeito aleatório* implica em atribuir uma distribuição 
 
 `$$\large \varepsilon_i \sim N(0, \sigma^2)$$`
 
+--
+
+&lt;br&gt;
+
+.center[
+.gray-box[ Isso torna um LMM automaticamente um modelo Bayesiano?]
+
+]
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -671,7 +664,7 @@ Parâmetro vs. hiperparâmetros
 
 **Hiperparâmetros**
 
-- Descrevem como os parâmetros variam.
+- Descrevem como os parâmetros variam
   - `\({\sigma_{\alpha}^2}\)`
 
 
@@ -754,7 +747,7 @@ Explica o desvio do grupo em relação à média geral
 O cerne dos modelos mistos está na estruturação de `\(\sigma_a^2\)`
 
 - i.e., como descrever a dependência entre observações pertencentes ao mesmo grupo
-  - Na prática, isso significa definir uma matriz de variância-covarância (`\(\mathbf \Sigma\)`) 
+  - Definir uma matriz de variância-covarância (`\(\mathbf \Sigma\)`) 
 
 &lt;br&gt;
 &lt;br&gt;
@@ -763,36 +756,12 @@ O cerne dos modelos mistos está na estruturação de `\(\sigma_a^2\)`
 
 --
 
-.salmon-box[ 
+.center[
 
-.center[&lt;span style="color: white;"&gt;**ATENÇÃO!**&lt;/span&gt;]
+.gray-box[ 
 
-&lt;span style="color: white;"&gt;Para compreender plenamente os modelos lineares mistos, é essencial interpretá-los sob a ótica matricial ]&lt;/span&gt;
-
----
-# PPGECO | ECL0072 | out. 2026
-
-### Modelo Linear Misto
-
-
-Os efeitos aleatórios podem ser a nível do intercepto e/ou inclinação da reta
-
-&lt;br&gt;
-
-.pull-left[
-
-.center[.small-text2[**Intercepto aleatório**]]
-
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-20-1.svg" alt="" width="100%" style="display: block; margin: auto;" /&gt;
-
+**Para compreender melhor os modelos lineares mistos, é necessário interpretá-los sob a lente matemática**
 ]
-
-.pull-right[
-
-.center[.small-text2[**Intercepto &amp; inclinação aleatórios**]]
-
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-21-1.svg" alt="" width="100%" style="display: block; margin: auto;" /&gt;
-
 ]
 
 
@@ -807,8 +776,26 @@ Considere a biomassa de peixes `\(y\)` no *i-ésimo* transecto, descrita em fun�
 
 &lt;div style="height: 10px;"&gt;&lt;/div&gt;
 
+
 .pull-left[
 
+.code-bg[
+
+``` r
+f(biomassa_kg_m2 ~ 1 + sst, data = df)
+```
+]
+
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-21-1.svg" alt="" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+.pull-right[
+
+&lt;br&gt;
+&lt;br&gt;
 &lt;br&gt;
 
 
@@ -823,23 +810,11 @@ Considere a biomassa de peixes `\(y\)` no *i-ésimo* transecto, descrita em fun�
 `$$\Large y_i = \beta_0 + \beta_1x_i + \varepsilon_i$$`
 ]
 
-&lt;br&gt;
-
-.code-bg[
-
-``` r
-f(biomassa_kg_m2 ~ 1 + sst, data = df)
-```
-]
 
 ]
 
 
-.pull-right[
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-23-1.svg" alt="" width="90%" style="display: block; margin: auto;" /&gt;
-
-]
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -906,6 +881,8 @@ Dado que o modelo pressupõe *independência* entre as observações, isso empli
 `$$\large \text{Cov}(\varepsilon_i, \varepsilon_j) = 0 ~~~~~~~ (i \neq j)$$`
 &lt;br&gt;
 
+--
+
 Portanto:
 
 $$
@@ -968,13 +945,44 @@ $$
 $$
 &lt;br&gt;
 
-.salmon-box[
+.gray-box-small[
 
+.center[
 A matriz `\(\Sigma\)` possui dimensão `\(n \times n\)`
 ]
+]
 
 
 ]
+
+---
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
+
+
+**Modelo linear misto**
+
+
+Os efeitos aleatórios podem ser a nível do intercepto e/ou inclinação da reta
+
+&lt;br&gt;
+
+.pull-left[
+
+.center[.small-text2[**Intercepto aleatório**]]
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-22-1.svg" alt="" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+.center[.small-text2[**Intercepto &amp; inclinação aleatórios**]]
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-23-1.svg" alt="" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -984,11 +992,29 @@ A matriz `\(\Sigma\)` possui dimensão `\(n \times n\)`
 
 **Modelo linear misto - intercepto aleatório**
 
-Agora, considere que a biomassa de peixes `\((y)\)` no *i-ésimo* transecto também varia em função do recife em que foi amostrado `\((j = {1, 2, ..., K=5})\)` 
+Agora, considere que a biomassa de peixes `\((y)\)` no *i-ésimo* transecto também varia em função do recife em que foi amostrada `\((j = {1, 2, ..., K=5})\)` 
 
 &lt;div style="height: 15px;"&gt;&lt;/div&gt;
 
+
+
 .pull-left[
+
+.code-bg[
+
+``` r
+f(biomassa_kg_m2 ~ 1 + (1 | recife), data = df)
+```
+
+]
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-25-1.svg" alt="" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+
+.pull-right[
 
 &lt;br&gt;
 
@@ -1020,20 +1046,6 @@ Lembrando que:
 
 ]
 
-.pull-right[
-
-
-``` r
-f(biomassa_kg_m2 ~ 1 + (1 | recife), data = df)
-```
-
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-25-1.svg" alt="" width="90%" style="display: block; margin: auto;" /&gt;
-
-
-
-]
-
-
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -1050,15 +1062,14 @@ f(biomassa_kg_m2 ~ 1 + (1 | recife), data = df)
 &lt;br&gt;
 &lt;br&gt;
 
-`$$\large \underbrace{\begin{bmatrix} y_1 \\ y_2 \\ y_3 \\ \vdots \\ y_n \end{bmatrix}}_{\mathbf{y}} = \underbrace{\begin{bmatrix} 1 &amp; x_1 \\ 1 &amp; x_2 \\ 1 &amp; x_3 \\ \vdots &amp; \vdots \\ 1 &amp; x_n \end{bmatrix}}_{\mathbf{X}} \underbrace{\begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix}}_{\boldsymbol{\beta}} + \underbrace{\begin{bmatrix} 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\ 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\ 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0\\ \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots \\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 \end{bmatrix}}_{\mathbf{Z}} \underbrace{\begin{bmatrix} b_a \\ b_b \\ b_c \\ b_d \\ b_e \end{bmatrix}}_{\mathbf{b}} + \underbrace{\begin{bmatrix} \varepsilon_1 \\ \varepsilon_2 \\ \varepsilon_3 \\ \vdots \\ \varepsilon_n \end{bmatrix}}_{\boldsymbol{\varepsilon}}$$` 
+`$$\large \underbrace{\begin{bmatrix} y_1 \\ y_2 \\ y_3 \\ \vdots \\ y_n \end{bmatrix}}_{\mathbf{y}} = \underbrace{\begin{bmatrix} 1 &amp; x_1 \\ 1 &amp; x_2 \\ 1 &amp; x_3 \\ \vdots &amp; \vdots \\ 1 &amp; x_n \end{bmatrix}}_{\mathbf{X}} \underbrace{\begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix}}_{\boldsymbol{\beta}} + \color{#e07a5f}{\underbrace{\begin{bmatrix} 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\ 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\ 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0\\ \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots \\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 \end{bmatrix}}_{\mathbf{Z}}} \color{#e07a5f}{\underbrace{\begin{bmatrix} b_a \\ b_b \\ b_c \\ b_d \\ b_e \end{bmatrix}}_{\mathbf{b}}} + \underbrace{\begin{bmatrix} \varepsilon_1 \\ \varepsilon_2 \\ \varepsilon_3 \\ \vdots \\ \varepsilon_n \end{bmatrix}}_{\boldsymbol{\varepsilon}}$$` 
 
 &lt;br&gt;
 
 .small-text2[ A matriz ] `\(Z\)` .small-text2[(indicadora) associa cada observação ao seu efeito aleatório correspondente] (`\(b_j\)`)
-- Há um total de `\(K\)` colunas
+- Há um total de `\(k\)` colunas
 
-.footnote[K = número de grupos; no exemplo, K = 5 (recifes)]
-
+.footnote[k = número de grupos; no exemplo, k = 5 (recifes)]
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -1071,6 +1082,8 @@ As premissas para constução da matriz de variância-covariância para `\(b\)` 
 
 
 &lt;br&gt;
+&lt;br&gt;
+
 
 .pull-left[
 
@@ -1090,12 +1103,11 @@ $$
 
 .pull-right[
 
-&lt;br&gt;
 
-`$$\Large \Sigma_a = \sigma_a^2 I_K$$`
-.salmon-box[
+`$$\Large \Sigma_a = \sigma_a^2 I_k$$`
+.gray-box[
 
-A matriz `\(\Sigma_a\)` possui dimensão `\(K \times K\)`
+A matriz `\(\Sigma_a\)` possui dimensão `\(k \times k\)`
 
   ]
 
@@ -1116,6 +1128,7 @@ A matriz `\(\Sigma_a\)` possui dimensão `\(K \times K\)`
 .pull-left[
 
 .center[**Variância dentro do grupo**]
+
 
 $$
 \large
@@ -1149,6 +1162,8 @@ $$
 0 &amp; 0 &amp; 0 &amp; 0 &amp; \sigma_a^2
 \end{bmatrix}`
 $$ 
+
+
 ]
 
 
@@ -1200,7 +1215,7 @@ A matriz `\(\mathbf{V}\)` representa a matriz de variância-covariância de todo
 
 $$
 \large
-\mathbf{V_j} =
+\mathbf{V} =
 `\begin{bmatrix}
 \sigma_a^2 + \sigma^2 &amp; \sigma_a^2 &amp; \sigma_a^2 &amp; \cdots &amp; \sigma_a^2 \\
 \sigma_a^2 &amp; \sigma_a^2 + \sigma^2 &amp; \sigma_a^2 &amp; \cdots &amp; \sigma_a^2 \\
@@ -1238,6 +1253,8 @@ A estrutura da matriz `\(\mathbf{V}_j\)` implica que observações pertencentes 
 
 &lt;br&gt;
 
+--
+
 .small-text2[
 
 Modelos mistos representam, portanto, uma escolha natural para acomodar a dependência entre observações
@@ -1268,12 +1285,12 @@ O modelo anterior é também conhecido por modelo linear misto com intercepto al
 
 .pull-left[
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-26-1.svg" alt="" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-26-1.svg" alt="" width="85%" style="display: block; margin: auto;" /&gt;
 ]
 
 .pull-right[
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-27-1.svg" alt="" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-27-1.svg" alt="" width="85%" style="display: block; margin: auto;" /&gt;
 ]
   
 ---
@@ -1310,8 +1327,8 @@ O modelo anterior é também conhecido por modelo linear misto com intercepto al
 
 Onde:
 
-- `\(b_{0j}\)`: efeito aleatório do intercepto para o recife `\(j\)`
-- `\(b_{1j}\)`: efeito aleatório da inclinação para o recife `\(j\)`
+- `\(b_{0j}\)`: desvio do intercepto do recife `\(j\)` em relação ao intercepto populacional `\(\beta_0\)`
+- `\(b_{1j}\)`: desvio da inclinação do recife `\(j\)` em relação à inclinação populacional `\(\beta_1\)`
 ]
 
 
@@ -1321,13 +1338,15 @@ Onde:
 
 .pull-right[
 
-
+.code-bg[
 
 ``` r
 f(biomassa_kg_m2 ~ 1 + sst + (1 + sst | recife), data = df)
 ```
+]
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-29-1.svg" alt="" width="80%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-29-1.svg" alt="" width="85%" style="display: block; margin: auto;" /&gt;
 
 
 
@@ -1350,7 +1369,7 @@ f(biomassa_kg_m2 ~ 1 + sst + (1 + sst | recife), data = df)
 .center[**Representação matricial**]
 
 
-`$$\underbrace{\begin{bmatrix} y_1 \\ y_2 \\ y_3 \\ y_4 \\ y_5 \\ \vdots \\ y_n \end{bmatrix}}_{\mathbf{y}} = \underbrace{\begin{bmatrix} 1 &amp; x_1 \\ 1 &amp; x_2 \\ 1 &amp; x_3 \\ 1 &amp; x_4 \\ 1 &amp; x_5 \\ \vdots &amp; \vdots \\ 1 &amp; x_n \end{bmatrix}}_{\mathbf{X}} \underbrace{\begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix}}_{\boldsymbol{\beta}} + \underbrace{\begin{bmatrix} 1 &amp; x_1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\ 1 &amp; x_2 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; 1 &amp; x_3 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; 1 &amp; x_4 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; x_5 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\ \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots \\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; x_n \end{bmatrix}}_{\mathbf{Z}} \underbrace{\begin{bmatrix} b_{0A} \\ b_{1A} \\ b_{0B} \\ b_{1B} \\ b_{0C} \\ b_{1C} \\ b_{0D} \\ b_{1D} \\ b_{0E} \\ b_{1E} \end{bmatrix}}_{\mathbf{b}} + \underbrace{\begin{bmatrix} \varepsilon_1 \\ \varepsilon_2 \\ \varepsilon_3 \\ \varepsilon_4 \\ \varepsilon_5 \\ \vdots \\ \varepsilon_n \end{bmatrix}}_{\boldsymbol{\varepsilon}}$$`
+`$$\underbrace{\begin{bmatrix} y_1 \\ y_2 \\ y_3 \\ y_4 \\ y_5 \\ \vdots \\ y_n \end{bmatrix}}_{\mathbf{y}} = \underbrace{\begin{bmatrix} 1 &amp; x_1 \\ 1 &amp; x_2 \\ 1 &amp; x_3 \\ 1 &amp; x_4 \\ 1 &amp; x_5 \\ \vdots &amp; \vdots \\ 1 &amp; x_n \end{bmatrix}}_{\mathbf{X}} \underbrace{\begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix}}_{\boldsymbol{\beta}} + \color{#e07a5f}{\underbrace{\begin{bmatrix} 1 &amp; x_1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\ 1 &amp; x_2 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; 1 &amp; x_3 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; 1 &amp; x_4 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; x_5 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\ \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots \\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; x_n \end{bmatrix}}_{\mathbf{Z}}} \color{#e07a5f}{\underbrace{\begin{bmatrix} b_{0A} \\ b_{1A} \\ b_{0B} \\ b_{1B} \\ b_{0C} \\ b_{1C} \\ b_{0D} \\ b_{1D} \\ b_{0E} \\ b_{1E} \end{bmatrix}}_{\mathbf{b}}} + \underbrace{\begin{bmatrix} \varepsilon_1 \\ \varepsilon_2 \\ \varepsilon_3 \\ \varepsilon_4 \\ \varepsilon_5 \\ \vdots \\ \varepsilon_n \end{bmatrix}}_{\boldsymbol{\varepsilon}}$$`
 
 
 .small-text2[
@@ -1359,28 +1378,6 @@ A matriz `\(Z\)` possui agora o dobro de colunas
 
 - Cada grupo está associado a 2 colunas: uma coluna referente ao intercepto (`\(1\)`s) e uma coluna com os valores da covariável `\(x_i\)` (inclinação)
 ]
-
----
-# PPGECO | ECL0072 | out. 2026
-### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
-
-
-**Modelo linear misto - intercepto &amp; inclinação aleatórios**
-
-A variância do vetor dos efeitos aleatórios `\(b\)` é dada por:
-
-$$
-\large
-\Sigma_a
-=
-`\begin{bmatrix}
-\Sigma_A^2 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
-0 &amp; \Sigma_B^2  &amp;  0 &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; \Sigma_C^2 &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; \Sigma_D^2 &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; 0 &amp; \Sigma_E^2
-\end{bmatrix}`
-$$
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -1395,7 +1392,7 @@ Para um determinado recife `\(j\)`, o vetor de efeitos aleatórios é composto p
 
   - Assim, para cada recife pode-se descrever a matriz de variância-covarância conforme:
 
-`$$\large \boldsymbol{\Sigma}_j = \text{Var}\begin{bmatrix} b_{0j} \\ b_{1j} \end{bmatrix} = \begin{bmatrix} \sigma_{b0}^2 &amp; \sigma_{b0,b1} \\ \sigma_{b0,b1} &amp; \sigma_{b1}^2 \end{bmatrix}$$`
+`$$\large \boldsymbol{\Sigma}_a = \text{Var}\begin{bmatrix} b_{0j} \\ b_{1j} \end{bmatrix} = \begin{bmatrix} \sigma_{b0}^2 &amp; \sigma_{b0,b1} \\ \sigma_{b0,b1} &amp; \sigma_{b1}^2 \end{bmatrix}$$`
 
 &lt;br&gt;
 
@@ -1404,9 +1401,9 @@ Para um determinado recife `\(j\)`, o vetor de efeitos aleatórios é composto p
 .small-text2[
 
 Onde:
-- `\(\sigma_{b0}^2\)`: variância dos interceptos de todos os recifes
-- `\(\sigma_{b1}^2\)`: variância das inclinações de todos os recifes
-- `\(\sigma_{b0,b1}\)`: covariância global entre intercepto e inclinação
+- `\(\sigma_{b0}^2\)`: variância dos desvios de intercepto entre recifes
+- `\(\sigma_{b1}^2\)`: variância dos desvios de inclinação entre recifes
+- `\(\sigma_{b0,b1}\)`: covariância entre o desvio de intercepto e o de inclinação de um mesmo recife
 
 ]
 
@@ -1431,31 +1428,65 @@ Onde:
 
 **Modelo linear misto - intercepto &amp; inclinação aleatórios**
 
+&lt;div style="height: 15px;"&gt;&lt;/div&gt;
+
+
+Visualizando toda a matriz de variância-covariância:
+
+
+&lt;br&gt;
+
+`$$\boldsymbol{\Sigma}_a=\text{Var}(\mathbf b)=
+\begin{pmatrix}\sigma_{b_0}^2 &amp; \sigma_{b_0b_{1}} &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
+\sigma_{b_0b_{1}} &amp; \sigma_{b_1}^2 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
+0 &amp; 0 &amp; \sigma_{b_0}^2 &amp; \sigma_{b_0b_{1}} &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
+0 &amp; 0 &amp; \sigma_{b_0b_{1}} &amp; \sigma_{b_1}^2 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; \sigma_{b_0}^2 &amp; \sigma_{b_0b_{1}} &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; \sigma_{b_0b_{1}} &amp; \sigma_{b_1}^2 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; \sigma_{b_0}^2 &amp; \sigma_{b_0b_{1}} &amp; 0 &amp; 0\\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; \sigma_{b_0b_{1}} &amp; \sigma_{b_1}^2 &amp; 0 &amp; 0\\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; \sigma_{b_0}^2 &amp; \sigma_{b_0b_{1}}\\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; \sigma_{b_0b_{1}} &amp; \sigma_{b_1}^2 \end{pmatrix}$$`
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Um mergulho na matemática&lt;/span&gt;]
+
+**Modelo linear misto - intercepto &amp; inclinação aleatórios**
+
 A variância marginal `\(V\)` é dada por:
 
+&lt;br&gt;
 
 `$$\large V = \underbrace{\Sigma}_\text{dentro} + \underbrace{Z \times \Sigma_a \times Z'}_\text{entre}$$`
 
+&lt;br&gt;
+
+
+.pull-left[
+
 portanto:
 
+&lt;br&gt;
 
-$$
-\large
-V
-=
-\underbrace{
-`\begin{bmatrix}
-V_a &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
-0 &amp; V_b  &amp;  0 &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; V_c &amp; 0 &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; V_d &amp; 0\\
-0 &amp; 0 &amp; 0 &amp; 0 &amp; V_e
-\end{bmatrix}`
-}_{\text{n} \times \text{n}}
-$$ 
+
+- `\(\text{Var}(y_{ij}) = \sigma_{b_0}^2 + 2x_{ij}\sigma_{b_0b_{1}} + x_{ij}^2\sigma_{b_1}^2 + \sigma^2\)`
+
+
+- `\(\text{Cov}(y_{ij}, y_{ik}) = \sigma_{b_0}^2 + (x_{ij} + x_{ik})\sigma_{b_0b_{1}} + x_{ij}x_{ik}\sigma_{b_1}^2\)`
+
+]
 
 
 
+
+
+.pull-right[
+
+&lt;br&gt;
+
+&gt; .small-text2[&lt;span style="color: #e07a5f;"&gt;**A variância e a covariância marginais da variável-resposta dependem tanto da variância e covariância dos efeitos aleatórios quanto da covariável**&lt;/span&gt;]
+]
 
 
 ---
@@ -1464,7 +1495,7 @@ $$
 
 
 A variabilidade entre grupos (recifes) é incorporada na incerteza da média populacional
-- Inferência mais realista: evita o Erro Tipo I.
+- Inferência mais realista: evita o Erro Tipo I
 
 
 
@@ -1482,7 +1513,7 @@ A variabilidade entre grupos (recifes) é incorporada na incerteza da média pop
 .small-text[
 
 Assume que todas as observações são independentes
-- Superestima o tamanho amostral efetivo (`\(N\)`), resultando em um erro padrão erroneamente pequeno (IC estreito).
+- Superestima o tamanho amostral efetivo (`\(N\)`), resultando em um erro padrão erroneamente pequeno (IC estreito)
 ]
 
 ]
@@ -1509,6 +1540,7 @@ Considera grupos de informação
 
 A estruturação dos efeitos aleatórios depende não só das hipóteses, como também do desenho amostral
 
+&lt;br&gt;
 
 .center[ **Desenho amostral aninhado** ]
 
@@ -1519,11 +1551,10 @@ A estruturação dos efeitos aleatórios depende não só das hipóteses, como t
 
 .small-text2[
 
-Fatores independentes não se cruzam
+Fatores não se cruzam
   - Observações de um nível inferior pertencem exclusivamente a uma única unidade do nível superior 
-    - transectos &gt; recifes &gt; ano
-  - As diferentes fontes de variação são parcialmente confundidas (*confounding effect*)
-    - diferença de produtividade entre dois recifes pode ser resultado do efeito temporal (ano) ou espacial (recife)
+    - `\(\text{transectos} \subset \text{recifes} \subset \text{ano}\)`
+
 
 ]
 
@@ -1532,7 +1563,7 @@ Fatores independentes não se cruzam
 ### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Estrutura dos efeitos aleatórios&lt;/span&gt;]
 
 
-`$$\text{biomassa}_{ijk} = \mu_a + \gamma_k + \delta_{j(k)} + \epsilon_{ijk}$$`
+`$$\text{biomassa}_{ijk} = \mu + \gamma_k + \delta_{j(k)} + \epsilon_{ijk}$$`
 
 
 &lt;img src="../Figuras/nested_random_effect.png" alt="" width="50%" style="display: block; margin: auto;" /&gt;
@@ -1543,29 +1574,34 @@ Fatores independentes não se cruzam
 `$$\sigma^2_{Total} = \sigma^2_{Ano} + \sigma^2_{Recife:Ano} + \sigma^2_{residual}$$`
 
 
-.small-text[
+.small-text3[
 
 
-- **Variância anual (`\(\sigma_{\gamma}\)`):** avalia o quanto a biomassa média varia de um ano para o outro
+- **Variância anual (`\(\sigma^2_{\gamma}\)`):** representa o quanto a biomassa média varia entre os anos
 
-- **Variância entre recifes do mesmo ano (`\(\sigma_{\delta}\)`):** avalia o quanto os recifes diferem entre si dentro de um mesmo ano
+- **Variância entre recifes do mesmo ano (`\(\sigma^2_{\delta}\)`):** representa o quanto a biomassa média varia entre recifes pertencentes ao mesmo ano
 
-- **Variância residual (`\(\sigma\)`):** representa a variação entre os transectos individuais (`\(y_1, y_2, \dots\)`) coletados no mesmo recife
+- **Variância residual (`\(\sigma^2\)`):** representa a variação entre os transectos individuais (`\(y_1, y_2, \dots\)`) coletados no mesmo recife
 
 ]
 
-
+.code-bg[
+.small-code[
 
 ``` r
 f(biomassa_kg_m2 ~ 1 + (1 | ano/recife))
 ```
+]
+]
 
-
+.code-bg[
+.small-code[
 
 ``` r
 f(biomassa_kg_m2 ~ 1 + (1 | ano) + (1 | ano:recife))
 ```
-
+]
+]
 
 ---
 ### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Estrutura dos efeitos aleatórios&lt;/span&gt;]
@@ -1573,6 +1609,7 @@ f(biomassa_kg_m2 ~ 1 + (1 | ano) + (1 | ano:recife))
 
 .center[**Desenho amostral cruzado**]
 
+&lt;br&gt;
 
 
 &lt;img src="../Figuras/crossed_design.png" alt="" width="50%" style="display: block; margin: auto;" /&gt;
@@ -1582,19 +1619,22 @@ f(biomassa_kg_m2 ~ 1 + (1 | ano) + (1 | ano:recife))
 
 .small-text2[
 
-Fatores independentes se cruzam
-  - Observações de um grupo aparecem em um ou mais níves do outro grupo (monitoramento)
-  - É possível separar as diferentes fontes de variação
-    - A diferença de produtividade pode ser avaliada a nivel espacial (recifes) e temporal (anos)
+Fatores se cruzam
+  - Os mesmos níveis de um fator ocorrem em diferentes níveis do outro fator
+    - Ex.: os mesmos recifes são amostrados em anos distintos
+
+  - O desenho amostral permite separar as diferentes fontes de variação
+    - variação espacial: diferenças entre recifes
+    - variação temporal: diferenças entre anos
 
 ]
 
 ---
 
 # PPGECO | ECL0072 | out. 2026
-### Modelo Linear Misto
+### Modelo Linear Misto  | .small-text[&lt;span style="color: #e07a5f;"&gt;Estrutura dos efeitos aleatórios&lt;/span&gt;]
 
-`$$\text{biomassa}_{ijk} = \mu_a + \gamma_k + \delta_j + \epsilon_{ijk}$$`
+`$$\text{biomassa}_{ijk} = \mu + \gamma_k + \delta_j + \epsilon_{ijk}$$`
 
 
 &lt;img src="../Figuras/crossed_random_effect.png" alt="" width="40%" style="display: block; margin: auto;" /&gt;
@@ -1616,12 +1656,27 @@ Fatores independentes se cruzam
 
 ]
 
-
+.code-bg[
 
 ``` r
 f(biomassa_kg_m2 ~ 1 + (1 | ano) + (1 | recife))
 ```
+]
 
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto  | .small-text[&lt;span style="color: #e07a5f;"&gt;Estrutura dos efeitos aleatórios&lt;/span&gt;]
+
+
+Qual estrutura escolher?
+
+
+&lt;img src="../Figuras/nested_and_crossed_table.png" alt="" width="40%" style="display: block; margin: auto;" /&gt;
+
+
+.footnote[.small-text2[Figura: [Schielzeth &amp; Nakagawa (2013)](https://besjournals.onlinelibrary.wiley.com/doi/epdf/10.1111/j.2041-210x.2012.00251.x)]]
 
 
 ---
@@ -1636,7 +1691,7 @@ A abordagem *frequentista* para estimação dos parâmetros de modelos mistos ex
   
 .pull-left[
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-40-1.svg" alt="" width="85%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-41-1.svg" alt="" width="85%" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -1670,13 +1725,13 @@ No estimador de máxima verossimilhança, todos os parâmetros são estimados co
 
 A abordagem *frequentista* para estimação dos parâmetros de modelos mistos exige algumas cautelas:
 
-- Dado o conjunto de parâmetros `\(\large \theta = \{ \beta_0, \beta, \sigma^2, \sigma_{\alpha}^2 \}\)`&lt;sup&gt;1&lt;/sup&gt;, objetiva-se `\(\hat{\theta} := argmin ~ L(\theta)\)`
+- Dado o conjunto de parâmetros `\(\large \theta = \{ \beta_0, \beta, \sigma^2, \sigma_{\alpha}^2 \}\)`&lt;sup&gt;1&lt;/sup&gt;, objetiva-se `\(\hat{\theta} := argmax ~ L(\theta)\)`
 
 &lt;br&gt;
   
 .pull-left[
 
-&lt;img src="Aula_04_files/figure-html/unnamed-chunk-41-1.svg" alt="" width="85%" style="display: block; margin: auto;" /&gt;
+&lt;img src="Aula_04_files/figure-html/unnamed-chunk-42-1.svg" alt="" width="85%" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -1714,7 +1769,7 @@ Erros padrões subestimados
 
 Uma forma de contornar esse problema consiste em aplicar a verossimilhança restrita (REML&lt;sup&gt;1&lt;/sup&gt;)
 
-- Separa previamente os efeitos fixos (`\(\boldsymbol{\beta}\)`) e efeitos aleatórios (`\(\sigma^2\)`) e estima separadamente cada conjunto de parâmetros
+- Separa previamente os efeitos fixos (`\(\beta_0, \beta\)`) e efeitos aleatórios (`\(\sigma^2, \sigma^2_\alpha\)`) e estima separadamente cada conjunto de parâmetros
 
 &lt;br&gt;
 
@@ -1777,6 +1832,82 @@ Diante do estimador REML, não se pode comparar modelos com diferentes estrutura
 
 ]
 
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto | .small-text[&lt;span style="color: #e07a5f;"&gt;Inferência&lt;/span&gt;]
+
+**LMMs como modelos hierárquicos Bayesianos**
+
+
+Na abordagem Bayesiana, todos os parâmetros do modelo são representados via distribuições de probabilidade, incluindo os dos efeitos aleatórios
+
+
+&lt;br&gt;
+
+
+.pull-left[
+
+&lt;br&gt;
+
+.center[
+
+`$$\large y_{ij} \sim N(\mu_{ij}, ~\sigma^2)$$`
+]
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+.center[
+`$$\large \mu_{ij} = \beta_0 + \beta_1x_{ij} + \alpha_j$$`
+]
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+.center[
+`$$\large \alpha_j \sim N(0,~ \sigma_\alpha^2)$$`
+]
+
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+.center[
+`$$\large \beta_0,\beta_1,\sigma,\sigma_\alpha \sim P(\theta)$$`
+]
+
+]
+
+
+.pull-right[
+
+.center[**Vantagens**]
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+.small-text2[
+
+**1 | Representação completa da incerteza**
+
+Distribuições posteriores para efeitos fixos, efeitos aleatórios e componentes de variância
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+-----
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+**2 | Regularização através das prioris**
+
+Componentes de variância podem ser difíceis de estimar quando há poucos grupos ou pouca informação em cada grupo
+- definir uma priori regularizadora sobre esses parâemtros
+
+
+]
+
+]
+
 
 
 ---
@@ -1784,86 +1915,63 @@ Diante do estimador REML, não se pode comparar modelos com diferentes estrutura
 # PPGECO | ECL0072 | out. 2026
 ### Modelo Linear Misto 
 
-Quando usar modelos mistos:
+**Quando usar modelos mistos?**
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
 
 
-**1. Estrutura dos dados**
+--
 
+
+.small-text2[
 - **Dados agrupados/hierárquicos:** observações pertencem a grupos ou unidades amostrais, gerando dependência entre observações do mesmo grupo
 
-&lt;br&gt;
+]
 
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+--
+
+.small-text2[
 - **Medidas repetidas:** múltiplas observações são feitas na mesma unidade experimental, indivíduo ou local, ao longo do tempo ou em diferentes condições
+]
 
-&lt;br&gt;
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
 
+
+--
+
+.small-text2[
 - **Dados desbalanceados:** grupos apresentam diferentes números de observações
+]
 
-&lt;br&gt;
-
-- **Pseudo-replicação:** existem várias observações dentro da mesma unidade experimental, que não podem ser consideradas réplicas independentes
-
----
-# PPGECO | ECL0072 | out. 2026
-### Modelo Linear Misto 
-
-Quando usar modelos mistos:
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
 
 
-**2. Objetivo da inferência**
+--
 
-- **Generalização populacional:** quando o objetivo é inferir para uma população de grupos/unidades além daqueles especificamente amostrados — por exemplo, inferir sobre todos os recifes, e não apenas comparar os recifes amostrados
+.small-text2[
+- **Generalização populacional:** quando o objetivo é inferir para uma população de grupos/unidades além daqueles especificamente amostrados
+  - Ex.: inferir sobre todos os recifes, e não apenas comparar os recifes amostrados
+]
 
-&lt;br&gt;
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
 
+--
+
+.small-text2[
 - **Interesse na variabilidade:** quando é importante quantificar a variação entre grupos ou permitir que o efeito de uma variável varie entre grupos, além de estimar o efeito médio
+]
 
-&lt;br&gt;
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
 
+--
 
-.salmon-box[**ATENÇÃO:** Se a variável de agrupamento possuir menos de 5 níveis, deve-se tratá-la como efeito fixo! Caso contrário,o modelo não terá informação suficiente para estimar com precisão a variância do efeito aleatório.]
-
----
-
-# Modelos Mistos (MM)
-
-### Estrutura do modelo
-
-&lt;br&gt;
-&lt;br&gt;
-
-
-
-`$$\Large
-Y =
-\underset{
-\substack{
-\rule{3.8cm}{0.3pt}\\
-\color{#81b29a}{\text{Covariáveis ambientais}}\\
-\color{#81b29a}{\text{Tratamentos}}
-}
-}{\text{Efeitos fixos}}
-+
-\underset{
-\substack{
-\rule{3.8cm}{0.3pt}\\ 
-\\
-\color{#e07a5f}{\text{Estrutura aninhada}}\\
-\color{#e07a5f}{\text{Correlação temporal}}\\
-\color{#e07a5f}{\text{Correlação espacial}}\\
-\color{#e07a5f}{\text{Ruído aleatório}}
-}
-}{\text{Efeitos aleatórios}}$$`
-
-
-
-&lt;br&gt;
-
-Também conhecidos por:
-
-- modelos multiníveis
-- modelos hiearárquicos
-
+.small-text2[
+- **Dados com sobredispersão:** quando a variabilidade dos dados é maior do que a esperada pelo modelo  (comum em dados de contagens contagens ou proporções)
+  - A inclusão de um efeito aleatório no nível da observação (*observation-level random effect* - OLRE) absorve a variação extra não explicada
+]
 
 ---
 
@@ -1871,7 +1979,59 @@ Também conhecidos por:
 
 ### Estudo dirigido
 
-- **Caps. 6** - Hobbs &amp; Hooten (2007). Bayesian Models - A Statistical Primer for Ecologists.
+
+
+.small-text3[
+
+**Livros**
+
+- **Cap. 10** - Bolker (2009). Ecological Models and Data in R.
+
+- **Cap. 13** - Bolker (2015). Linear and generalized linear mixed models. In Fox et al (Eds.), Ecological Statistics: Contemporary theory and application.
+
+
+- **Caps. 10-12** - Faraway (2016). Extending the Linear Model with R, 2. ed.
+
+
+- **Caps. 12** - Kéry (2010). Introduction to WinBUGS for ecologists.
+
+
+- **Cap. 15** - Gelman et al. (2013). Bayesian Data Analysis, 3. ed.
+
+
+- **Caps. 4-5** - Zuur et al. (2009). Mixed effects models and extensions in ecology with R.
+
+
+- **Cap. 6** - Hobbs &amp; Hooten (2007). Bayesian Models - A Statistical Primer for Ecologists.
+
+
+----
+
+**Artigos**
+
+
+- Bolker et al. (2009). [Generalized linear mixed models: a practical guide for ecology and evolution.](10.1016/j.tree.2008.10.008)
+
+
+- Harrison et al. (2018). [A brief introduction to mixed effects modelling and multi-model inference in ecology.](https://peerj.com/articles/4794/)
+
+
+- Krzywinski et al (2014). [Nested designs.](https://www.nature.com/articles/nmeth.3137)
+
+
+- Marshall (2024). [Principles of experimental design for ecology and evolution.](https://onlinelibrary.wiley.com/doi/10.1111/ele.14400)
+
+
+- Schielzeth &amp; Nakagawa (2013). [Nested by design: model fitting and interpretation in a mixed model era.](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/j.2041-210x.2012.00251.x)
+
+
+- Silk et al. (2020). [Perils and pitfalls of mixed-effects regression models in biology](https://peerj.com/articles/9522/#)
+
+
+
+
+]
+
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

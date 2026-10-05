@@ -48,30 +48,6 @@ class: title-slide
 
 <img src="../Figuras/logo_ppgeco2.svg" class="cover-logo">
 
----
-# PPGECO | ECL0072 | out. 2026
-
-<br>
-
-### Agenda
-
-- **Introdução geral**
-
-<br>
-
-- **Abordando a dependência dos dados**
-
-<br>
-
-- **Modelos (lineares) mistos**
-  - Conceitos gerias
-  - Um olhar matemático
-
-<br>
-
-- **Exemplo prático no R**
-
-<span style="color: red;">TODO: ajustar seguintes slides:(i) parâmetros vs. hiperparâmetros; (ii) Ajustar a parte das matrizes, em especifico as de intercepto/slope aleatóiro, também verificar a dimensão de cada matriz;(iii) melhorar último slide conclusivo</span>
 
 
 ---
@@ -172,12 +148,15 @@ knitr::include_graphics("../Figuras/spatial-temporal_structure.png")
 
 Processos ecológicos atuam em múltiplas escalas: 
 
-- **Ontogenêtica**
+- **Taxonômica (genética)**
 
 <br>
+<br>
+<br>
 
-```{r, out.width ="80%"}
-knitr::include_graphics("../Figuras/age_structure.png")
+
+```{r, out.width ="85%"}
+knitr::include_graphics("../Figuras/genetic_structure.png")
 ```
 
 
@@ -221,9 +200,18 @@ $$\Large y_i = \beta_0 + \beta x_i + \varepsilon_i \\ \varepsilon_i \overset{\te
 
 <br>
 
+.footnote[
+<sup>1</sup> e suas versões aditivas (GLM/GAM)
+]
+
+--
+
+
+<br>
+
 .small-text2[
 
-**Pressupostos**
+**Pressupostos de um LM:**
 
 - **Linearidade:** tendência de $y$ é descrita por um modelo linear
 
@@ -236,10 +224,6 @@ $$\Large y_i = \beta_0 + \beta x_i + \varepsilon_i \\ \varepsilon_i \overset{\te
   
 
 
-
-.footnote[
-<sup>1</sup> e suas versões aditivas (GLM/GAM)
-]
 
 ---
 class:center, middle
@@ -727,7 +711,8 @@ Modelos mistos são conhecidos por muitos nomes:
 - Modelos hierárquicos (*hierarchical models*)
 
 
-Na prática, o termo *efeito aleatório* implica em atribuir uma distribuição de probabilidade para os parâmetros desses efeitos
+Na prática, tratar um efeito como *aleatório* significa modelar os efeitos dos diferentes grupos como provenientes de uma distribuição de probabilidade 
+  - Descreve a variabilidade entre os grupos
 
 <br>
 
@@ -740,6 +725,14 @@ $$\large \alpha_j \sim N(0, \sigma_\alpha^2)$$
 
 $$\large \varepsilon_i \sim N(0, \sigma^2)$$
 
+--
+
+<br>
+
+.center[
+.gray-box[ Isso torna um LMM automaticamente um modelo Bayesiano?]
+
+]
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -772,7 +765,7 @@ $$\large \varepsilon_i \sim N(0, \sigma^2)$$
 
 **Hiperparâmetros**
 
-- Descrevem como os parâmetros variam.
+- Descrevem como os parâmetros variam
   - ${\sigma_{\alpha}^2}$
 
 
@@ -859,7 +852,7 @@ Explica o desvio do grupo em relação à média geral
 O cerne dos modelos mistos está na estruturação de $\sigma_a^2$
 
 - i.e., como descrever a dependência entre observações pertencentes ao mesmo grupo
-  - Na prática, isso significa definir uma matriz de variância-covarância ($\mathbf \Sigma$) 
+  - Definir uma matriz de variância-covarância ($\mathbf \Sigma$) 
 
 <br>
 <br>
@@ -868,16 +861,223 @@ O cerne dos modelos mistos está na estruturação de $\sigma_a^2$
 
 --
 
-.salmon-box[ 
+.center[
 
-.center[<span style="color: white;">**ATENÇÃO!**</span>]
+.gray-box[ 
 
-<span style="color: white;">Para compreender plenamente os modelos lineares mistos, é essencial interpretá-los sob a ótica matricial ]</span>
+**Para compreender melhor os modelos lineares mistos, é necessário interpretá-los sob a lente matemática**
+]
+]
+
 
 ---
 # PPGECO | ECL0072 | out. 2026
 
-### Modelo Linear Misto
+### Modelo Linear Misto | .small-text[<span style="color: #e07a5f;">Um mergulho na matemática</span>]
+
+**Modelo linear**
+
+Considere a biomassa de peixes $y$ no *i-ésimo* transecto, descrita em função da temperatura $x_i = SST$
+
+<div style="height: 10px;"></div>
+
+
+.pull-left[
+
+.code-bg[
+```{r, echo=T, eval=F}
+
+f(biomassa_kg_m2 ~ 1 + sst, data = df)
+
+```
+]
+
+
+```{r, fig.asp = 0.9, out.width="90%"}
+
+df %>%
+    ggplot(aes(x = sst, y = biomassa_kg_m2)) +
+    #geom_point(size = 4, alpha = 0.8, col = "gray70") +
+    #geom_smooth(method = 'lm', se = TRUE,  fill = '#e07a5f', col = "#e07a5f", size = 2) +
+    geom_point(size = 4, alpha = 0.6, col = "#e07a5f") +
+    geom_smooth(method = 'lm', se = TRUE,  fill = 'gray80', col = "gray40", size = 2) +
+    labs(x = "SST (°C)",y = "Biomassa (Kg/m2)") +
+    theme_minimal(base_size = 14) +
+    my_theme
+
+```
+
+]
+
+
+.pull-right[
+
+<br>
+<br>
+<br>
+
+
+.gray-box-big[
+$$\large y = {X\beta} + \varepsilon$$
+
+$$\large \varepsilon \sim  \text{MVN}(0, \sigma^2I)$$
+
+----
+
+
+$$\Large y_i = \beta_0 + \beta_1x_i + \varepsilon_i$$
+]
+
+
+]
+
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto | .small-text[<span style="color: #e07a5f;">Um mergulho na matemática</span>]
+
+**Modelo linear**
+
+<div style="height: 15px;"></div>
+
+
+.center[**Representação matricial**]
+
+<br>
+<br>
+
+$$\large \underbrace{\begin{bmatrix} y_1 \\ y_2 \\ y_3 \\ \vdots \\ y_n \end{bmatrix}}_{\mathbf{y}} = \underbrace{\begin{bmatrix} 1 & x_1 \\ 1 & x_2 \\ 1 & x_3 \\ \vdots & \vdots \\ 1 & x_n \end{bmatrix}}_{\mathbf{X}} \underbrace{\begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix}}_{\boldsymbol{\beta}} + \underbrace{\begin{bmatrix} \varepsilon_1 \\ \varepsilon_2 \\ \varepsilon_3 \\ \vdots \\ \varepsilon_n \end{bmatrix}}_{\boldsymbol{\varepsilon}}$$ 
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto | .small-text[<span style="color: #e07a5f;">Um mergulho na matemática</span>]
+
+
+**Modelo linear**
+
+A variância de um vetor $\varepsilon = (\varepsilon_1, \varepsilon_2, \varepsilon_3, ..., \varepsilon_n)$ é uma matriz:
+
+<br>
+
+$$
+\text{Var}(\varepsilon)
+= \Sigma =
+\begin{bmatrix}
+\sigma^2 & \text{Cov}(\varepsilon_1, \varepsilon_2) & \text{Cov}(\varepsilon_1, \varepsilon_2) & \cdots & \text{Cov}(\varepsilon_1, \varepsilon_n)\\
+\text{Cov}(\varepsilon_2, \varepsilon_1) & \sigma^2  &  \text{Cov}(\varepsilon_2, \varepsilon_3) & \cdots & \text{Cov}(\varepsilon_2, \varepsilon_n)\\
+\text{Cov}(\varepsilon_3, \varepsilon_1)  & \text{Cov}(\varepsilon_3, \varepsilon_2) & \sigma^2  & \cdots & \text{Cov}(\varepsilon_3, \varepsilon_n)\\
+\vdots & \vdots & \vdots & \ddots & \vdots\\
+\text{Cov}(\varepsilon_n, \varepsilon_1) & \text{Cov}(\varepsilon_n, \varepsilon_2) & \text{Cov}(\varepsilon_n, \varepsilon_3) & \cdots & \sigma^2  
+\end{bmatrix}
+$$ 
+<br>
+<br>
+
+.small-text[
+- **Elementos da diagonal principal:** variância (constante)
+
+- **Demais elementos:** co-variância
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto | .small-text[<span style="color: #e07a5f;">Um mergulho na matemática</span>]
+
+
+**Modelo linear**
+
+Dado que o modelo pressupõe *independência* entre as observações, isso emplica em:
+
+
+
+$$\large \text{Cov}(\varepsilon_i, \varepsilon_j) = 0 ~~~~~~~ (i \neq j)$$
+<br>
+
+--
+
+Portanto:
+
+$$
+\large
+\Sigma
+=
+\begin{bmatrix}
+\sigma^2 & 0 & 0 & \cdots & 0\\
+0 & \sigma^2  &  0 & \cdots & 0\\
+0 & 0 & \sigma^2  & \cdots & 0\\
+\vdots & \vdots & \vdots & \ddots & \vdots\\
+0 & 0 & 0 & \cdots & \sigma^2  
+\end{bmatrix}
+$$ 
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto | .small-text[<span style="color: #e07a5f;">Um mergulho na matemática</span>]
+
+
+**Modelo linear**
+
+Além disso, o pressuposto de *homocedasticidade* implica em $\sigma^2 = \text{cte.}$
+
+Logo:
+
+<br>
+
+
+.pull-left[
+
+$$
+\large
+\Sigma
+=
+\sigma^2
+\underbrace{
+\begin{bmatrix}
+1 & 0 & 0 & \cdots & 0\\
+0 & 1  &  0 & \cdots & 0\\
+0 & 0 & 1  & \cdots & 0\\
+\vdots & \vdots & \vdots & \ddots & \vdots\\
+0 & 0 & 0 & \cdots & 1  
+\end{bmatrix}
+}_\text{Mariz identidade}
+$$ 
+]
+
+<br>
+
+.pull-right[
+$$
+\Large
+\Sigma
+=
+\sigma^2 I_n
+$$
+<br>
+
+.gray-box-small[
+
+.center[
+A matriz $\Sigma$ possui dimensão $n \times n$
+]
+]
+
+
+]
+
+---
+### Modelo Linear Misto | .small-text[<span style="color: #e07a5f;">Um mergulho na matemática</span>]
+
+
+**Modelo linear misto**
 
 
 Os efeitos aleatórios podem ser a nível do intercepto e/ou inclinação da reta
@@ -946,7 +1146,7 @@ pop_line <- newdat %>%
 ###############################################################################
 
 ggplot(df, aes(sst, biomassa_kg_m2)) +
-    geom_point(aes(colour = recife), alpha = .30, size = 3) +
+    geom_point(aes(colour = recife), alpha = .30, size = 4) +
     geom_line(data = newdat, aes(x = sst, y = pred_group, colour = recife), linewidth = 1.3) +
     geom_line(data = pop_line, aes(x = sst, y = pred_pop, colour = recife), linewidth = 1.5, linetype = "dashed") +
     scale_color_manual(
@@ -1023,7 +1223,7 @@ pop_line2 <- newdat2 %>%
 ###############################################################################
 
 ggplot(df, aes(sst, biomassa_kg_m2)) +
-  geom_point(aes(colour = recife), alpha = .3, size = 3) +
+  geom_point(aes(colour = recife), alpha = .3, size = 4) +
   geom_line(data = newdat2, aes(x = sst, y = pred_group, colour = recife), linewidth = 1.3) +
   geom_line(data = pop_line2, aes(x = sst, y = pred_pop, colour = recife), linewidth = 1.5, linetype = "dashed") +
   scale_color_manual(
@@ -1049,198 +1249,6 @@ ggplot(df, aes(sst, biomassa_kg_m2)) +
 ]
 
 
----
-# PPGECO | ECL0072 | out. 2026
-
-### Modelo Linear Misto | .small-text[<span style="color: #e07a5f;">Um mergulho na matemática</span>]
-
-**Modelo linear**
-
-Considere a biomassa de peixes $y$ no *i-ésimo* transecto, descrita em função da temperatura $x_i = SST$
-
-<div style="height: 10px;"></div>
-
-.pull-left[
-
-<br>
-
-
-.gray-box-big[
-$$\large y = {X\beta} + \varepsilon$$
-
-$$\large \varepsilon \sim  \text{MVN}(0, \sigma^2I)$$
-
-----
-
-
-$$\Large y_i = \beta_0 + \beta_1x_i + \varepsilon_i$$
-]
-
-<br>
-
-.code-bg[
-```{r, echo=T, eval=F}
-
-f(biomassa_kg_m2 ~ 1 + sst, data = df)
-
-```
-]
-
-]
-
-
-.pull-right[
-
-```{r, fig.asp = 0.9, out.width="90%"}
-
-df %>%
-    ggplot(aes(x = sst, y = biomassa_kg_m2)) +
-    # geom_point(size = 4, alpha = 0.5, col = "gray40") +
-    # geom_smooth(method = 'lm', se = TRUE,  fill = '#e07a5f', col = "#e07a5f", size = 2) +
-    geom_point(size = 4, alpha = 0.4, col = "#e07a5f") +
-    geom_smooth(method = 'lm', se = TRUE,  fill = 'gray80', col = "gray50", size = 2) +
-    labs(x = "SST (°C)",y = "Biomassa (Kg/m2)") +
-    theme_minimal(base_size = 14) +
-    my_theme
-
-```
-
-]
-
----
-# PPGECO | ECL0072 | out. 2026
-
-### Modelo Linear Misto | .small-text[<span style="color: #e07a5f;">Um mergulho na matemática</span>]
-
-**Modelo linear**
-
-<div style="height: 15px;"></div>
-
-
-.center[**Representação matricial**]
-
-<br>
-<br>
-
-$$\large \underbrace{\begin{bmatrix} y_1 \\ y_2 \\ y_3 \\ \vdots \\ y_n \end{bmatrix}}_{\mathbf{y}} = \underbrace{\begin{bmatrix} 1 & x_1 \\ 1 & x_2 \\ 1 & x_3 \\ \vdots & \vdots \\ 1 & x_n \end{bmatrix}}_{\mathbf{X}} \underbrace{\begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix}}_{\boldsymbol{\beta}} + \underbrace{\begin{bmatrix} \varepsilon_1 \\ \varepsilon_2 \\ \varepsilon_3 \\ \vdots \\ \varepsilon_n \end{bmatrix}}_{\boldsymbol{\varepsilon}}$$ 
-
----
-# PPGECO | ECL0072 | out. 2026
-
-### Modelo Linear Misto | .small-text[<span style="color: #e07a5f;">Um mergulho na matemática</span>]
-
-
-**Modelo linear**
-
-A variância de um vetor $\varepsilon = (\varepsilon_1, \varepsilon_2, \varepsilon_3, ..., \varepsilon_n)$ é uma matriz:
-
-<br>
-
-$$
-\text{Var}(\varepsilon)
-= \Sigma =
-\begin{bmatrix}
-\sigma^2 & \text{Cov}(\varepsilon_1, \varepsilon_2) & \text{Cov}(\varepsilon_1, \varepsilon_2) & \cdots & \text{Cov}(\varepsilon_1, \varepsilon_n)\\
-\text{Cov}(\varepsilon_2, \varepsilon_1) & \sigma^2  &  \text{Cov}(\varepsilon_2, \varepsilon_3) & \cdots & \text{Cov}(\varepsilon_2, \varepsilon_n)\\
-\text{Cov}(\varepsilon_3, \varepsilon_1)  & \text{Cov}(\varepsilon_3, \varepsilon_2) & \sigma^2  & \cdots & \text{Cov}(\varepsilon_3, \varepsilon_n)\\
-\vdots & \vdots & \vdots & \ddots & \vdots\\
-\text{Cov}(\varepsilon_n, \varepsilon_1) & \text{Cov}(\varepsilon_n, \varepsilon_2) & \text{Cov}(\varepsilon_n, \varepsilon_3) & \cdots & \sigma^2  
-\end{bmatrix}
-$$ 
-<br>
-<br>
-
-.small-text[
-- **Elementos da diagonal principal:** variância (constante)
-
-- **Demais elementos:** co-variância
-]
-
-
----
-# PPGECO | ECL0072 | out. 2026
-
-### Modelo Linear Misto | .small-text[<span style="color: #e07a5f;">Um mergulho na matemática</span>]
-
-
-**Modelo linear**
-
-Dado que o modelo pressupõe *independência* entre as observações, isso emplica em:
-
-
-
-$$\large \text{Cov}(\varepsilon_i, \varepsilon_j) = 0 ~~~~~~~ (i \neq j)$$
-<br>
-
-Portanto:
-
-$$
-\large
-\Sigma
-=
-\begin{bmatrix}
-\sigma^2 & 0 & 0 & \cdots & 0\\
-0 & \sigma^2  &  0 & \cdots & 0\\
-0 & 0 & \sigma^2  & \cdots & 0\\
-\vdots & \vdots & \vdots & \ddots & \vdots\\
-0 & 0 & 0 & \cdots & \sigma^2  
-\end{bmatrix}
-$$ 
-
-
-
----
-# PPGECO | ECL0072 | out. 2026
-
-### Modelo Linear Misto | .small-text[<span style="color: #e07a5f;">Um mergulho na matemática</span>]
-
-
-**Modelo linear**
-
-Além disso, o pressuposto de *homocedasticidade* implica em $\sigma^2 = \text{cte.}$
-
-Logo:
-
-<br>
-
-
-.pull-left[
-
-$$
-\large
-\Sigma
-=
-\sigma^2
-\underbrace{
-\begin{bmatrix}
-1 & 0 & 0 & \cdots & 0\\
-0 & 1  &  0 & \cdots & 0\\
-0 & 0 & 1  & \cdots & 0\\
-\vdots & \vdots & \vdots & \ddots & \vdots\\
-0 & 0 & 0 & \cdots & 1  
-\end{bmatrix}
-}_\text{Mariz identidade}
-$$ 
-]
-
-<br>
-
-.pull-right[
-$$
-\Large
-\Sigma
-=
-\sigma^2 I_n
-$$
-<br>
-
-.salmon-box[
-
-A matriz $\Sigma$ possui dimensão $n \times n$
-]
-
-
-]
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -1250,11 +1258,41 @@ A matriz $\Sigma$ possui dimensão $n \times n$
 
 **Modelo linear misto - intercepto aleatório**
 
-Agora, considere que a biomassa de peixes $(y)$ no *i-ésimo* transecto também varia em função do recife em que foi amostrado $(j = {1, 2, ..., K=5})$ 
+Agora, considere que a biomassa de peixes $(y)$ no *i-ésimo* transecto também varia em função do recife em que foi amostrada $(j = {1, 2, ..., K=5})$ 
 
 <div style="height: 15px;"></div>
 
+
+
 .pull-left[
+
+.code-bg[
+```{r, echo=T, eval=F}
+f(biomassa_kg_m2 ~ 1 + (1 | recife), data = df)
+```
+
+]
+
+```{r, fig.asp = 0.9, out.width="90%"}
+
+df %>%
+    ggplot(aes(x = recife, y = biomassa_kg_m2)) +
+    geom_jitter(aes(col = recife), size = 4, alpha = 0.5) +
+    geom_boxplot(size = 1, alpha = 0.3) +
+    labs(x = "Recifes",y = "Biomassa (Kg/m2)") +
+    scale_color_manual(values = c("#846267", "#588157","#e07a5f", "#457b9d", "#f6bd60")) +
+    theme_minimal(base_size = 14) +
+    my_theme +
+    theme(axis.text.x = element_text(colour = "grey20",  margin = margin(t = 25)),
+        axis.text.y = element_text(colour = "grey20", margin = margin(r = 20)))
+
+```
+
+
+]
+
+
+.pull-right[
 
 <br>
 
@@ -1286,32 +1324,6 @@ Lembrando que:
 
 ]
 
-.pull-right[
-
-```{r, echo=T, eval=F}
-f(biomassa_kg_m2 ~ 1 + (1 | recife), data = df)
-```
-
-```{r, fig.asp = 0.9, out.width="90%"}
-
-df %>%
-    ggplot(aes(x = recife, y = biomassa_kg_m2)) +
-    geom_jitter(aes(col = recife), size = 4, alpha = 0.5) +
-    geom_boxplot(size = 1, alpha = 0.3) +
-    labs(x = "Recifes",y = "Biomassa (Kg/m2)") +
-    scale_color_manual(values = c("#846267", "#588157","#e07a5f", "#457b9d", "#f6bd60")) +
-    theme_minimal(base_size = 14) +
-    my_theme +
-    theme(axis.text.x = element_text(colour = "grey20",  margin = margin(t = 25)),
-        axis.text.y = element_text(colour = "grey20", margin = margin(r = 20)))
-
-```
-
-
-
-]
-
-
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -1328,15 +1340,14 @@ df %>%
 <br>
 <br>
 
-$$\large \underbrace{\begin{bmatrix} y_1 \\ y_2 \\ y_3 \\ \vdots \\ y_n \end{bmatrix}}_{\mathbf{y}} = \underbrace{\begin{bmatrix} 1 & x_1 \\ 1 & x_2 \\ 1 & x_3 \\ \vdots & \vdots \\ 1 & x_n \end{bmatrix}}_{\mathbf{X}} \underbrace{\begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix}}_{\boldsymbol{\beta}} + \underbrace{\begin{bmatrix} 1 & 0 & 0 & 0 & 0\\ 1 & 0 & 0 & 0 & 0\\ 0 & 1 & 0 & 0 & 0\\ \vdots & \vdots & \vdots & \vdots & \vdots \\ 0 & 0 & 0 & 0 & 1 \end{bmatrix}}_{\mathbf{Z}} \underbrace{\begin{bmatrix} b_a \\ b_b \\ b_c \\ b_d \\ b_e \end{bmatrix}}_{\mathbf{b}} + \underbrace{\begin{bmatrix} \varepsilon_1 \\ \varepsilon_2 \\ \varepsilon_3 \\ \vdots \\ \varepsilon_n \end{bmatrix}}_{\boldsymbol{\varepsilon}}$$ 
+$$\large \underbrace{\begin{bmatrix} y_1 \\ y_2 \\ y_3 \\ \vdots \\ y_n \end{bmatrix}}_{\mathbf{y}} = \underbrace{\begin{bmatrix} 1 & x_1 \\ 1 & x_2 \\ 1 & x_3 \\ \vdots & \vdots \\ 1 & x_n \end{bmatrix}}_{\mathbf{X}} \underbrace{\begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix}}_{\boldsymbol{\beta}} + \color{#e07a5f}{\underbrace{\begin{bmatrix} 1 & 0 & 0 & 0 & 0\\ 1 & 0 & 0 & 0 & 0\\ 0 & 1 & 0 & 0 & 0\\ \vdots & \vdots & \vdots & \vdots & \vdots \\ 0 & 0 & 0 & 0 & 1 \end{bmatrix}}_{\mathbf{Z}}} \color{#e07a5f}{\underbrace{\begin{bmatrix} b_a \\ b_b \\ b_c \\ b_d \\ b_e \end{bmatrix}}_{\mathbf{b}}} + \underbrace{\begin{bmatrix} \varepsilon_1 \\ \varepsilon_2 \\ \varepsilon_3 \\ \vdots \\ \varepsilon_n \end{bmatrix}}_{\boldsymbol{\varepsilon}}$$ 
 
 <br>
 
 .small-text2[ A matriz ] $Z$ .small-text2[(indicadora) associa cada observação ao seu efeito aleatório correspondente] ($b_j$)
-- Há um total de $K$ colunas
+- Há um total de $k$ colunas
 
-.footnote[K = número de grupos; no exemplo, K = 5 (recifes)]
-
+.footnote[k = número de grupos; no exemplo, k = 5 (recifes)]
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -1349,6 +1360,8 @@ As premissas para constução da matriz de variância-covariância para $b$ são
 
 
 <br>
+<br>
+
 
 .pull-left[
 
@@ -1368,12 +1381,11 @@ $$
 
 .pull-right[
 
-<br>
 
-$$\Large \Sigma_a = \sigma_a^2 I_K$$
-.salmon-box[
+$$\Large \Sigma_a = \sigma_a^2 I_k$$
+.gray-box[
 
-A matriz $\Sigma_a$ possui dimensão $K \times K$
+A matriz $\Sigma_a$ possui dimensão $k \times k$
 
   ]
 
@@ -1394,6 +1406,7 @@ A matriz $\Sigma_a$ possui dimensão $K \times K$
 .pull-left[
 
 .center[**Variância dentro do grupo**]
+
 
 $$
 \large
@@ -1427,6 +1440,8 @@ $$
 0 & 0 & 0 & 0 & \sigma_a^2
 \end{bmatrix}
 $$ 
+
+
 ]
 
 
@@ -1478,7 +1493,7 @@ A matriz $\mathbf{V}$ representa a matriz de variância-covariância de todo o c
 
 $$
 \large
-\mathbf{V_j} =
+\mathbf{V} =
 \begin{bmatrix}
 \sigma_a^2 + \sigma^2 & \sigma_a^2 & \sigma_a^2 & \cdots & \sigma_a^2 \\
 \sigma_a^2 & \sigma_a^2 + \sigma^2 & \sigma_a^2 & \cdots & \sigma_a^2 \\
@@ -1516,6 +1531,8 @@ $$\large \text{Corr}(y_{ij}, y_{kj}) = \frac{\sigma_a^2}{\sigma_a^2 + \sigma^2}$
 
 <br>
 
+--
+
 .small-text2[
 
 Modelos mistos representam, portanto, uma escolha natural para acomodar a dependência entre observações
@@ -1546,43 +1563,11 @@ O modelo anterior é também conhecido por modelo linear misto com intercepto al
 
 .pull-left[
 
-```{r, out.width="70%", fig.asp=0.8}
+```{r, out.width="85%", fig.asp=0.8}
 ggplot(df, aes(sst, biomassa_kg_m2)) +
-    geom_point(aes(colour = recife), alpha = .30, size = 3) +
-    geom_line(data = newdat, aes(x = sst, y = pred_group, colour = recife), linewidth = 1.3) +
-    geom_line(data = pop_line, aes(x = sst, y = pred_pop, colour = recife), linewidth = 1.5, linetype = "dashed") +
-    scale_color_manual(
-        name = "Recifes",
-        values = reef_cols,
-        breaks = names(reef_cols)
-    ) +
-    labs(
-        x = "SST (°C)",
-        y = "Biomassa (Kg/m2)"
-    ) +
-    guides(
-        colour = guide_legend(
-            override.aes = list(size = 3, alpha = 1) # Makes points in legend bigger & non-transparent
-        )
-    ) +
-    theme_minimal(base_size = 16) +
-    my_theme +
-    theme(
-        legend.position = "inside",
-        legend.position.inside = c(0.15, 0.80), # Adjust X and Y between 0 and 1
-        legend.background = element_rect(fill = "white", color = "gray80", linewidth = 0.3), legend.title = element_text(size = 12, face = "bold"), # Legend title size
-        legend.text = element_text(size = 10, face = 'bold'))
-    
-```
-]
-
-.pull-right[
-
-```{r, out.width="70%", fig.asp=0.8}
-ggplot(df, aes(sst, biomassa_kg_m2)) +
-  geom_point(aes(colour = recife), alpha = .3, size = 3) +
-  geom_line(data = newdat2, aes(x = sst, y = pred_group, colour = recife), linewidth = 1.3) +
-  geom_line(data = pop_line2, aes(x = sst, y = pred_pop, colour = recife), linewidth = 1.5, linetype = "dashed") +
+  geom_point(aes(colour = recife), alpha = .30, size = 4) +
+  geom_line(data = newdat, aes(x = sst, y = pred_group, colour = recife), linewidth = 1.3) +
+  geom_line(data = pop_line, aes(x = sst, y = pred_pop, colour = recife), linewidth = 1.5, linetype = "dashed") +
   scale_color_manual(
     name = "Recifes",
     values = reef_cols,
@@ -1590,10 +1575,48 @@ ggplot(df, aes(sst, biomassa_kg_m2)) +
   ) +
   labs(
     x = "SST (°C)",
-    y = "Biomassa (Kg/m2)"
+    y = "Biomassa (kg)"
   ) +
-  theme_minimal(base_size = 16) +
-  my_theme
+  guides(
+    colour = guide_legend(
+      override.aes = list(size = 3, alpha = 1) # Makes points in legend bigger & non-transparent
+    )
+  ) +
+  my_theme +
+  theme(
+    legend.position = "inside",
+    legend.position.inside = c(0.12, 0.81), # Adjust X and Y between 0 and 1
+    legend.background = element_rect(fill = "white", color = "gray80", linewidth = 0.3), legend.title = element_text(size = 14, face = "bold"), # Legend title size
+    legend.text = element_text(size = 12))
+
+```
+]
+
+.pull-right[
+
+```{r, out.width="85%", fig.asp=0.8}
+
+ggplot(df, aes(sst, biomassa_kg_m2)) +
+    geom_point(aes(colour = recife), alpha = .3, size = 4) +
+    geom_line(data = newdat2, aes(x = sst, y = pred_group, colour = recife), linewidth = 1.3) +
+    geom_line(data = pop_line2, aes(x = sst, y = pred_pop, colour = recife), linewidth = 1.5, linetype = "dashed") +
+    scale_color_manual(
+      name = "Recifes",
+      values = reef_cols,
+      breaks = names(reef_cols)
+    ) +
+    labs(
+      x = "SST (°C)",
+      y = "Biomassa (kg)"
+    ) +
+    my_theme +
+    theme(
+      legend.position = "inside",
+      legend.position.inside = c(0.12, 0.81), # Adjust X and Y between 0 and 1
+      legend.background = element_rect(fill = "white", color = "gray80", linewidth = 0.3), legend.title = element_text(size = 14, face = "bold"), # Legend title size
+      legend.text = element_text(size = 12))
+
+
 ```
 ]
   
@@ -1631,8 +1654,8 @@ $$\large y_{ij} = \beta_0 + \beta_1x_{ij} + b_{0j} + b_{1j}x_{ij}+ \varepsilon_{
 
 Onde:
 
-- $b_{0j}$: efeito aleatório do intercepto para o recife $j$
-- $b_{1j}$: efeito aleatório da inclinação para o recife $j$
+- $b_{0j}$: desvio do intercepto do recife $j$ em relação ao intercepto populacional $\beta_0$
+- $b_{1j}$: desvio da inclinação do recife $j$ em relação à inclinação populacional $\beta_1$
 ]
 
 
@@ -1642,16 +1665,19 @@ Onde:
 
 .pull-right[
 
-
+.code-bg[
 ```{r, echo=T, eval=F}
 f(biomassa_kg_m2 ~ 1 + sst + (1 + sst | recife), data = df)
 ```
+]
 
-```{r, fig.asp = 0.9, out.width="80%"}
+
+```{r, fig.asp = 0.9, out.width="85%"}
 
 df %>%
     ggplot(aes(x = sst, y = biomassa_kg_m2)) +
-    geom_point(col = '#d5bdaf', size = 4, alpha = 0.4) +
+    #geom_point(col = '#d5bdaf', size = 4, alpha = 0.4) +
+    geom_point(col = 'gray80', size = 4, alpha = 0.4) +
     geom_smooth(aes(col = recife, fill = recife),method = 'lm',size = 1, alpha = 0.3) +
     labs(x = "Recifes",y = "Biomassa (Kg/m2)") +
     scale_color_manual(values = c("#846267", "#588157","#e07a5f", "#457b9d", "#f6bd60")) +
@@ -1684,7 +1710,7 @@ df %>%
 .center[**Representação matricial**]
 
 
-$$\underbrace{\begin{bmatrix} y_1 \\ y_2 \\ y_3 \\ y_4 \\ y_5 \\ \vdots \\ y_n \end{bmatrix}}_{\mathbf{y}} = \underbrace{\begin{bmatrix} 1 & x_1 \\ 1 & x_2 \\ 1 & x_3 \\ 1 & x_4 \\ 1 & x_5 \\ \vdots & \vdots \\ 1 & x_n \end{bmatrix}}_{\mathbf{X}} \underbrace{\begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix}}_{\boldsymbol{\beta}} + \underbrace{\begin{bmatrix} 1 & x_1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 1 & x_2 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 1 & x_3 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 1 & x_4 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 1 & x_5 & 0 & 0 & 0 & 0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\ 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & x_n \end{bmatrix}}_{\mathbf{Z}} \underbrace{\begin{bmatrix} b_{0A} \\ b_{1A} \\ b_{0B} \\ b_{1B} \\ b_{0C} \\ b_{1C} \\ b_{0D} \\ b_{1D} \\ b_{0E} \\ b_{1E} \end{bmatrix}}_{\mathbf{b}} + \underbrace{\begin{bmatrix} \varepsilon_1 \\ \varepsilon_2 \\ \varepsilon_3 \\ \varepsilon_4 \\ \varepsilon_5 \\ \vdots \\ \varepsilon_n \end{bmatrix}}_{\boldsymbol{\varepsilon}}$$
+$$\underbrace{\begin{bmatrix} y_1 \\ y_2 \\ y_3 \\ y_4 \\ y_5 \\ \vdots \\ y_n \end{bmatrix}}_{\mathbf{y}} = \underbrace{\begin{bmatrix} 1 & x_1 \\ 1 & x_2 \\ 1 & x_3 \\ 1 & x_4 \\ 1 & x_5 \\ \vdots & \vdots \\ 1 & x_n \end{bmatrix}}_{\mathbf{X}} \underbrace{\begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix}}_{\boldsymbol{\beta}} + \color{#e07a5f}{\underbrace{\begin{bmatrix} 1 & x_1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 1 & x_2 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 1 & x_3 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 1 & x_4 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 1 & x_5 & 0 & 0 & 0 & 0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\ 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & x_n \end{bmatrix}}_{\mathbf{Z}}} \color{#e07a5f}{\underbrace{\begin{bmatrix} b_{0A} \\ b_{1A} \\ b_{0B} \\ b_{1B} \\ b_{0C} \\ b_{1C} \\ b_{0D} \\ b_{1D} \\ b_{0E} \\ b_{1E} \end{bmatrix}}_{\mathbf{b}}} + \underbrace{\begin{bmatrix} \varepsilon_1 \\ \varepsilon_2 \\ \varepsilon_3 \\ \varepsilon_4 \\ \varepsilon_5 \\ \vdots \\ \varepsilon_n \end{bmatrix}}_{\boldsymbol{\varepsilon}}$$
 
 
 .small-text2[
@@ -1693,28 +1719,6 @@ A matriz $Z$ possui agora o dobro de colunas
 
 - Cada grupo está associado a 2 colunas: uma coluna referente ao intercepto ($1$s) e uma coluna com os valores da covariável $x_i$ (inclinação)
 ]
-
----
-# PPGECO | ECL0072 | out. 2026
-### Modelo Linear Misto | .small-text[<span style="color: #e07a5f;">Um mergulho na matemática</span>]
-
-
-**Modelo linear misto - intercepto & inclinação aleatórios**
-
-A variância do vetor dos efeitos aleatórios $b$ é dada por:
-
-$$
-\large
-\Sigma_a
-=
-\begin{bmatrix}
-\Sigma_A^2 & 0 & 0 & 0 & 0\\
-0 & \Sigma_B^2  &  0 & 0 & 0\\
-0 & 0 & \Sigma_C^2 & 0 & 0\\
-0 & 0 & 0 & \Sigma_D^2 & 0\\
-0 & 0 & 0 & 0 & \Sigma_E^2
-\end{bmatrix}
-$$
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -1729,7 +1733,7 @@ Para um determinado recife $j$, o vetor de efeitos aleatórios é composto por 2
 
   - Assim, para cada recife pode-se descrever a matriz de variância-covarância conforme:
 
-$$\large \boldsymbol{\Sigma}_j = \text{Var}\begin{bmatrix} b_{0j} \\ b_{1j} \end{bmatrix} = \begin{bmatrix} \sigma_{b0}^2 & \sigma_{b0,b1} \\ \sigma_{b0,b1} & \sigma_{b1}^2 \end{bmatrix}$$
+$$\large \boldsymbol{\Sigma}_a = \text{Var}\begin{bmatrix} b_{0j} \\ b_{1j} \end{bmatrix} = \begin{bmatrix} \sigma_{b0}^2 & \sigma_{b0,b1} \\ \sigma_{b0,b1} & \sigma_{b1}^2 \end{bmatrix}$$
 
 <br>
 
@@ -1738,9 +1742,9 @@ $$\large \boldsymbol{\Sigma}_j = \text{Var}\begin{bmatrix} b_{0j} \\ b_{1j} \end
 .small-text2[
 
 Onde:
-- $\sigma_{b0}^2$: variância dos interceptos de todos os recifes
-- $\sigma_{b1}^2$: variância das inclinações de todos os recifes
-- $\sigma_{b0,b1}$: covariância global entre intercepto e inclinação
+- $\sigma_{b0}^2$: variância dos desvios de intercepto entre recifes
+- $\sigma_{b1}^2$: variância dos desvios de inclinação entre recifes
+- $\sigma_{b0,b1}$: covariância entre o desvio de intercepto e o de inclinação de um mesmo recife
 
 ]
 
@@ -1765,31 +1769,65 @@ $$\rho = \frac{\sigma_{b0, b1}}{\sigma_{b0} \cdot \sigma_{b1}}$$
 
 **Modelo linear misto - intercepto & inclinação aleatórios**
 
+<div style="height: 15px;"></div>
+
+
+Visualizando toda a matriz de variância-covariância:
+
+
+<br>
+
+$$\boldsymbol{\Sigma}_a=\text{Var}(\mathbf b)=
+\begin{pmatrix}\sigma_{b_0}^2 & \sigma_{b_0b_{1}} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+\sigma_{b_0b_{1}} & \sigma_{b_1}^2 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & \sigma_{b_0}^2 & \sigma_{b_0b_{1}} & 0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & \sigma_{b_0b_{1}} & \sigma_{b_1}^2 & 0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & \sigma_{b_0}^2 & \sigma_{b_0b_{1}} & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & \sigma_{b_0b_{1}} & \sigma_{b_1}^2 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & \sigma_{b_0}^2 & \sigma_{b_0b_{1}} & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & \sigma_{b_0b_{1}} & \sigma_{b_1}^2 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \sigma_{b_0}^2 & \sigma_{b_0b_{1}}\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \sigma_{b_0b_{1}} & \sigma_{b_1}^2 \end{pmatrix}$$
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto | .small-text[<span style="color: #e07a5f;">Um mergulho na matemática</span>]
+
+**Modelo linear misto - intercepto & inclinação aleatórios**
+
 A variância marginal $V$ é dada por:
 
+<br>
 
 $$\large V = \underbrace{\Sigma}_\text{dentro} + \underbrace{Z \times \Sigma_a \times Z'}_\text{entre}$$
 
+<br>
+
+
+.pull-left[
+
 portanto:
 
+<br>
 
-$$
-\large
-V
-=
-\underbrace{
-\begin{bmatrix}
-V_a & 0 & 0 & 0 & 0\\
-0 & V_b  &  0 & 0 & 0\\
-0 & 0 & V_c & 0 & 0\\
-0 & 0 & 0 & V_d & 0\\
-0 & 0 & 0 & 0 & V_e
-\end{bmatrix}
-}_{\text{n} \times \text{n}}
-$$ 
+
+- $\text{Var}(y_{ij}) = \sigma_{b_0}^2 + 2x_{ij}\sigma_{b_0b_{1}} + x_{ij}^2\sigma_{b_1}^2 + \sigma^2$
+
+
+- $\text{Cov}(y_{ij}, y_{ik}) = \sigma_{b_0}^2 + (x_{ij} + x_{ik})\sigma_{b_0b_{1}} + x_{ij}x_{ik}\sigma_{b_1}^2$
+
+]
 
 
 
+
+
+.pull-right[
+
+<br>
+
+> .small-text2[<span style="color: #e07a5f;">**A variância e a covariância marginais da variável-resposta dependem tanto da variância e covariância dos efeitos aleatórios quanto da covariável**</span>]
+]
 
 
 ---
@@ -1798,7 +1836,7 @@ $$
 
 
 A variabilidade entre grupos (recifes) é incorporada na incerteza da média populacional
-- Inferência mais realista: evita o Erro Tipo I.
+- Inferência mais realista: evita o Erro Tipo I
 
 
 ```{r}
@@ -1846,10 +1884,11 @@ newdat$upr_mixed <- newdat$fit_mixed + 1.96 * se_mixed
 
 # --- Gráfico 1: Modelo Simples ---
 ggplot(df, aes(x = sst, y = biomassa_kg_m2)) +
-  geom_point(alpha = 0.5, color = "#d5bdaf", size = 3) +
-  geom_ribbon(data = newdat, aes(y = fit_lm, ymin = lwr_lm, ymax = upr_lm), fill = "#dda3a4", alpha = 0.4) +
-  geom_line(data = newdat, aes(y = fit_lm), color = "#bc4749",  linewidth = 1.2) +
-  labs(x = "SST (°C)", y = "Biomassa (Kg/m2)", title = "biomassa ~ sst",) +
+    geom_point(size = 4, alpha = 0.3, col = "#e07a5f") +
+
+  geom_ribbon(data = newdat, aes(y = fit_lm, ymin = lwr_lm, ymax = upr_lm), fill = "gray70", alpha = 0.5) +
+  geom_line(data = newdat, aes(y = fit_lm), color = "gray40",  linewidth = 1.2) +
+  labs(x = "SST (°C)", y = "Biomassa (Kg/m2)", title = "biomassa ~ sst + recife") +
   theme_minimal(base_size = 14) +
   my_theme
 ```
@@ -1862,7 +1901,7 @@ ggplot(df, aes(x = sst, y = biomassa_kg_m2)) +
 .small-text[
 
 Assume que todas as observações são independentes
-- Superestima o tamanho amostral efetivo ($N$), resultando em um erro padrão erroneamente pequeno (IC estreito).
+- Superestima o tamanho amostral efetivo ($N$), resultando em um erro padrão erroneamente pequeno (IC estreito)
 ]
 
 ]
@@ -1872,9 +1911,9 @@ Assume que todas as observações são independentes
 ```{r, out.width="90%", fig.asp=0.75}
 
 ggplot(df, aes(x = sst, y = biomassa_kg_m2)) +
-  geom_point(alpha = 0.5, color = "#d5bdaf", size = 3) +
-  geom_ribbon(data = newdat, aes(y = fit_mixed, ymin = lwr_mixed, ymax = upr_mixed), fill = "#dda3a4", alpha = 0.4) +
-  geom_line(data = newdat, aes(y = fit_mixed), color = "#bc4749", linewidth = 1.2) +
+  geom_point(size = 4, alpha = 0.3, col = "#e07a5f") +
+  geom_ribbon(data = newdat, aes(y = fit_mixed, ymin = lwr_mixed, ymax = upr_mixed), fill = "gray70", alpha = 0.5) +
+  geom_line(data = newdat, aes(y = fit_mixed), color = "gray40", linewidth = 1.2) +
   labs(x = "SST (°C)", y = "Biomassa (Kg/m2)", title = "biomassa ~ sst + (sst|recife)",) +
   theme_minimal(base_size = 14) +
   my_theme
@@ -1899,6 +1938,7 @@ Considera grupos de informação
 
 A estruturação dos efeitos aleatórios depende não só das hipóteses, como também do desenho amostral
 
+<br>
 
 .center[ **Desenho amostral aninhado** ]
 
@@ -1911,11 +1951,10 @@ knitr::include_graphics("../Figuras/nested_design.png")
 
 .small-text2[
 
-Fatores independentes não se cruzam
+Fatores não se cruzam
   - Observações de um nível inferior pertencem exclusivamente a uma única unidade do nível superior 
-    - transectos > recifes > ano
-  - As diferentes fontes de variação são parcialmente confundidas (*confounding effect*)
-    - diferença de produtividade entre dois recifes pode ser resultado do efeito temporal (ano) ou espacial (recife)
+    - $\text{transectos} \subset \text{recifes} \subset \text{ano}$
+
 
 ]
 
@@ -1924,7 +1963,7 @@ Fatores independentes não se cruzam
 ### Modelo Linear Misto | .small-text[<span style="color: #e07a5f;">Estrutura dos efeitos aleatórios</span>]
 
 
-$$\text{biomassa}_{ijk} = \mu_a + \gamma_k + \delta_{j(k)} + \epsilon_{ijk}$$
+$$\text{biomassa}_{ijk} = \mu + \gamma_k + \delta_{j(k)} + \epsilon_{ijk}$$
 
 
 ```{r, out.width = "50%"}
@@ -1937,29 +1976,34 @@ knitr::include_graphics("../Figuras/nested_random_effect.png")
 $$\sigma^2_{Total} = \sigma^2_{Ano} + \sigma^2_{Recife:Ano} + \sigma^2_{residual}$$
 
 
-.small-text[
+.small-text3[
 
 
-- **Variância anual ($\sigma_{\gamma}$):** avalia o quanto a biomassa média varia de um ano para o outro
+- **Variância anual ($\sigma^2_{\gamma}$):** representa o quanto a biomassa média varia entre os anos
 
-- **Variância entre recifes do mesmo ano ($\sigma_{\delta}$):** avalia o quanto os recifes diferem entre si dentro de um mesmo ano
+- **Variância entre recifes do mesmo ano ($\sigma^2_{\delta}$):** representa o quanto a biomassa média varia entre recifes pertencentes ao mesmo ano
 
-- **Variância residual ($\sigma$):** representa a variação entre os transectos individuais ($y_1, y_2, \dots$) coletados no mesmo recife
+- **Variância residual ($\sigma^2$):** representa a variação entre os transectos individuais ($y_1, y_2, \dots$) coletados no mesmo recife
 
 ]
 
-
+.code-bg[
+.small-code[
 ```{r, eval=F, echo=T}
 f(biomassa_kg_m2 ~ 1 + (1 | ano/recife))
 ```
+]
+]
 
-
+.code-bg[
+.small-code[
 ```{r, eval=F, echo=T}
 
 f(biomassa_kg_m2 ~ 1 + (1 | ano) + (1 | ano:recife))
 
 ```
-
+]
+]
 
 ---
 ### Modelo Linear Misto | .small-text[<span style="color: #e07a5f;">Estrutura dos efeitos aleatórios</span>]
@@ -1967,6 +2011,7 @@ f(biomassa_kg_m2 ~ 1 + (1 | ano) + (1 | ano:recife))
 
 .center[**Desenho amostral cruzado**]
 
+<br>
 
 
 ```{r, out.width = "50%"}
@@ -1978,19 +2023,22 @@ knitr::include_graphics("../Figuras/crossed_design.png")
 
 .small-text2[
 
-Fatores independentes se cruzam
-  - Observações de um grupo aparecem em um ou mais níves do outro grupo (monitoramento)
-  - É possível separar as diferentes fontes de variação
-    - A diferença de produtividade pode ser avaliada a nivel espacial (recifes) e temporal (anos)
+Fatores se cruzam
+  - Os mesmos níveis de um fator ocorrem em diferentes níveis do outro fator
+    - Ex.: os mesmos recifes são amostrados em anos distintos
+
+  - O desenho amostral permite separar as diferentes fontes de variação
+    - variação espacial: diferenças entre recifes
+    - variação temporal: diferenças entre anos
 
 ]
 
 ---
 
 # PPGECO | ECL0072 | out. 2026
-### Modelo Linear Misto
+### Modelo Linear Misto  | .small-text[<span style="color: #e07a5f;">Estrutura dos efeitos aleatórios</span>]
 
-$$\text{biomassa}_{ijk} = \mu_a + \gamma_k + \delta_j + \epsilon_{ijk}$$
+$$\text{biomassa}_{ijk} = \mu + \gamma_k + \delta_j + \epsilon_{ijk}$$
 
 
 ```{r, out.width = "40%"}
@@ -2014,11 +2062,28 @@ $$\sigma^2_{Total} = \sigma^2_{Ano} + \sigma^2_{Recife} + \sigma^2_{residual}$$
 
 ]
 
-
+.code-bg[
 ```{r, eval=F, echo=T}
 f(biomassa_kg_m2 ~ 1 + (1 | ano) + (1 | recife))
 ```
+]
 
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto  | .small-text[<span style="color: #e07a5f;">Estrutura dos efeitos aleatórios</span>]
+
+
+Qual estrutura escolher?
+
+
+```{r, out.width = "40%"}
+knitr::include_graphics("../Figuras/nested_and_crossed_table.png")
+```
+
+
+.footnote[.small-text2[Figura: [Schielzeth & Nakagawa (2013)](https://besjournals.onlinelibrary.wiley.com/doi/epdf/10.1111/j.2041-210x.2012.00251.x)]]
 
 
 ---
@@ -2129,7 +2194,7 @@ $$\hat{\sigma}_{OLS}^2 = \frac{\sum_{i=1}^{n} (y_i - \hat{\mu_i})^2}{\color{#e07
 
 A abordagem *frequentista* para estimação dos parâmetros de modelos mistos exige algumas cautelas:
 
-- Dado o conjunto de parâmetros $\large \theta = \{ \beta_0, \beta, \sigma^2, \sigma_{\alpha}^2 \}$<sup>1</sup>, objetiva-se $\hat{\theta} := argmin ~ L(\theta)$
+- Dado o conjunto de parâmetros $\large \theta = \{ \beta_0, \beta, \sigma^2, \sigma_{\alpha}^2 \}$<sup>1</sup>, objetiva-se $\hat{\theta} := argmax ~ L(\theta)$
 
 <br>
   
@@ -2175,7 +2240,7 @@ Erros padrões subestimados
 
 Uma forma de contornar esse problema consiste em aplicar a verossimilhança restrita (REML<sup>1</sup>)
 
-- Separa previamente os efeitos fixos ($\boldsymbol{\beta}$) e efeitos aleatórios ($\sigma^2$) e estima separadamente cada conjunto de parâmetros
+- Separa previamente os efeitos fixos ($\beta_0, \beta$) e efeitos aleatórios ($\sigma^2, \sigma^2_\alpha$) e estima separadamente cada conjunto de parâmetros
 
 <br>
 
@@ -2238,6 +2303,82 @@ Diante do estimador REML, não se pode comparar modelos com diferentes estrutura
 
 ]
 
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### Modelo Linear Misto | .small-text[<span style="color: #e07a5f;">Inferência</span>]
+
+**LMMs como modelos hierárquicos Bayesianos**
+
+
+Na abordagem Bayesiana, todos os parâmetros do modelo são representados via distribuições de probabilidade, incluindo os dos efeitos aleatórios
+
+
+<br>
+
+
+.pull-left[
+
+<br>
+
+.center[
+
+$$\large y_{ij} \sim N(\mu_{ij}, ~\sigma^2)$$
+]
+
+<div style="height: 7px;"></div>
+
+
+.center[
+$$\large \mu_{ij} = \beta_0 + \beta_1x_{ij} + \alpha_j$$
+]
+
+<div style="height: 7px;"></div>
+
+.center[
+$$\large \alpha_j \sim N(0,~ \sigma_\alpha^2)$$
+]
+
+
+<div style="height: 7px;"></div>
+
+.center[
+$$\large \beta_0,\beta_1,\sigma,\sigma_\alpha \sim P(\theta)$$
+]
+
+]
+
+
+.pull-right[
+
+.center[**Vantagens**]
+
+<div style="height: 7px;"></div>
+
+
+.small-text2[
+
+**1 | Representação completa da incerteza**
+
+Distribuições posteriores para efeitos fixos, efeitos aleatórios e componentes de variância
+
+<div style="height: 7px;"></div>
+
+-----
+
+<div style="height: 7px;"></div>
+
+**2 | Regularização através das prioris**
+
+Componentes de variância podem ser difíceis de estimar quando há poucos grupos ou pouca informação em cada grupo
+- definir uma priori regularizadora sobre esses parâemtros
+
+
+]
+
+]
+
 
 
 ---
@@ -2245,86 +2386,63 @@ Diante do estimador REML, não se pode comparar modelos com diferentes estrutura
 # PPGECO | ECL0072 | out. 2026
 ### Modelo Linear Misto 
 
-Quando usar modelos mistos:
+**Quando usar modelos mistos?**
+
+<div style="height: 7px;"></div>
 
 
-**1. Estrutura dos dados**
+--
 
+
+.small-text2[
 - **Dados agrupados/hierárquicos:** observações pertencem a grupos ou unidades amostrais, gerando dependência entre observações do mesmo grupo
 
-<br>
+]
 
+<div style="height: 7px;"></div>
+
+
+--
+
+.small-text2[
 - **Medidas repetidas:** múltiplas observações são feitas na mesma unidade experimental, indivíduo ou local, ao longo do tempo ou em diferentes condições
+]
 
-<br>
+<div style="height: 7px;"></div>
 
+
+--
+
+.small-text2[
 - **Dados desbalanceados:** grupos apresentam diferentes números de observações
+]
 
-<br>
-
-- **Pseudo-replicação:** existem várias observações dentro da mesma unidade experimental, que não podem ser consideradas réplicas independentes
-
----
-# PPGECO | ECL0072 | out. 2026
-### Modelo Linear Misto 
-
-Quando usar modelos mistos:
+<div style="height: 7px;"></div>
 
 
-**2. Objetivo da inferência**
+--
 
-- **Generalização populacional:** quando o objetivo é inferir para uma população de grupos/unidades além daqueles especificamente amostrados — por exemplo, inferir sobre todos os recifes, e não apenas comparar os recifes amostrados
+.small-text2[
+- **Generalização populacional:** quando o objetivo é inferir para uma população de grupos/unidades além daqueles especificamente amostrados
+  - Ex.: inferir sobre todos os recifes, e não apenas comparar os recifes amostrados
+]
 
-<br>
+<div style="height: 7px;"></div>
 
+--
+
+.small-text2[
 - **Interesse na variabilidade:** quando é importante quantificar a variação entre grupos ou permitir que o efeito de uma variável varie entre grupos, além de estimar o efeito médio
+]
 
-<br>
+<div style="height: 7px;"></div>
 
+--
 
-.salmon-box[**ATENÇÃO:** Se a variável de agrupamento possuir menos de 5 níveis, deve-se tratá-la como efeito fixo! Caso contrário,o modelo não terá informação suficiente para estimar com precisão a variância do efeito aleatório.]
-
----
-
-# Modelos Mistos (MM)
-
-### Estrutura do modelo
-
-<br>
-<br>
-
-
-
-$$\Large
-Y =
-\underset{
-\substack{
-\rule{3.8cm}{0.3pt}\\
-\color{#81b29a}{\text{Covariáveis ambientais}}\\
-\color{#81b29a}{\text{Tratamentos}}
-}
-}{\text{Efeitos fixos}}
-+
-\underset{
-\substack{
-\rule{3.8cm}{0.3pt}\\ 
-\\
-\color{#e07a5f}{\text{Estrutura aninhada}}\\
-\color{#e07a5f}{\text{Correlação temporal}}\\
-\color{#e07a5f}{\text{Correlação espacial}}\\
-\color{#e07a5f}{\text{Ruído aleatório}}
-}
-}{\text{Efeitos aleatórios}}$$
-
-
-
-<br>
-
-Também conhecidos por:
-
-- modelos multiníveis
-- modelos hiearárquicos
-
+.small-text2[
+- **Dados com sobredispersão:** quando a variabilidade dos dados é maior do que a esperada pelo modelo  (comum em dados de contagens contagens ou proporções)
+  - A inclusão de um efeito aleatório no nível da observação (*observation-level random effect* - OLRE) absorve a variação extra não explicada
+]
 
 ---
 
@@ -2332,4 +2450,56 @@ Também conhecidos por:
 
 ### Estudo dirigido
 
-- **Caps. 6** - Hobbs & Hooten (2007). Bayesian Models - A Statistical Primer for Ecologists.
+
+
+.small-text3[
+
+**Livros**
+
+- **Cap. 10** - Bolker (2009). Ecological Models and Data in R.
+
+- **Cap. 13** - Bolker (2015). Linear and generalized linear mixed models. In Fox et al (Eds.), Ecological Statistics: Contemporary theory and application.
+
+
+- **Caps. 10-12** - Faraway (2016). Extending the Linear Model with R, 2. ed.
+
+
+- **Caps. 12** - Kéry (2010). Introduction to WinBUGS for ecologists.
+
+
+- **Cap. 15** - Gelman et al. (2013). Bayesian Data Analysis, 3. ed.
+
+
+- **Caps. 4-5** - Zuur et al. (2009). Mixed effects models and extensions in ecology with R.
+
+
+- **Cap. 6** - Hobbs & Hooten (2007). Bayesian Models - A Statistical Primer for Ecologists.
+
+
+----
+
+**Artigos**
+
+
+- Bolker et al. (2009). [Generalized linear mixed models: a practical guide for ecology and evolution.](10.1016/j.tree.2008.10.008)
+
+
+- Harrison et al. (2018). [A brief introduction to mixed effects modelling and multi-model inference in ecology.](https://peerj.com/articles/4794/)
+
+
+- Krzywinski et al (2014). [Nested designs.](https://www.nature.com/articles/nmeth.3137)
+
+
+- Marshall (2024). [Principles of experimental design for ecology and evolution.](https://onlinelibrary.wiley.com/doi/10.1111/ele.14400)
+
+
+- Schielzeth & Nakagawa (2013). [Nested by design: model fitting and interpretation in a mixed model era.](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/j.2041-210x.2012.00251.x)
+
+
+- Silk et al. (2020). [Perils and pitfalls of mixed-effects regression models in biology](https://peerj.com/articles/9522/#)
+
+
+
+
+]
+
