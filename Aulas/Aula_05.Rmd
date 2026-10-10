@@ -48,47 +48,31 @@ class: title-slide
 
 <img src="../Figuras/logo_ppgeco2.svg" class="cover-logo">
 
----
-# PPGECO | ECL0072 | out. 2026
 
-### Agenda
-
-
-- Contextualização
-
-
-- Revisão de GLM/GAM
-
-
-- Inferência em modelos mistos 
-
-
-- <span style="color: red;">Validação (Maybe; vai depender se foi explorado na aula de Bayesiana)</span>
 
 
 ---
 # PPGECO | ECL0072 | out. 2026
-### Contexto
+
+<div style="height: 15px;"></div>
 
 De perto, ninguém é Normal....
 
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+<div style="height: 7px;"></div>
+
+
+```{r echo=FALSE, out.width ="90%"}
+knitr::include_graphics("../Figuras/Marine_ecosystem2.png")
+```
 
 
 
-[**Mostrar uma imagem de ecosistema marinho e suas interações ecológicas**]
-
-
+.footnote[Figura criada com IA]
 
 ---
 # PPGECO | ECL0072 | out. 2026
-### Contexto
 
+<div style="height: 15px;"></div>
 
 A maioria dos processos ecológicos resulta em dados assimétricos, discretos e que violam um ou mais dos pressupostos do modelo linear
 
@@ -651,7 +635,7 @@ Erros padrões subestimados
 
 Uma forma de contornar esse problema consiste em aplicar a verossimilhança restrita (REML<sup>1</sup>)
 
-- Separa previamente os efeitos fixos ($\boldsymbol{\beta}$) e efeitos aleatórios ($\sigma^2$) e estima separadamente cada conjunto de parâmetros
+- Separa previamente os efeitos fixos ($\beta_0, \beta$) e efeitos aleatórios ($\sigma^2, \sigma^2_\alpha$) e estima separadamente cada conjunto de parâmetros
 
 <br>
 
@@ -727,223 +711,186 @@ Em GLMMs e GAMMs, como os dados não seguem uma distribuição Normal, a funçã
     - PQL-REML (Penalized Quasi-Likelihood REML)
 
 
----
-# PPGECO | ECL0072 | out. 2026
-### Inferência bayesiana | .small-text[<span style="color: #e07a5f;">LMMs/GLMMs/GAMMs</span>]
+--
 
-A abordagem frequentista enfrenta um conjunto de gargalos que tornam a abordagem bayesiana uma escolha natural para ajustar modelos mistos
-
-<div style="height: 15px;"></div>
-
-.center[**Integração da função de verossimilhança**]
 
 <br>
 
-**Abordagem Frequentista**
-<br>
+> <span style="color: #e07a5f;">Diante de estruturas complexas, os modelos mistos apresentam frequentemente falhas de convergência </span>
 
-.small-text2[
-Depende da teoria assintótica para aproximar a integral da função de verossimilhança (eg.,*Laplace*, *AGHQ* ou *PQL*).
-  - Falho em dados esparsos, com estimativas enviesadas para os componentes de variância
-]
-
-<div style="height: 5px;"></div>
-
-----
-<div style="height: 5px;"></div>
-
-
-**Abordagem Bayesiana**
-<br>
-
-.small-text2[
-Não há aproximação assintótica da verossimilhança. Avalia-se a distribuição conjunta dos efeitos fixos e aleatórios via amostragem MCMC ou aproximações numéricas (INLA)
-- Não há limitação quanto ao $N$ amostral
-
-]
----
-# PPGECO | ECL0072 | out. 2026
-### Inferência bayesiana | .small-text[<span style="color: #e07a5f;">LMMs/GLMMs/GAMMs</span>]
-
-A abordagem frequentista enfrenta um conjunto de gargalos que tornam a abordagem bayesiana uma escolha natural para ajustar modelos mistos
-
-<div style="height: 15px;"></div>
-
-.center[**Teste de fronteira (*boundary effect*)**]
-
-<br>
-
-**Abordagem Frequentista**
-<br>
-
-.small-text2[
-
-Ao testar a significância de uma variância $H_0: \sigma_a^2 = 0$ via Teste de Razão de Verossimilhança (LRT), a hipótese nula está na fronteira do espaço paramétrico (variâncias não podem ser negativas)
-- Viola a distribuição Qui-quadrado ($\chi^2$) e infla os p-valores 
-
-]
-
-<div style="height: 5px;"></div>
-
-----
-
-<div style="height: 5px;"></div>
-
-**Abordagem Bayesiana**
-<br>
-
-.small-text2[
-Todas as análises são retiradas diretamente da distribuição posterior dos parâmetros, sem dependender de testes paramétricos.
-  - Nese caso, avalia-se a relevância do efeito aleatório via critérios de seleção de modelos baseados na distribuição posterior (e.g., WAIC, LOO-CV,...)
-]
 
 
 ---
 # PPGECO | ECL0072 | out. 2026
 ### Inferência bayesiana | .small-text[<span style="color: #e07a5f;">LMMs/GLMMs/GAMMs</span>]
 
-A abordagem frequentista enfrenta um conjunto de gargalos que tornam a abordagem bayesiana uma escolha natural para ajustar modelos mistos
-
-<div style="height: 15px;"></div>
+**Modelos mistos como modelos hierárquicos Bayesianos**
 
 
-.center[**Regularização dos componentes de variância**]
-<br>
+Na abordagem bayesiana, todos os parâmetros do modelo são representados via distribuições de probabilidade, incluindo os dos efeitos aleatórios
 
-
-**Abordagem Frequentista**
-<br>
-
-.small-text2[
-A estimação dos componentes de variância ($\sigma_a^2$, $\sigma_b^2$, ...) pode tornar-se instável em modelos com estruturas hierárquicas complexas, resultando em falhas de convergência
-  - A recomendação consiste em simplificar a estrutura do efeito aleatório
-
-]
-
-<div style="height: 5px;"></div>
-
-----
-
-<div style="height: 5px;"></div>
-
-**Abordagem Bayesiana**
-<br>
-
-.small-text2[
-
-A inclusão de prioris pouco informativas (*weakly informative priors*) atua como uma regularização natural. 
-- Impede que a variância colapse em zero ou exploda para o infinito, permitindo ajustar modelos estruturalmente ricos sem falhas de otimização numérica
-
-]
-
-
----
-# PPGECO | ECL0072 | out. 2026
-### Inferência bayesiana | .small-text[<span style="color: #e07a5f;">LMMs/GLMMs/GAMMs</span>]
-
-A abordagem frequentista enfrenta um conjunto de gargalos que tornam a abordagem bayesiana uma escolha natural para ajustar modelos mistos
-
-<div style="height: 15px;"></div>
-
-
-.center[**Propagação integral da incerteza**]
-<br>
-
-
-**Abordagem Frequentista**
-<br>
-
-.small-text2[
-As incertezas dos efeitos fixos $\boldsymbol{\beta}$ e dos componentes de variância $\sigma_b^2$ são calculadas separadamente
-  - Ao fazer predições na escala original da resposta (via $g^{-1}$), a incerteza da estimativa do efeito aleatório é frequentemente ignorada 
-
-]
-
-<div style="height: 5px;"></div>
-
-----
-
-<div style="height: 5px;"></div>
-
-**Abordagem Bayesiana**
-<br>
-
-.small-text2[
-
-Todos os parâmetros são tratados simultaneamente como variáveis aleatórias na distribuiçõ posterior 
-  - A incerteza do efeito aleatório propaga-se de forma automática  para os efeitos fixos, intervalos de credibilidade e predições espaciais/temporais.
-]
-
----
-class: center, middle, inverse
-
-
-## <span style="color: #6b705c;">ESTUDO DE CASO - 01</span>
-
-### <span style="color: #6b705c;"> - Distribuição de koalas em uma paisagem fragmentada - </span>
-
-
-
----
-class: inverse
-
-# PPGECO | ECL0072 | out. 2026
-### Estudo de caso 01 | .small-text[<span style="color:
-
-The data presented are based on surveys that were conducted to determine koala presence or absence at 300 locations in Noosa. This formed part of a larger study investigating the role of landscape change on koala distributions across eastern Australia (McAlpine et al., 2006; Rhodes et al., 2006). Using a form of stratified random sampling (McKay et al., 1979; Thompson, 1992) 100 sites were first located across the Noosa LGA. Then, within each site, three subsites were located 100 m apart. At each subsite, the presence or absence of koalas was then determined using standardised searches for koala faecal pellets around the bases of trees (as in Phillips and Callaghan, 2000). 
-
-
-Previous work has identified the koala’s preferred tree species in Noosa and these have been classified into primary, secondary, and supplementary species (Australian Koala Foundation (AKF) unpublished data). At each subsite, the percentage of trees that were primary and secondary species was recorded. Finally, the distribution of koala habitat (classified into highly suitable, suitable, marginal, and unsuitable habitat) and the location of paved roads were mapped in a geograph- ical information system (AKF unpublished data, Fig. 21.2). The data on the pres- ence/absence of koalas will be the response variable for our analysis, while the data on preferred tree species, habitat and roads will form the basis of the explanatory variables.
-
----
-<br>
-
-$$\large
-Y =
-\underset{
-\substack{
-\rule{3.8cm}{0.3pt}\\
-\color{#81b29a}{\text{Covariáveis ambientais}}\\
-\color{#81b29a}{\text{Tratamentos}}
-}
-}{\text{Efeitos fixos}}
-+
-\underset{
-\substack{
-\rule{3.8cm}{0.3pt}\\ 
-\\
-\color{#e07a5f}{\text{Estrutura aninhada}}\\
-\color{#e07a5f}{\text{Correlação temporal}}\\
-\color{#e07a5f}{\text{Correlação espacial}}\\
-\color{#e07a5f}{\text{Ruído aleatório}}
-}
-}{\text{Efeitos aleatórios}}$$
 
 <br>
 
-
-------
 
 .pull-left[
 
-$$\large y_i \sim N(\mu_i, \sigma^2)$$
+<br>
 
-$$\large \mu_i = \beta_0 + \beta x_i + \alpha_{j[i]}$$
+.center[
 
-$$\large \alpha_j \sim N(0, \sigma_{\alpha}^2)$$
+$$\large y_{ij} \sim N(\mu_{ij}, ~\sigma^2)$$
+]
+
+<div style="height: 7px;"></div>
+
+
+.center[
+$$\large \mu_{ij} = \beta_0 + \beta_1x_{ij} + \alpha_j$$
+]
+
+<div style="height: 7px;"></div>
+
+.center[
+$$\large \alpha_j \sim N(0,~ \sigma_\alpha^2)$$
+]
+
+
+<div style="height: 7px;"></div>
+
+.center[
+$$\large \beta_0,\beta_1,\sigma,\sigma_\alpha \sim P(\theta)$$
+]
 
 ]
+
 
 .pull-right[
 
-.small-text2[**Parâmetros a serem estimados**]
+.center[**Vantagens**]
 
-$\large \theta = \{ \beta_0, \beta, \sigma^2, \sigma_{\alpha}^2 \}$
+<div style="height: 7px;"></div>
+
+
+.small-text2[
+
+**1 | Representação completa da incerteza**
+
+Distribuições posteriores para efeitos fixos, efeitos aleatórios e componentes de variância
+
+<div style="height: 7px;"></div>
+
+-----
+
+<div style="height: 7px;"></div>
+
+**2 | Regularização através das prioris**
+
+Componentes de variância podem ser difíceis de estimar quando há poucos grupos ou pouca informação em cada grupo
+- definir uma priori regularizadora sobre esses parâemtros
+
 
 ]
 
----
-Classical regression and generalized linear models represent a special case of multilevel modeling in which there is no group-level model-in Bayesian terms, no prior information.
-- For the classical regression model, $y_i = X_i\beta + \varepsilon_i$ , with independent errors $\varepsilon_i \sim N(0, \sigma^2)$, the corresponding prior distribution is a uniform distribution on the entire range $\infty, -\infty$ for each of the components of $\beta$, and uniform on ($(0, \infty$) for $\sigma^2$ as well.
+]
+
 
 ---
+
+
+# PPGECO | ECL0072 | out. 2026
+### Modelo Linear Misto 
+
+**Quando usar modelos mistos?**
+
+<div style="height: 7px;"></div>
+
+
+--
+
+
+.small-text2[
+- **Dados agrupados/hierárquicos:** observações pertencem a grupos ou unidades amostrais, gerando dependência entre observações do mesmo grupo
+
+]
+
+<div style="height: 7px;"></div>
+
+
+--
+
+.small-text2[
+- **Medidas repetidas:** múltiplas observações são feitas na mesma unidade experimental, indivíduo ou local, ao longo do tempo ou em diferentes condições
+]
+
+<div style="height: 7px;"></div>
+
+
+--
+
+.small-text2[
+- **Dados desbalanceados:** grupos apresentam diferentes números de observações
+]
+
+<div style="height: 7px;"></div>
+
+
+--
+
+.small-text2[
+- **Generalização populacional:** quando o objetivo é inferir para uma população de grupos/unidades além daqueles especificamente amostrados
+  - Ex.: inferir sobre todos os recifes, e não apenas comparar os recifes amostrados
+]
+
+<div style="height: 7px;"></div>
+
+--
+
+.small-text2[
+- **Interesse na variabilidade:** quando é importante quantificar a variação entre grupos ou permitir que o efeito de uma variável varie entre grupos, além de estimar o efeito médio
+]
+
+<div style="height: 7px;"></div>
+
+--
+
+.small-text2[
+- **Dados com sobredispersão:** quando a variabilidade dos dados é maior do que a esperada pelo modelo  (comum em dados de contagens contagens ou proporções)
+  - A inclusão de um efeito aleatório no nível da observação (*observation-level random effect* - OLRE) absorve a variação extra não explicada
+]
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### Estudo dirigido
+
+
+
+.small-text3[
+
+**Livros**
+
+- **Cap. 4** - Bolker (2009). Ecological Models and Data in R.
+
+- **Caps. 2, 3, 5 e 9** - Faraway (2016). Extending the Linear Model with R, 2. ed.
+
+- **Caps. 13 e 15** - Gelman et al. (2020). Regression and Other Stories.
+
+- **Caps. 8-10** - Zuur et al. (2009). Mixed effects models and extensions in ecology with R.
+
+
+
+
+----
+
+**Material Extra**
+
+- [Material da disciplina GLM/GAM](https://github.com/mcruf/ECL0072-GLM_GAM)
+
+  -[Lista de vídeos no YouTube](https://youtube.com/playlist?list=PLhfTXDln3k652uTf0jf4EyoBJBTUHiorf&si=Pk23sNq_LLAqaJnc) 
+
+
+]
+
+
