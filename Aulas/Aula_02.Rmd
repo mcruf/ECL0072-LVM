@@ -539,10 +539,6 @@ Assumindo $H_0$ como verdadeira, avalia-se a probabilidade de obter um resultado
 
 **Mito da intensidade da significância da relação**
 
-<br>
-
-
-
 
 
 .pull-left[
@@ -594,15 +590,15 @@ summary(mod)
 ]
 
 
-.footnote[.small-text2[Fonte: [explainxkcd](https://www.explainxkcd.com/wiki/index.php/1478:_P-Values)]]
+.footnote[.small-text2[Figura: [explainxkcd](https://www.explainxkcd.com/wiki/index.php/1478:_P-Values)]]
 
 
 --
 
-<div style="height: 10px;"></div>
+<div style="height: 5px;"></div>
 
 
-.small-text[
+.small-text3[
 
 O número de asteriscos no sumário estatístico do modelo **não** mede a força nem o nível de significância do efeito
 
@@ -631,7 +627,7 @@ knitr::include_graphics("../Figuras/p-valium.png")
 ```
 
 
-.footnote[Figura: [Prof. Thiago Rangel](https://estat.bio.br/)]
+.footnote[Figura: [Thiago Rangel](https://estat.bio.br/)]
 
 
 ---
@@ -1194,11 +1190,14 @@ Uma saída de campo com 10 quadrantes
 
 .center[**Modelo**]
 
+.small-text2[
 **parte determinística:** detecção média $\theta$
 
 **parte estocástica:** $y ~ \sim Binomial(N, \theta)$
 
 A incerteza está no parâmetro $\theta$
+
+]
 
 ]
 
@@ -1339,7 +1338,7 @@ knitr::include_graphics("../Figuras/informative_prior_likelihood_posterior.png")
 ### A natureza sob o olhar bayesiano  
 
 
-As prioris exercem maior impacto em dados pequenos
+As prioris exercem maior impacto em dados com poucas amostras 
 - muito cuidado com a escolha da priori!
 
 <br>
@@ -2356,13 +2355,62 @@ knitr::include_graphics("../Figuras/MCMC_hamilton.png")
   - *random walk*
 
 ---
+# PPGECO | ECL0072 | out. 2026
+
+### Estudo dirigido
 
 
-https://www.youtube.com/watch?v=3qodjHRUxAo
+
+.small-text3[
+
+**Livros**
+
+- **Cap. 1** - McElreath (2020). Satistical rethinking.
+
+- **Cap. 2** - Hilborn & Mangel (1993). The ecological detective.
+
+- **Cap. 1** - Gelman et al. (2013). Bayesian Data Analysis, 3. ed.
+
+- **Cap. 1** - Kinas & Agrelli (2020). Introdução à análise bayesiana (com R), 2. ed.
+
+- **Caps. 2, 4 e 5** - Kruschke (2014). Doing Bayesian data analysis: A tutorial with R, JAGS, and Stan. Academic press.
+
+- **Cap. 2** - McCarthy (2007). Bayesian Methods for Ecology.
+
+- **Caps. 4 & 5** - Hobbs & Hooten (2007). Bayesian Models - A Statistical Primer for Ecologists.
+
+----
+
+**Artigos**
+
+- Clark (2005). [Why environmental scientists are becoming Bayesians](https://onlinelibrary.wiley.com/doi/10.1111/j.1461-0248.2004.00702.x)
+
+- Clark & Gelfand (2005). [A future for models and data in environmental science.](https://www.sciencedirect.com/science/article/abs/pii/S0169534706001030)
+
+- Dennis (1996). [Should ecologists become bayesians?](https://www.jstor.org/stable/2269594)
+
+- Efron (2013). [Bayes’ Theorem in the 21st Century.](https://www.science.org/doi/10.1126/science.1236536)
+
+- Ellison (1996). [An Introduction to Bayesian Inference for Ecological Research and Environmental Decision-Making.](https://esajournals.onlinelibrary.wiley.com/doi/10.2307/2269588)
+
+- Ellison (2004). [Bayesian inference in ecology](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1461-0248.2004.00603.x)
+
+- Leek and Peng (2015). [P values are just the tip of the iceberg.](https://www.nature.com/articles/520612a)
+
+- Nuzzo (2014). [Statistical errors.](https://www.nature.com/articles/506150a)
+
+- Schoot et al. (2021). [Bayesian statistics and modelling](https://www.nature.com/articles/s43586-020-00001-2)
+
+- Williams & Hooten (2016). [Combining statistical inference and decisions in ecology.](https://esajournals.onlinelibrary.wiley.com/doi/10.1890/15-1593.1)
 
 
+----
 
-O intervalo de confiança sempre quis ser o intervalo de confiança, mas nunca foi
-**MCMC**
+**Videos**
 
-- Bayesian workflow - https://arxiv.org/pdf/2011.01808 (Gelman - 2020)
+- https://www.youtube.com/watch?v=3qodjHRUxAo
+
+- https://www.youtube.com/watch?v=_NEMHM1wDfI&list=PLhfTXDln3k652uTf0jf4EyoBJBTUHiorf&index=23
+
+
+]
