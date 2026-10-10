@@ -529,7 +529,7 @@ p6  <- df %>%
       dplyr::summarize(N_mean = mean(Prionace_glauca),
                        N_sd = sd(Prionace_glauca),
                        Nsamples = n()) %>% 
-      mutate(N_se = N_sd / sqrt(Nsamples - 1), #erro padrão da média
+      mutate(N_se = N_sd / sqrt(Nsamples ), #erro padrão da média
              CI_lower = N_mean + qt((1-0.95)/2, Nsamples - 1) * N_se, #IC da média
              CI_upper = N_mean - qt((1-0.95)/2, Nsamples - 1) * N_se) %>% 
       ggplot( aes(x = MonthYear, y = N_mean, group = 1)) +
