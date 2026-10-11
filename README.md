@@ -2,7 +2,7 @@
 ## Tópicos Especiais em Ecologia - Modelos Espaço-Temporais para Dados Ecológicos
 
 <p align="center">
-<img src="Figuras/Logo_course_repo.png" alt="Figuras/Logo_course_rep.png" width="400"/>
+<img src="Figuras/Logo_course_repo.png" alt="Figuras/Logo_course_repo.png" width="400"/>
 </p>
 
 
