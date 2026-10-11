@@ -6,14 +6,14 @@
 -------
 
 
+<br>
 
 
 ### Acessando o material da disciplina
 
-Este repositório contém todo o material da disciplina e os arquivos necessários para gerar a página da disciplina.
+Este repositório contém todo o material da disciplina ministrada para o Programa de Pós-Graduação em Ecologia (PPGECO - UFRN) durante o segundo semestre de 2026.
 
-
-A página da disciplina foi toda construída usando apenas o [R Markdown][] e, por isso, o código fonte pode ser acessado nos arquivos `Rmd`. Para gerar o site você precisará instalar (ou atualizar) os pacotes `rmarkdown` e `knitr`.
+A página da disciplina foi toda construída usando apenas o [R Markdown][], com o código fonte acessível nos arquivos `Rmd`. Para gerar o site, você precisará instalar (ou atualizar) os pacotes `rmarkdown` e `knitr`.
 
 - Para acessar o material da disciplina, siga as intruções abaixo:
 
