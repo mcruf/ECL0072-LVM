@@ -4,7 +4,9 @@
     <title>MODELOS ESPAÇO-TEMPORAIS PARA DADOS ECOLÓGICOS (ECL0072)</title>
     <meta charset="utf-8" />
     <meta name="author" content="Marie-Christine Rufener" />
-    <script src="libs/header-attrs-2.29/header-attrs.js"></script>
+    <script src="libs/header-attrs-2.32/header-attrs.js"></script>
+    <script src="libs/kePrint-0.0.1/kePrint.js"></script>
+    <link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
   <body>
@@ -32,10 +34,9 @@ class: title-slide
 # PPGECO | ECL0072 | out. 2026
 
 
-### Estrutura do curso
+### Estrutura do curso | .small-text[&lt;span style="color: #e07a5f;"&gt;Ementa&lt;/span&gt;]
 
-#### Ementa
-
+&lt;br&gt;
 
 .small-text2[
 
@@ -64,7 +65,7 @@ class: title-slide
 - **26/10 -** Fundamentos em Estatística Espacial &amp; GIS
 - **27/10 -** Modelos Espaciais (via R-INLA)
 - **28/10 -** Modelos Espaço-Temporais (via R-INLA)
-- **29/10 -** Dúvidas dos projetos (opcional: tutorial de elaboração de mapas no R)
+- ~~**29/10 -** Dúvidas dos projetos (opcional: tutorial de elaboração de mapas no R)~~ [Feriado!]
 - **30/10 -** Apresentação dos projetos
 
 ]
@@ -74,12 +75,72 @@ class: title-slide
 # PPGECO | ECL0072 | out. 2026
 
 
-### Estrutura do curso
-
-#### Avaliação
-Entrega de projeto &amp; apresentação de trabalho (grupos de 3-4 pessoas)
+### Estrutura do curso | .small-text[&lt;span style="color: #e07a5f;"&gt;Avaliação&lt;/span&gt;]
 
 
+Desenvolvimento de um projeto prático no qual se deverá explorar um banco de dados ecológico e  propor um modelo estatístico alinhado às abordagens estatísticas apresentadas ao longo da disciplina
+
+- Grupo de **3 pessoas**, utilizando, preferencialmente dados próprios
+
+
+&lt;br&gt;
+
+
+
+.pull-left[
+
+.center[**Relatório escrito**]
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+.small-text2[
+Entrega de resumo do projeto (máx. 2 páginas), contemplando os seguintes tópicos:
+
+- Contexto 
+- Objetivo(s) do estudo
+- Hipótese(s) do estudo
+- Descrição do conjunto de dados
+- Abordagem estatística proposta
+
+&lt;br&gt;
+
+]
+
+
+&gt; .small-text2[&lt;span style="color: #e07a5f;"&gt;**Entrega: 26/10 (segunda-feira)**&lt;/span&gt;]
+
+
+
+
+
+]
+
+
+.pull-right[
+
+.center[**Apresentação oral do projeto**]
+
+&lt;div style="height: 15px;"&gt;&lt;/div&gt;
+
+.small-text2[
+- 10 min de apresentação
+- 5-10 min de discussão com a turma
+]
+
+
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+
+&gt; .small-text2[&lt;span style="color: #e07a5f;"&gt;**Apresentação: 30/10 (sexta-feira)**&lt;/span&gt;]
+
+
+]
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -88,13 +149,13 @@ Entrega de projeto &amp; apresentação de trabalho (grupos de 3-4 pessoas)
 
 &lt;br&gt;
 
-#### .center[Índice HBC]
+### .center[Índice HBC]
 
 &lt;br&gt;
 
 --
 
-&lt;img src="../Figuras/Indice_HBC.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="../Figuras/Indice_HBC.png" alt="" width="70%" style="display: block; margin: auto;" /&gt;
 
 
 ---
@@ -102,7 +163,7 @@ Entrega de projeto &amp; apresentação de trabalho (grupos de 3-4 pessoas)
 
 ### Uma jornada estatística
 
-&lt;img src="../Figuras/stat_and_rock.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="../Figuras/stat_and_rock.png" alt="" width="80%" style="display: block; margin: auto;" /&gt;
 
 
 ---
@@ -145,9 +206,169 @@ Entrega de projeto &amp; apresentação de trabalho (grupos de 3-4 pessoas)
 
 ---
 # PPGECO | ECL0072 | out. 2026
+
+### Material do curso
+
+Todo o curso foi construído usando apenas o R Markdown 
+- Material pode ser acessado via
+
+
+&lt;br&gt;
+&lt;br&gt;
+
+.center[.gray-box-big[
+
+**https://github.com/mcruf/ECL0072-LVM**
+
+]]
+
+---
+
+class: inverse, center, middle
+
+
+## &lt;span style="color: #6b705c;"&gt; - Modelos Lineares - &lt;/span&gt;
+
+---
+# PPGECO | ECL0072 | out. 2026
+### A economia da natureza
+
+A matemática é a linguagem da natureza
+
+
+---
+# PPGECO | ECL0072 | out. 2026
 ### O que é um modelo?
 
-#### A matemática é a linguagem da natureza
+
+Um modelo descreve as mais diversas relações da natureza
+
+&lt;br&gt;
+&lt;br&gt;
+
+
+
+$$ \huge y = f(x|\theta)$$
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+
+&lt;img src="../Figuras/modelo_matematico.png" alt="" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+# PPGECO | ECL0072 | out. 2026
+### O que é um modelo *estatístico*?
+
+&lt;br&gt;
+
+.gray-box-small[
+
+`$$\Large y ~~~~ = \underbrace{f(x|\theta)}_\text{Determinístico} + \underbrace{\varepsilon}_\text{Estocástico}$$`
+]
+
+
+&lt;br&gt;
+
+
+
+&lt;img src="../Figuras/palmer_penguin_regression.png" alt="" width="65%" style="display: block; margin: auto;" /&gt;
+
+.footnote[.small-text2[Ilustrações: [Allison Horst (adaptada)](https://allisonhorst.github.io/palmerpenguins/)]]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Tipos de relações
+
+
+&lt;br&gt;
+&lt;br&gt;
+
+&lt;img src="../Figuras/correlation_examples.png" alt="" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Para que serve um modelo?
+
+**| Descritivo **
+
+Avaliar a relação entre variáveis
+
+&lt;br&gt;
+
+.center[.small-text[**Indicadores de mudanças climáticas ao longo do tempo**]]
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+&lt;img src="../Figuras/Begon_1.png" alt="" width="100%" style="display: block; margin: auto;" /&gt;
+
+
+.footnote[.small-text2[Figura: Begon &amp; Townsend (2021)]]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Para que serve um modelo?
+
+**| Inferência **
+
+
+Avaliar a formar novas hipóteses
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+.center[.small-text[**Relação produtividade *vs.* riqueza de espécies em comunidades de lagos**]]
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+&lt;img src="../Figuras/Dodson_et_al.png" alt="" width="60%" style="display: block; margin: auto;" /&gt;
+
+
+.footnote[.small-text2[Figura adaptada: [Dodson et al. (2000)](https://www.jstor.org/stable/177332)]]
+
+---
+# PPGECO | ECL0072 | out. 2026
+### Para que serve um modelo?
+
+**| Predição **
+
+
+
+Realizar projeções (futuras ou passadas)
+
+&lt;br&gt;
+
+.center[.small-text[**Cenários climáticos e seus efeitos na pesca**]]
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+
+.pull-left[
+
+&lt;div style="height: 10px;"&gt;&lt;/div&gt;
+
+
+&lt;img src="../Figuras/Begon_2.png" alt="" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+
+.pull-right[
+
+
+
+&lt;img src="../Figuras/Serpetti_et_al.png" alt="" width="100%" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+
+.footnote[.small-text2[Figuras: Begon &amp; Townsend (2021); [Serpetti et al. (2017)](https://www.nature.com/articles/s41598-017-13220-7)]]
 
 
 ---
@@ -155,15 +376,1138 @@ Entrega de projeto &amp; apresentação de trabalho (grupos de 3-4 pessoas)
 ### Para que serve um modelo?
 
 
+Modelos são uma descrição simplificada da natureza
+
+&lt;br&gt;
+
+&lt;img src="../Figuras/meme_horse2.png" alt="" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+.footnote[.small-text2[Imagem: Reddit (adaptada)]]
 
 ---
 # PPGECO | ECL0072 | out. 2026
-### O que é modelagem estatística?
+### Para que serve um modelo?
+
+
+
+.pull-left[
+
+&lt;br&gt;
+&lt;br&gt;
+
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="../Figuras/GeorgeEPBox.jpg" alt="George P. Box (1919-2013)" width="60%" /&gt;
+&lt;p class="caption"&gt;George P. Box (1919-2013)&lt;/p&gt;
+&lt;/div&gt;
+]
+
+
+.pull-right[
+
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+
+&gt; &lt;font size="6"&gt;&lt;center&gt; &lt;span style="color: #e07a5f;"&gt; Essentially, &lt;b&gt;all models are wrong&lt;/b&gt;, but &lt;b&gt;some are useful&lt;/b&gt;&lt;/center&gt;&lt;/font&gt;&lt;/span&gt; 
+
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares
+
+Base para a maioria dos modelos mais complexos
+
+&lt;br&gt;
+
+
+&lt;img src="../Figuras/visao_geral_lm.png" alt="" width="55%" style="display: block; margin: auto;" /&gt;
+
 
 
 ---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares 
+
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+.pull-left[
+
+.gray-box-big[
+`$$\large y \sim Normal (\color{#e07a5f}\mu, \color{#457b9d}\sigma)$$`
 
 
+`$$\large \color{#e07a5f}{\mu(x)} = \beta_0 + \beta_1x$$`
+]
+
+-----
+
+
+`$$\large y_i = \color{#e07a5f}{\mu_i} + \color{#457b9d}{\varepsilon_i}$$`
+
+`$$\large \varepsilon_i \sim Normal(0, \sigma)$$`
+
+
+&lt;br&gt;
+
+
+
+.small-text3[
+- `\(\beta_0\)` - intercepto
+- `\(\beta_1\)` - parâmetro (coeficiente, peso, ...)
+- `\(x\)` - covariável (variável independente, preditora, input, ... )
+- `\(y\)` - variável resposta (variável dependente, output, ...)
+- `\(\varepsilon\)` - resíduo (erro)
+]
+
+]
+
+
+.pull-right[
+
+
+&lt;img src="../Figuras/pinguins_residuos.png" alt="" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares 
+
+
+.pull-left[
+
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+.gray-box-big[
+`$$\LARGE y_i = \beta_0 + \beta_1{\color{#e07a5f}{x_i}} + \varepsilon_i$$`
+]
+
+]
+
+
+.pull-right[
+
+&lt;br&gt;
+
+
+&lt;img src="../Figuras/tipos_de_variaveis.png" alt="" width="65%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares 
+
+
+.pull-left[
+
+&lt;br&gt;
+&lt;br&gt;
+
+&lt;img src="../Figuras/tipos_de_variaveis.png" alt="" width="65%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+.pull-right[
+
+&lt;br&gt;
+
+
+#### .center[&lt;span style="color: #e07a5f;"&gt;LM &lt;/span&gt;]
+
+- Quando `\(x\)` reúne apenas variáveis *quantitativas*
+
+-------
+
+
+#### .center[&lt;span style="color: #e07a5f;"&gt;ANOVA &lt;/span&gt;]
+
+- Quando `\(x\)` reúne apenas variáveis *qualitativas*
+
+-------
+
+
+#### .center[&lt;span style="color: #e07a5f;"&gt;ANCOVA &lt;/span&gt;]
+
+- Quando `\(x\)` reúne variáveis *quantitativas* e *qualitativas*
+
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares 
+
+&lt;br&gt;
+&lt;br&gt;
+
+
+.pull-left[
+
+
+.gray-box-big[
+
+`$$\Large y_i = \mu_i + \varepsilon_i$$`
+
+
+$$\Large \varepsilon_i = y_i - \mu_i $$
+
+]
+
+&lt;br&gt;
+
+
+O resíduo representa a variabilidade de `\(y\)` que não foi explicada pelo componente sistemático do modelo
+
+
+Essa variabilidade pode refletir
+
+- Diferenças biológicas entre indivíduos
+- Variáveis não incluídos no modelo
+- Erros de medição e amostragem
+- Estocasticidade ambiental
+- ...
+  
+
+
+]
+
+
+
+.pull-right[
+
+&lt;br&gt;
+&lt;br&gt;
+
+&lt;img src="../Figuras/pinguins_residuos.png" alt="" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares 
+
+O termo *linear* está relacionado na linearidade entre os parâmetros do modelo (`\(\theta = \{\beta_0, \beta_1 \}\)`) e não em relação às variáveis preditoras (jeitão do gráfico)
+
+
+&lt;br&gt;
+&lt;br&gt;
+
+.pull-left[
+
+`$$y_i = \beta_0 + \beta_1x_i + \varepsilon_i$$` 
+
+&lt;img src="../Figuras/regressao_linear.png" alt="" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+.pull-right[
+
+`$$y_i = \beta_0 + \beta_1 x_i + \beta_2 x_i^2 + \beta_3 x_i^3 + \varepsilon_i$$` 
+
+&lt;img src="../Figuras/regressao_polinomial.png" alt="" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares 
+
+#### Quais equações são lineares?
+
+&lt;br&gt;
+&lt;br&gt;
+
+
+.pull-left[
+- `\(\Large y = \beta_0 + \beta_1 x + \beta_2 x^2 + \varepsilon\)`
+
+&lt;br&gt;
+&lt;br&gt;
+
+- `\(\Large y = \beta_0 + \beta_1 \beta_2 x + \varepsilon\)`
+
+&lt;br&gt;
+&lt;br&gt;
+
+- `\(\Large y = \beta_0 + \beta_1log(x_1) + \varepsilon\)`
+]
+
+--
+
+.pull-right[
+
+- `\(\large y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_1 x_2 + \epsilon\)`
+
+&lt;br&gt;
+&lt;br&gt;
+
+- `\(\Large y = \beta_0 + e^{\beta_1x_1} + \varepsilon\)`
+
+&lt;br&gt;
+&lt;br&gt;
+
+- `\(\Large y = \frac{1}{1 + e^{-(\beta_0 + \beta_1 x)}} + \varepsilon\)`
+
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares | .small-text[&lt;span style="color: #e07a5f;"&gt;Um olhar matemático&lt;/span&gt;]
+
+
+
+Muitos modelos estatísticos podem ser expressos por meio de matrizes
+- Facilita a implementação computacional 
+- Permite utilizar ferramentas de álgebra linear na estimação dos parâmetros do modelo
+
+
+&lt;br&gt;
+
+
+`$$\Large \mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\varepsilon}$$`
+
+&lt;br&gt;
+
+.small-text2[
+- **y** - vetor da variável resposta (`\(n \times 1\)`)
+- **X** - matriz de design; inclui os preditores e intercepto (`\(n \times p\)`)
+- `\(\boldsymbol{\beta}\)` - vetor dos parâmetros (`\(p \times 1\)`)
+- `\(\boldsymbol{\varepsilon}\)` - vetor dos resíduos (`\(n \times 1\)`)
+]
+
+
+&lt;br&gt;
+
+--
+
+.gray-box-big[
+
+.small-text3[
+.center[**Convenção de notação**]
+
+
+**Escalar:** letra minúscula em itálico (ex.: `\(x_i, y_i, n\)`)
+
+**Vetor:** letra minúscula em negrito (ex: `\(\mathbf{y}, \boldsymbol{\beta}, \boldsymbol{\varepsilon}\)`)
+
+**Matriz:** letra maiúscula em negrito (ex: `\(\mathbf{X}, \mathbf{Z}, \mathbf{\Sigma}\)`)
+&lt;/div&gt;
+
+]
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares | .small-text[&lt;span style="color: #e07a5f;"&gt;Um olhar matemático&lt;/span&gt;]
+
+
+**| Exemplo prático**
+
+
+.center[.small-text2[**Pinguins de Palmer**]]
+
+
+.code-bg[
+
+``` r
+## Importando os dados
+dados &lt;- readRDS("Dados/palmerpenguins_extended.rds")
+```
+]
+
+&lt;br&gt;
+
+
+&lt;img src="../Figuras/palmerpenguins_alone.png" alt="" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+.footnote[.small-text2[Fonte: https://allisonhorst.github.io/palmerpenguins/]]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares | .small-text[&lt;span style="color: #e07a5f;"&gt;Um olhar matemático&lt;/span&gt;]
+
+
+&lt;br&gt;
+&lt;br&gt;
+
+
+
+
+.pull-left[
+
+
+.gray-box-small[
+`$$\large Peso_i = \beta_0 + \beta_1Bico_i + \varepsilon_i$$`
+]
+
+&lt;br&gt;
+
+&lt;table class="table" style="font-size: 18px; color: black; width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:center;"&gt; species &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; bill_length_mm &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; body_mass_g &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Adelie &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 30.5 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Adelie &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 58.3 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5126 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Chinstrap &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 33.6 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3392 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Chinstrap &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 27.6 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4194 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Gentoo &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 57.2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 7482 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Gentoo &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 75.0 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 7306 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+]
+
+.pull-right[
+
+&lt;br&gt;
+
+&lt;img src="../Figuras/pinguins_scatterplot.png" alt="" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+
+]
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares | .small-text[&lt;span style="color: #e07a5f;"&gt;Um olhar matemático&lt;/span&gt;]
+
+
+&lt;br&gt;
+&lt;br&gt;
+
+`$$\Large Peso_i = \beta_0 + \beta_1Bico_i + \varepsilon_i$$`
+
+&lt;br&gt;
+
+.pull-left[
+
+&lt;br&gt;
+&lt;br&gt;
+
+
+`$$\Large \color{#e07a5f}{5330} = \beta_0 + \beta_1 \color{#e07a5f}{30.5} + \varepsilon_1 \\ \Large \color{#e07a5f}{5126} = \beta_0 + \beta_1 \color{#e07a5f}{58.3} + \varepsilon_2 \\ \Large \color{#e07a5f}{3392} = \beta_0 + \beta_1 \color{#e07a5f}{33.6} + \varepsilon_3 \\ ~~~\vdots ~~~~~~~~~~~\vdots ~~~~~~~~~~~\vdots ~~~~~~~~~~\vdots$$`
+
+]
+
+--
+
+
+.pull-right[
+
+
+&lt;br&gt;
+
+$$
+`\begin{bmatrix}
+\large
+5330 \\
+\large 5126 \\
+\large 3392 \\
+\large 4194 \\
+\large 7482 \\
+\large 7306
+\end{bmatrix}`
+=
+`\begin{bmatrix}
+\large 1 &amp; \large 30.5 \\
+\large 1 &amp; \large 58.3 \\
+\large 1 &amp; \large 33.6 \\
+\large 1 &amp; \large 27.6 \\
+\large 1 &amp; \large 57.2 \\
+\large 1 &amp; \large 75.0
+\end{bmatrix}`
+`\begin{bmatrix}
+\large \beta_0 \\
+\large \beta_1
+\end{bmatrix}`
++
+`\begin{bmatrix}
+\large \varepsilon_1 \\
+\large \varepsilon_2 \\
+\large \varepsilon_3 \\
+\large \varepsilon_4 \\
+\large \varepsilon_5 \\
+\large \varepsilon_6
+\end{bmatrix}`
+$$
+
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares | .small-text[&lt;span style="color: #e07a5f;"&gt;Um olhar matemático&lt;/span&gt;]
+
+
+No `R`, podemos usar a função .small-text[`model.matrix()`] para construir a matriz de design `\(\mathbf{X}\)` 
+
+
+&lt;br&gt;
+
+
+.code-bg[
+
+
+``` r
+## Formula
+form &lt;- dados$body_mass_g~dados$bill_length_mm
+
+## Design matrix
+model.matrix(form)[1:10, ]
+```
+
+```
+   (Intercept) dados$bill_length_mm
+1            1                 53.4
+2            1                 49.3
+3            1                 55.7
+4            1                 38.0
+5            1                 60.7
+6            1                 35.7
+7            1                 61.0
+8            1                 66.1
+9            1                 61.4
+10           1                 54.9
+```
+
+]
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares | .small-text[&lt;span style="color: #e07a5f;"&gt;Um olhar matemático&lt;/span&gt;]
+
+**| ANOVA (um fator)**
+
+
+&lt;br&gt;
+&lt;br&gt;
+
+
+
+.pull-left[
+
+.gray-box-small[
+
+`\(Peso_i = \beta_0 + \sum_{j=1}^{J-1} \beta_jEspecie_{i,j} + \varepsilon_{i,j}\)`
+
+]
+
+&lt;br&gt;
+
+&lt;table class="table" style="font-size: 18px; color: black; width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:center;"&gt; species &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; bill_length_mm &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; body_mass_g &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Adelie &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 30.5 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Adelie &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 58.3 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5126 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Chinstrap &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 33.6 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3392 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Chinstrap &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 27.6 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4194 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Gentoo &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 57.2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 7482 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Gentoo &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 75.0 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 7306 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+
+.pull-right[
+
+&lt;br&gt;
+
+&lt;img src="../Figuras/pinguins_boxplot.png" alt="" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+
+]
+
+&lt;br&gt;
+
+--
+
+
+&lt;div style="height: 7px;"&gt;&lt;/div&gt;
+
+&gt; &lt;span style="color: #e07a5f;"&gt;**ATENÇÃO: O primeiro nível do fator é sempre absorvido pelo intercepto] `\(\beta_0\)` nível de referência)**&lt;/span&gt;
+
+
+
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares | .small-text[&lt;span style="color: #e07a5f;"&gt;Um olhar matemático&lt;/span&gt;]
+
+**| ANOVA (um fator)**
+
+&lt;br&gt;
+&lt;br&gt;
+
+`$$\large Peso_i = \beta_0 + \beta_1Chinstrap_i + \beta_2Gentoo_i + \varepsilon_{i,j}$$`
+
+&lt;br&gt;
+
+.pull-left[
+
+&lt;br&gt;
+&lt;br&gt;
+
+
+
+`$$\Large \color{#e07a5f}{5330} = \beta_0 + (\beta_1 \cdot \color{#e07a5f}0) + (\beta_2 \cdot \color{#e07a5f}0) + \varepsilon_1 \\ \Large \color{#e07a5f}{3392} = \beta_0 + (\beta_1 \cdot \color{#e07a5f}1) + (\beta_2 \cdot \color{#e07a5f}0) + \varepsilon_3 \\ \Large \color{#e07a5f}{7482} = \beta_0 + (\beta_1 \cdot \color{#e07a5f}0) + (\beta_2 \cdot \color{#e07a5f}1) + \varepsilon_5 \\ ~~~\vdots ~~~~~~~~~~~\vdots ~~~~~~~~~~~\vdots ~~~~~~~~~~\vdots$$`
+
+]
+
+--
+
+
+.pull-right[
+
+
+&lt;br&gt;
+
+$$
+`\begin{bmatrix}
+\large 5330 \\
+\large 5126 \\
+\large 3392 \\
+\large 4194 \\
+\large 7482 \\
+\large 7306
+\end{bmatrix}`
+=
+`\begin{bmatrix}
+\large 1 &amp; \large 0 &amp; \large 0\\
+\large 1 &amp; \large 0 &amp; \large 0\\
+\large 1 &amp; \large 1 &amp; \large 0\\
+\large 1 &amp; \large 1 &amp; \large 0\\
+\large 1 &amp; \large 0 &amp; \large 1\\
+\large 1 &amp; \large 0 &amp; \large 1
+\end{bmatrix}`
+\cdot
+`\begin{bmatrix}
+\large \beta_0 \\
+\large \beta_1 \\
+\large \beta_2
+\end{bmatrix}`
++
+`\begin{bmatrix}
+\large \varepsilon_1 \\
+\large \varepsilon_2 \\
+\large \varepsilon_3 \\
+\large \varepsilon_4 \\
+\large \varepsilon_5 \\
+\large \varepsilon_6
+\end{bmatrix}`
+$$
+
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares | .small-text[&lt;span style="color: #e07a5f;"&gt;Um olhar matemático&lt;/span&gt;]
+
+**| ANOVA**
+
+&lt;br&gt;
+
+.code-bg[
+
+
+``` r
+## Formula
+form2 &lt;- dados$body_mass_g~dados$species
+
+## Design matrix
+head(model.matrix(form2))
+```
+
+```
+  (Intercept) dados$speciesChinstrap dados$speciesGentoo
+1           1                      0                   0
+2           1                      0                   0
+3           1                      0                   0
+4           1                      0                   0
+5           1                      0                   0
+6           1                      0                   0
+```
+
+``` r
+tail(model.matrix(form2))
+```
+
+```
+     (Intercept) dados$speciesChinstrap dados$speciesGentoo
+3425           1                      0                   1
+3426           1                      0                   1
+3427           1                      0                   1
+3428           1                      0                   1
+3429           1                      0                   1
+3430           1                      0                   1
+```
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares | .small-text[&lt;span style="color: #e07a5f;"&gt;Um olhar matemático&lt;/span&gt;]
+
+**| ANCOVA**
+
+&lt;br&gt;
+&lt;br&gt;
+
+.pull-left[
+
+
+.gray-box-small[
+
+`\(Peso_i = \beta_0 + \beta_1Bico_i + \sum_{j=1}^{J-1} \beta_jEspecie_{i,j} + \varepsilon_{i}\)`
+
+]
+
+&lt;br&gt;
+
+&lt;table class="table" style="font-size: 18px; color: black; width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:center;"&gt; species &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; bill_length_mm &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; body_mass_g &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Adelie &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 30.5 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Adelie &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 58.3 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5126 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Chinstrap &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 33.6 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3392 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Chinstrap &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 27.6 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4194 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Gentoo &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 57.2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 7482 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Gentoo &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 75.0 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 7306 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+
+.pull-right[
+
+&lt;br&gt;
+&lt;br&gt;
+
+&lt;img src="../Figuras/pinguins_ancova.png" alt="" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares | .small-text[&lt;span style="color: #e07a5f;"&gt;Um olhar matemático&lt;/span&gt;]
+
+**| ANCOVA**
+
+&lt;br&gt;
+&lt;br&gt;
+
+`$$\large Peso_i = \beta_0 + \beta_1Bico_i + \sum_{j=1}^{J-1} \beta_jEspecie_{i,j} + \varepsilon_{i}$$`
+
+&lt;br&gt;
+
+.pull-left[
+
+`$$\color{#e07a5f}{5330} = \beta_0 + \beta_1\color{#e07a5f}{30.5} + (\beta_2 \cdot\color{#e07a5f}{0}) + (\beta_3 \cdot \color{#e07a5f}{0}) + \varepsilon_1 \\  \color{#e07a5f}{3392} = \beta_0 + \beta_1\color{#e07a5f}{33.6} + (\beta_2 \cdot\color{#e07a5f}{1}) + (\beta_3 \cdot \color{#e07a5f}{0}) + \varepsilon_3 \\  \color{#e07a5f}{7482} = \beta_0 + \beta_1\color{#e07a5f}{57.2} + (\beta_2 \cdot\color{#e07a5f}{0}) + (\beta_3 \cdot \color{#e07a5f}{1}) + \varepsilon_5 \\ ~~~\vdots ~~~~~~~~~~~\vdots ~~~~~~~~~~~\vdots ~~~~~~~~~~\vdots$$`
+
+
+]
+
+--
+
+.pull-right[
+
+`$$\begin{bmatrix}
+5330 \\
+5126 \\
+3392 \\
+4194 \\
+7482 \\
+7306
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 &amp; 30.5 &amp; 0 &amp; 0 \\
+1 &amp; 58.3 &amp; 0 &amp; 0 \\
+1 &amp; 33.6 &amp; 1 &amp; 0 \\
+1 &amp; 27.6 &amp; 1 &amp; 0 \\
+1 &amp; 57.2 &amp; 0 &amp; 1 \\
+1 &amp; 75.0 &amp; 0 &amp; 1
+\end{bmatrix}
+\begin{bmatrix}
+\beta_0 \\
+\beta_1 \\
+\beta_2 \\
+\beta_3
+\end{bmatrix}
++
+\begin{bmatrix}
+\varepsilon_1 \\
+\varepsilon_2 \\
+\varepsilon_3 \\
+\varepsilon_4 \\
+\varepsilon_5 \\
+\varepsilon_6
+\end{bmatrix}$$`
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares | .small-text[&lt;span style="color: #e07a5f;"&gt;Um olhar matemático&lt;/span&gt;]
+
+**| ANCOVA**
+
+&lt;br&gt;
+
+.code-bg[
+
+
+``` r
+## Formula
+form3 &lt;- dados$body_mass_g ~ dados$bill_length_mm + dados$species
+
+## Design matrix
+head(model.matrix(form3))
+```
+
+```
+  (Intercept) dados$bill_length_mm dados$speciesChinstrap dados$speciesGentoo
+1           1                 53.4                      0                   0
+2           1                 49.3                      0                   0
+3           1                 55.7                      0                   0
+4           1                 38.0                      0                   0
+5           1                 60.7                      0                   0
+6           1                 35.7                      0                   0
+```
+
+]
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares | .small-text[&lt;span style="color: #e07a5f;"&gt;Um olhar matemático&lt;/span&gt;]
+
+**| ANCOVA com interação**
+
+
+&lt;br&gt;
+
+.pull-left[
+
+
+.gray-box-small[
+
+
+`\(\small Peso_i =\beta_0 + \beta_1 Bico_i + \beta_2 Especie_{i,1} + \beta_3 Especie_{i,2}  + \beta_4 Bico_i\,Especie_{i,1} + \beta_5 Bico_i\,Especie_{i,2} + \varepsilon_i\)`
+
+]
+
+&lt;br&gt;
+&lt;br&gt;
+
+
+&lt;table class="table" style="font-size: 18px; color: black; width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:center;"&gt; species &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; bill_length_mm &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; body_mass_g &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Adelie &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 30.5 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5330 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Adelie &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 58.3 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5126 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Chinstrap &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 33.6 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3392 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Chinstrap &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 27.6 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 4194 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Gentoo &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 57.2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 7482 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; Gentoo &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 75.0 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 7306 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+
+.pull-right[
+
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+&lt;img src="../Figuras/pinguins_ancova.png" alt="" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+
+
+]
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares | .small-text[&lt;span style="color: #e07a5f;"&gt;Um olhar matemático&lt;/span&gt;]
+
+**| ANCOVA com interação**
+
+&lt;br&gt;
+&lt;br&gt;
+
+`$$Peso_i =\beta_0 + \beta_1 Bico_i + \beta_2 Chinastrap_{i} + \beta_3 Gentoo_{i} + \beta_4 Bico_i\,Chinastrap_{i} + \beta_5 Bico_i\,Gentoo_{i} + \varepsilon_i$$`
+
+&lt;br&gt;
+
+
+
+
+`$$\begin{bmatrix}
+\large 5330\\
+\large 5126\\
+\large 3392\\
+\large 4194\\
+\large 7482\\
+\large 7306
+\end{bmatrix}
+=
+\begin{bmatrix}
+\large 1 &amp; \large 30.5 &amp; \large 0 &amp; \large 0 &amp; \large 0 &amp; \large 0\\
+\large 1 &amp; \large 58.3 &amp; \large 0 &amp; \large 0 &amp; \large 0 &amp; \large 0\\
+\large 1 &amp; \large 33.6 &amp; \large 1 &amp; \large 0 &amp; \large 33.6 &amp; \large 0\\
+\large 1 &amp; \large 27.6 &amp; \large 1 &amp; \large 0 &amp; \large 27.6 &amp; \large 0\\
+\large 1 &amp; \large 57.2 &amp; \large 0 &amp; \large 1 &amp; \large 0 &amp; \large 57.2\\
+\large 1 &amp; \large 75.0 &amp; \large 0 &amp; \large 1 &amp; \large 0 &amp; \large 75.0
+\end{bmatrix}
+\begin{bmatrix}
+\large \beta_0\\
+\large \beta_1\\
+\large \beta_2\\
+\large \beta_3\\
+\large \beta_4\\
+\large \beta_5
+\end{bmatrix}
++
+\begin{bmatrix}
+\large \varepsilon_1\\
+\large \varepsilon_2\\
+\large \varepsilon_3\\
+\large \varepsilon_4\\
+\large \varepsilon_5\\
+\large \varepsilon_6
+\end{bmatrix}$$`
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+### Modelos lineares | .small-text[&lt;span style="color: #e07a5f;"&gt;Pressupostos&lt;/span&gt;]
+
+
+Todo modelo estatístico é baseado em um conjunto de pressupostos
+
+--
+
+&lt;br&gt;
+- **Representatividade**
+  - As amostras são representativas da população
+  - *Garbage in, garbage out*
+
+--
+
+&lt;br&gt;
+
+- **Aditividade &amp; Linearidade**
+  - O modelo é aditivo e linear na relação de seus parâmetros
+
+--
+
+&lt;br&gt;
+
+- **Resíduos**
+  - Independentes 
+  - Homocedásticos (variância constante)*
+  - Normalidade*
+
+
+.footnote[*Apenas aplicável para modelos lineares!]
+---
+# PPGECO | ECL0072 | out. 2026
+
+### Estudo dirigido
+
+- **Cap. 01** - Hobbs &amp; Hooten (2007). Bayesian Models - A Statistical Primer for Ecologists.
+
+
+- **Cap. 06** - Kery, M. (2007). Introduction to WinBUGS for Ecologists. A Bayesian approach to regression, ANOVA, mixed models and related analysis.
+---
+
+class:center, middle
+# PPGECO | ECL0072 | out. 2026
+
+
+## A matemática foi inventada ou descoberta?
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
