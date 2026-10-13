@@ -2103,20 +2103,15 @@ knitr::include_graphics("../Figuras/nested_and_crossed_table.png")
 
 - **Cap. 13** - Bolker (2015). Linear and generalized linear mixed models. In Fox et al (Eds.), Ecological Statistics: Contemporary theory and application.
 
-
 - **Caps. 10-12** - Faraway (2016). Extending the Linear Model with R, 2. ed.
-
-
-- **Caps. 12** - Kéry (2010). Introduction to WinBUGS for ecologists.
-
 
 - **Cap. 15** - Gelman et al. (2013). Bayesian Data Analysis, 3. ed.
 
+- **Cap. 6** - Hobbs & Hooten (2007). Bayesian Models - A Statistical Primer for Ecologists.
+
+- **Caps. 12** - Kéry (2010). Introduction to WinBUGS for ecologists.
 
 - **Caps. 4-5** - Zuur et al. (2009). Mixed effects models and extensions in ecology with R.
-
-
-- **Cap. 6** - Hobbs & Hooten (2007). Bayesian Models - A Statistical Primer for Ecologists.
 
 
 ----
