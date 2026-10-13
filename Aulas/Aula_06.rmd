@@ -52,17 +52,7 @@ class: title-slide
 # PPGECO | ECL0072 | out. 2026
 
 <br>
-
-### Agenda
-
-
-
----
-# PPGECO | ECL0072 | out. 2026
-
-Leitura:
-- Cap. 13 - Legendre & Legendre. Numerical ecology
-
+<br>
 <br>
 
 ```{r, out.width ="85%"}
@@ -1430,8 +1420,36 @@ Na prática, a maioria dos CRS podem ser especificados de acordo com o código *
 .footnote[<sup>1</sup>*European Petroleum Survey Group*]
 
 ---
+# PPGECO | ECL0072 | out. 2026
 
-**Ebooks recomendados**
-- https://rspatial.org/index.html (cap. 2)
-- https://bookdown.org/tep/gis/index.html (cap. 4)
-- https://tmap.geocompx.org/
+### Estudo dirigido
+
+.small-text3[
+
+**Livros**
+
+- **Cap. 13** - Legendre & Legendre (1998). Numerical Ecology.
+
+-----
+
+**Artigos**
+
+- Gaspard et al. (2019). [Residual spatial autocorrelation in macroecological and biogeographical modeling: a review](https://link.springer.com/article/10.1186/s41610-019-0118-3)
+
+- Legendre & Fortin (1989). [Spatial pattern and ecological analysis](https://link.springer.com/article/10.1007/BF00048036)
+
+
+-----
+
+**Ebooks com práticas no R**
+
+- [Spatial Data Science with R and “terra”](https://rspatial.org/index.html#)
+
+- [Introduction to Geographic Information System](https://bookdown.org/tep/gis/index.html)
+
+- [Spatial Data Visualization with tmap](https://tmap.geocompx.org/)
+
+- [Spatial Data Science](https://r-spatial.org/book/)
+
+]
+
