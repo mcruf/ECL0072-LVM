@@ -1428,7 +1428,18 @@ Na prática, a maioria dos CRS podem ser especificados de acordo com o código *
 
 **Livros**
 
+- **Caps. 1-2** - Banerjee et al. (2015). Hierarchical Modeling and Analysis for Spatial Data.
+
+- **Cap. 1** - Cressie (1993). Statistics for Spatial Data.
+
+- **Caps. 2-3** - Gelfand et al. (2010). Handbook of Spatial Statistics.
+
 - **Cap. 13** - Legendre & Legendre (1998). Numerical Ecology.
+
+
+**Livros complementares**
+
+- Diggle & Ribeiro Jr. (2007). Model-based Geostatistics. 
 
 -----
 
@@ -1443,13 +1454,20 @@ Na prática, a maioria dos CRS podem ser especificados de acordo com o código *
 
 **Ebooks com práticas no R**
 
+- Bodnar (2023). [Introduction to Geographic Information System](https://bookdown.org/tep/gis/index.html)
+
+- Gómez-Rubio (2020). [Bayesian Inference with INLA](https://becarioprecario.bitbucket.io/inla-gitbook/index.html)
+
+- Krainski et al. (2021). [Advanced Spatial Modeling with Stochastic Partial Differential Equations Using R and INLA](https://becarioprecario.bitbucket.io/spde-gitbook/index.html)
+
+- Moraga (2023). [Spatial Statistics for Data Science: Theory and Practice with R](https://www.paulamoraga.com/book-spatial/)
+
+- Pebesma & Bivand (2025). [Spatial Data Science](https://r-spatial.org/book/)
+
+- Tennekes & Nowosad (2026). [Spatial Data Visualization with tmap](https://tmap.geocompx.org/)
+
 - [Spatial Data Science with R and “terra”](https://rspatial.org/index.html#)
 
-- [Introduction to Geographic Information System](https://bookdown.org/tep/gis/index.html)
-
-- [Spatial Data Visualization with tmap](https://tmap.geocompx.org/)
-
-- [Spatial Data Science](https://r-spatial.org/book/)
 
 ]
 

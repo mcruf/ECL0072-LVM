@@ -1,0 +1,15 @@
+xaringan
+xaringanthemer
+kableExtra
+dplyr
+ggplot2
+ggExtra
+broom.mixed
+Matrix
+lme4
+knitr
+emmeans
+INLA
+viridisLite
+viridis
+plotly

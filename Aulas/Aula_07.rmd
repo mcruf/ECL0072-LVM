@@ -48,13 +48,6 @@ class: title-slide
 
 <img src="../Figuras/logo_ppgeco2.svg" class="cover-logo">
 
----
-# PPGECO | ECL0072 | out. 2026
-
-<br>
-
-### Agenda
-
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -1259,15 +1252,55 @@ knitr::include_graphics("../Figuras/INLA_mesh.png")
 
 ---
 
+# PPGECO | ECL0072 | out. 2026
 
-ebooks
-
-https://becarioprecario.bitbucket.io/inla-gitbook/index.html
-
-
-- https://www.annualreviews.org/content/journals/10.1146/annurev-statistics-060116-054045
+### Estudo dirigido
 
 
-- caps. 3-5 (Guisan - Habitat suitability modeling)
-- cap. 3 (Franklin, 2010)
 
+.small-text3[
+
+**Livros**
+
+- **Caps. 3, 4, 6 e 8** - Guisan & Zimmermann (2017). Habitat Suitability and Distribution Models with Applications in R.
+
+- **Cap. 3** - Franklin (2010). Mapping Species Distribution: Spatial Inference and Predictions.
+
+----
+
+**Artigos**
+
+- Dormann (2007). [Effects of incorporating spatial autocorrelation into the analysis of species distribution data](https://onlinelibrary.wiley.com/doi/10.1111/j.1466-8238.2006.00279.x)
+
+- Dungan et al. (2002). [A balanced view of scale in spatial statistical analysis](https://nsojournals.onlinelibrary.wiley.com/doi/ftr/10.1034/j.1600-0587.2002.250510.x)
+
+- Knegt et al. (2010). [Spatial autocorrelation and the scaling of species–environment relationships](https://esajournals.onlinelibrary.wiley.com/doi/10.1890/09-1359.1)
+
+- Legendre et al. (2002). [The consequences of spatial structure for the design and analysis of ecological field surveys](https://nsojournals.onlinelibrary.wiley.com/doi/10.1034/j.1600-0587.2002.250508.x)
+
+- Paradinas et al. (2023). [Understanding spatial effects in species distribution models](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0285463)
+
+- Rue et al. (2009). [Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximations](https://rss.onlinelibrary.wiley.com/doi/full/10.1111/j.1467-9868.2008.00700.x)
+
+- Simpson et al. (2012). [Think continuous: Markovian Gaussian models in spatial statistics](https://www.sciencedirect.com/science/article/abs/pii/S2211675312000048)
+
+- Zurell et al.(2020).[A standard protocol for reporting species distribution models](https://nsojournals.onlinelibrary.wiley.com/doi/10.1111/ecog.04960)
+
+------
+
+**Ebooks com práticas no R**
+
+
+- [Geospatial Health Data: Modeling and Visualization with R-INLA and Shiny](https://www.paulamoraga.com/book-geospatial/)
+
+- [Spatial Statistics for Data Science: Theory and Practice with R](https://www.paulamoraga.com/book-spatial/)
+
+- Gómez-Rubio (2020). [Bayesian Inference with INLA](https://becarioprecario.bitbucket.io/inla-gitbook/index.html)
+
+- Krainski et al. (2021). [Advanced Spatial Modeling with Stochastic Partial Differential Equations Using R and INLA](https://becarioprecario.bitbucket.io/spde-gitbook/index.html)
+
+
+
+
+
+]

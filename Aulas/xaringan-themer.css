@@ -284,9 +284,6 @@ table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
 .small-code .remark-code {
   font-size: 70% !important;
 }
-.small-code .remark-code-line {
-  font-size: 70% !important;
-}
 .small-text {
   font-size: 80%;
 }
@@ -380,10 +377,11 @@ p {
   color: #FFFFFF;
 }
 .title-slide {
+  bottom: 0px !important;
   background-color: #FFFFFF !important;
   background-image: url('../Figuras/Logo_course.png') !important;
   background-position: left bottom !important;
-  background-size: 70% auto !important;
+  background-size: 65% auto !important;
   padding: 40px 60px 40px 60px !important;
 }
 .title-block {
