@@ -16,7 +16,7 @@
 <script src="site_libs/header-attrs-2.32/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/journal.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -31,6 +31,8 @@
        pre:not([class]) { background-color: white }</style>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet" />
 
@@ -43,6 +45,16 @@
   ul.task-list{list-style: none;}
     </style>
 
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
 
 
 
@@ -252,42 +264,42 @@ $(document).ready(function () {
   <ul class="dropdown-menu" role="menu">
     <li class="dropdown-header">Dia 1</li>
     <li>
-      <a href="Aulas/Aula_01.html">LM</a>
+      <a href="Aulas/Aula_01.html">Revisitando Modelos Lineares (LM)</a>
     </li>
     <li class="divider"></li>
     <li class="dropdown-header">Dia 2</li>
     <li>
-      <a href="Aulas/Aula_02.html">Métodos de inferência &amp; Validação</a>
+      <a href="Aulas/Aula_02.html">Métodos de inferência estatística</a>
     </li>
     <li class="divider"></li>
     <li class="dropdown-header">Dia 3</li>
     <li>
-      <a href="Aulas/Aula_03.html">GLM para dados binários</a>
+      <a href="Aulas/Aula_03.html">Modelagem bayesiana</a>
     </li>
     <li class="divider"></li>
     <li class="dropdown-header">Dia 4</li>
     <li>
-      <a href="Aulas/Aula_04.html">GLM para dados discretos</a>
+      <a href="Aulas/Aula_04.html">Modelos Lineares Mistos (LMM)</a>
     </li>
     <li class="divider"></li>
     <li class="dropdown-header">Dia 5</li>
     <li>
-      <a href="Aulas/Aula_05.html">GLM para dados contínuos</a>
+      <a href="Aulas/Aula_05.html">Modelos Lineares/Aditivos Generalizados Mistos (GLMM/GAMM)</a>
     </li>
     <li class="divider"></li>
     <li class="dropdown-header">Dia 6</li>
     <li>
-      <a href="Aulas/Aula_06.html">GLM para dados categóricos</a>
+      <a href="Aulas/Aula_06.html">Fundamentos em Estatística Espacial &amp; GIS</a>
     </li>
     <li class="divider"></li>
     <li class="dropdown-header">Dia 7</li>
     <li>
-      <a href="Aulas/Aula_07.html">Dist. prob complementares</a>
+      <a href="Aulas/Aula_07.html">Modelos Espaciais</a>
     </li>
     <li class="divider"></li>
     <li class="dropdown-header">Dia 8</li>
     <li>
-      <a href="Aulas/Aula_08.html">GAM</a>
+      <a href="Aulas/Aula_08.html">Modelos Espaço-Temporias</a>
     </li>
   </ul>
 </li>
@@ -347,30 +359,39 @@ effects models and extensions in ecology with R</a>. Springer.</p></li>
 <div id="referências-complementares" class="section level2">
 <h2>Referências complementares</h2>
 <ul>
-<li><p>Agresti, A. (2015). <a
-href="https://www.amazon.com.br/Foundations-Linear-Generalized-Models/dp/1118730038/ref=sr_1_1?__mk_pt_BR=%C3%85M%C3%85%C5%BD%C3%95%C3%91&amp;crid=3VGZL6HG9QL16&amp;dib=eyJ2IjoiMSJ9.Hhvti9pShXJLAMbNDTnLioUMcEKe0qGTIHcZkkXP-CJsiZY5VgorzOIUqCGn_zCnqV-HvKI7-1Qq2ewNGnHmTiFpxQiW94tUEfHr2hRuCG7aRkflgZESZfqEmFPlb0EBGKc9cpidnStIyjvJ4dmbDhwZYusTASRdef3MJ7M9NxdDGPwlXWkEAVrXcpTYJ_joEOgf-ok8QH-GP2-CBPM_Rd9gJh1HlIXGzdq7RU0jifg.QFStUnt4HBstE1QLw0dMmldLOMlLOvXMURAnK5E1-uo&amp;dib_tag=se&amp;keywords=Foundations+of+Linear+and+Generalized+Linear+Models&amp;qid=1757417879&amp;s=books&amp;sprefix=%2Cstripbooks%2C217&amp;sr=1-1&amp;ufe=app_do%3Aamzn1.fos.e05b01e0-91a7-477e-a514-15a32325a6d6">Foundations
-of Linear and Generalized Linear Models</a>. Wiley.</p></li>
-<li><p>Bolker, B.M. (2008). <a
+<li>Bolker, B.M. (2008). <a
 href="http://www.leg.ufpr.br/lib/exe/fetch.php/wiki:internas:biblioteca:bolker.pdf">Ecological
 models and data in R</a>. Princeton University
-Press.[<strong>Ebook</strong>]</p></li>
-<li><p>Clark, M. &amp; Berry, S. (2025). <a
-href="https://m-clark.github.io/book-of-models/">Models Demystified: A
-practical guide from linear regression to deep learning</a>
-[<strong>Ebook</strong>]</p></li>
-<li><p>Clark, M. (???). <a
-href="https://m-clark.github.io/generalized-additive-models/">Generalized
-Additive Models</a> [<strong>Ebook</strong>]</p></li>
-<li><p>Da Silva F. R et al. (2022). <a
-href="https://analises-ecologicas.com/">Análises Ecológicas no
-R</a>.[<strong>Ebook</strong>]</p></li>
-<li><p>Gelman, A. et al. (2020). <a
-href="https://avehtari.github.io/ROS-Examples/">Regression and Other
-Stories</a>. Cambridge University Press.</p></li>
+Press.[<strong>Ebook</strong>]</li>
 </ul>
-<!-- - Stasinopoulos et al. (2017). [Flexible Regression and Smoothing -->
-<!-- : Using GAMLSS in R.](https://www.taylorfrancis.com/books/mono/10.1201/b21973/flexible-regression-smoothing-mikis-stasinopoulos-robert-rigby-gillian-heller-vlasios-voudouris-fernanda-de-bastiani). Chapman and Hall/CRC. -->
 <p><br></p>
+</div>
+<div id="artigos-científicos-adicionais" class="section level2">
+<h2>Artigos científicos adicionais</h2>
+<ul>
+<li><p>David &amp; Kay (2023). <a
+href="https://esajournals.onlinelibrary.wiley.com/doi/10.1002/ecs2.4539">Writing
+statistical methods for ecologists</a></p></li>
+<li><p>Powers &amp; Hampton (2019). <a
+href="https://esajournals.onlinelibrary.wiley.com/doi/10.1002/eap.1822">Open
+science, reproducibility, and transparency in ecology</a></p></li>
+<li><p>Touchon /&amp; McCoy (2016). <a
+href="https://esajournals.onlinelibrary.wiley.com/doi/10.1002/ecs2.1394">The
+mismatch between current statistical practice and doctoral training in
+ecology.</a></p></li>
+<li><p>Tredennick et al. (2021). <a
+href="https://esajournals.onlinelibrary.wiley.com/doi/10.1002/ecy.3336">A
+practical guide to selecting models for exploration, inference, and
+prediction in ecology</a></p></li>
+<li><p>Zuur et al. (2010). <a
+href="https://besjournals.onlinelibrary.wiley.com/doi/10.1111/j.2041-210X.2009.00001.x">A
+protocol for data exploration to avoid common statistical
+problems.</a></p></li>
+<li><p>Zuur et al. (2016). <a
+href="https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.12577">A
+protocol for conducting and presenting results of regression-type
+analyses.</a></p></li>
+</ul>
 </div>
 <div id="quando-bater-aquela-curiosidade-extra" class="section level2">
 <h2>Quando bater aquela curiosidade extra</h2>
@@ -381,45 +402,36 @@ de vídeos no YouTube</a></li>
 </ul>
 <p><br></p>
 </div>
-<div id="tutoriais" class="section level2">
-<h2>Tutoriais</h2>
-<p><strong>RMarkdown</strong></p>
-<ul>
-<li><a href="https://livro.curso-r.com/9-1-markdown.html#markdown"
-class="uri">https://livro.curso-r.com/9-1-markdown.html#markdown</a></li>
-<li><a href="https://bookdown.org/yihui/rmarkdown-cookbook/"
-class="uri">https://bookdown.org/yihui/rmarkdown-cookbook/</a></li>
-</ul>
-<p><strong>Bookdown</strong></p>
-<ul>
-<li><a href="https://bookdown.org/yihui/bookdown/"
-class="uri">https://bookdown.org/yihui/bookdown/</a></li>
-</ul>
-<p><strong>Visualização de dados</strong></p>
-<ul>
-<li><a href="https://clauswilke.com/dataviz/"
-class="uri">https://clauswilke.com/dataviz/</a></li>
-</ul>
-<p><br></p>
-</div>
 <div id="para-apreciar-com-um-cafezinho" class="section level2">
 <h2>Para apreciar com um cafezinho</h2>
 <ul>
-<li><p>Hilborn, R. &amp; Mangel, M., (2013). <a
+<li><p>Dennet, D. C. (2018). <a
+href="https://www.amazon.com.br/Bacteria-Bach-Back-Evolution-Minds/dp/0393355500">From
+Bacteria to Bach and Back: The Evolution of Minds</a>. W. W. Norton
+&amp; Company</p></li>
+<li><p>Hilborn, R. &amp; Mangel, M. (2013). <a
 href="http://press.princeton.edu/titles/5987.html">The ecological
 detective: confronting models with data</a>. Princeton University
 Press.</p></li>
+<li><p>McGrayne, S. B. (2012). <a
+href="https://www.amazon.com.br/Theory-That-Would-Not-Die/dp/0300188226">The
+Theory that Would not Die: how Baye’s rule cracked the enigma code,
+hunted down Russian submarines, and emerged triumphant from two
+centuries of controversy</a>. Yale University Press.</p></li>
 <li><p>Mlodinow, L. (2009).<a
 href="http://zahar.com.br/livro/o-andar-do-b%C3%AAbado">O andar do
 bêbado. Como o acaso determina nossas vidas</a>. Zahar.</p></li>
+<li><p>Salsburg, D. (2009). <a
+href="http://www.zahar.com.br/livro/uma-senhora-toma-cha">Uma senhora
+toma chá. Como a estatística revolucionou a ciência no século XX</a>.
+Zahar.</p></li>
+<li><p>Seth, A. (2021). <a
+href="https://www.amazon.com.br/Being-You-Science-Consciousness-English-ebook/dp/B07ZG1BXL5/ref=sr_1_1?adgrpid=154058837162&amp;dib=eyJ2IjoiMSJ9.xZp5oSqTXajpluJOhhIeNU140Z9S45fD21Ns7MkvK-rGjHj071QN20LucGBJIEps.o248Fl8t8Se7F0CQKC-fcNms5EBlLtpLJhVktVDYIlk&amp;dib_tag=se&amp;hvadid=670004030299&amp;hvdev=c&amp;hvexpln=0&amp;hvlocphy=9221315&amp;hvnetw=g&amp;hvocijid=9581969671947862195--&amp;hvqmt=e&amp;hvrand=9581969671947862195&amp;hvtargid=kwd-1212155114090&amp;hydadcr=29997_14594555&amp;keywords=being+you+anil+seth&amp;mcid=ad06e9943ee13bc89b5e5e5fc18c550b&amp;qid=1791322833&amp;sr=8-1">Being
+You: A New Science of Consciousness</a> Faber &amp; Faber.</p></li>
 </ul>
 <!-- - Huff, D. -->
 <!--   [Como mentir com estatística](http://www.intrinseca.com.br/livro/624/). -->
 <!--   Rio de Janeiro: Intrínseca, 2016. -->
-<!-- - Salsburg, D. -->
-<!--   [Uma senhora toma chá. Como a estatística revolucionou a ciência no século XX](http://www.zahar.com.br/livro/uma-senhora-toma-cha). -->
-<!--   Rio de Janeiro: Zahar, 2009. -->
-<!-- - Wheelan, C. -->
 <!--   [Estatística: o que é, para que serve, como funciona](http://www.zahar.com.br/livro/estatistica). -->
 <!--   Rio de Janeiro: Zahar, 2016. -->
 </div>

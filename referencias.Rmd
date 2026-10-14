@@ -24,22 +24,36 @@ output:
 
 ## Referências complementares
 
-- Agresti, A. (2015). [Foundations of Linear and Generalized Linear Models](https://www.amazon.com.br/Foundations-Linear-Generalized-Models/dp/1118730038/ref=sr_1_1?__mk_pt_BR=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=3VGZL6HG9QL16&dib=eyJ2IjoiMSJ9.Hhvti9pShXJLAMbNDTnLioUMcEKe0qGTIHcZkkXP-CJsiZY5VgorzOIUqCGn_zCnqV-HvKI7-1Qq2ewNGnHmTiFpxQiW94tUEfHr2hRuCG7aRkflgZESZfqEmFPlb0EBGKc9cpidnStIyjvJ4dmbDhwZYusTASRdef3MJ7M9NxdDGPwlXWkEAVrXcpTYJ_joEOgf-ok8QH-GP2-CBPM_Rd9gJh1HlIXGzdq7RU0jifg.QFStUnt4HBstE1QLw0dMmldLOMlLOvXMURAnK5E1-uo&dib_tag=se&keywords=Foundations+of+Linear+and+Generalized+Linear+Models&qid=1757417879&s=books&sprefix=%2Cstripbooks%2C217&sr=1-1&ufe=app_do%3Aamzn1.fos.e05b01e0-91a7-477e-a514-15a32325a6d6). Wiley.
+
 
 - Bolker, B.M. (2008). [Ecological models and data in R](http://www.leg.ufpr.br/lib/exe/fetch.php/wiki:internas:biblioteca:bolker.pdf). Princeton University Press.[**Ebook**]
 
-- Clark, M. & Berry, S. (2025). [Models Demystified: A practical guide from linear regression to deep learning](https://m-clark.github.io/book-of-models/) [**Ebook**]
 
-- Clark, M. (???). [Generalized Additive Models](https://m-clark.github.io/generalized-additive-models/) [**Ebook**]
 
-- Da Silva F. R et al. (2022). [Análises Ecológicas no R](https://analises-ecologicas.com/).[**Ebook**]
-
-- Gelman, A. et al. (2020). [Regression and Other Stories](https://avehtari.github.io/ROS-Examples/). Cambridge University Press.
-
-<!-- - Stasinopoulos et al. (2017). [Flexible Regression and Smoothing -->
-<!-- : Using GAMLSS in R.](https://www.taylorfrancis.com/books/mono/10.1201/b21973/flexible-regression-smoothing-mikis-stasinopoulos-robert-rigby-gillian-heller-vlasios-voudouris-fernanda-de-bastiani). Chapman and Hall/CRC. -->
 
 <br>
+
+
+## Artigos científicos adicionais
+
+
+- David \& Kay (2023). [Writing statistical methods for ecologists](https://esajournals.onlinelibrary.wiley.com/doi/10.1002/ecs2.4539)
+
+
+- Powers \& Hampton (2019). [Open science, reproducibility, and transparency in ecology](https://esajournals.onlinelibrary.wiley.com/doi/10.1002/eap.1822)
+
+
+- Touchon /& McCoy (2016). [The mismatch between current statistical practice and doctoral training in ecology.](https://esajournals.onlinelibrary.wiley.com/doi/10.1002/ecs2.1394)
+
+
+- Tredennick et al. (2021). [A practical guide to selecting models for exploration, inference, and prediction in ecology](https://esajournals.onlinelibrary.wiley.com/doi/10.1002/ecy.3336)
+
+
+- Zuur et al. (2010). [A protocol for data exploration to avoid common statistical problems.](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/j.2041-210X.2009.00001.x)
+
+
+- Zuur et al. (2016). [A protocol for conducting and presenting results of regression-type analyses.](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.12577)
+
 
 
 ## Quando bater aquela curiosidade extra
@@ -49,43 +63,29 @@ output:
 <br>
 
 
-## Tutoriais
-
-**RMarkdown**
-
-- https://livro.curso-r.com/9-1-markdown.html#markdown
-- https://bookdown.org/yihui/rmarkdown-cookbook/
-
-
-**Bookdown**
-
-- https://bookdown.org/yihui/bookdown/
-
-
-**Visualização de dados**
-
-- https://clauswilke.com/dataviz/
-
-<br>
-
-
-
 
 ## Para apreciar com um cafezinho
 
-- Hilborn, R. \& Mangel, M., (2013). [The ecological detective: confronting models with data](http://press.princeton.edu/titles/5987.html). Princeton University Press.
+
+- Dennet, D. C. (2018). [From Bacteria to Bach and Back: The Evolution of Minds](https://www.amazon.com.br/Bacteria-Bach-Back-Evolution-Minds/dp/0393355500). W. W. Norton & Company
+
+- Hilborn, R. \& Mangel, M. (2013). [The ecological detective: confronting models with data](http://press.princeton.edu/titles/5987.html). Princeton University Press.
+
+- McGrayne, S. B. (2012). [The Theory that Would not Die: how Baye’s rule cracked the
+enigma code, hunted down Russian submarines, and emerged triumphant from two centuries
+of controversy](https://www.amazon.com.br/Theory-That-Would-Not-Die/dp/0300188226).  Yale University Press.
 
 - Mlodinow, L. (2009).[O andar do bêbado. Como o acaso determina nossas vidas](http://zahar.com.br/livro/o-andar-do-b%C3%AAbado). Zahar.
+
+- Salsburg, D. (2009). [Uma senhora toma chá. Como a estatística revolucionou a ciência no século XX](http://www.zahar.com.br/livro/uma-senhora-toma-cha). Zahar.
+
+- Seth, A. (2021). [Being You: A New Science of Consciousness](https://www.amazon.com.br/Being-You-Science-Consciousness-English-ebook/dp/B07ZG1BXL5/ref=sr_1_1?adgrpid=154058837162&dib=eyJ2IjoiMSJ9.xZp5oSqTXajpluJOhhIeNU140Z9S45fD21Ns7MkvK-rGjHj071QN20LucGBJIEps.o248Fl8t8Se7F0CQKC-fcNms5EBlLtpLJhVktVDYIlk&dib_tag=se&hvadid=670004030299&hvdev=c&hvexpln=0&hvlocphy=9221315&hvnetw=g&hvocijid=9581969671947862195--&hvqmt=e&hvrand=9581969671947862195&hvtargid=kwd-1212155114090&hydadcr=29997_14594555&keywords=being+you+anil+seth&mcid=ad06e9943ee13bc89b5e5e5fc18c550b&qid=1791322833&sr=8-1) Faber \& Faber.
 
 
 <!-- - Huff, D. -->
 <!--   [Como mentir com estatística](http://www.intrinseca.com.br/livro/624/). -->
 <!--   Rio de Janeiro: Intrínseca, 2016. -->
 
-<!-- - Salsburg, D. -->
-<!--   [Uma senhora toma chá. Como a estatística revolucionou a ciência no século XX](http://www.zahar.com.br/livro/uma-senhora-toma-cha). -->
-<!--   Rio de Janeiro: Zahar, 2009. -->
-<!-- - Wheelan, C. -->
 
 <!--   [Estatística: o que é, para que serve, como funciona](http://www.zahar.com.br/livro/estatistica). -->
 <!--   Rio de Janeiro: Zahar, 2016. -->

@@ -1,5 +1,5 @@
 ---
-title: "Tópicos Especias em Ecologia"
+title: "Modelos Espaço-Temporais para Dados Ecológicos "
 output:
   html_document:
     toc: false
@@ -16,10 +16,10 @@ source("Scripts/Setup/setup_knitr.R")
 <!-- espaço para avisos. Comente quando não utilizar. </div> -->
 
 
-# <span style="color:#e07a5f">Modelos Espaço-Temporais para Dados Ecológicos </span>
-
+<!--# <span style="color:#e07a5f">Modelos Espaço-Temporais para Dados Ecológicos </span> -->
 
 <br>
+
 
 - **Curso:** Pós-Graduação em Ecologia (PPGECO)
 
@@ -47,14 +47,16 @@ Diante deste contexto, torna-se essencial que ecólogos desenvolvam competência
 
 Esta discplina, portanto, tem como objetivo capacitar as(os) participantes no uso de ferramentas estatísticas modernas para estimar e prever a dinâmica espaço-temporal de processos ecológicos. A ênfase será nos modelos hierárquicos bayesianos, uma abordagem estatística versátil que permite incorporar múltiplas fontes de incertezas, relações não lineares e diferentes estruturas de dependência, como correlações espaciais e temporais.
 
-<br>
+<div style="height: 30px;"></div>
+
 
 # Público-alvo
 
 Pós-graduandos, docentes e pesquisadores interessadas em estatística aplicada à ecologia espacial e programação.
 
 
-<br>
+<div style="height: 30px;"></div>
+
 
 # Pré-requisitos da disciplina:
 
@@ -63,7 +65,8 @@ Pós-graduandos, docentes e pesquisadores interessadas em estatística aplicada 
 - Conhecimento básico de modelos lineares generalizados e aditivos, como LM, GLM e GAM
 
 
-<br>
+<div style="height: 30px;"></div>
+
 
 # O que esperar do curso?
 
@@ -76,7 +79,8 @@ mapas cartográficos, via linguagem R
 
 - Conceitos de boas práticas de programação e reprodutibilidade
 
-<br>
+<div style="height: 30px;"></div>
+
 
 
 # O que não esperar da disciplina?
@@ -86,13 +90,10 @@ mapas cartográficos, via linguagem R
 - Aprofundamento em modelos de nicho ecológico
 
 
-<br>
+<div style="height: 30px;"></div>
 
-# Estrutura da disciplina
 
-## Plano de aula
-
-**ATUALIZAR**
+# Plano de aula
 
 - **Aula 1:** Revisitando Modelos Lineares (LM)
 - **Aula 2:** Métodos de inferência estatística: frequentista vs. bayesiana
@@ -105,24 +106,23 @@ mapas cartográficos, via linguagem R
 - ~~**Aula 9:** Dúvidas dos projetos (opcional: tutorial de elaboração de mapas no R)~~ [Feriado]
 - **Aula 10:** Apesentação de projetos
 
- 
-Cada dia da disciplina será dividida entre aulas teóricas e práticas, de forma que se associe a teoria estatística por meio de exercícios práticos.
 
-<br>
+<div style="height: 30px;"></div>
 
-## Estrutura da disciplina
+
+# Estrutura da disciplina
 
 Cada dia da disciplina será dividida entre aulas teóricas e práticas, de forma que o discente aprenda a associar a teoria estatística por meio de exercícios aplicados.
 
 Sempre que possível, os discentes serão incentivados a utilizar seus próprios conjuntos de dados para replicar os exercíos das práticas após cada dia da disciplina e no desenvolvimento do projeto final da disciplina.
 
-Todo o material da disciplina, incluindo slides, roteiros das aulas práticas, conjuntos de dados e materiais complementares será disponibilizado em um repositório do GitHub.
+Todo o material da disciplina, incluindo slides, roteiros das aulas práticas, conjuntos de dados e materiais complementares está disponibilizado no repositório do [GitHub](https://github.com/mcruf/ECL0072-LVM).
 
 
-<br>
+<div style="height: 30px;"></div>
 
-## Avaliação
 
+# Avaliação
 
 A avaliação da disciplina será baseada no desenvolvimento de um projeto prático, em grupos de três integrantes, utilizando, preferencialmente dados oriundos das pesquisas dos próprios participantes. A avaliação será composta por duas etapas complementares:
 
