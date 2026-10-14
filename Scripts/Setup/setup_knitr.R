@@ -44,15 +44,18 @@ knitr::opts_chunk$set(cache = TRUE,
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 3) Define main ggplot theme
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-my_theme <- theme(legend.position = "none",
-                  plot.title = element_text(hjust = 0.5, face = 'bold'),
-                  legend.title = element_blank(),
-                  axis.text.x = element_text(colour = "grey20", margin = margin(t = 25)),
-                  axis.text.y = element_text(colour = "grey20", margin = margin(r = 20)),
-                  axis.title = element_text(face = "bold", colour = "black", size = 16),
+my_theme <- theme_bw(base_size = 12) + 
+            theme(plot.title = element_text(hjust = 0.5, face = 'bold'),
+                  axis.text.x = element_text(colour = "grey20", margin = margin(t = 10)),
+                  axis.text.y = element_text(colour = "grey20", margin = margin(r = 10)),
+                  axis.title = element_text(face = "bold", colour = "black", size = 12),
                   strip.background = element_rect(fill = 'white'),
                   legend.background = element_rect(fill = "transparent", colour = NA),
                   legend.box.background = element_rect(fill = "transparent", colour = NA),
+                  plot.background   = element_rect(fill = "transparent", color = NA),
+                  panel.background  = element_rect(fill = "transparent", color = NA),
+                  panel.grid.major.y = element_line(linetype = 'dotted'),
+                  panel.grid.major.x = element_line(linetype = 'dotted'),
                   axis.line = element_line(color = "black"),
                   plot.margin = margin(5, 10, 5, 5))
 

@@ -138,6 +138,42 @@ extract_env_dynamic <- function(points_sf, env_raster, var_name, year_map = NULL
 
 #-----------------------------------------------------------------------------------------
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Intraclass correlation coefficient (ICC) for (G)LMMs
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Model *must* be a brms-object
+
+variance_partition  <- function(model, nome) {
+  
+  post <- as.data.frame(model)
+  
+  # Get cols with SD & random effects 
+  sd_cols <- grep("^sd_", colnames(post), value = TRUE)
+  
+  # Convert SD to variance 
+  var_random <- post[, sd_cols, drop = FALSE]^2
+  var_residual <- post$sigma^2
+  
+  # Total variance
+  var_total <- rowSums(var_random) + var_residual
+  
+  
+  # Calculate ICC for random components
+  icc_draws <- as.data.frame(lapply(var_random, function(v) v / var_total))
+  colnames(icc_draws) <- gsub("sd_|__Intercept", "", colnames(icc_draws))
+  
+  # Calculate residual proportion 
+  icc_draws$Residual <- var_residual / var_total
+  
+  # Organize df to long-format (plotting...)
+  icc_draws %>%
+    tidyr::pivot_longer(cols = everything(), names_to = "Component", values_to = "Proportion") %>%
+    mutate(model = nome)
+}
+
+
+#-----------------------------------------------------------------------------------------
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~
 #  INLA model diagnostics 
@@ -160,4 +196,24 @@ mdiagnostic <- function(model){
   
   round(data.frame(DIC  = dic, WAIC = waic, LCPO = lcpo), 2)
 
+}
+
+#-----------------------------------------------------------------------------------------
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~
+#  INLA hyperparameters
+#~~~~~~~~~~~~~~~~~~~~~~~
+# Computes the hyperparameters of the spatial field (range and sigma)
+
+spatial_hyper <- function(mod) {
+  
+  res <- inla.spde2.result(mod, "spatial", spde, do.transf = TRUE)
+  rng <- res$marginals.range.nominal[[1]]
+  sdm <- inla.tmarginal(sqrt, res$marginals.variance.nominal[[1]]) # variância -> DP
+  
+  data.frame(par  = c("Alcance (km)", "DP do campo"),
+             mean = c(inla.emarginal(function(x) x, rng), inla.emarginal(function(x) x, sdm)),
+             q025 = c(inla.qmarginal(0.025, rng), inla.qmarginal(0.025, sdm)),
+             q975 = c(inla.qmarginal(0.975, rng), inla.qmarginal(0.975, sdm)))
 }

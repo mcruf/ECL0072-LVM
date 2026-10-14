@@ -57,10 +57,7 @@ style_xaringan(
     ".small-code .remark-code" = list(
       "font-size" = "70% !important"
     ),
-    ".small-code .remark-code-line" = list(
-      "font-size" = "70% !important"
-    ),
-    
+ 
     # Text with different sizes 
     ".small-text" = list("font-size" = "80%"),
     ".small-text2" = list("font-size" = "90%"),
@@ -170,11 +167,11 @@ style_xaringan(
     ### ==========================================
     ### Estilos para a Capa Personalizada (Title Slide)
     ### ==========================================
-    ".title-slide" = list(
+    ".title-slide" = list( "bottom" = "0px !important",
       "background-color" = "#FFFFFF !important", # FORÇA O FUNDO BRANCO
       "background-image" = "url('../Figuras/Logo_course.png') !important", # Adicionado ../ se necessário
       "background-position" = "left bottom !important",
-      "background-size" = "70% auto !important", # Tamanho ajustado da imagem geométrica
+      "background-size" = "65% auto !important", # Tamanho ajustado da imagem geométrica
       "padding" = "40px 60px 40px 60px !important"
     ),
     
