@@ -112,24 +112,16 @@ dados_finais <- dados_simulados %>%
     biomassa_kg
   )
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 5. Inspeção dos Dados Gerados
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 5. Ajustando coluna de biomassa
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# head(dados_finais, 10)
-# 
-# ggplot(dados_finais, aes(x = recife, y = biomassa_kg, fill = recife, col = recife)) +
-#   geom_boxplot(alpha = 0.5, notch=T) +
-#   scale_fill_manual(values = c("#846267", "#588157","#e07a5f", "#457b9d", "#f6bd60")) +
-#   scale_color_manual(values = c("#846267", "#588157","#e07a5f", "#457b9d", "#f6bd60")) +
-#   labs(x = "Recife",y = "X") +
-#   theme_minimal(base_size = 14) +
-#   my_theme
-
+colnames(dados_finais)[8] <- "biomassa_kg_m2"
+dados_finais$biomassa_kg_m2 <- (dados_finais$biomassa_kg_m2/100) * 0.5 #Rescaling
 
 
 # 6. Salvando os dados
-saveRDS(dados_finais, "~/OneDrive/Arbeit/Lectures_and_Talks/UFRN/Lectures/Graduation/ECL0072-LVM/Dados/biomass_reef.rds")
+saveRDS(dados_finais, "~/OneDrive/Arbeit/Lectures_and_Talks/UFRN/Lectures/Graduation/ECL0072-LVM/Dados/reef_biomass.rds")
 
 
 
