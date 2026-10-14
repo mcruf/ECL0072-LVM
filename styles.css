@@ -1,0 +1,108 @@
+/* Barra de navegação */
+.navbar,
+.navbar-default,
+.navbar-inverse {
+  background-color: #d5bdaf !important;
+    border-color: #d5bdaf !important;
+}
+
+/* Título e links */
+.navbar-default .navbar-brand,
+.navbar-inverse .navbar-brand,
+.navbar-default .navbar-nav > li > a,
+.navbar-inverse .navbar-nav > li > a {
+  color: #3d2c24 !important;
+}
+
+/* Hover, foco e item ativo */
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-nav > li > a:focus,
+.navbar-inverse .navbar-nav > li > a:hover,
+.navbar-inverse .navbar-nav > li > a:focus,
+.navbar-default .navbar-nav > .active > a,
+.navbar-inverse .navbar-nav > .active > a,
+.navbar-default .navbar-nav > .open > a,
+.navbar-inverse .navbar-nav > .open > a {
+  background-color: #c4a898 !important;
+    color: #3d2c24 !important;
+}
+
+/* Menu suspenso (Aulas) */
+.navbar-default .dropdown-menu,
+.navbar-inverse .dropdown-menu {
+  background-color: #f4f4f2;
+    border-color: #f4f4f2;
+}
+
+
+
+.dropdown-menu > li > a {
+  color: #3d2c24 !important;
+  background-color: #f4f4f2 !important;
+
+}
+
+.dropdown-menu > li > a:hover,
+.dropdown-menu > li > a:focus {
+  background-color: #c4a898 !important;
+}
+
+
+/* Ícone do menu no mobile */
+.navbar-inverse .navbar-toggle { border-color: #3d2c24; }
+.navbar-inverse .navbar-toggle .icon-bar { background-color: #3d2c24; }
+
+
+/* Fundo da página */
+body {
+  background-color: #f4f4f2;
+  color: #2b2b2b; /* cinza bem escuro, mais suave que o preto puro */
+}
+
+/* Blocos de código e saídas do R */
+pre, pre code {
+  background-color: #f1ebe4;
+  border-color: #e3d5ca;
+}
+
+/* Menu lateral do índice (toc_float) */
+.list-group-item {
+  background-color: #f8f4ef;
+  border-color: #e3d5ca;
+}
+.list-group-item.active,
+.list-group-item.active:hover,
+.list-group-item.active:focus {
+  background-color: #d5bdaf;
+  border-color: #d5bdaf;
+  color: #3d2c24;
+}
+
+/* Tabelas */
+table {
+  background-color: transparent;
+}
+
+
+/* Títulos das seções */
+h1.title {
+    color: #846267;
+  }
+
+h1, .h1 {
+  color: #846267;
+}
+
+h2, .h2 {
+  color: #595859;
+}
+
+
+
+/* Linha horizontal */
+hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #d5bdaf, transparent);
+  margin: 2em ;
+}
