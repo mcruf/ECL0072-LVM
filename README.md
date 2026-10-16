@@ -1,6 +1,9 @@
 
 <p align="center">
-<img src="Figuras/Logo_course_repo.png" alt="Figuras/Logo_course_repo.png" width="600" height="300"/>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="Figuras/Logo_course_repo.png">
+  <source media="(prefers-color-scheme: light)" srcset="Figuras/Logo_course_repo_white.png">
+</picture>
 </p>
 
 -------
