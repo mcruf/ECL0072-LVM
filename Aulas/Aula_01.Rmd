@@ -299,7 +299,7 @@ $$\Large y ~~~~ = \underbrace{f(x|\theta)}_\text{Determinístico} + \underbrace{
 knitr::include_graphics("../Figuras/palmer_penguin_regression.png")
 ```
 
-.footnote[.small-text2[Ilustrações: [Allison Horst (adaptada)](https://allisonhorst.github.io/palmerpenguins/)]]
+.footnote[.small-text2[Ilustrações (adaptadas): [Allison Horst](https://allisonhorst.github.io/palmerpenguins/)]]
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -344,7 +344,7 @@ knitr::include_graphics("../Figuras/Begon_1.png")
 **| Inferência **
 
 
-Avaliar a formar novas hipóteses
+Avaliar e formar novas hipóteses
 
 <div style="height: 7px;"></div>
 
