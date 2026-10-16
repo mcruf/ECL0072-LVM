@@ -1,19 +1,31 @@
 #############################################################################
 #                                                                           #
 #                            Prática da aula 01                             #
-#                           - Regressão linear -                            #
+#                        - Modelos Lineares Gerais -                        #
 #                                                                           #
 #############################################################################
 
 
 # CONTEXTO:
+# CONTEXTO:
+# Modelos lineares (LMs) constituem a base de diversos modelos estatísticos mais complexos (GLM, GAM, GLMM/GAMM, ...).
+# Nesta prática, utilizaremos dados morfométricos dos pinguins de Palmer para explorar o ajuste e a interpretação de modelos lineares no R,
+# tendo a massa corporal (body_mass_g) como variável resposta e características como sexo, comprimento do bico e espécie como variáveis explicativas. 
+# A partir desses dados, veremos como teste-t, regressão linear, ANOVA e ANCOVA podem ser formulados dentro de um mesmo framework:
+# y = Xβ + ε.
 
 
 # OBJETIVOS:
-
-
-# ESTRUTURA DOS DADOS
-
+# - Explorar o banco de dados 
+# - Compreender a estrutura geral de um modelo linear e sua matriz de design
+# - Ajustar modelos lineares gerais via função lm()
+#    - Teste-t ............ preditor categórico (2 níveis)
+#    - LM ................. preditor contínuo
+#    - ANOVA .............. preditor categórico (> 2 níveis)
+#    - ANCOVA ............. preditor contínuo + categórico (retas paralelas)
+#    - ANCOVA c/ interação. preditor contínuo + categórico (retas não paralelas)
+# Interpretar os coeficientes no contexto de cada modelo testado
+# Comparar os diferentes modelos e avaliar os seus pressupostos
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~
@@ -32,7 +44,6 @@ library(performance) # Avaliação de modelos
 #~~~~~~~~~~~~~~~~~~~~~~~~
 # 1) Importando os dados
 #~~~~~~~~~~~~~~~~~~~~~~~~
-
 df <- readRDS("Dados/palmerpenguins_extended.rds")
 head(df)
 str(df)
@@ -60,7 +71,7 @@ str(df) # Sanity check
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 table(is.na(df)) # Há NA nos dados? Se sim, a análise exploratória deverá ser feita com mais cautela.
-
+colSums(is.na(df))
 
 
 # 3.1) Variável resposta
@@ -71,7 +82,7 @@ summary(df$body_mass_g)
 ## Histograma
 phist <- ggplot(df, aes(x = body_mass_g)) +
          geom_histogram(fill = '#3e5c76', col = 'white', alpha = 0.8, linewidth = 1) +
-         coord_cartesian(expand = c(0,0)) +
+         coord_cartesian(expand = F) +
          labs(x = 'Body mass (g)', y = 'Frequency') +
          theme_bw(base_size = 12)
 
@@ -107,15 +118,15 @@ phist + pbox + pdot
 
 # 3.2) Relação peso corporal e sexo
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ps <- ggplot(df, aes(y = body_mass_g, fill = sex, col = sex)) +
-      geom_boxplot(size = 1, alpha = 0.3) +
+ps <- ggplot(df, aes(y = body_mass_g, x = sex, fill = sex, col = sex)) +
+      geom_boxplot(linewidth = 1, alpha = 0.3) +
       scale_fill_manual(values = c("#846267", "#f6bd60")) +
       scale_color_manual(values = c("#846267", "#f6bd60")) +
-      labs(x = 'Body mass (g)', y = 'Density') +
+      labs(x = '', y = 'Body mass (g)') +
       theme_light(base_size = 14) 
 
 ps2 <- ggplot(df, aes(x = body_mass_g, fill = sex, col = sex)) +
-        geom_density(size = 1, alpha = 0.3) +
+        geom_density(linewidth = 1, alpha = 0.3) +
         scale_fill_manual(values = c("#846267", "#f6bd60")) +
         scale_color_manual(values = c("#846267", "#f6bd60")) +
         labs(x = 'Body mass (g)', y = 'Density') +
@@ -187,13 +198,14 @@ table(df$species, df$sex)
 # 4) Modelos Lineares Gerais 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+
 #~~~~~~~~~~~~~~~~~
 # 4.1) Teste-t: 
 #~~~~~~~~~~~~~~~~~
 # Machos e fêmeas diferem quanto ao peso corporal?
 
 mod_t <- lm(body_mass_g ~ sex, data = df)
-#t.test(body_mass_g ~ sex, data = df) # Mesma coisa
+#t.test(body_mass_g ~ sex, data = df, var.equal = TRUE) # Mesma coisa
 
 
 ## O que tem dentro do objeto mod_t?
@@ -208,7 +220,7 @@ head(model.matrix(mod_t))
 summary(mod_t)
 
 # - Intercept: peso das fêmeas
-# - sexmale: peso dos machos (Intercept + sexmale)
+# - sexmale: diferença no peso médio entre femeas e machos. Peso do macho: Intercept + sexmale
 
 
 
@@ -240,7 +252,7 @@ par(mfrow=c(1,1))
 hist(mod_lm$residuals)
 check_model(mod_lm)
 plot(df$body_mass_g ~ mod_lm$fitted.values)
-abline(0,1,2)
+abline(a = 0, b = 1, col = 2)
 
 
 ## Centralizando a covariável
@@ -251,7 +263,7 @@ summary(mod_lm2)
 
 # - Intercept: peso médio esperado de um pinguim cujo comprimento do bico = comprimento médio do bico
 # - bill_length_mm: Aumento médio da massa corporal do pinguim para cada aumento de 1 mm no comprimento do bico
-# ATENÇÃO: centralizar uma variável é diferente de padronizar - mudança esperada no peso associada a um aumento de 1 desvio-padrão no
+# ATENÇÃO: centralizar uma variável é diferente de padronizar - mudança esperada no peso associada a um aumento de 1 desvio-padrão no comprimento do bico
 
 
 ## Visualizando o ajuste: intervalo de confiança vs. intervalo de predição
@@ -267,19 +279,16 @@ head(pred_df)
 pred_ci <- predict(mod_lm, newdata = pred_df, interval = "confidence")  
 
 
-
-### incerteza sobre uma nova observação  ( y_i(x) = beta_0_i + beta_1_i*x + epsilon_i)
+### incerteza sobre uma nova observação  ( y_i(x) = beta_0 + beta_1*x_i + epsilon_i)
 pred_pi <- predict(mod_lm, newdata = pred_df, interval = "prediction")  
 
 
-#### Armazenado predições no data frame
+#### Armazenando predições no data frame
 pred_df$fit <- pred_ci[, "fit"] # Ou pred_pi - mesmo resultado!
-pred_df$ci_lwr <- pred_ci[, "lwr"] # IC-95 inferior de pred_ic
-pred_df$ci_upr <- pred_ci[, "upr"] # IC-95 superior de pred_ic
-pred_df$pi_lwr <- pred_pi[, "lwr"] # IC-95 inferior de pred_ic
-pred_df$pi_upr <- pred_pi[, "upr"] # IC-95 superior de pred_ic
-
-
+pred_df$ci_lwr <- pred_ci[, "lwr"] # IC-95 inferior de pred_ci
+pred_df$ci_upr <- pred_ci[, "upr"] # IC-95 superior de pred_ci
+pred_df$pi_lwr <- pred_pi[, "lwr"] # IP-95 inferior de pred_pi
+pred_df$pi_upr <- pred_pi[, "upr"] # IP-95 superior de pred_pi
 
 
 
@@ -310,7 +319,6 @@ p_ci + p_pi
 
 
 
-
 #~~~~~~~~~~~~~~~~~
 # 4.3) ANOVA
 #~~~~~~~~~~~~~~~~~
@@ -321,8 +329,8 @@ head(model.matrix(mod_anova)) # Matriz de design
 
 summary(mod_anova)
 # - Intercept: peso médio da espécie de referência (Adelie)
-# - speciesChinstrap: diferença no peso médio entre Chinastrap e Adelie; Peso Chinstrap = 4445.48 + 157.06
-# - speciesGentoo: diferença no peso médio entre Gentoo e Adelie; Peso Chinstrap = 4445.48 + 992.17
+# - speciesChinstrap: diferença no peso médio entre Chinstrap e Adelie; Peso Chinstrap = 4445.48 + 157.06
+# - speciesGentoo: diferença no peso médio entre Gentoo e Adelie; Peso Gentoo = 4445.48 + 992.17
 
 anova(mod_anova) # O peso difere entre as espécies?
 
@@ -330,8 +338,9 @@ anova(mod_anova) # O peso difere entre as espécies?
 ## Visualizando a média estimada por espécie com IC 95%
 df_pred <- data.frame(species = levels(df$species))
 
+
 ### Armazenando tudo em um data frame
-pred_anova <- predict(mod_anova, newdata = df_pred, interval = "prediction")
+pred_anova <- predict(mod_anova, newdata = df_pred, interval = "confidence")
 df_pred <- cbind(df_pred, pred_anova)
 
 
@@ -355,21 +364,22 @@ ggplot() +
 
 mod_ancova <- lm(body_mass_g ~ bill_length_mm + species, data = df)
 head(model.matrix(mod_ancova)) # Matriz de design
+anova(mod_ancova)
 
 summary(mod_ancova)
 # - Intercept: peso médio da espécie de referência (Adelie) quando o comprimento do bico = 0
 # - bill_length_mm: efeito do comprimento do bico sobre o peso do pinguim
-# - speciesChinstrap: diferença no peso médio entre Chinastrap e Adelie quando comprimento do bico = 0
+# - speciesChinstrap: diferença no peso médio entre Chinstrap e Adelie quando comprimento do bico = 0
 # - speciesGentoo: diferença no peso médio entre Gentoo e Adelie quando comprimento do bico = 0
 
 
 ## A adição do efeito 'comprimento do bico' melhora o ajuste do modelo?
 anova(mod_anova, mod_ancova)
-
+#anova(mod_anova, mod_ancova, test = 'LRT') # Likelihood Ratio Test
 
 ## O efeito das espécies muda quando controlamos pelo tamanho do bico?
-cbind(ANOVA  = coef(mod_anova)[c("speciesChinstrap", "speciesGentoo")],
-      ANCOVA = coef(mod_ancova)[c("speciesChinstrap", "speciesGentoo")])
+cbind(ANOVA  = coef(mod_anova)[c("speciesChinstrap", "speciesGentoo")], # Diferença 'bruta' no peso médio entre cada espécie 
+      ANCOVA = coef(mod_ancova)[c("speciesChinstrap", "speciesGentoo")]) # Diferença de peso médio entre as espécies com o mesmo comprimento do bico
 
 
 ## Visualizando os valores ajustados
@@ -377,7 +387,7 @@ pred_df <- df %>%
            group_by(species) %>%
            reframe(bill_length_mm = seq(min(bill_length_mm), max(bill_length_mm), length.out = 100))
 
-pred_df$fit <- predict(mod_ancova, newdata = pred_df)
+pred_df$fit <- predict(mod_ancova, newdata = pred_df) # Retorna apenas os valores ajustados
 
 p_ancova <- ggplot() +
             geom_point(data = df, aes(x = bill_length_mm, y = body_mass_g, col = species),
@@ -391,9 +401,9 @@ p_ancova
 
 
 
-
 # 4.5) ANCOVA com interação
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# A relação peso-comprimento é a mesma para todas as espécies? 
 # Cada espécie tem seu próprio intercepto e inclinação
 
 mod_ancova2 <- lm(body_mass_g ~ bill_length_mm * species, data = df)
@@ -401,4 +411,44 @@ head(model.matrix(mod_ancova2)) # Matriz de design
 
 summary(mod_ancova2)
 
+# - Intercept: peso médio da espécie de referência (Adelie) quando o comprimento do bico = 0
+# - bill_length_mm: efeito do comprimento do bico sobre o peso do pinguim
+# - speciesChinstrap: diferença no peso médio entre Chinstrap e Adelie quando comprimento do bico = 0
+# - speciesGentoo: diferença no peso médio entre Gentoo e Adelie quando comprimento do bico = 0
+# - Diferença de inclinação de Chinstrap em relação à espécie de referência (Adelie)
+# - Diferença de inclinação de Gentoo em relação à espécie de referência (Adelie)
 
+
+## A interação é significativa? 
+anova(mod_ancova, mod_ancova2)
+#anova(mod_ancova, mod_ancova2, test = 'LRT') # Likelihood Ratio Test
+
+anova(mod_ancova2)
+
+
+
+# 4.6) Comparando os modelos
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+models <- list(mod_t, mod_lm, mod_anova, mod_ancova, mod_ancova2)
+names(models) <- c("t-test", "lm", "anova", "ancova", "ancova-interaction")
+
+
+tab_modelos <- data.frame(modelo = names(models),
+                          k = sapply(models, function(m) attr(logLik(m), "df")),   # nº de parâmetros (inclui sigma)
+                          sigma  = sapply(models, sigma),
+                          R2_adj = sapply(models, function(m) summary(m)$adj.r.squared),
+                          AIC = sapply(models, AIC)) %>%
+                mutate(dAIC = AIC - min(AIC)) %>%
+                arrange(AIC)
+
+tab_modelos
+
+# ATENÇÃO: modelos aninhados podem ser comparados via teste de razão de verossimilhança (Likelihood Ratio Teste - via função anova());
+# modelos não aninhados (ex.: t-test por sexo vs. ANOVA por espécie) só podem ser comparados via critérios de informação (e.x., AIC)
+
+
+
+# 4.7) Diagnóstico do modelo selecionado
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+check_model(mod_ancova2)
