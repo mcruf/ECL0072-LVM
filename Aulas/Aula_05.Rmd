@@ -67,7 +67,7 @@ knitr::include_graphics("../Figuras/Marine_ecosystem2.png")
 
 
 
-.footnote[Figura criada com IA]
+.footnote[.small-text2[Figura criada com IA]]
 
 ---
 # PPGECO | ECL0072 | out. 2026
@@ -155,7 +155,7 @@ Os GLMs evitam o velho hábito de transformar os dados
 
 .pull-right[
 
-```{r echo=FALSE, out.width ="60%", fig.align ='center', fig.cap="Ronald Coase (1910-2013)", fig.topcaption=T}
+```{r echo=FALSE, out.width ="60%", fig.align ='center', fig.cap="Ronald Coase (1910-2013)", fig.topcaption=F}
 knitr::include_graphics("../Figuras/Ronald_Coase.jpg")
 ```
 

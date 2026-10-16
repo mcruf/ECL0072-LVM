@@ -254,7 +254,20 @@ class: inverse, center, middle
 # PPGECO | ECL0072 | out. 2026
 ### A economia da natureza
 
-A matemática é a linguagem da natureza
+
+<div style="height: 7px;"></div>
+
+```{r echo=FALSE, out.width ="85%"}
+knitr::include_graphics("../Figuras/Marine_full_ecosystem2.png")
+```
+
+
+.footnote[.small-text2[Figura criada com IA]]
+
+
+--
+
+.center[.small-text2[**A matemática é a linguagem da natureza**]]
 
 
 ---
@@ -1413,13 +1426,13 @@ Todo modelo estatístico é baseado em um conjunto de pressupostos
 
 **Livros**
 
-- **Cap. 01** - Faraway, J. J. (2014). Linear Models With R, 2nd Ed.
+- **Cap. 01** - Faraway (2014). Linear Models With R, 2nd Ed.
 
 - **Caps. 06, 07 & 11** - Gelman et al. (2020). Regression and Other Stories.
 
 - **Cap. 01** - Hobbs & Hooten (2007). Bayesian Models - A Statistical Primer for Ecologists.
 
-- **Cap. 06** - Kery, M. (2007). Introduction to WinBUGS for Ecologists - A Bayesian Approach to Regression, ANOVA, Mixed Models and Related Analysis.
+- **Cap. 06** - Kery (2007). Introduction to WinBUGS for Ecologists - A Bayesian Approach to Regression, ANOVA, Mixed Models and Related Analysis.
 
 
 ----
