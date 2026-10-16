@@ -3,12 +3,14 @@
 
 <picture>
   <!-- Image displayed when the user is in Dark Mode -->
-  <source media="(prefers-color-scheme: dark)" srcset="Figuras/Logo_course_repo.png">
+  <source media="(prefers-color-scheme: dark)" srcset="Figuras/Logo_course_repo.png" width="600" height="300">
   <!-- Image displayed when the user is in Light Mode (and fallback) -->
-  <img alt="Describe your figure here" src="Figuras/Logo_course_repo_white.png">
+  <img alt="Describe your figure here" src="Figuras/Logo_course_repo_white.png" width="600" height="300">
 </picture>
 
 </p>
+
+
 
 -------
 
