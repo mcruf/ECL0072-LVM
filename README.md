@@ -1,11 +1,13 @@
 
 <p align="center">
-  
+
 <picture>
+  <!-- Image displayed when the user is in Dark Mode -->
   <source media="(prefers-color-scheme: dark)" srcset="Figuras/Logo_course_repo.png">
-  <source media="(prefers-color-scheme: light)" srcset="Figuras/Logo_course_repo_white.png">
+  <!-- Image displayed when the user is in Light Mode (and fallback) -->
+  <img alt="Describe your figure here" src="Figuras/Logo_course_repo_white.png">
 </picture>
-  
+
 </p>
 
 -------
