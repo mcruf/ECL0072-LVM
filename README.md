@@ -1,9 +1,11 @@
 
 <p align="center">
+  
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="Figuras/Logo_course_repo.png">
   <source media="(prefers-color-scheme: light)" srcset="Figuras/Logo_course_repo_white.png">
 </picture>
+  
 </p>
 
 -------
