@@ -1,19 +1,30 @@
 ###################################################################################
 #                                                                                 #
-#                                 Prática da aula 06                              #
+#                            Prática da aula 06 - parte I                         #
 #               - Análise exploratória de dados espaço-temporais -                #
 #                                                                                 #
 ###################################################################################
 
-# Esta prática analisará um conjunto de dados (fictícios) de capturas do tubarão-azul (Prionace glauca),
-# obtidos por meio da pesca de espinhel ao longo do Oceano Atlântico Sul durante um período de 2 anos.
-# Cada linha do banco de dados corresponde a uma pescaria (i.e., amostra) e contém informações sobre a 
-# operação pesqueira (e.g., long/lat, data, esforço, ...) e sobre as espécies capturadas (abundância).
 
-# O principal objetivo é realizar uma análise exploratória dos dados, buscando identificar padrões espaciais,
-# temporais e espaço-temporais que possam auxiliar a compreensão da distribuição da espécie, bem como servir como
-# e servir como etapa inicial para direcionar a estrutura dos modelos espaciais (aula 07) e espaço-temporais (aula 08).
+# CONTEXTO:
+# Dados ecológicos são frequentemente estruturados no espaço e no tempo, refletindo processos ambientais, biológicos e amostrais que operam em
+# diferentes escalas. Antes de especificar um modelo espaço-temporal, é fundamental explorar essas estruturas para identificar padrões, tendências e possíveis fontes
+# de dependência espacial e temporal presentes nos dados. Para explorar essas questões, esta prática analisará um conjunto de dados (fictícios) de capturas do tubarão-azul (Prionace glauca),
+# obtidos por meio da pesca de espinhel ao longo do Oceano Atlântico Sul.
 
+# DADOS:
+# - Variável resposta: abundância do tubarão-azul (Prionace_glauca; contagem)
+# - Covariáveis: informações da operação pesqueira (e.g., long/lat, data, esforço, ...) e abundância das demais espécies capturadas
+# - Dados auxiliares: mapa do Oceano Atlântico Sul (Natural Earth)
+
+# OBJETIVOS:
+# - Realizar uma análise exploratória dos dados, buscando identificar padrões espaciais, temporais e espaço-temporais que auxiliem a compreensão da distribuição da espécie
+# - Servir como etapa inicial para direcionar a estrutura dos modelos espaciais (aula 07) e espaço-temporais (aula 08)
+
+# ABORDAGEM ANALÍTICA:
+# - Exploração da variável resposta
+# - Dinâmica espacial: mapas, Moran's I, correlograma, variograma
+# - Dinâmica temporal e espaço-temporal: mapas
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~

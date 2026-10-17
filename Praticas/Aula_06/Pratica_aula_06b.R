@@ -1,34 +1,37 @@
 #########################################################################################
 #                                                                                       #
-#                                   Prática da aula 06                                  #
+#                               Prática da aula 06 - parte II                           #
 #        - Processamento de dados ambientais para estimação e predição espacial -       #
 #                                                                                       #
 #########################################################################################
 
-
-# O presente script é uma continuação do script 'Pratica_aula_06a.R' e tem como objetivo preparar e extrair covariáveis ambientais
-# para cada pescaria. Essas informações serão abordadas posteriormente no script da próxima aula ('Pratica_aula_07.R').
-
-# Os dados ambientais (i.e., produtos de sensoriamento remoto) foram obtidos por meio do Copernicus Marine Service,
-# via API utilizando python. Para detalhes sobre o download e a organização dos arquivos, consulte o script:
+# CONTEXTO:
+# Este script é uma continuação do script 'Pratica_aula_06a.R'. Nesta prática, iremos preparar covariáveis ambientais
+# (i.e., produtos de sensoriamento remoto) e associá-las a cada pescaria, etapa necessária antes de usá-las em análises estatísticas.
+# Os dados ambientais foram obtidos por meio do Copernicus Marine Service, via API utilizando python. Para detalhes sobre o download e a organização dos arquivos, consulte o script:
 # Praticas/Aula_06/Copernicus_data_download_practical.ipynb
 
+# DADOS:
+# - Dados pesqueiros: mesmo banco de dados da aula 06a (pescarias com localização, mês e ano)
+# - Dados ambientais provenientes do Copernicus Marine Service (rasters):
+#   (i) Variáveis físicas:
+#       - temperatura superficial do mar (SST);
+#       - altura da superfície do mar (SSH);
+#       - espessura da camada de mistura (MLT);
+#       - batimetria (BATHY).
+#   (ii) Variável biogeoquímica:
+#        - produtividade primária líquida (NPPV).
+# - SST, SSH, MLT e NPPV são variáveis dinâmicas, disponíveis mensalmente, enquanto a batimetria é uma variável estática.
 
-# Ao todo, foram baixadas cinco variáveis ambientais, provenientes de dois produtos distintos do Copernicus Marine Service:
-# 1) Variáveis físicas (Global Ocean Physics Reanalysis)
-#    - Sea surface temperature (SST)
-#    - Sea surface height (SSH)
-#    - Mixed layer thickness (MLT)
-#    - Bathymetry (BATHY)
-#
-# 2) Variáveis biogeoquímicas (Global Ocean Biogeochemistry Hindcast)
-#     - Net primary productivity (NPPV)
+# OBJETIVOS:
+# - Preparar e extrair covariáveis ambientais para cada pescaria; serão utilizadas nos modelos da próxima aula (aula 07)
+# - Compreender a importância de padronizar a extensão espacial, o CRS e a resolução espacial das camadas ambientais
 
-# Há um total de 4 variáveis dinâmicas (SST, SSH, MLT e NPPV), i.e., que possuem uma série temporal e foram baixadas na mesma 
-# resolução temporal dos dados pesqueiros (mensal - 24 meses no total). Já a batimetria é uma variável estática, permanecendo constante ao longo do tempo.
-
-# Ao longo desta prática, as diferentes camadas ambientais serão padronizadas quanto à extensão espacial, sistema de referência de coordenadas (CRS) e
-# resolução espacial. Em seguida, os valores de cada variável ambiental serão extraídos para a localização e o período de cada pescaria.
+# ABORDAGEM ANALÍTICA:
+# - Importação e exploração de dados ambientais em formato raster.
+# - Padronização das camadas ambientais quanto à extensão espacial, CRS e resolução espacial (reamostragem para a camada de menor resolução)
+# - Remoção das pescarias fora da área de estudo
+# - Extração dos valores ambientais para a localização de cada pescaria; nas variáveis dinâmicas, respeitando o mês e o ano da pescaria
 
 
 
@@ -251,7 +254,7 @@ plot(st_geometry(dfsp), pch = 19, cex = 0.7, col = "#e29578", add = T) #Eita! H�
 
 ## Filtrando pescarias (pontos amostrais) fora da área de estudo
 dfsp_f <- dfsp %>% 
-          st_filter(sw_ocean, .predicate = st_intersects)
+  st_filter(sw_ocean, .predicate = st_intersects)
 
 dim(dfsp)[1] - dim(dfsp_f)[1] #No. de pontos removidos
 
