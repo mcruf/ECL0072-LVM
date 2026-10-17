@@ -1,6 +1,6 @@
 #############################################################################
 #                                                                           #
-#                            Prática da aula 02                             #
+#                         Prática das aulas 2 & 3                           #
 #          - Estimação do tamanho de primeira maturação (L50) -             #
 #                                                                           #
 #############################################################################
@@ -8,15 +8,11 @@
 
 # CONTEXTO:
 # Os dados utilizados nesta prática são provenientes de amostragens realizadas por meio de pesca experimental ao longo da costa do Rio Grande do Norte, 
-# entre os anos de 2012 e 2014. Para esta análise, foram selecionados os dados biológicos de Lutjanus synagris (ariocó), 
-# um importante recurso pesqueiro na região Nordeste do Brasil.
+# entre os anos de 2012 e 2014. Para esta análise, foram selecionados os dados biológicos de Lutjanus synagris (ariocó), um importante recurso pesqueiro na região Nordeste do Brasil.
 # O conjunto de dados compreende informações de 89 indivíduos, incluindo comprimento corporal, sexo e estágio de maturação gonadal.
-
 # A partir dessas informações, iremos investigar a relação entre o comprimento corporal e a maturidade sexual e
 # estimar o comprimento de primeira maturação (L50). O L50 é definido como o comprimento no qual um indivíduo apresenta 50% de probabilidade de estar 
-# sexualmente maduro.
-
-# Para isso, utilizaremos modelos de regressão logística Bayesianos para descrever a relação entre comprimento corporal,
+# sexualmente maduro. Para isso, utilizaremos modelos de regressão logística Bayesianos para descrever a relação entre comprimento corporal,
 # sexo e maturidade sexual.
 
 
@@ -26,8 +22,8 @@
 
 
 # ESTRUTURA DOS DADOS
-# $Length         = comprimento corporal (cm)
-# $Sex            = sexo (F = fêmea; M = macho)
+# $Length = comprimento corporal (cm)
+# $Sex = sexo (F = fêmea; M = macho)
 # $Maturity_stage = estágio de maturação (A-D)
 # Posteriormente, os estágios de maturação serão convertidos em uma variável binária:
 #   0 = imaturo (A/B)
@@ -48,11 +44,11 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~
 # Carregando os pacotes
 #~~~~~~~~~~~~~~~~~~~~~~~~
-library(dplyr)
-library(tidyr)
-library(brms)
-library(ggplot2)
-library(patchwork)
+library(dplyr) # Manipulação de dados
+library(tidyr) # Manipulação de dados
+library(brms) # Modelos Bayesianos
+library(ggplot2) # Visualização de dados
+library(patchwork) # Visualização de dados (figuras com +1 painel)
 
 
 

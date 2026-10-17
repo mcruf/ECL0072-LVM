@@ -1,7 +1,7 @@
 #############################################################################
 #                                                                           #
-#                            Prática da aula 01                             #
-#                           - Regressão linear -                            #
+#                         Prática das aulas 2 & 3                           #
+#                       - Modelo Linear Bayesiano -                         #
 #                                                                           #
 #############################################################################
 
@@ -10,15 +10,12 @@
 # Esta prática irá utilizar dados de riqueza de espécies de plantas nas ilhas Galápagos para introduzir os principais componentes de uma
 # regressão linear Bayesiana utilizando o pacote brms.
 
-
 # DADOS:
 # O conjunto de dados reúne informações sobre a riqueza de espécies de plantas e diferentes características das ilhas, incluindo área, elevação
 # e medidas relacionadas ao seu grau de isolamento.
-
-# Fontes dos dados
+# Fontes dos dados:
 # - Johnson & Raven (1973). Species frequency and island area. https://www.science.org/doi/10.1126/science.179.4076.893
 # - Fieberg, J. Data4Ecologists: https://github.com/jfieberg/Data4Ecologists
-
 
 # OBJETIVOS:
 # Percorrer as principais etapas de um fluxo de trabalho Bayesiano (Bayesian workflow), incluindo:
