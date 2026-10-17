@@ -21,13 +21,13 @@ source("Scripts/Setup/setup_knitr.R")
 <br>
 
 
-- **Curso:** Pós-Graduação em Ecologia (PPGECO)
-
-- **Período:** 2026.2
+- **Curso:** Pós-Graduação em Ecologia (PPGECO-UFRN)
 
 - **Responsável:** [Marie-Christine Rufener][]
 
 - **Contato:** macrufener@gmail.com
+
+- **Data:** 19-30 outubro de 2026
 
 - **Horário e Sala:**
     - Segunda à Sexta, 08:30 - 12:30h; Laboratório de modelagem (DECOL)
@@ -79,8 +79,8 @@ mapas cartográficos, via linguagem R
 
 - Conceitos de boas práticas de programação e reprodutibilidade
 
-<div style="height: 30px;"></div>
 
+<div style="height: 30px;"></div>
 
 
 # O que não esperar da disciplina?
