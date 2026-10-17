@@ -15,13 +15,7 @@
 # sexualmente maduro. Para isso, utilizaremos modelos de regressão logística Bayesianos para descrever a relação entre comprimento corporal,
 # sexo e maturidade sexual.
 
-
-# OBJETIVOS:
-# - Entender o efeito do comprimento e sexo sobre a probabilidade do peixe estar maturo;
-# - Estimar o comprimento no qual a maturidade esperada é de 50% (L50)
-
-
-# ESTRUTURA DOS DADOS
+# DADOS
 # $Length = comprimento corporal (cm)
 # $Sex = sexo (F = fêmea; M = macho)
 # $Maturity_stage = estágio de maturação (A-D)
@@ -29,6 +23,9 @@
 #   0 = imaturo (A/B)
 #   1 = maturo   (C/D)
 
+# OBJETIVOS:
+# - Entender o efeito do comprimento e sexo sobre a probabilidade do peixe estar maturo;
+# - Estimar o comprimento no qual a maturidade esperada é de 50% (L50)
 
 # ABORDAGEM ANALÍTICA:
 # O estado de maturação de cada indivíduo é uma variável binária (imaturo/maturo) e pode
