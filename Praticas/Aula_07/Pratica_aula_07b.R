@@ -1,23 +1,36 @@
-#####################################################################
-#                                                                   #
-#                       Prática da aula 07                          #                                
-#               - Modelos espaciais via R-INLA -                    #
-#                                                                   #
-#####################################################################
+#########################################################################################
+#                                                                                       #
+#                                     Prática da aula 07                                #
+#                              - Modelos espaciais via R-INLA -                         #
+#                                                                                       #
+#########################################################################################
 
 
-# Esta prática tem como objetivo ajustar modelos espaciais (geoestatísticos) bayesianos via R-INLA, para avaliar a
-# distribuição espacial da abundância do tubarão azul (*Prionace glauca*), capturado pela frota atuneira ao longo do Atlântico Sul.
+# CONTEXTO
+# Dados ecológicos coletados no espaço frequentemente apresentam dependência espacial, de modo que observações próximas tendem a ser mais semelhantes
+# entre si do que observações mais distantes. Em modelos geoestatísticos, essa dependência pode ser representada por um campo aleatório espacial contínuo, permitindo modelar a estrutura espacial
+# residual que não é explicada pelas covariáveis observadas. Nesta prática, daremos continuidade à introdução ao R-INLA realizada naPrática 07a, 
+# incorporando explicitamente a dependência espacial por meio da abordagem SPDE. Utilizaremos essa abordagem para investigar e predizer a distribuição
+# espacial da abundância do tubarão-azul (Prionace glauca) no Oceano Atlântico Sul.
+
+# DADOS
+# Usaremos o mesmo banco de dados que foi utilizado na última prática (Pratica_aula_07a.R)
 
 
-# O fluxo da análise é dividido em 5 etapas sequenciais:
+# OBJETIVOS:
+# - Ajustar modelos espaciais (geoestatísticos) bayesianos via R-INLA para avaliar a distribuição espacial da abundância da espécie
+# - Compreender os componentes necessários para a especificação de um modelo SPDE (mesh, matriz de projeção A, SPDE e stacks)
+# - Comparar modelos com diferentes estruturas espaciais e distribuições da resposta, e avaliar seus resultados e mapas preditivos
+
+
+# ABORDAGEM ANALÍTICA
 # 1. Carregamento e tratamento dos dados pesqueiros e ambientais (rasters)
 # 2. Padronização espacial (CRS, resolução e extensão das variáveis ambientais)
 # 3. Extração de covariáveis ambientais dinâmicas e estáticas para os pontos amostrais
 # 4. Análise exploratória e verificação de multicolinearidade
-# 5. Construção da malha espacial 
+# 5. Construção da malha espacial (mesh)
 # 6. Definição da matriz de projeção A, SPDE e stacks 
-# 7. Ajuste dos modelos 
+# 7. Ajuste dos modelos (com diferentes distribuições de probabiliade e nível de complexidade)
 # 8. Extração e avaliação dos resultados
 
 

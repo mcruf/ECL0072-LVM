@@ -1,23 +1,34 @@
-#####################################################################
-#                                                                   #
-#                       Prática da aula 07                          #                            
-#                  - Breve introdução ao INLA  -                    #
-#                                                                   #
-#####################################################################
+#########################################################################################
+#                                                                                       #
+#                                     Prática da aula 07                                #
+#                               - Breve introdução ao R-INLA -                          #
+#                                                                                       #
+#########################################################################################
 
-# Este script apresenta uma introdução prática ao pacote R-INLA para modelagem bayesiana. 
-# Para tal, serão utilizados o mesmo conjunto de dados pesqueiros das práticas anteriores (Pratica_aula_06a.R e Pratica_aula_06b.R).
+# CONTEXTO
+# O INLA oferece uma abordagem computacional para inferência bayesiana em modelos gaussianos latentes, constituindo uma alternativa aos métodos baseados em MCMC.
+# Nesta prática, portanto, utilizaremos o INLA para introduzir seu fluxo de trabalho, sintaxe e principais outputs, antes de avançarmos para a especificação de
+# modelos geoestatísticos por meio da abordagem SPDE.
 
-# O objetivo principal é promover a familiarização com o fluxo de trabalho
-# e a sintaxe do INLA, abordando as seguintes etapas:
+# DADOS
+# Daremos continuidade ao estudo da distribuição do tubarão-azul (Prionace glauca) no Oceano Atlântico Sul, 
+# utilizando o banco de dados preparado nas práticas anteriores.
+
+# OBJETIVOS
+# O objetivo principal é promover a familiarização com o fluxo de trabalho e a sintaxe do INLA, abordando as seguintes etapas:
 #   (i)   Ajustar modelos utilizando a função inla()
 #   (ii)  Acessar e interpretar os principais outputs do modelo
 #   (iii) Explorar distribuições marginais posteriores
 #   (iv)  Comparar os modelos (DIC, WAIC e LCPO)
 #   (v)   Realizar o diagnóstico visual do ajuste (PIT e QQ-plot)
 
-# Nota: A especificação completa de modelos geoestatísticos com campos aleatórios contínuos (SPDE/Matérn) será abordada na próxima prática (Pratica_aula_07b.R)
-
+# ABORDAGEM ANALÍTICA:
+#   - Modelos Bayesianos ajustados via R-INLA
+#     - 5 modelos com ordem crescente de complexidade: (i) operações pesqueiras, (ii) covariáveis ambientais, (iii) operações pesqueiras & covariáveis ambientais,
+#     (iv) modelo (iii) + efeito aleatório das embarcações, (v) modelo (iv) com efeitos suavizadores (RW1) sobre Lat/Long (GAM)
+#   - Extração e interpretação dos outputs do modelo e exploração das distribuições marginais posteriores
+#   - Comparação dos modelos via DIC, WAIC e LCPO
+#   - Diagnóstico visual do ajuste (independência, observado vs. predito, PIT, QQ-plot e homocedasticidade)
 
 
 
