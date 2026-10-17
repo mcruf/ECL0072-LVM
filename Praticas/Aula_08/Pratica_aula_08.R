@@ -1,49 +1,51 @@
-#########################################################################
-#                                                                       #
-#                          Prática da aula 08                           #                                
-#               - Modelos espaço-temporais via R-INLA -                 #
-#                                                                       #
-#########################################################################
+#########################################################################################
+#                                                                                       #
+#                                     Prática da aula 08                                #
+#                          - Modelos espaço-temporais via R-INLA -                      #
+#                                                                                       #
+#########################################################################################
 
 
-# Esta prática estende a prática da aula 07 (modelos espaciais) para acomodar diferentes
-# estruturas espaço-temporais. O objetivo é compreender e avaliar como diferentesestruturas de dependência espaço-tempora
-# podem descrever a evolução da distribuição do processo ecológico sob análise.
-
-# As estruturas aqui exploradas seguem as tipologias propostas por Paradinas et al. (2017):
+# CONTEXTO
+# Esta prática estenderá os modelos espaciais desenvolvidos na Prática 07b para incorporar explicitamente diferentes formas 
+# de dependência temporal ao campo espacial. Utilizaremos diferentes estruturas espaço-temporais para investigar como
+# a distribuição da abundância do tubarão-azul (Prionace glauca) varia mensalmente no Oceano Atlântico Sul.
+# As estruturas espaço-temporais aqui exploradas são baseadas nas tipologias apresentadas por Paradinas et al. (2017):
 # - https://www.sciencedirect.com/science/article/abs/pii/S2211675316300872
 
-# - Modelo 0: Distribuição espacial
-#   - Estrutura espaço-temporal: U(s,t) = W(s)
-#   - Um único campo espacial representa todos os meses. Não há componente
-#     temporal explícito. Serve como referência para avaliar a inclusão da dimensão temporal.
+# DADOS
+# Usaremos o mesmo banco de dados que foi utilizado ao longo das práticas das Aulas 6 e 7.
 
-# - Modelo 1: Distribuição persistente com mudanças aleatórias
-#   - Estrutura espaço-temporal: U(s,t) = W(s) + V(t)
-#   - O campo espacial permanece comum aos meses, enquanto um efeito temporal independente altera o nível do preditor em cada mês.
-#     Essa alteração é compartilhada por todas as localidades.
+# OBJETIVOS:
+# - Compreender e avaliar como diferentes estruturas de dependência espaço-temporal podem descrever a evolução da distribuição
+#   do processo ecológico sob análise
+# - Comparar modelos com diferentes estruturas espaço-temporais e avaliar o ajuste do melhor modelo
+# - Gerar e interpretar mapas preditivos da abundância ao longo do espaço e do tempo
 
-# - Modelo 2: Distribuição persistente com tendência temporal
-#   - Estrutura espaço-temporal: U(s,t) = W(s) + g(t)
-#   - O campo espacial permanece comum aos meses, mas o efeito temporal evolui de maneira suave
-#     Nesta prática, g(t) será representado por um passeio aleatório de segunda ordem (RW2), que penaliza mudanças
-#     na inclinação da trajetória temporal.
+# ABORDAGEM ANALÍTICA
+# Modelos bayesianos ajustados via R-INLA, com 5 estruturas espaço-temporais U(s,t):
+#     - Modelo 0: Distribuição espacial
+#         - Estrutura espaço-temporal: U(s,t) = W(s)
+#         - Um único campo espacial representa todos os meses. Não há componente
+#           temporal explícito. Serve como referência para avaliar a inclusão da dimensão temporal.
+#     - Modelo 1: Distribuição persistente com mudanças aleatórias
+#         - Estrutura espaço-temporal: U(s,t) = W(s) + V(t)
+#         - O campo espacial permanece comum aos meses, enquanto um efeito temporal independente altera o nível do preditor em cada mês.
+#           Essa alteração é compartilhada por todas as localidades.
+#     - Modelo 2: Distribuição persistente com tendência temporal
+#         - Estrutura espaço-temporal: U(s,t) = W(s) + g(t)
+#         - O campo espacial permanece comum aos meses, mas o efeito temporal evolui de maneira suave
+#           Nesta prática, g(t) será representado por um passeio aleatório de segunda ordem (RW2), que penaliza mudanças
+#           na inclinação da trajetória temporal.
+#     - Modelo 3: Distribuição oportunista
+#         - Estrutura espaço-temporal: U(s,t) = W_t(s)
+#         - Cada mês possui seu próprio campo espacial. Os campos compartilham os hiperparâmetros espaciais, mas são independentes entre meses,
+#           condicionalmente a esses hiperparâmetros.
+#     - Modelo 4: Distribuição progressiva:
+#         - Estrutura espaço-temporal: U(s,t) segue uma estrutura espacial Matérn e temporal AR1.
+#         - Cada mês possui seu próprio campo espacial, correlacionado com os demais meses. 
+# - OBS.: Nos modelos 1 e 2, o padrão espacial é fixo e só a intensidade muda no tempo; nos Modelos 3 e 4, o próprio padrão espacial
 
-# - Modelo 3: Distribuição oportunista
-#   - Estrutura espaço-temporal: U(s,t) = W_t(s)
-#   - Cada mês possui seu próprio campo espacial. Os campos compartilham os hiperparâmetros espaciais, mas são independentes entre meses,
-#     condicionalmente a esses hiperparâmetros.
-
-# - Modelo 4: Distribuição progressiva:
-#   - Estrutura espaço-temporal: U(s,t) segue uma estrutura espacial Matérn e temporal AR1.
-#   - Cada mês possui seu próprio campo espacial, correlacionado com os demais meses. 
-
-# Em (i) e (ii) o padrão espacial é fixo e só a intensidade muda no tempo.
-# Em (iii) e (iv) o próprio padrão espacial muda no tempo
-#  - sem memória (iii)
-#  - com memória (iv)
-
-# Usaremos o mês do ano como resolução temporal dos dados.
 
 
 
