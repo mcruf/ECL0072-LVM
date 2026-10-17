@@ -7,13 +7,17 @@
 
 
 # CONTEXTO:
-# CONTEXTO:
 # Modelos lineares (LMs) constituem a base de diversos modelos estatísticos mais complexos (GLM, GAM, GLMM/GAMM, ...).
-# Nesta prática, utilizaremos dados morfométricos dos pinguins de Palmer para explorar o ajuste e a interpretação de modelos lineares no R,
-# tendo a massa corporal (body_mass_g) como variável resposta e características como sexo, comprimento do bico e espécie como variáveis explicativas. 
-# A partir desses dados, veremos como teste-t, regressão linear, ANOVA e ANCOVA podem ser formulados dentro de um mesmo framework:
-# y = Xβ + ε.
+# Nesta prática, utilizaremos dados morfométricos dos pinguins de Palmer para explorar o ajuste e a interpretação de modelos lineares no R.
+# A partir desses dados, veremos como teste-t, regressão linear, ANOVA e ANCOVA podem ser formulados dentro do contexto de Modelos Lineares Gerais, 
+# expressos como y = Xβ + ε.
 
+# DADOS:
+# - Variável resposta: massa corporal (body_mass_g; contínua, em g)
+# - Covariáveis: comprimento do bico (bill_length_mm; contínua), sexo (sex; 2 níveis) e espécie (species; 3 níveis)
+# Fonte: 
+# - Extraído de: https://www.kaggle.com/datasets/samybaladram/palmers-penguin-dataset-extended?resource=download
+# - Também disponível via pacote do r: https://allisonhorst.github.io/palmerpenguins/ (dado menor)
 
 # OBJETIVOS:
 # - Explorar o banco de dados 
