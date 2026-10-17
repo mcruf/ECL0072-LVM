@@ -24,7 +24,7 @@ Este repositório contém todo o material da disciplina ministrada para o Progra
 
 A página da disciplina foi toda construída usando apenas o [R Markdown][], com o código fonte acessível nos arquivos `Rmd`. Para gerar o site, você precisará instalar (ou atualizar) os pacotes `rmarkdown` e `knitr`.
 
-- Para acessar o material da disciplina, siga as intruções abaixo:
+- Para acessar o material da disciplina, siga as instruções abaixo:
 
    - (1) Copie (ou fork) esse repositório
    - (2) Apague o diretório `site_libs/`
