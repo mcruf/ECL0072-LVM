@@ -6,17 +6,27 @@
 #############################################################################
 
 
-# Nesta prática, serão utilizados dados que simulam o monitoramento da ictiofauna
-# recifal para explorar o ajuste e a interpretação de Modelos Lineares Mistos (LMMs) em uma abordagem Bayesiana.
+# CONTEXTO:
+# Nesta prática, serão utilizados dados que simulam o monitoramento da ictiofauna recifal para explorar o ajuste
+# e a interpretação de Modelos Lineares Mistos (LMMs) em uma abordagem Bayesiana. 
+# A prática será dividida em duas partes: 
+# - (1) introdução aos LMMs 
+# - (2) estrutura dos efeitos aleatórios.
 
-# Os dados representam medidas repetidas de biomassa de peixes em diferentes
-# recifes (n=5), anos (n=3) e meses (n=12), obtidas por diferentes mergulhadores (n=3).
+# DADOS:
+# - Variável resposta: biomassa de peixes (biomassa_kg_m2; contínua, em kg/m2)
+# - Covariáveis: temperatura superficial do mar (sst; contínua) e fatores de agrupamento com medidas repetidas:
+#   recife (n = 5), ano (n = 3), mês (n = 12), transecto e mergulhador (n = 3)
 
-# A prática será dividida em duas partes.
+# OBJETIVOS:
+# - Compreender a lógica dos Modelos Lineares Mistos (LMMs) e como eles lidam com a dependência entre observações (medidas repetidas)
+# - Interpretar os efeitos fixos e aleatórios, incluindo a partição da variância entre os níveis de agrupamento
+# - Avaliar como diferentes estruturas de efeitos aleatórios influenciam a inferência e a capacidade preditiva dos modelos
 
+# ABORDAGEM ANALÍTICA:
+# - Modelos Bayesianos ajustados via brms (distribuição Gaussiana)
 
-# PARTE 1 - Introdução aos LMMs
-
+# > PARTE 1 - Introdução aos LMMs:
 # 1) LM com fator (ANOVA)
 #     - A biomassa média difere entre os recifes?
 # 2) LM com fator & var. numérica (ANCOVA)
@@ -27,13 +37,8 @@
 # 4) LMM com intercepto e inclinação aleatórios
 #     - A relação entre biomassa e SST varia entre os recifes?
 
-
-
-# PARTE 2 - Estrutura dos efeitos aleatórios
-
-# Diferentes estruturas de efeitos aleatórios serão exploradas para representar
-# as fontes de dependência presentes no desenho amostral.
-
+# > PARTE 2 - Estrutura dos efeitos aleatórios
+# - Explorar diferentes estruturas de efeitos aleatórios para representar as fontes de dependência presentes no desenho amostral
 
 
 
