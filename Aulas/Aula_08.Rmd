@@ -1,0 +1,115 @@
+---
+title: "MODELOS ESPAÇO-TEMPORAIS PARA DADOS ECOLÓGICOS (ECL0072)"
+subtitle: "AULA 08: MODELOS ESPAÇO-TEMPORAIS"
+author: "Marie-Christine Rufener"
+institute: "macrufener@gmail.com"
+date: "Out / 2026"
+output:
+  xaringan::moon_reader:
+    seal: false
+    css: xaringan-themer.css
+    lib_dir: libs
+    nature:
+      #seal: false #disable title slide
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~
+# Default knitr iputs
+#~~~~~~~~~~~~~~~~~~~~~~
+
+source("../Scripts/Setup/setup_knitr.R")
+
+#~~~~~~~~~~~~~~~~~~~~~~
+# Slide customization
+#~~~~~~~~~~~~~~~~~~~~~~
+source("../Scripts/Setup/setup_slides.R")
+
+
+```
+
+class: title-slide
+<div class="title-block">
+  <h1>`r rmarkdown::metadata$title`</h1>
+  <div class="date-text">`r rmarkdown::metadata$date`</div>
+</div>
+
+<div class="subtitle-block">
+  <h2>`r rmarkdown::metadata$subtitle`</h2>
+  <p class="author-name">`r rmarkdown::metadata$author`</p>
+  <p class="author-email"><u>`r rmarkdown::metadata$institute`</u></p>
+</div>
+
+<img src="../Figuras/logo_ppgeco2.svg" class="cover-logo">
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+Processos ecológico são dinâmicos no espaço e no tempo
+
+
+<br>
+
+.small-text2[.center[**Dinâmica espaço-temporal do bacalhau (*Gadus morhua*)**]]
+
+
+```{r, out.width="90%"}
+knitr::include_graphics("../Figuras/wbs_cod.gif")
+```
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+**Distribuição persistente aleatória**
+
+<br>
+
+
+```{r, out.width="60%"}
+knitr::include_graphics("../Figuras/persistent_iid.png")
+```
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+**Distribuição persistente com tendência**
+
+<br>
+
+
+```{r, out.width="60%"}
+knitr::include_graphics("../Figuras/persistent_trend.png")
+```
+
+
+---
+
+# PPGECO | ECL0072 | out. 2026
+
+**Distribuição oportunística**
+
+<br>
+
+```{r, out.width="60%"}
+knitr::include_graphics("../Figuras/oportunistic.png")
+```
+
+
+---
+# PPGECO | ECL0072 | out. 2026
+
+**Distribuição com progressão**
+
+<br>
+
+```{r, out.width="60%"}
+knitr::include_graphics("../Figuras/oportunistic.png")
+```
