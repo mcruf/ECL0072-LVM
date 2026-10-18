@@ -1,13 +1,9 @@
-
 <p align="center">
-
 <picture>
-  <!-- Image displayed when the user is in Dark Mode -->
-  <source media="(prefers-color-scheme: dark)" srcset="Figuras/Logo_course_repo.png" width="600" height="300">
-  <!-- Image displayed when the user is in Light Mode (and fallback) -->
-  <img alt="Describe your figure here" src="Figuras/Logo_course_repo_white.png" width="600" height="300">
+  <source media="(prefers-color-scheme: dark)" srcset="Figuras/Logo_course_repo_white.png">
+  <source media="(prefers-color-scheme: light)" srcset="Figuras/Logo_course_repo.png">
+  <img alt="Logo do curso" src="Figuras/Logo_course_repo.png" width="600">
 </picture>
-
 </p>
 
 
