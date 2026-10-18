@@ -1,8 +1,8 @@
 <p align="center">
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="Figuras/logo_readme_black-bg.png">
-  <source media="(prefers-color-scheme: light)" srcset="Figuras/logo_readme_white-bg.ong">
-  <img alt="Logo do curso" src="Figuras/logo_readme_black-bg.png" width="600">
+  <source media="(prefers-color-scheme: dark)" srcset="Figuras/logo_readme_white-bg.png">
+  <source media="(prefers-color-scheme: light)" srcset="Figuras/logo_readme_black-bg.ong">
+  <img alt="Logo do curso" src="Figuras/logo_readme_white-bg.png" width="600">
 </picture>
 </p>
 
