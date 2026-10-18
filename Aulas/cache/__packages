@@ -13,3 +13,8 @@ INLA
 viridisLite
 viridis
 plotly
+Rcpp
+brms
+bayesplot
+GGally
+patchwork
