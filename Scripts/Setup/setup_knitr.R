@@ -10,17 +10,44 @@ set.seed(123) #set a common seed
 #~~~~~~~~~~~~~~~~~~
 # 1) Load packages
 #~~~~~~~~~~~~~~~~~~
-library(xaringan)
-library(xaringanthemer)
-library(kableExtra)
-library(dplyr)
-library(ggplot2)
-library(ggExtra)
-library(broom.mixed)
-library(lme4)
-library(knitr)
-library(emmeans)
-library(INLA)
+
+# Ensures that all packages are loaded (and installed, if necessary!)
+
+## Package list
+required_pkgs <- c("xaringan", "xaringanthemer", "kableExtra", "dplyr", "ggplot2", "ggExtra", "broom.mixed", "lme4", "knitr", "emmeans", "INLA")
+
+## Missing packages
+missing_pkgs <- required_pkgs[ !required_pkgs %in% installed.packages()[, "Package"]]
+
+## Install missing packages
+if(length(missing_pkgs) > 0){
+  
+  message("Installing missing packages...")
+  
+  install.packages(missing_pkgs)
+  
+}
+
+## Load packages
+invisible(lapply(required_pkgs, library, character.only = TRUE))
+
+
+## Removing obsolete objects
+rm(list = c("missing_pkgs", "required_pkgs"))
+
+
+
+# library(xaringan)
+# library(xaringanthemer)
+# library(kableExtra)
+# library(dplyr)
+# library(ggplot2)
+# library(ggExtra)
+# library(broom.mixed)
+# library(lme4)
+# library(knitr)
+# library(emmeans)
+# library(INLA)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~                  
