@@ -3,8 +3,8 @@ output_dir: "."
 exclude: ["README.md"]
 output:
   html_document:
-    theme: journal #flatly
-   # css: styles.css
+    #theme: journal #flatly
+    css: styles.css
     highlight: default
     code_folding: hide
     number_sections: false
@@ -30,35 +30,35 @@ navbar:
     - text: "Aulas"
       menu:
       - text: "Dia 1"
-      - text: "LM"
+      - text: "Revisitando Modelos Lineares (LM)"
         href: Aulas/Aula_01.html
       - text: "----------"
       - text: "Dia 2"
-      - text: "Métodos de inferência & Validação"
+      - text: "Métodos de inferência estatística: frequentista vs. bayesiana"
         href: Aulas/Aula_02.html
       - text: "----------"
       - text: "Dia 3"
-      - text: "GLM para dados binários"
+      - text: "Modelagem bayesiana"
         href: Aulas/Aula_03.html
       - text: "----------"
       - text: "Dia 4"
-      - text: "GLM para dados discretos"
+      - text: "Modelos Lineares Mistos (LMM)"
         href: Aulas/Aula_04.html
       - text: "----------"
       - text: "Dia 5"
-      - text: "GLM para dados contínuos"
+      - text: "Modelos Lineares/Aditivos Generalizados Mistos (GLMM/GAMM)"
         href: Aulas/Aula_05.html
       - text: "----------"
       - text: "Dia 6"
-      - text: "GLM para dados categóricos"
+      - text: "Fundamentos em Estatística Espacial & GIS"
         href: Aulas/Aula_06.html
       - text: "----------"
       - text: "Dia 7"
-      - text: "Dist. prob complementares"
+      - text: "Modelos Espaciais"
         href: Aulas/Aula_07.html
       - text: "----------"
       - text: "Dia 8"
-      - text: "GAM"
+      - text: "Modelos Espaço-Temporais"
         href: Aulas/Aula_08.html
   right:
     - text: GitHub
