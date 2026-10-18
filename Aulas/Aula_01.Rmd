@@ -75,7 +75,7 @@ class: title-slide
 
 <br>
 
-.small-text[
+.small-text2[
 
 .center[**SEMANA 2**]
 
