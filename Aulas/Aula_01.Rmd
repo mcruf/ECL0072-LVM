@@ -1034,7 +1034,7 @@ knitr::include_graphics("../Figuras/pinguins_boxplot.png")
 
 <div style="height: 7px;"></div>
 
-> <span style="color: #e07a5f;">**ATENÇÃO: O primeiro nível do fator é sempre absorvido pelo intercepto] $\beta_0$ nível de referência)**</span>
+> <span style="color: #e07a5f;">**ATENÇÃO: O primeiro nível do fator é sempre absorvido pelo intercepto ($\beta_0$ nível de referência)**</span>
 
 
 
