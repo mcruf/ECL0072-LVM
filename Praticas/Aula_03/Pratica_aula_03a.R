@@ -350,14 +350,6 @@ ppw2$Area_log + ppi2$Area_log
 
 
 
-## Contrastando as prioris com a distribuição posterior do parâmetro
-mcmc_dens(mod_iprior, pars=c("b_Area_log")) + 
-  geom_function(fun = dnorm, args = list(mean = 0, sd = 0.5), colour = "red", linewidth = 1.5) + 
-  geom_function(fun = dnorm, args = list(mean = 0.3, sd = 0.2), colour = "black", linewidth = 1.5) + 
-  xlim(-1, 1)
-
-
-
 # 3.4) Ajustando o modelo via MCMC
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Vamos re-rodar o modelo inicial com as duas prioris e avaliar a distribuição posterior dos parâmetros
@@ -589,7 +581,7 @@ mod4 <- brm(m4,
 # ATENÇÃO: A magnitude de elpd_diff não deve ser interpretada isoladamente.
 # Deve-se, também, considerar o erro-padrão associado à diferença de ELPD entre cada modelo e o modelo de referência  (se_diff) .
 
-# ATENÇÃO-2: O LOO compara a capacidade preditiva dos MODELOS utilizados para representar nossas hipóteses ecológicas. 
+# ATENÇÃO-2: O LOO compara a capacidade preditiva dos modelos utilizados para representarem as nossas hipóteses ecológicas. 
 # Ele não calcula a probabilidade de uma hipótese ser verdadeira ou falsa!
 
 loo0 <- loo(mod0)
@@ -608,12 +600,6 @@ loo_compare(loo0, loo1, loo2, loo3, loo4) # Modelo com maior ELPD é usado como 
 # Após avaliar a capacidade preditiva de cada modelo, podemos nos perguntar qual o suporte que os dados fornecem em relação às hipóteses testadas.
 # Para isso, podemos utilizar o Bayes factor (BF): BF = p(y | model A) / p(y | model B) 
 # O BF indica quantas vezes os dados alteram as razões de chances relativas (odds) entre os dois modelos.
-
-# ATENÇÃO: O cálculo do Bayes factor requer prioris minimamente informativas para os parâmetros do modelo. 
-# Prioris flat (impróprias), como as utilizadas por default pelo brms para alguns coeficientes, não são adequadas para
-# o cálculo do BF, visto que a verossimilhança marginal depende diretamente da distribuição a priori.
-# Portanto, antes de calcular o BF, devem ser especificadas prioris apropriadas em cada modelo.
-
 
 # Qual o suporte do mod1 em relação ao mod4?
 bayes_factor(mod1, mod4) # 
@@ -655,3 +641,4 @@ plot(p_direction(mod1))
 # mas também se sua magnitude é relevante na prática.
 rope(mod1)
 plot(rope(mod1))
+
