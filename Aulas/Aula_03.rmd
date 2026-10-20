@@ -187,25 +187,27 @@ Ao definir um modelo bayesiano, temos que escolher uma distribuição de probabi
 
 <div style="height: 7px;"></div>
 
-.small-text[
+.small-text2[
 
 As prioris descrevem os valores considerados plausíveis para os parâmetros do modelo antes de utilizar os dados atuais para estimá-los
 - Dependem do modelo, da escala dos parâmetros e do contexto do estudo
 - Não existe uma priori universalmente "correta"
 
-<br>
+]
 
+<div style="height: 2px;"></div>
 
+.small-text[
 **Ponto de vista tradicional:** 
 - Estudos prévios
 - Meta-análises
 - Opinião de especialistas
 
-<div style="height: 4px;"></div>
+<div style="height: 2px;"></div>
 
 ------
 
-<div style="height: 4px;"></div>
+<div style="height: 2px;"></div>
 
 **Ponto de vista moderno:**
 - Domínio sobre o sistema ecológico 
