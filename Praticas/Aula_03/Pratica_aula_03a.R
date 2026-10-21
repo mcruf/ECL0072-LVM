@@ -176,7 +176,7 @@ ggplot(df, aes(x = Area_log, y = Species_log)) +
 # Analisando multicolinearidade
 df %>% 
   #select("Area", "Elevation","Nearest.dist", "Santacruz.dist", "Adjacent.isl.area") %>%  
-  select(Species_log, Area_log, Elevation, Nearest.dist, Santacruz.dist, Adj_isl_log) %>% 
+  select(Species_log, Area_log, Elevation_log, Nearest.dist_log, Santacruz.dist_log, Adj_isl_log) %>% 
   ggpairs(lower = list(continuous = wrap("smooth", color = "#e07a5f", alpha = 0.5, se = FALSE)),
           diag = list(continuous = wrap("densityDiag", fill = "#e07a5f", alpha = 0.6)),
           upper = list(continuous = wrap("cor", size = 4, color = "black"))) +
@@ -188,15 +188,6 @@ df %>%
 
 
 
-# As relações ficam mais evidentes com as variáveis logaritmizadas.
-# Será que isso pode afetar o ajuste do modelo?
-
-# Checagem de preguiçoso...
-test <- lm(Species ~ Area, data = df)
-test2 <- lm(log(Species) ~ log(Area), data = df)
-
-rbind(summary(test)$r.squared, summary(test2)$r.squared) # Eita!!
-#CUIDADO: NÃO pode comparar os modelos via AIC!
 
 
 
@@ -284,8 +275,7 @@ informative_prior <- prior(normal(0.3, 0.2), class = "b", coef = "Area_log")  # 
 qnorm(c(0.025, 0.975), mean = 0.3, sd = 0.2) # Aproximadamente 95% da probabilidade de z está entre [-0.09, 0.69]
 
 # ATENÇÃO: a priori informativa é meramente ilustrativa a título do exemplo aqui abordado. 
-# Uma priori informativa real deveria ser justificada por conhecimento independente dos dados analisados, como literatura anterior,
-# experimentos prévios ou conhecimento especializado.
+# Uma priori informativa sólida deve ser baseada na literatura, experimentos prévios ou conhecimento especializado.
 
 
 
@@ -602,7 +592,7 @@ loo_compare(loo0, loo1, loo2, loo3, loo4) # Modelo com maior ELPD é usado como 
 # O BF indica quantas vezes os dados alteram as razões de chances relativas (odds) entre os dois modelos.
 
 # Qual o suporte do mod1 em relação ao mod4?
-bayes_factor(mod1, mod4) # 
+bayes_factor(mod1, mod4) # mod1 é 4x mais plausível do que mod4
 #bayes_factor(mod4, mod1) # Cuidado com a direção.
 
 
