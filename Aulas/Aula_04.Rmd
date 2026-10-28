@@ -1493,7 +1493,7 @@ A matriz $\mathbf{V}$ representa a matriz de variância-covariância de todo o c
 
 $$
 \large
-\mathbf{V} =
+\mathbf{V_j} =
 \begin{bmatrix}
 \sigma_a^2 + \sigma^2 & \sigma_a^2 & \sigma_a^2 & \cdots & \sigma_a^2 \\
 \sigma_a^2 & \sigma_a^2 + \sigma^2 & \sigma_a^2 & \cdots & \sigma_a^2 \\
